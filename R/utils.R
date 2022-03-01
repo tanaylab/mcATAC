@@ -1,6 +1,7 @@
 #' Negation of the %in% operator
 #'
 #' @export
+#' @noRd
 `%!in%` <- Negate(`%in%`)
 
 

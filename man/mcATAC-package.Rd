@@ -8,6 +8,14 @@
 \description{
 Metacell analysis for ATAC data
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/tanaylab/mcATAC}
+  \item Report bugs at \url{https://github.com/tanaylab/mcATAC/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Aviezer Lifshitz \email{aviezer.lifshitz@weizmann.ac.il}
 
