@@ -23,7 +23,7 @@ import_from_h5ad <- function(file) {
 #'
 #' @export
 import_from_10x <- function(dir = NULL, matrix_fn = file.path(dir, "matrix.mtx"), cells_fn = file.path(dir, "barcodes.tsv"), features_fn = file.path(dir, "features.tsv")) {
-    check_files_exists(c(matrix_fn, cells_fn, features_fn))
+    check_files_exist(c(matrix_fn, cells_fn, features_fn))
 
     cli_alert("Importing matrix")
     mat <- tgutil::fread_mm(matrix_fn, row.names = features_fn, col.names = cells_fn)
