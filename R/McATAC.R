@@ -113,16 +113,3 @@ validate_atac_object <- function(mat, peaks, metadata, metadata_id_field) {
         }
     }
 }
-
-#' Write a McATAC or ScATAC object to an h5ad file
-#'
-#'
-#' @param object McATAC or ScATAC object
-#' @param out_file name of the output file
-#'
-#' @return None.
-#'
-#' @export
-export_to_h5ad <- function(object, out_file) {
-
-}

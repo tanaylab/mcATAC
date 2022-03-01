@@ -21,10 +21,3 @@ gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL) {
 gen_atac_mc_clust <- function(atac_mc, k, peak_set = NULL, use_prior_annot = FALSE, annot = "cell_type") {
 
 }
-
-
-
-# export_atac_clust_ucsc(a_mc, a_mc_clust, fn)
-# generate a browser track for each mc cluster
-# export_atac_clust_misha(a_mc, a_mc_clust, clust_names)
-# export atac coverage to misha tracks

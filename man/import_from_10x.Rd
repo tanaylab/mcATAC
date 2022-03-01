@@ -27,3 +27,10 @@ an ScATAC object
 \description{
 Create an ScATAC object from 10x directory
 }
+\examples{
+\dontrun{
+atac <- import_from_10x("./pbmc_data")
+atac
+}
+
+}

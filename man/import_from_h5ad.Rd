@@ -2,7 +2,7 @@
 % Please edit documentation in R/import.R
 \name{import_from_h5ad}
 \alias{import_from_h5ad}
-\title{Create an ScATAC object from an h5ad object}
+\title{Create an ScATAC object from an h5ad file}
 \usage{
 import_from_h5ad(file)
 }
@@ -13,5 +13,5 @@ import_from_h5ad(file)
 an ScATAC object
 }
 \description{
-Create an ScATAC object from an h5ad object
+Create an ScATAC object from an h5ad file
 }
