@@ -31,6 +31,12 @@
     <loc>/reference/annotate_peaks.html</loc>
   </url>
   <url>
+    <loc>/reference/export_atac_clust_misha.html</loc>
+  </url>
+  <url>
+    <loc>/reference/export_atac_clust_ucsc.html</loc>
+  </url>
+  <url>
     <loc>/reference/export_to_h5ad.html</loc>
   </url>
   <url>
@@ -59,6 +65,9 @@
   </url>
   <url>
     <loc>/reference/plot_atac_atac_cor.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_atac_peak_map.html</loc>
   </url>
   <url>
     <loc>/reference/plot_atac_rna.html</loc>
