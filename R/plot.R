@@ -36,6 +36,14 @@ plot_atac_rna_cor <- function(mc_atac, rna_mat) {
 }
 
 # the central heat map showing normalized accessibility of peaks over metacells, ordered by clustering
-# plot_atac_peak_map <- function(mc_atac, mc_atac_clust, a_pmod){
 
-# }
+#' Plot normalized accessibility of peaks over metacells, ordered by clustering
+#'
+#' @param mc_atac McATAC object
+#' @param mc_atac_clust output of \code{gen_atac_mc_clust}
+#' @param peak_clust output of \code{gen_atac_peak_clust}
+#'
+#' @export
+plot_atac_peak_map <- function(mc_atac, mc_atac_clust, peak_clust) {
+
+}

@@ -1,6 +1,6 @@
 
 
-#' Create an ScATAC object from an h5ad object
+#' Create an ScATAC object from an h5ad file
 #'
 #' @param file name of an h5ad file with ATAC data
 #'
@@ -20,6 +20,12 @@ import_from_h5ad <- function(file) {
 #' @param features_fn if \code{dir} is missing, the filename of the features to import ("features.tsv")
 #'
 #' @return an ScATAC object
+#'
+#' @examples
+#' \dontrun{
+#' atac <- import_from_10x("./pbmc_data")
+#' atac
+#' }
 #'
 #' @export
 import_from_10x <- function(dir = NULL, matrix_fn = file.path(dir, "matrix.mtx"), cells_fn = file.path(dir, "barcodes.tsv"), features_fn = file.path(dir, "features.tsv")) {
