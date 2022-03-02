@@ -8,7 +8,7 @@
 \usage{
 project_atac_on_mc(atac, cell_to_metacell)
 
-project_atac_on_mc_from_metacell1(atac, mc)
+project_atac_on_mc_from_metacell1(atac, scdb, mc_id)
 
 project_atac_on_mc_from_h5ad(atac, h5ad_file)
 }
@@ -18,12 +18,24 @@ project_atac_on_mc_from_h5ad(atac, h5ad_file)
 \item{cell_to_metacell}{a data frame with a column named "cell_id" with cell id and
 another column named "metacell" with the metacell the cell is part of.}
 
-\item{mc}{a metacell1 \code{mc} object}
+\item{scdb}{a metacell1 \code{scdb} path}
+
+\item{mc_id}{id of the metacell object within \code{scdb}}
 
 \item{h5ad_file}{name of an h5ad file which is the output of 'metacells' python package.}
+}
+\value{
+an McATAC object
 }
 \description{
 Given cell to metacell association, summarise atac counts to generate a McATAC object.
 \code{project_atac_on_mc_from_metacell1} projects given a metacell1 'mc' object, while \code{project_atac_on_mc_from_h5ad}
 uses the output of the 'metacells' python package (metacell2).
+}
+\examples{
+\dontrun{
+atac_sc <- import_from_10x("raw")
+atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "raw/scdb", "rna")
+}
+
 }
