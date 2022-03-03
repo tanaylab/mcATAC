@@ -6,3 +6,5 @@
 raw/
 README.html
 docs
+inst/doc
+pbmc_data/

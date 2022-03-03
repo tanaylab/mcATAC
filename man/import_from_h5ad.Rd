@@ -2,16 +2,28 @@
 % Please edit documentation in R/import.R
 \name{import_from_h5ad}
 \alias{import_from_h5ad}
-\title{Create an ScATAC object from an h5ad file}
+\title{Create an ScATAC,McATAC object from an h5ad file}
 \usage{
-import_from_h5ad(file)
+import_from_h5ad(file, class = NULL)
 }
 \arguments{
 \item{file}{name of an h5ad file with ATAC data}
+
+\item{class}{is the file storing ScATAC or McATAC. If NULL - the class would be determined by the 'class' field in the 'uns' part
+of the h5ad file, if exists, and otherwise the class would be
+McATAC.}
 }
 \value{
-an ScATAC object
+an ScATAC/McATAC object
 }
 \description{
-Create an ScATAC object from an h5ad file
+Create an ScATAC,McATAC object from an h5ad file
+}
+\examples{
+\dontrun{
+atac_sc <- import_from_10x("pbmc_data")
+export_to_h5ad(atac_sc, "pbmc_data/atac_sc.h5ad")
+atac_sc_loaded <- import_from_h5ad("pbmc_data/atac_sc.h5ad")
+}
+
 }

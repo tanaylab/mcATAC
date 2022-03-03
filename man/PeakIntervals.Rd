@@ -15,4 +15,8 @@ a PeakIntervals object
 \description{
 a PeakIntervals object is simply a misha intervals set which can have, optionally, a field called 'peak_name'
 which holds the name of the peaks.
+
+Note that if you have informative rownames you should make them
+an explicit column due to the fact that the package might change
+them occasionally (e.g. when creating h5ad files)
 }
