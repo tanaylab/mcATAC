@@ -8,22 +8,39 @@
 #' @param atac an ScATAC object
 #' @param cell_to_metacell a data frame with a column named "cell_id" with cell id and
 #' another column named "metacell" with the metacell the cell is part of.
+#' @param metadata per-metacell metadata. A data frame with a column called 'metacell' and additional metacell annotations.
 #'
 #' @return an McATAC object
 #'
 #' @examples
 #' \dontrun{
-#' atac_sc <- import_from_10x("raw")
-#' atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "raw/scdb", "rna")
+#' atac_sc <- import_from_10x("pbmc_data")
+#' atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")
 #' }
 #'
 #' @export
-project_atac_on_mc <- function(atac, cell_to_metacell) {
+project_atac_on_mc <- function(atac, cell_to_metacell, metadata = NULL) {
     cell_to_metacell <- deframe(cell_to_metacell)
-    sc_mat <- atac$mat[, colnames(atac$mat) %in% cell_to_metacell, drop = FALSE]
-    mc_mat <- tgs_matrix_tapply(sc_mat, cell_to_metacell, sum)
-    # TODO: deal with metadata (?)
-    return(McATAC(mc_mat, atac$peaks))
+
+    assert_that(all(names(cell_to_metacell) %in% colnames(atac$mat)))
+    sc_mat <- atac$mat[, colnames(atac$mat) %in% names(cell_to_metacell), drop = FALSE]
+
+    n_removed_cells <- ncol(atac$mat) - ncol(sc_mat)
+    if (n_removed_cells > 0) {
+        cli_alert_info("{.val {n_removed_cells}} cells (out of {.val {ncol(atac$mat)}}) do not have a metacell and have been removed.")
+    }
+
+    mc_mat <- t(tgs_matrix_tapply(sc_mat, cell_to_metacell, sum))
+
+    assert_that(are_equal(atac$peaks$peak_name, rownames(mc_mat)))
+    assert_that(all(colnames(mc_mat) %in% cell_to_metacell))
+
+    # TODO: deal with cell metadata (?)
+
+    mc_atac <- McATAC(mc_mat, atac$peaks, metadata)
+    cli_alert_success("Created a new McATAC object with {.val {ncol(mc_atac$mat)}} metacells and {.val {nrow(mc_atac$mat)}} ATAC peaks.")
+
+    return(mc_atac)
 }
 
 #'
@@ -32,12 +49,14 @@ project_atac_on_mc <- function(atac, cell_to_metacell) {
 #'
 #' @export
 #' @rdname project_atac_on_mc
-project_atac_on_mc_from_metacell1 <- function(atac, scdb, mc_id) {
+project_atac_on_mc_from_metacell1 <- function(atac, scdb, mc_id, metadata = NULL) {
     metacell::scdb_init(scdb, force_reinit = TRUE)
     rna_mc <- metacell::scdb_mc(mc_id)
     cell_to_metacell <- rna_mc@mc %>%
         enframe("cell_id", "metacell") %>%
         as_tibble()
+
+    # TODO: when rna_mc@colors and rna_mc@color_key exist - add them as metadata
 
     return(project_atac_on_mc(atac, cell_to_metacell))
 }
@@ -47,6 +66,6 @@ project_atac_on_mc_from_metacell1 <- function(atac, scdb, mc_id) {
 #'
 #' @export
 #' @rdname project_atac_on_mc
-project_atac_on_mc_from_h5ad <- function(atac, h5ad_file) {
+project_atac_on_mc_from_h5ad <- function(atac, h5ad_file, metadata = NULL) {
 
 }

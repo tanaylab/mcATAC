@@ -22,10 +22,13 @@ Imports:
     tibble,
     tidyr,
     Matrix,
-    methods
+    methods,
+    assertthat
 Suggests: 
     testthat (>= 3.0.0),
-    metacell
+    metacell,
+    knitr,
+    rmarkdown
 Remotes:
     tanaylab/misha,
     tanaylab/misha.ext,
@@ -38,3 +41,4 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 URL: https://github.com/tanaylab/mcATAC
 BugReports: https://github.com/tanaylab/mcATAC/issues
+VignetteBuilder: knitr

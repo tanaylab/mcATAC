@@ -6,17 +6,19 @@
 \alias{project_atac_on_mc_from_h5ad}
 \title{Given metacells (usually from RNA data), project ATAC counts to get a McATAC object}
 \usage{
-project_atac_on_mc(atac, cell_to_metacell)
+project_atac_on_mc(atac, cell_to_metacell, metadata = NULL)
 
-project_atac_on_mc_from_metacell1(atac, scdb, mc_id)
+project_atac_on_mc_from_metacell1(atac, scdb, mc_id, metadata = NULL)
 
-project_atac_on_mc_from_h5ad(atac, h5ad_file)
+project_atac_on_mc_from_h5ad(atac, h5ad_file, metadata = NULL)
 }
 \arguments{
 \item{atac}{an ScATAC object}
 
 \item{cell_to_metacell}{a data frame with a column named "cell_id" with cell id and
 another column named "metacell" with the metacell the cell is part of.}
+
+\item{metadata}{per-metacell metadata. A data frame with a column called 'metacell' and additional metacell annotations.}
 
 \item{scdb}{a metacell1 \code{scdb} path}
 
@@ -34,8 +36,8 @@ uses the output of the 'metacells' python package (metacell2).
 }
 \examples{
 \dontrun{
-atac_sc <- import_from_10x("raw")
-atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "raw/scdb", "rna")
+atac_sc <- import_from_10x("pbmc_data")
+atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")
 }
 
 }

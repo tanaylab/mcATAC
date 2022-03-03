@@ -12,3 +12,7 @@ check_files_exist <- function(files) {
         }
     }
 }
+
+is_sparse_matrix <- function(mat) {
+    return(methods::is(mat, "sparseMatrix"))
+}

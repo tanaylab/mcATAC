@@ -1,0 +1,51 @@
+---
+title: "mcATAC"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{mcATAC}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(mcATAC)
+```
+
+## Download dataset
+
+Download the following dataset from 10x: 
+
+PBMC from a healthy donor - granulocytes removed through cell sorting (10k) (Filtered feature barcode matrix MEX (DIR))
+
+And extract it's contents to a directory called `pbmc_data`.
+
+
+## Import ATAC dataset
+
+```{r import}
+atac_sc <- import_from_10x("pbmc_data")
+atac_sc
+```
+
+
+## Project RNA metacells 
+
+```{r project}
+atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")
+```
+
+
+## Export to an h5ad file
+
+```{r export-to-h5ad}
+export_to_h5ad(atac_mc, "pbmc_data/atac_mc.h5ad")
+# Load using: atac_mc <- import_from_h5ad("pbmc_data/atac_mc.h5ad")
+```
+
