@@ -79,25 +79,58 @@
 <p>Download the following dataset from 10x:</p>
 <p><a href="https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k?" class="external-link">PBMC from a healthy donor - granulocytes removed through cell sorting (10k) (Filtered feature barcode matrix MEX (DIR))</a></p>
 <p>And extract it's contents to a directory called <code>pbmc_data</code>.</p>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="st">"pbmc_data"</span><span class="op">)</span><span class="op">)</span><span class="op">{</span>
+  <span class="fu"><a href="../reference/download_pbmc_example_data.html">download_pbmc_example_data</a></span><span class="op">(</span><span class="op">)</span>
+<span class="op">}</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="import-atac-dataset">Import ATAC dataset<a class="anchor" aria-label="anchor" href="#import-atac-dataset"></a>
 </h2>
 <div class="sourceCode"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_from_10x.html">import_from_10x</a></span><span class="op">(</span><span class="st">"pbmc_data"</span><span class="op">)</span>
-<span class="va">atac_sc</span></code></pre></div>
+<span class="co">#&gt; • Importing matrix</span>
+<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Imported a matrix of <span style="color: #0000BB;">11909</span> cells and <span style="color: #0000BB;">144978</span> features</span>
+<span class="co">#&gt; • Importing features</span>
+<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #0000BB;">108377</span> ATAC peaks</span>
+<span class="co">#&gt; <span style="color: #00BB00;">✔</span> successfully imported to an ScATAC object with <span style="color: #0000BB;">11909</span> cells and <span style="color: #0000BB;">108377</span> ATAC peaks</span>
+<span class="va">atac_sc</span>
+<span class="co">#&gt; An ScATAC object with <span style="color: #0000BB;">11909</span> cells <span style="color: #0000BB;">108377</span> ATAC peaks.</span>
+<span class="co">#&gt; Slots include:</span>
+<span class="co">#&gt; • `$mat`: a numeric matrix where rows are peaks and columns are cells. Can be a</span>
+<span class="co">#&gt; sparse matrix.</span>
+<span class="co">#&gt; • `$peaks`: a misha intervals set with the peak definitions.</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="project-rna-metacells">Project RNA metacells<a class="anchor" aria-label="anchor" href="#project-rna-metacells"></a>
 </h2>
 <div class="sourceCode"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project_atac_on_mc.html">project_atac_on_mc_from_metacell1</a></span><span class="op">(</span><span class="va">atac_sc</span>, <span class="st">"pbmc_data/scdb"</span>, <span class="st">"rna"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span>
+<span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span>
+<span class="co">#&gt;   cell_id            metacell</span>
+<span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">1</span> AAACAGCCAATCCCTT-1       44</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">2</span> AAACAGCCAATGCGCT-1       22</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">3</span> AAACAGCCACCAACCG-1        7</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">4</span> AAACAGCCAGGATAAC-1       24</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">5</span> AAACAGCCAGTTTACG-1       32</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">6</span> AAACATGCAAGGTCCT-1       30</span>
+<span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project_atac_on_mc.html">project_atac_on_mc</a></span><span class="op">(</span><span class="va">atac_sc</span>, <span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span>
+<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #0000BB;">3198</span> cells (out of <span style="color: #0000BB;">11909</span>) do not have a metacell and have been removed.</span>
+<span class="co">#&gt; <span style="color: #00BB00;">✔</span> Created a new McATAC object with <span style="color: #0000BB;">97</span> metacells and <span style="color: #0000BB;">108377</span> ATAC peaks.</span></code></pre></div>
+<p>Or using a metacell1 object:</p>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># atac_mc &lt;- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="export-to-an-h5ad-file">Export to an h5ad file<a class="anchor" aria-label="anchor" href="#export-to-an-h5ad-file"></a>
 </h2>
 <div class="sourceCode"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/export_to_h5ad.html">export_to_h5ad</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="st">"pbmc_data/atac_mc.h5ad"</span>, compression <span class="op">=</span> <span class="st">"gzip"</span><span class="op">)</span>
+<span class="co">#&gt; • Creating an AnnData object</span>
+<span class="co">#&gt; • Writing to file</span>
+<span class="co">#&gt; <span style="color: #00BB00;">✔</span> Successfully exported to <span style="color: #0000BB;">pbmc_data/atac_mc.h5ad</span></span>
 <span class="co"># Load using: atac_mc &lt;- import_from_h5ad("pbmc_data/atac_mc.h5ad")</span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
