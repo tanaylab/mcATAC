@@ -18,7 +18,10 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item">
+      <ul class="navbar-nav me-auto"><li class="nav-item">
+  <a class="nav-link" href="../articles/mcATAC.html">Get started</a>
+</li>
+<li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -48,7 +51,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">export_to_h5ad</span><span class="op">(</span><span class="va">object</span>, <span class="va">out_file</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">export_to_h5ad</span><span class="op">(</span><span class="va">object</span>, <span class="va">out_file</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -57,12 +60,40 @@
 <dd><p>McATAC or ScATAC object</p></dd>
 <dt>out_file</dt>
 <dd><p>name of the output file</p></dd>
+<dt>...</dt>
+<dd><p>Arguments passed on to <code><a href="https://anndata.dynverse.org/reference/write_h5ad.html" class="external-link">anndata::write_h5ad</a></code></p><dl><dt><code>anndata</code></dt>
+<dd><p>An <code><a href="https://anndata.dynverse.org/reference/AnnData.html" class="external-link">AnnData()</a></code> object</p></dd>
+
+    <dt><code>filename</code></dt>
+<dd><p>Filename of data file. Defaults to backing file.</p></dd>
+
+    <dt><code>compression</code></dt>
+<dd><p>See the h5py <a href="http://docs.h5py.org/en/latest/high/dataset.html#dataset-compression" class="external-link">filter pipeline</a>.
+Options are <code>"gzip"</code>, <code>"lzf"</code> or <code>NULL</code>.</p></dd>
+
+    <dt><code>compression_opts</code></dt>
+<dd><p>See the h5py <a href="http://docs.h5py.org/en/latest/high/dataset.html#dataset-compression" class="external-link">filter pipeline</a>.</p></dd>
+
+    <dt><code>as_dense</code></dt>
+<dd><p>Sparse in AnnData object to write as dense. Currently only supports <code>"X"</code> and <code>"raw/X"</code>.</p></dd>
+
+  
+</dl></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>None.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="import_from_10x.html">import_from_10x</a></span><span class="op">(</span><span class="st">"pbmc_data"</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu">export_to_h5ad</span><span class="op">(</span><span class="va">atac_sc</span>, <span class="st">"pbmc_data/atac_sc.h5ad"</span><span class="op">)</span></span>
+<span class="r-in"><span class="op">}</span></span>
+<span class="r-in"></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 
