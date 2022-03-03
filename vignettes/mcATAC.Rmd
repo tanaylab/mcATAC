@@ -22,9 +22,16 @@ library(mcATAC)
 
 Download the following dataset from 10x: 
 
-PBMC from a healthy donor - granulocytes removed through cell sorting (10k) (Filtered feature barcode matrix MEX (DIR))
+[PBMC from a healthy donor - granulocytes removed through cell sorting (10k) (Filtered feature barcode matrix MEX (DIR))](https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k?)
+
 
 And extract it's contents to a directory called `pbmc_data`.
+
+```{r download-data}
+if (!dir.exists("pbmc_data")){
+  download_pbmc_example_data()
+}
+```
 
 
 ## Import ATAC dataset
@@ -38,6 +45,13 @@ atac_sc
 ## Project RNA metacells 
 
 ```{r project}
+data(cell_to_metacell_pbmc_example)
+head(cell_to_metacell_pbmc_example)
+atac_mc <- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example)
+```
+
+Or using a metacell1 object: 
+```{r project-mc1, eval = FALSE}
 atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")
 ```
 
@@ -45,7 +59,7 @@ atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")
 ## Export to an h5ad file
 
 ```{r export-to-h5ad}
-export_to_h5ad(atac_mc, "pbmc_data/atac_mc.h5ad")
+export_to_h5ad(atac_mc, "pbmc_data/atac_mc.h5ad", compression = "gzip")
 # Load using: atac_mc <- import_from_h5ad("pbmc_data/atac_mc.h5ad")
 ```
 
