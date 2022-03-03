@@ -15,11 +15,11 @@ import_from_10x(
 \item{dir}{10x directory. Should have the following files: 'matrix.mtx', 'barcodes.tsv' and 'features.tsv'.
 See 'Cell Ranger Arc' for more details: https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/overview/welcome}
 
-\item{matrix_fn}{if \code{dir} is missing, the filename of the matrix to import ("matrix.mtx")}
+\item{matrix_fn}{if \code{dir} is missing, the filename of the matrix to import ("matrix.mtx" or "matrix.mtx.gz")}
 
-\item{cells_fn}{if \code{dir} is missing, the filename of the cells to import ("barcodes.tsv")}
+\item{cells_fn}{if \code{dir} is missing, the filename of the cells to import ("barcodes.tsv" or "barcodes.tsv.gz")}
 
-\item{features_fn}{if \code{dir} is missing, the filename of the features to import ("features.tsv")}
+\item{features_fn}{if \code{dir} is missing, the filename of the features to import ("features.tsv" or "features.tsv.gz")}
 }
 \value{
 an ScATAC object
