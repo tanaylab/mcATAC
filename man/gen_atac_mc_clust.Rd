@@ -6,9 +6,9 @@
 \usage{
 gen_atac_mc_clust(
   atac_mc,
-  k,
+  k = NULL,
   peak_set = NULL,
-  use_prior_annot = FALSE,
+  use_prior_annot = TRUE,
   annot = "cell_type"
 )
 }
@@ -17,7 +17,7 @@ gen_atac_mc_clust(
 
 \item{k}{number of clusters}
 
-\item{peak_set}{a PeakInervals object (or a misha intervals set). if NULL - he peaks from \code{atac_mc} would be used.}
+\item{peak_set}{a PeakIntervals object (or a misha intervals set). if NULL - the peaks from \code{atac_mc} would be used.}
 
 \item{use_prior_annot}{when TRUE - use the metacell annotation to generate metacell clusters. Clusters would be generated based on a categorical field \code{annot} from the \code{metadata} slot in the McATAC object.}
 

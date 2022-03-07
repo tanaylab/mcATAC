@@ -11,7 +11,7 @@ gen_atac_peak_clust(atac_mc, k, peak_set = NULL)
 
 \item{k}{number of clusters}
 
-\item{peak_set}{a PeakInervals object (or a misha intervals set). if NULL - he peaks from \code{atac_mc} would be used.}
+\item{peak_set}{a PeakIntervals object (or a misha intervals set). if NULL - the peaks from \code{atac_mc} would be used.}
 }
 \description{
 Cluster atac peaks based on atac distributions

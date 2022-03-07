@@ -4,12 +4,14 @@
 \alias{plot_atac_rna}
 \title{Plot a scatter of gene expression vs an atac profile}
 \usage{
-plot_atac_rna(mc_atac, gene, peak = NULL)
+plot_atac_rna(mc_atac, mc_rna, gene, peak = NULL)
 }
 \arguments{
 \item{mc_atac}{a McATAC object}
 
-\item{gene}{name of the gene top plot}
+\item{mc_rna}{a metacell 'mc' object}
+
+\item{gene}{name of the gene to plot}
 
 \item{peak}{name of the peak to plot. If NULL - the promoter of \code{gene} would be shown}
 }
