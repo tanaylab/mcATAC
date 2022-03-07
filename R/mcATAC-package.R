@@ -4,10 +4,12 @@
 #' @import dplyr
 #' @import ggplot2
 #' @import tgstat
+#' @importFrom Matrix t
+#' @importFrom assertthat assert_that are_equal
 #' @importFrom purrr walk map
 #' @importFrom tibble as_tibble enframe deframe rownames_to_column column_to_rownames
 #' @importFrom glue glue
-#' @importFrom cli cli_abort cli_alert_info cli_alert_success cli_alert_warning cli_alert_danger cli_alert
+#' @importFrom cli cli_abort cli_alert_info cli_alert_success cli_alert_warning cli_alert_danger cli_alert cli_ul cli_warn
 #' @importFrom rlang has_name
 ## usethis namespace: start
 ## usethis namespace: end

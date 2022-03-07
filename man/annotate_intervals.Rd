@@ -9,7 +9,7 @@ annotate_intervals(
   MIN_PROXIMAL = 1000,
   MAX_PROXIMAL = 20000,
   MIN_DISTAL = 20000,
-  MAX_DISTAL = 1e+06,
+  MAX_DISTAL = 1000000,
   EXONIC_PEAK_DIST = 0
 )
 }

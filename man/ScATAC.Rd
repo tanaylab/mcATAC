@@ -7,7 +7,7 @@
 ScATAC(mat, peaks, metadata = NULL)
 }
 \arguments{
-\item{mat}{a numeric matrix where rows are peaks, and columns are cells. Can be a sparse matrix.}
+\item{mat}{a numeric matrix where rows are peaks and columns are cells. Can be a sparse matrix.}
 
 \item{peaks}{misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).}
 

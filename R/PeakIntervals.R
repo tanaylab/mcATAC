@@ -3,6 +3,10 @@
 #' @description a PeakIntervals object is simply a misha intervals set which can have, optionally, a field called 'peak_name'
 #' which holds the name of the peaks.
 #'
+#' Note that if you have informative rownames you should make them
+#' an explicit column due to the fact that the package might change
+#' them occasionally (e.g. when creating h5ad files)
+#'
 #' @param intervals misha intervals (a data frame which has the following columns: 'chrom', 'start' and 'end')
 #' @return a PeakIntervals object
 #'
@@ -22,6 +26,9 @@ validate_peaks <- function(peaks) {
     if (!all(colnames(peaks)[1:3] == c("chrom", "start", "end"))) {
         cli_abort("{.field peaks} does not contain a valid intervals set (the first columns should be 'chrom', 'start' and 'end')")
     }
+
+    assert_that(is.numeric(peaks$start))
+    assert_that(is.numeric(peaks$end))
 
     distinct_peaks <- peaks %>% distinct(chrom, start, end)
     if (nrow(distinct_peaks) < nrow(peaks)) {

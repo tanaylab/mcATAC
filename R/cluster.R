@@ -7,8 +7,8 @@
 #'
 #' @export
 gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL) {
-    atac_peak_km = tglkmeans::TGL_kmeans(as.matrix(atac_mc$mat), k)
-    atac_mc$peaks[,glue::glue('cluster_k={k}')] = atac_peak_km$cluster
+    atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(atac_mc$mat), k)
+    atac_mc$peaks[, glue::glue("cluster_k={k}")] <- atac_peak_km$cluster
     return(atac_mc)
 }
 
@@ -22,16 +22,16 @@ gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL) {
 #'
 #' @inheritParams gen_atac_peak_clust
 #' @export
-gen_atac_mc_clust <- function(atac_mc, k=NULL, peak_set = NULL, use_prior_annot = TRUE, annot = "cell_type") {
+gen_atac_mc_clust <- function(atac_mc, k = NULL, peak_set = NULL, use_prior_annot = TRUE, annot = "cell_type") {
     if (!use_prior_annot) {
         if (!is.null(k)) {
-            atac_mc_km = tglkmeans::TGL_kmeans(as.matrix(atac_mc$mat), k)
+            atac_mc_km <- tglkmeans::TGL_kmeans(as.matrix(atac_mc$mat), k)
             return(setNames(atac_mc_km$cluster, 1:length(atac_mc_km$cluster)))
+        } else {
+            stop("Must choose k if clustering with use_prior_annot == FALSE")
         }
-        else {stop('Must choose k if clustering with use_prior_annot == FALSE')}
-    }
-    else {
-        res = match(unlist(atac_mc$metadata[,annot]), sort(unique(unlist(atac_mc$metadata[,annot]))))
+    } else {
+        res <- match(unlist(atac_mc$metadata[, annot]), sort(unique(unlist(atac_mc$metadata[, annot]))))
         return(setNames(res, 1:length(res)))
     }
 }

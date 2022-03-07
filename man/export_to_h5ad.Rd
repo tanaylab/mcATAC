@@ -4,16 +4,34 @@
 \alias{export_to_h5ad}
 \title{Write a McATAC or ScATAC object to an h5ad file}
 \usage{
-export_to_h5ad(object, out_file)
+export_to_h5ad(object, out_file, ...)
 }
 \arguments{
 \item{object}{McATAC or ScATAC object}
 
 \item{out_file}{name of the output file}
+
+\item{...}{
+  Arguments passed on to \code{\link[anndata:write_h5ad]{anndata::write_h5ad}}
+  \describe{
+    \item{\code{anndata}}{An \code{\link[anndata:AnnData]{AnnData()}} object}
+    \item{\code{filename}}{Filename of data file. Defaults to backing file.}
+    \item{\code{compression}}{See the h5py \href{http://docs.h5py.org/en/latest/high/dataset.html#dataset-compression}{filter pipeline}.
+Options are \code{"gzip"}, \code{"lzf"} or \code{NULL}.}
+    \item{\code{compression_opts}}{See the h5py \href{http://docs.h5py.org/en/latest/high/dataset.html#dataset-compression}{filter pipeline}.}
+    \item{\code{as_dense}}{Sparse in AnnData object to write as dense. Currently only supports \code{"X"} and \code{"raw/X"}.}
+  }}
 }
 \value{
 None.
 }
 \description{
 Write a McATAC or ScATAC object to an h5ad file
+}
+\examples{
+\dontrun{
+atac_sc <- import_from_10x("pbmc_data")
+export_to_h5ad(atac_sc, "pbmc_data/atac_sc.h5ad")
+}
+
 }
