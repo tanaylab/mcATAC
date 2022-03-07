@@ -1,6 +1,6 @@
 #' Construct a new McATAC object
 #'
-#' @param mat a numeric matrix where rows are peaks, and columns are metacells. Can be a sparse matrix.
+#' @param mat a numeric matrix where rows are peaks, and columns are metacells. Can be a sparse matrix (ummm,  preferably not! -YS).
 #' @param peaks misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).
 #' @param metadata data frame with a column called 'metacell' and additional metacell annotations.
 #' @description McATAC is a shallow object holding ATAC data over metacells.
