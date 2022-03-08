@@ -29,7 +29,8 @@ Suggests:
     testthat (>= 3.0.0),
     metacell,
     knitr,
-    rmarkdown
+    rmarkdown,
+    fs
 Remotes:
     tanaylab/misha,
     tanaylab/misha.ext,

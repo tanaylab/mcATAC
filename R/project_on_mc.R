@@ -28,7 +28,7 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, min_int_frac = 0.1
 
     n_removed_cells <- ncol(atac$mat) - ncol(sc_mat)
     if (n_removed_cells > 0) {
-        cli_alert_info("{.val {n_removed_cells}} cells (out of {.val {ncol(atac$mat)}}) do not have a metacell and have been removed.")        
+        cli_alert_info("{.val {n_removed_cells}} cells (out of {.val {ncol(atac$mat)}}) do not have a metacell and have been removed.")
         if ((ncol(atac$mat) - n_removed_cells) <= round(min_int_frac * ncol(atac$mat))) {
             cli_alert_warning("Intersect of ATAC mat colnames and mc names is less than {.field {scales::percent(min_int_frac)}}. Make sure you are projecting the right objects.")
         }
