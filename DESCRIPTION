@@ -16,6 +16,7 @@ Imports:
     glue,
     misha,
     misha.ext,
+    pheatmap,
     purrr,
     rlang,
     tgstat,

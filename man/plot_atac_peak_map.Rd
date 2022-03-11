@@ -16,3 +16,7 @@ plot_atac_peak_map(mc_atac, mc_atac_clust, peak_clust)
 \description{
 Plot normalized accessibility of peaks over metacells, ordered by clustering
 }
+\examples{
+\dontrun{
+}
+}

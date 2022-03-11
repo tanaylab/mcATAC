@@ -4,14 +4,16 @@
 \alias{gen_atac_peak_clust}
 \title{Cluster atac peaks based on atac distributions}
 \usage{
-gen_atac_peak_clust(atac_mc, k, peak_set = NULL)
+gen_atac_peak_clust(atac_mc, k, peak_set = NULL, ...)
 }
 \arguments{
 \item{atac_mc}{a McATAC object}
 
 \item{k}{number of clusters}
 
-\item{peak_set}{a PeakIntervals object (or a misha intervals set). if NULL - the peaks from \code{atac_mc} would be used.}
+\item{peak_set}{\itemize{
+\item (optional) a subset of peaks of \code{atac_mc$peaks} on which to cluster
+}}
 
 \item{...}{
   Arguments passed on to \code{\link[tglkmeans:TGL_kmeans]{tglkmeans::TGL_kmeans}}
@@ -32,8 +34,15 @@ if NULL, no reordering would be done.}
   }}
 }
 \value{
-atac_mc with added cluster_k_{k} column to $peaks specifying the cluster for each enhancer
+atac_mc with added cluster_k_{k} column to atac_mc$peaks specifying the cluster for each enhancer
 }
 \description{
 Cluster atac peaks based on atac distributions
+}
+\examples{
+\dontrun{
+my_atac_mc = gen_atac_peak_clust(my_atac_mc, )
+}
+
+    
 }

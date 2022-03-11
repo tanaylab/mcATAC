@@ -4,7 +4,12 @@
 \alias{prepare_clusters}
 \title{Prepare peak clusters for export (backend function)}
 \usage{
-prepare_clusters(mc_atac, clust_vec = NULL, normalization = "none")
+prepare_clusters(
+  mc_atac,
+  clust_vec = NULL,
+  normalization = "none",
+  eps_q = 0.05
+)
 }
 \arguments{
 \item{mc_atac}{McATAC object}
@@ -12,6 +17,8 @@ prepare_clusters(mc_atac, clust_vec = NULL, normalization = "none")
 \item{clust_vec}{(optional) a vector of length #metacells representing an annotation/clustering (can be output of \code{gen_atac_mc_clust})}
 
 \item{normalization}{(optional) normalization method, either 'none', 'lfcom' (log2 fold-change over median), 'zs' (Z-scores)}
+
+\item{eps_q}{if \code{normalization == 'lfcom'}, use quantile \code{eps_q} (default = 0.05) for regularizing log expression}
 }
 \value{
 a list of:

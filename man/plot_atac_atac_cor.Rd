@@ -17,3 +17,9 @@ p a pheatmap of ATAC metacell correlations
 \description{
 Plot a correlation matrix of ATAC metacells
 }
+\examples{
+\dontrun{
+p1 = plot_atac_atac_cor(my_atac_mc)
+p2 = plot_atac_atac_cor(my_atac_mc, sp_f = F)
+}
+}

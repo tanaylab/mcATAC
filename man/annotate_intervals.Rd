@@ -37,7 +37,7 @@ annotate_intervals(
 \item{exonic_peak_dist}{a parameter that allows proximity (without overlap) of peaks to exons that still classifies them as exonic peaks, as active transcription usually confers accessibility in the vicinity of exons, and this might confound a possible assignment of regulatory activity to an exon.}
 }
 \value{
-an intervals set with the following annotations: 'promoter', 'intronic', 'exonic', 'ig_proximal' (intergenic-proximal), 'ig_distal' (intergenic-distal).
+intervals - the input intervals set with an added field \code{peak_annot}
 }
 \description{
 Annotate an intervals set
@@ -48,4 +48,10 @@ Exonic peaks overlap exons.
 Intergenic-proximal peaks are less than \code{max_proximal} away from a TSS, but not within a gene body
 Intergenic-distal peaks are more than \code{min_distal} away from some TSS, and less than \code{max-distal} from any TSS, and not within a gene body.
 Desert peaks are at least \code{max_distal} from any known TSS (as defined by the \code{tss} interval set).
+}
+\examples{
+\dontrun{
+my_intervals = annotate_intervals(my_intervals, 'mm10', min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
+table(my_intervals$peak_annot)
+}    
 }

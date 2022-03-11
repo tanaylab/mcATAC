@@ -4,7 +4,10 @@
 #' @param atac a McATAC or ScATAC object
 #'
 #' @return the original \code{atac} object, with the peaks annotated using \code{annotate_intervals}
-#'
+#' @examples
+#' \dontrun{
+#' pbmc_atac_mc = annotate_peaks(pbmc_atac_mc)
+#' }    
 #' @export
 annotate_peaks <- function(atac) {
     if (!has_name("peaks", atac)) {
@@ -33,23 +36,35 @@ annotate_peaks <- function(atac) {
 #' @param max_distal the maximum distance from any TSS, under which a peak is considered to be of a distal enhancer, and above which it is a 'desert' peak.
 #' @param exonic_peak_dist a parameter that allows proximity (without overlap) of peaks to exons that still classifies them as exonic peaks, as active transcription usually confers accessibility in the vicinity of exons, and this might confound a possible assignment of regulatory activity to an exon.
 #'
-#' @return an intervals set with the following annotations: 'promoter', 'intronic', 'exonic', 'ig_proximal' (intergenic-proximal), 'ig_distal' (intergenic-distal).
-#'
+#' @return intervals - the input intervals set with an added field \code{peak_annot}
+#' @examples
+#' \dontrun{
+#' my_intervals = annotate_intervals(my_intervals, 'mm10', min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
+#' table(my_intervals$peak_annot)
+#' }    
 #' @export
 annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_proximal = 2e+04, 
                 min_distal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 0) {
+    
     # TODO: update peak annotation data frame with neighbor gene, distance, more (exons, enhancers etc.). The annotation might be an optional paramter.
-
     # TODO: check whether a genome is loaded
     # TODO: check whether 'tss' and 'exons' interval sets are already loaded
-    if (is.null(genome)) {cli_abort('Specify genome')}
-    gsetroot('/home/aviezerl/mm10')
-    tss = gintervals.load('intervs.global.tss')
-    exons = gintervals.load('intervs.global.exon')
     
+    ## if (genome isn't loaded) {
+        if (is.null(genome)) {cli_abort('Specify genome')}
+        misha.ext::gset_genome(genome)
+    #}
+    ## Please check this \/ \/
+    if (!rlang::env_has(nms = 'tss')) {
+        tss = gintervals.load('intervs.global.tss')
+    }
+    if (!rlang::env_has(nms = 'exons')) {
+        exons = gintervals.load('intervs.global.exon')
+    }
     if (length(grep('intervalID', colnames(intervals))) == 0) {intervals$intervalID = 1:nrow(intervals)}
     nei_peak_prom = gintervals.neighbors(intervals, tss, mindist = -min_proximal, maxdist = min_proximal)
     nei_peak_exon = gintervals.neighbors(intervals, exons, mindist = -exonic_peak_dist, maxdist = exonic_peak_dist)
+    gene_body_df = get_gene_body_df(tss, exons)
     nei_peak_gb = gintervals.neighbors(intervals, gene_body_df, maxdist = 0, mindist = 0)
     prom_peaks = nei_peak_prom$intervalID
     exon_peaks = nei_peak_exon$intervalID[!(nei_peak_exon$intervalID %in% prom_peaks)]
@@ -80,7 +95,7 @@ annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_prox
 }
 
 
-#' Generate dataframe of approximate gene bodies (edges of first and last exons)
+#' Generate dataframe of approximate gene bodies (edges of first and last exons) - backend function
 #'
 #' @param tss tss interval set built-in to misha
 #' @param exons exon interval set built-in to misha
@@ -88,7 +103,7 @@ annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_prox
 #' @return gene_body_df a misha intervals set approximating starts and ends of genes
 #'
 #' @export
-annotate_peaks <- function(tss, exons) {
+get_gene_body_df <- function(tss, exons) {
     kgid_both = intersect(unique(exons$kgID), unique(tss$kgID))
     exons_filt = exons[exons$kgID %in% kgid_both,]
     genes_start = tapply(exons_filt$start, exons_filt$kgID, min)

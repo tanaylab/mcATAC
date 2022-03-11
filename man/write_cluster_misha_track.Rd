@@ -4,7 +4,13 @@
 \alias{write_cluster_misha_track}
 \title{Generate a misha track for a metacell cluster (backend function)}
 \usage{
-write_cluster_misha_track(cl, atac_mc_mat_clust, track_prefix)
+write_cluster_misha_track(
+  cl,
+  atac_mc_mat_clust,
+  track_prefix,
+  description = NULL,
+  override = FALSE
+)
 }
 \arguments{
 \item{cl}{ATAC metacell cluster}
@@ -12,6 +18,10 @@ write_cluster_misha_track(cl, atac_mc_mat_clust, track_prefix)
 \item{atac_mc_mat_clust}{a matrix with ATAC signal averaged across metacells in each cluster}
 
 \item{track_prefix}{prefix for track name}
+
+\item{description}{(optional) description for track (can be a glue-formatted expression)}
+
+\item{override}{(optional) whether to override an existing track; warning: may slow runtime substantially (due to reloading misha db)}
 }
 \value{
 trknm - the name of the generated track in the misha database

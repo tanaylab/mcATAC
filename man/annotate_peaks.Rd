@@ -4,24 +4,19 @@
 \alias{annotate_peaks}
 \title{Annotate ATAC peaks}
 \usage{
-annotate_peaks(tss, exons)
-
-annotate_peaks(tss, exons)
+annotate_peaks(atac)
 }
 \arguments{
-\item{tss}{tss interval set built-in to misha}
-
-\item{exons}{exon interval set built-in to misha}
-
 \item{atac}{a McATAC or ScATAC object}
 }
 \value{
 the original \code{atac} object, with the peaks annotated using \code{annotate_intervals}
-
-gene_body_df a misha intervals set approximating starts and ends of genes
 }
 \description{
 Annotate ATAC peaks
-
-Generate dataframe of approximate gene bodies (edges of first and last exons)
+}
+\examples{
+\dontrun{
+pbmc_atac_mc = annotate_peaks(pbmc_atac_mc)
+}    
 }

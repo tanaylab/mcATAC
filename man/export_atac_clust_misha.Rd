@@ -7,6 +7,7 @@
 export_atac_clust_misha(
   mc_atac,
   track_prefix,
+  description = NULL,
   clust_vec = NULL,
   normalization = "none",
   parallel = FALSE,
@@ -15,6 +16,8 @@ export_atac_clust_misha(
 }
 \arguments{
 \item{track_prefix}{prefix for generated misha tracks.}
+
+\item{description}{(optional) description for tracks (can be a glue-formatted expression)}
 
 \item{clust_vec}{(optional) a vector of length #metacells representing an annotation/clustering (can be output of \code{gen_atac_mc_clust})}
 
