@@ -42,7 +42,7 @@ annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_prox
 
     # TODO: check whether a genome is loaded
     # TODO: check whether 'tss' and 'exons' interval sets are already loaded
-    
+    if (is.null(genome)) {cli_abort('Specify genome')}
     gsetroot('/home/aviezerl/mm10')
     tss = gintervals.load('intervs.global.tss')
     exons = gintervals.load('intervs.global.exon')

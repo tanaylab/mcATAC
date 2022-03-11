@@ -11,8 +11,8 @@
 #' @export
 plot_atac_rna <- function(mc_atac, mc_rna, gene, peak = NULL, max_dist_to_promoter_peak = 5e+2, eps_q = 0.05) {
     if (is.null(peak)) {
-        tss = gintervals.load('tss')
-        tss_gene = tss[tss$geneSymbol == gene,c('chrom', 'start', 'end', 'geneSymbol')]
+        tss <- gintervals.load("tss")
+        tss_gene <- tss[tss$geneSymbol == gene, c("chrom", "start", "end", "geneSymbol")]
         if (nrow(tss_gene) == 0) {
             cli_abort('Peak not supplied and gene TSS location not found')
         }
@@ -22,22 +22,28 @@ plot_atac_rna <- function(mc_atac, mc_rna, gene, peak = NULL, max_dist_to_promot
         if (nrow(nei_peaks_tss) == 0) {
             cli_abort("Peak not supplied and no relevant promoter peak found for gene. Check if your ATAC matrix should have a peak for this gene's promoter.")
         }
-        prom_peak = nei_peaks_tss[which.min(nei_peaks_tss$dist), 4:6]
-        if (length(unlist(stringr::str_split(rownames(mc_atac$mat_[[1]]), '-'))) == 3) {
-            peak = paste0(unlist(prom_peak), collapse = '-')
+        prom_peak <- nei_peaks_tss[which.min(nei_peaks_tss$dist), 4:6]
+        if (length(unlist(stringr::str_split(rownames(mc_atac$mat_[[1]]), "-"))) == 3) {
+            peak <- paste0(unlist(prom_peak), collapse = "-")
+        } else {
+            peak <- paste0(prom_peak[[1]], ":", prom_peak[[2]], "-", prom_peak[[3]])
         }
-        else {peak = paste0(prom_peak[[1]], ':', prom_peak[[2]], '-', prom_peak[[3]])}
-        av = mc_atac$mat[peak,]
+        av <- mc_atac$mat[peak, ]
+    } else {
+        av <- mc_atac[peak, ]
     }
-    else {av = mc_atac[peak,]}
-    eps_rna = quantile(apply(mc_rna@e_gc, 1, mean), eps_q)
-    rv = log2(mc_rna@e_gc[gene,] + eps_rna)
-    if (any(grepl('color', colnames(mc_atac$metadata)))) {clrs = unique(mc_atac$metadata[,c('cell_type', 'color')])}
-    else {clrs = as.data.frame(list('cell_type' = 'all_mc', 'color' = 'black'))}
-    df = as.data.frame(list('atac' = av, 'rna' = rv, 'cell_type' = unlist(mc_atac$metadata[,'cell_type'])))
-    gg = ggplot2::ggplot(df, aes(x = rna, y = atac, color = cell_type)) + ggplot2::geom_point() + 
-            labs(title=glue::glue('{gene} - ATAC of {peak} vs. RNA'), x = 'log2 e_gc', y = 'ATAC (not normalized)') + 
-            scale_color_manual(values = tibble::deframe(clrs[,c('color', 'cell_type')]))
+    eps_rna <- quantile(apply(mc_rna@e_gc, 1, mean), 0.05)
+    rv <- log2(mc_rna@e_gc[gene, ] + eps_rna)
+    if (any(grepl("color", colnames(mc_atac$metadata)))) {
+        clrs <- unique(mc_atac$metadata[, c("cell_type", "color")])
+    } else {
+        clrs <- as.data.frame(list("cell_type" = "all_mc", "color" = "black"))
+    }
+    df <- as.data.frame(list("atac" = av, "rna" = rv, "cell_type" = unlist(mc_atac$metadata[, "cell_type"])))
+    gg <- ggplot2::ggplot(df, aes(x = rna, y = atac, color = cell_type)) +
+        ggplot2::geom_point() +
+        labs(title = glue::glue("{gene} - ATAC of {peak} vs. RNA"), x = "log2 e_gc", y = "ATAC (not normalized)") +
+        scale_color_manual(values = setNames(unlist(clrs[, "color"]), unlist(clrs[, "cell_type"])))
     return(gg)
 }
 
@@ -60,17 +66,19 @@ plot_atac_atac_cor <- function(mc_atac, sp_f = TRUE) {
         else  {
             clust_vec = unlist(mc_atac$metadata[,grep('cluster_k_',colnames(mc_atac$metadata))[[1]]])
         }
+    } else {
+        clust_vec <- unlist(mc_atac$metadata[, "cell_type"])
     }
-    else {clust_vec = unlist(mc_atac$metadata[,'cell_type'])}
-    col_annot = as.data.frame(list('cluster' = clust_vec))
-    rownames(col_annot) = 1:nrow(mc_atac$metadata)
-    if (any(grepl('color', colnames(mc_atac$metadata)))) {
-        col_key = unique(mc_atac$metadata[,c('cell_type', 'color')])
-        ann_colors = list('cluster' = setNames(col_key$color, col_key$cell_type))
-    }
-    else {
-        ann_colors = list('cluster' = setNames(sample(grep('white|gray|grey', colors(), v=T, inv=T), 
-                    length(unique(clust_vec))), unique(clust_vec)))
+    col_annot <- as.data.frame(list("cluster" = clust_vec))
+    rownames(col_annot) <- 1:nrow(mc_atac$metadata)
+    if (any(grepl("color", colnames(mc_atac$metadata)))) {
+        col_key <- unique(mc_atac$metadata[, c("cell_type", "color")])
+        ann_colors <- list("cluster" = setNames(col_key$color, col_key$cell_type))
+    } else {
+        ann_colors <- list("cluster" = setNames(sample(
+            grep("white|gray|grey", colors(), v = T, inv = T),
+            length(unique(clust_vec))
+        ), unique(clust_vec)))
     }
     cor_mat = tgs_cor(mc_atac$mat, spearman = sp_f, pairwise.complete.obs = TRUE)
     p = pheatmap::pheatmap(cor_mat[order(clust_vec), order(clust_vec)], 

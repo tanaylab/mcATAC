@@ -2,22 +2,26 @@
 % Please edit documentation in R/export.R
 \name{prepare_clusters}
 \alias{prepare_clusters}
-\title{Generate a ucsc genome browser file for each metacell cluster}
+\title{Prepare peak clusters for export (backend function)}
 \usage{
 prepare_clusters(mc_atac, clust_vec = NULL, normalization = "none")
 }
 \arguments{
 \item{mc_atac}{McATAC object}
 
-\item{clust_vec}{(optional) a vector of length #metacells representing an annotation/clustering
-(can be output of \code{gen_atac_mc_clust})}
+\item{clust_vec}{(optional) a vector of length #metacells representing an annotation/clustering (can be output of \code{gen_atac_mc_clust})}
 
 \item{normalization}{(optional) normalization method, either 'none', 'lfcom' (log2 fold-change over median), 'zs' (Z-scores)}
+}
+\value{
+a list of:
 
-\item{track_prefix}{prefix for generated misha tracks.}
+atac_mc_mat_clust - ATAC signal per peak averaged over clusters
 
-\item{output_dir}{(optional) name of the directory to write files to}
+clusts - names of clusters
+
+col_key - mapping of cluster names to colors
 }
 \description{
-Generate a ucsc genome browser file for each metacell cluster
+Prepare peak clusters for export (backend function)
 }

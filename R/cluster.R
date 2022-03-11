@@ -8,10 +8,9 @@
 #' @inheritDotParams tglkmeans::TGL_kmeans
 #' @return atac_mc with added cluster_k_{k} column to $peaks specifying the cluster for each enhancer
 #' @export
-gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL, ...)) {
-    atac_peak_km = tglkmeans::TGL_kmeans(as.matrix(atac_mc$mat), k, ...)
-    # atac_mc$peaks[,glue::glue('cluster_k_{k}')] = atac_peak_km$cluster
-    atac_mc$peaks <- atac_mc$peaks %>% mutate(clust = atac_mc$peaks)
+gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL) {
+    atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(atac_mc$mat), k)
+    atac_mc$peaks[, glue::glue("cluster_k={k}")] <- atac_peak_km$cluster
     return(atac_mc)
 }
 
@@ -24,10 +23,10 @@ gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL, ...)) {
 #' @inheritDotParams tglkmeans::TGL_kmeans
 #' @return a named numeric vector specifying the cluster for each metacell
 #' @export
-gen_atac_mc_clust <- function(atac_mc, k=NULL, peak_set = NULL, use_prior_annot = TRUE, annot = "cell_type", ...)) {
+gen_atac_mc_clust <- function(atac_mc, k = NULL, peak_set = NULL, use_prior_annot = TRUE, annot = "cell_type") {
     if (!use_prior_annot) {
         if (!is.null(k)) {
-            atac_mc_km = tglkmeans::TGL_kmeans(as.matrix(atac_mc$mat), k, ...))
+            atac_mc_km <- tglkmeans::TGL_kmeans(as.matrix(atac_mc$mat), k)
             return(setNames(atac_mc_km$cluster, 1:length(atac_mc_km$cluster)))
         }
         else {cli_abort('Must choose k if clustering with use_prior_annot == FALSE')}

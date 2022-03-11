@@ -6,7 +6,12 @@
 \alias{project_atac_on_mc_from_h5ad}
 \title{Given metacells (usually from RNA data), project ATAC counts to get a McATAC object}
 \usage{
-project_atac_on_mc(atac, cell_to_metacell, metadata = NULL)
+project_atac_on_mc(
+  atac,
+  cell_to_metacell = NULL,
+  min_int_frac = 0.1,
+  metadata = NULL
+)
 
 project_atac_on_mc_from_metacell1(atac, scdb, mc_id, metadata = NULL)
 
@@ -15,7 +20,10 @@ project_atac_on_mc_from_h5ad(atac, h5ad_file, metadata = NULL)
 \arguments{
 \item{atac}{an ScATAC object}
 
-\item{cell_to_metacell}{a data frame with a column named "cell_id" with cell id and}
+\item{cell_to_metacell}{a data frame with a column named "cell_id" with cell id and another column named "metacell" with the metacell the cell is
+part of.}
+
+\item{min_int_frac}{(optional) minimal expected fraction of intersection of barcodes (cell names) in ScATAC}
 
 \item{metadata}{per-metacell metadata. A data frame with a column called 'metacell' and additional metacell annotations.}
 
@@ -24,11 +32,6 @@ project_atac_on_mc_from_h5ad(atac, h5ad_file, metadata = NULL)
 \item{mc_id}{id of the metacell object within \code{scdb}}
 
 \item{h5ad_file}{name of an h5ad file which is the output of 'metacells' python package.}
-
-\item{mc}{a metacell1 \code{mc} object}
-
-\item{MIN_INT_FRAC}{(optional) minimal expected fraction of intersection of barcodes (cell names) in ScATAC and mc/cell_to_metacell
-another column named "metacell" with the metacell the cell is part of.}
 }
 \value{
 an McATAC object

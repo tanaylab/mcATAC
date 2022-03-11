@@ -149,25 +149,24 @@ prepare_clusters <- function(mc_atac, clust_vec = NULL, normalization = 'none') 
             clust_vec = gen_atac_mc_clust(atac_mc, k = round(ncol(atac_mc)/10))
         }
     }
-    if (all(!grepl('color', colnames(mc_atac$metadata)))) {
-        num_clrs = length(unique(clust_vec))
-        col_key = setNames(sample(grep('gray|white|grey', colors(), v=T), num_clrs), sort(unique(clust_vec)))
-    }
-    else {
-        col_key = unique(mc_atac$metadata[,c('cell_type', 'color')])
-        col_key = setNames(col_key$color, col_key$cell_type)
+    if (all(!grepl("color", colnames(mc_atac$metadata)))) {
+        num_clrs <- length(unique(clust_vec))
+        col_key <- setNames(sample(grep("gray|white|grey", colors(), v = T), num_clrs), sort(unique(clust_vec)))
+    } else {
+        col_key <- unique(mc_atac$metadata[, c("cell_type", "color")])
+        col_key <- setNames(col_key$color, col_key$cell_type)
     }
     # if (!is.null(clust_names)) {names(clusts) = clust_names}
-    eps = quantile(apply(mc_atac$mat, 1, mean), 0.05)
-    if (normalization == 'lfcom') {
-        atac_mc_mat = t(apply(mc_atac$mat, 1, function(x) log2((x + eps)/median(x + eps))))
+    eps <- quantile(apply(mc_atac$mat, 1, mean), 0.05)
+    if (normalization == "lfcom") {
+        atac_mc_mat <- t(apply(mc_atac$mat, 1, function(x) log2((x + eps) / median(x + eps))))
+    } else if (normalization == "zs") {
+        atac_mc_mat <- t(apply(mc_atac$mat, 1, function(x) (x - mean(x)) / sd(x)))
+    } else {
+        atac_mc_mat <- mc_atac$mat
     }
-    else if (normalization == 'zs') {
-        atac_mc_mat = t(apply(mc_atac$mat, 1, function(x) (x - mean(x))/sd(x)))
-    }
-    else {atac_mc_mat = mc_atac$mat}
-    atac_mc_mat_clust = t(tgs_matrix_tapply(atac_mc_mat, clust_vec, mean))
+    atac_mc_mat_clust <- t(tgs_matrix_tapply(atac_mc_mat, clust_vec, mean))
     # clusts = gsub('\\/', '_', sort(unique(clust_vec)))
-    clusts = sort(unique(clust_vec))
-    return(list('atac_mc_mat_clust' = atac_mc_mat_clust, 'clusts' = clusts, 'col_key' = col_key))
+    clusts <- sort(unique(clust_vec))
+    return(list("atac_mc_mat_clust" = atac_mc_mat_clust, "clusts" = clusts, "col_key" = col_key))
 }

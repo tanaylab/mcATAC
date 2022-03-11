@@ -4,7 +4,14 @@
 \alias{plot_atac_rna}
 \title{Plot a scatter of gene expression vs an atac profile}
 \usage{
-plot_atac_rna(mc_atac, mc_rna, gene, peak = NULL)
+plot_atac_rna(
+  mc_atac,
+  mc_rna,
+  gene,
+  peak = NULL,
+  max_dist_to_promoter_peak = 500,
+  eps_q = 0.05
+)
 }
 \arguments{
 \item{mc_atac}{a McATAC object}
@@ -14,6 +21,10 @@ plot_atac_rna(mc_atac, mc_rna, gene, peak = NULL)
 \item{gene}{name of the gene to plot}
 
 \item{peak}{name of the peak to plot. If NULL - the promoter of \code{gene} would be shown}
+
+\item{max_dist_to_promoter_peak}{how far from \code{gene}'s TSS to search for a promoter-proximal peak}
+
+\item{eps_q}{quantile of mean expression distribution to add as regularization when calculating log expression. Promoter ATAC signal has been observed empirically to often be linearly correlated with log of gene expression.}
 }
 \value{
 a ggplot object with the scatter plot

@@ -25,6 +25,11 @@ import_from_h5ad <- function(file, class = NULL) {
     mat <- t(adata$X)
 
     peaks <- adata$var
+    peaks <- peaks %>%
+        mutate(chrom = as.character(chrom), start = as.numeric(start), end = as.numeric(end))
+    rownames(peaks) <- NULL
+    peaks <- as_tibble(peaks)
+
     metadata <- adata$obs
     if (ncol(metadata) == 0) {
         metadata <- NULL
