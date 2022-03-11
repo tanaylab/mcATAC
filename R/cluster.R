@@ -5,15 +5,15 @@
 #' @param peak_set a PeakIntervals object (or a misha intervals set). if NULL - the peaks from \code{atac_mc} would be used.
 #' @param k number of clusters
 #'
+#' @inheritDotParams tglkmeans::TGL_kmeans
+#' @return atac_mc with added cluster_k_{k} column to $peaks specifying the cluster for each enhancer
 #' @export
-gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL) {
-    atac_peak_km = tglkmeans::TGL_kmeans(as.matrix(atac_mc$mat), k)
-    atac_mc$peaks[,glue::glue('cluster_k={k}')] = atac_peak_km$cluster
+gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL, ...)) {
+    atac_peak_km = tglkmeans::TGL_kmeans(as.matrix(atac_mc$mat), k, ...)
+    # atac_mc$peaks[,glue::glue('cluster_k_{k}')] = atac_peak_km$cluster
+    atac_mc$peaks <- atac_mc$peaks %>% mutate(clust = atac_mc$peaks)
     return(atac_mc)
 }
-
-##### Why do we need this function? Manifold structure across metacells should come from RNA
-##### -YSh
 
 #' Cluster metacells based on atac profiles
 #'
@@ -21,17 +21,20 @@ gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL) {
 #' @param annot name of the field to use when \code{use_prior_annot} is TRUE.
 #'
 #' @inheritParams gen_atac_peak_clust
+#' @inheritDotParams tglkmeans::TGL_kmeans
+#' @return a named numeric vector specifying the cluster for each metacell
 #' @export
-gen_atac_mc_clust <- function(atac_mc, k=NULL, peak_set = NULL, use_prior_annot = TRUE, annot = "cell_type") {
+gen_atac_mc_clust <- function(atac_mc, k=NULL, peak_set = NULL, use_prior_annot = TRUE, annot = "cell_type", ...)) {
     if (!use_prior_annot) {
         if (!is.null(k)) {
-            atac_mc_km = tglkmeans::TGL_kmeans(as.matrix(atac_mc$mat), k)
+            atac_mc_km = tglkmeans::TGL_kmeans(as.matrix(atac_mc$mat), k, ...))
             return(setNames(atac_mc_km$cluster, 1:length(atac_mc_km$cluster)))
         }
-        else {stop('Must choose k if clustering with use_prior_annot == FALSE')}
+        else {cli_abort('Must choose k if clustering with use_prior_annot == FALSE')}
     }
     else {
-        res = match(unlist(atac_mc$metadata[,annot]), sort(unique(unlist(atac_mc$metadata[,annot]))))
-        return(setNames(res, 1:length(res)))
+        assert_that(!is.null(atac_mc$metadata), any(grepl(colnames(atac_mc$metadata) == annot)), 
+                    msg = 'There is no metadata or the field "{annot}" does not exist in it.')
+        return(deframe(atac_mc$metadata %>% select(metacell, !!annot)))
     }
 }

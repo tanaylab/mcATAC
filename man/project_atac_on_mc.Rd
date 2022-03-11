@@ -6,31 +6,42 @@
 \alias{project_atac_on_mc_from_h5ad}
 \title{Given metacells (usually from RNA data), project ATAC counts to get a McATAC object}
 \usage{
-project_atac_on_mc(
-  atac,
-  mc = NULL,
-  cell_to_metacell = NULL,
-  MIN_INT_FRAC = 0.1
-)
+project_atac_on_mc(atac, cell_to_metacell, metadata = NULL)
 
-project_atac_on_mc_from_metacell1(atac, mc = NULL, cell_to_metacell = NULL)
+project_atac_on_mc_from_metacell1(atac, scdb, mc_id, metadata = NULL)
 
-project_atac_on_mc_from_h5ad(atac, h5ad_file)
+project_atac_on_mc_from_h5ad(atac, h5ad_file, metadata = NULL)
 }
 \arguments{
 \item{atac}{an ScATAC object}
 
-\item{mc}{a metacell1 \code{mc} object}
-
 \item{cell_to_metacell}{a data frame with a column named "cell_id" with cell id and}
+
+\item{metadata}{per-metacell metadata. A data frame with a column called 'metacell' and additional metacell annotations.}
+
+\item{scdb}{a metacell1 \code{scdb} path}
+
+\item{mc_id}{id of the metacell object within \code{scdb}}
+
+\item{h5ad_file}{name of an h5ad file which is the output of 'metacells' python package.}
+
+\item{mc}{a metacell1 \code{mc} object}
 
 \item{MIN_INT_FRAC}{(optional) minimal expected fraction of intersection of barcodes (cell names) in ScATAC and mc/cell_to_metacell
 another column named "metacell" with the metacell the cell is part of.}
-
-\item{h5ad_file}{name of an h5ad file which is the output of 'metacells' python package.}
+}
+\value{
+an McATAC object
 }
 \description{
 Given cell to metacell association, summarise atac counts to generate a McATAC object.
 \code{project_atac_on_mc_from_metacell1} projects given a metacell1 'mc' object, while \code{project_atac_on_mc_from_h5ad}
 uses the output of the 'metacells' python package (metacell2).
+}
+\examples{
+\dontrun{
+atac_sc <- import_from_10x("pbmc_data")
+atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")
+}
+
 }

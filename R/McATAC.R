@@ -1,6 +1,6 @@
 #' Construct a new McATAC object
 #'
-#' @param mat a numeric matrix where rows are peaks, and columns are metacells. Can be a sparse matrix (ummm,  preferably not! -YS).
+#' @param mat a numeric matrix where rows are peaks and columns are metacells. Can be a sparse matrix.
 #' @param peaks misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).
 #' @param metadata data frame with a column called 'metacell' and additional metacell annotations.
 #' @description McATAC is a shallow object holding ATAC data over metacells.
@@ -19,17 +19,16 @@ McATAC <- function(mat,
 print.McATAC <- function(x, ...) {
     cli::cli_text("An McATAC object with {.val {ncol(x$mat)}} metacells {.val {nrow(x$mat)}} ATAC peaks.")
     cli::cli_text("Slots include:")
-    cli::cli_dl()
-    cli::cli_li(c("{.code $mat}" = "a numeric matrix where rows are peaks, and columns are metacells. Can be a sparse matrix."))
-    cli::cli_li(c("{.code $peaks}" = "a misha intervals set with the peak definitions."))
+    cli_ul(c("{.code $mat}: a numeric matrix where rows are peaks and columns are metacells. Can be a sparse matrix."))
+    cli_ul(c("{.code $peaks}: a misha intervals set with the peak definitions."))
     if (!is.null(x$metadata)) {
-        cli::cli_li(c("{.code $metadata}" = "a tibble with a column called 'metacell' and additional metacell annotations."))
+        cli_ul(c("{.code $metadata}: a tibble with a column called 'metacell' and additional metacell annotations."))
     }
 }
 
 #' Construct a new ScATAC object
 #'
-#' @param mat a numeric matrix where rows are peaks, and columns are cells. Can be a sparse matrix.
+#' @param mat a numeric matrix where rows are peaks and columns are cells. Can be a sparse matrix.
 #' @param metadata data frame with a column called 'cell_id' and additional per-cell annotations.
 #' @description ScATAC is a shallow object holding ATAC data over cells.
 #' Minimally it should include a count matrix of peaks over cells, and \code{PeakIntervals} which hold the coordinates
@@ -48,11 +47,10 @@ ScATAC <- function(mat,
 print.ScATAC <- function(x, ...) {
     cli::cli_text("An ScATAC object with {.val {ncol(x$mat)}} cells {.val {nrow(x$mat)}} ATAC peaks.")
     cli::cli_text("Slots include:")
-    cli::cli_dl()
-    cli::cli_li(c("{.code $mat}" = "a numeric matrix where rows are peaks, and columns are cells. Can be a sparse matrix."))
-    cli::cli_li(c("{.code $peaks}" = "a misha intervals set with the peak definitions."))
+    cli_ul(c("{.code $mat}: a numeric matrix where rows are peaks and columns are cells. Can be a sparse matrix."))
+    cli_ul(c("{.code $peaks}: a misha intervals set with the peak definitions."))
     if (!is.null(x$metadata)) {
-        cli::cli_li(c("{.code $metadata}" = "a tibble with a column called 'cell_id' and additional cell annotations."))
+        cli_ul(c("{.code $metadata}: a tibble with a column called 'cell_id' and additional cell annotations."))
     }
 }
 
@@ -62,8 +60,6 @@ make_atac_object <- function(mat, peaks, metadata, metadata_id_field, class_name
         cli_abort("Number of peaks is not equal to the matrix rows.")
     }
     rownames(mat) <- peak_names(peaks)
-
-    validate_atac_object(mat, peaks, metadata, metadata_id_field)
 
     if (!is.null(metadata)) {
         metadata <- as_tibble(metadata)
@@ -76,19 +72,33 @@ make_atac_object <- function(mat, peaks, metadata, metadata_id_field, class_name
     )
 
     class(obj) <- class_name
+    validate_atac_object(obj)
     return(obj)
 }
 
-
 #' Validate a McATAC or ScATAC object
 #'
-#' @param metadata_id_field id field of the metadata. Should be "metacell" for McATAC object and "cell_id" for ScATAC object
+#' @param obj an McATAC or ScATAC object
 #'
-#' @inheritParams McATAC
 #' @noRd
-validate_atac_object <- function(mat, peaks, metadata, metadata_id_field) {
-    if (!is.matrix(mat) && !methods::is(mat, "sparseMatrix")) {
+validate_atac_object <- function(obj) {
+    assert_that(class(obj) %in% c("McATAC", "ScATAC"))
+    if (class(obj) == "McATAC") {
+        validate_atac_object_params(obj$mat, obj$peaks, obj$metadata, "metacell")
+    } else {
+        validate_atac_object_params(obj$mat, obj$peaks, obj$metadata, "cell_id")
+    }
+}
+
+
+
+validate_atac_object_params <- function(mat, peaks, metadata, metadata_id_field) {
+    if (!is.matrix(mat) && !is_sparse_matrix(mat)) {
         cli_abort("{.field mat} shuold be a matrix or a sparse matrix")
+    }
+
+    if (nrow(mat) != nrow(peaks)) {
+        cli_abort("Number of peaks is not equal to the matrix rows.")
     }
 
     # make sure the matrix rownames are the peak names
