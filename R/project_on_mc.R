@@ -41,7 +41,7 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, min_int_frac = 0.1
 
     # TODO: deal with cell metadata
 
-    mc_atac <- McATAC(mc_mat, atac$peaks, metadata)
+    mc_atac <- McATAC(mc_mat, atac$peaks, atac$genome, metadata)
     cli_alert_success("Created a new McATAC object with {.val {ncol(mc_atac$mat)}} metacells and {.val {nrow(mc_atac$mat)}} ATAC peaks.")
 
     return(mc_atac)

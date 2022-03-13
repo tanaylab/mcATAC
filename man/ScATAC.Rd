@@ -4,14 +4,16 @@
 \alias{ScATAC}
 \title{Construct a new ScATAC object}
 \usage{
-ScATAC(mat, peaks, metadata = NULL)
+ScATAC(mat, peaks, genome, metadata = NULL)
 }
 \arguments{
 \item{mat}{a numeric matrix where rows are peaks and columns are cells. Can be a sparse matrix.}
 
 \item{peaks}{misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).}
 
-\item{metadata}{data frame with a column called 'cell_id' and additional per-cell annotations.}
+\item{genome}{genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"}
+
+\item{metadata}{data frame with a column called 'cell_id' and additional per-cell annotations, or the name of a delimited file which contains such annotations.}
 }
 \description{
 ScATAC is a shallow object holding ATAC data over cells.

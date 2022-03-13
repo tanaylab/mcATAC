@@ -5,6 +5,8 @@
 #' @import ggplot2
 #' @import tgstat
 #' @importFrom Matrix t
+#' @importFrom misha gtrack.create_sparse gintervals.load gintervals.neighbors
+#' @importFrom misha.ext gintervals.neighbors1 gset_genome genome_exists
 #' @importFrom assertthat assert_that are_equal
 #' @importFrom purrr walk map
 #' @importFrom tibble as_tibble enframe deframe rownames_to_column column_to_rownames

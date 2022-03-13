@@ -4,8 +4,8 @@
 #'
 #' @param file name of an h5ad file with ATAC data
 #' @param class is the file storing ScATAC or McATAC. If NULL - the class would be determined by the 'class' field in the 'uns' part
-#' of the h5ad file, if exists, and otherwise the class would be
-#' McATAC.
+#' of the h5ad file, if exists and otherwise the class would be McATAC.
+#' @param genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10". If NULL - the assembly would be determined by the 'genome' field in the 'uns' part of the h5ad file.
 #'
 #' @return an ScATAC/McATAC object
 #'
@@ -17,7 +17,7 @@
 #' }
 #'
 #' @export
-import_from_h5ad <- function(file, class = NULL) {
+import_from_h5ad <- function(file, class = NULL, genome = NULL) {
     check_files_exist(file)
     cli_ul("Reading {.file {file}}")
     adata <- anndata::read_h5ad(file)
@@ -47,11 +47,19 @@ import_from_h5ad <- function(file, class = NULL) {
         }
     }
 
+    if (is.null(genome)) {
+        if (!is.null(adata$uns[["genome"]])) {
+            genome <- adata$uns[["genome"]]
+        } else {
+            cli_abort("h5ad file doesn't have the {.field genome} field at the {.file uns} section. Please provide the genome assembly explicitly using the {.field genome} paramter (e.g. {.code genome = \"mm10\"})")
+        }
+    }
+
     if (class == "McATAC") {
-        res <- McATAC(mat, peaks, metadata)
+        res <- McATAC(mat, peaks, genome, metadata)
         cli_alert_success("Successfully loaded an {.var {class}} object with {.val {ncol(res$mat)}} metacells and {.val {nrow(res$mat)}} ATAC peaks")
     } else {
-        res <- ScATAC(mat, peaks, metadata)
+        res <- ScATAC(mat, peaks, genome, metadata)
         cli_alert_success("Successfully loaded an {.var {class}} object with {.val {ncol(res$mat)}} cells and {.val {nrow(res$mat)}} ATAC peaks")
     }
 
@@ -68,14 +76,15 @@ import_from_h5ad <- function(file, class = NULL) {
 #'
 #' @return an ScATAC object
 #'
+#' @inheritParams ScATAC
 #' @examples
 #' \dontrun{
-#' atac <- import_from_10x("./pbmc_data")
+#' atac <- import_from_10x("./pbmc_data", genome = "hg38")
 #' atac
 #' }
 #'
 #' @export
-import_from_10x <- function(dir = NULL, matrix_fn = file.path(dir, "matrix.mtx"), cells_fn = file.path(dir, "barcodes.tsv"), features_fn = file.path(dir, "features.tsv")) {
+import_from_10x <- function(dir, genome, metadata = NULL, matrix_fn = file.path(dir, "matrix.mtx"), cells_fn = file.path(dir, "barcodes.tsv"), features_fn = file.path(dir, "features.tsv")) {
     if (!file.exists(matrix_fn)) {
         matrix_fn <- glue("{matrix_fn}.gz")
     }
@@ -103,7 +112,7 @@ import_from_10x <- function(dir = NULL, matrix_fn = file.path(dir, "matrix.mtx")
     atac_mat <- mat[atac_peaks$peak_name, ]
     cli_alert_info("{.val {nrow(atac_mat)}} ATAC peaks")
 
-    res <- ScATAC(atac_mat, atac_peaks)
+    res <- ScATAC(atac_mat, atac_peaks, genome = genome, metadata = metadata)
     cli_alert_success("successfully imported to an ScATAC object with {.val {ncol(atac_mat)}} cells and {.val {nrow(atac_mat)}} ATAC peaks")
 
     return(res)

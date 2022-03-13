@@ -36,7 +36,7 @@ export_to_h5ad <- function(object, out_file, ...) {
         X = mat,
         var = peaks,
         obs = metadata,
-        uns = list(class = class(object)[1])
+        uns = list(class = class(object)[1], genome = object$genome)
     )
 
     cli_ul("Writing to file")

@@ -1,7 +1,7 @@
 test_that("import from 10x works", {
-    atac_sc <<- import_from_10x(raw_dir)
+    atac_sc <<- import_from_10x(raw_dir, "hg38")
     expect_equal(class(atac_sc), "ScATAC")
-    expect_true(all(has_name(atac_sc, c("mat", "peaks", "metadata"))))
+    expect_true(all(has_name(atac_sc, c("mat", "peaks", "genome", "metadata"))))
     expect_equal(nrow(atac_sc$mat), 108377)
     expect_equal(ncol(atac_sc$mat), 11909)
     expect_equal(colnames(atac_sc$peaks), c("chrom", "start", "end", "peak_name"))
@@ -14,7 +14,7 @@ test_that("projection works", {
     expect_equal(nrow(atac_mc$mat), 108377)
     expect_equal(ncol(atac_mc$mat), length(unique(cell_to_metacell_pbmc_example$metacell)))
     expect_setequal(colnames(atac_mc$mat), cell_to_metacell_pbmc_example$metacell)
-    expect_true(all(has_name(atac_mc, c("mat", "peaks", "metadata"))))
+    expect_true(all(has_name(atac_mc, c("mat", "peaks", "genome", "metadata"))))
     expect_equal(colnames(atac_mc$peaks), c("chrom", "start", "end", "peak_name"))
     expect_equal(peak_names(atac_mc$peaks), atac_mc$peaks$peak_name)
 })

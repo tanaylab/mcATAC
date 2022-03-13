@@ -37,7 +37,7 @@ if (!dir.exists("pbmc_data")){
 ## Import ATAC dataset
 
 ```{r import}
-atac_sc <- import_from_10x("pbmc_data")
+atac_sc <- import_from_10x("pbmc_data", genome = "hg38")
 atac_sc
 ```
 

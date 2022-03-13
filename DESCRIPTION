@@ -15,7 +15,7 @@ Imports:
     scales,
     glue,
     misha,
-    misha.ext,
+    misha.ext (>= 0.0.3),
     purrr,
     rlang,
     tgstat,
