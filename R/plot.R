@@ -110,8 +110,8 @@ plot_atac_atac_cor <- function(mc_atac, sp_f = TRUE) {
     }
     cor_mat <- tgs_cor(mc_atac$mat, spearman = sp_f, pairwise.complete.obs = TRUE)
     p <- pheatmap::pheatmap(cor_mat[order(clust_vec), order(clust_vec)],
-        cluster_rows = Fq, cluster_cols = F,
-        show_rownames = F, show_colnames = F,
+        cluster_rows = FALSE, cluster_cols = FALSE,
+        show_rownames = FALSE, show_colnames = FALSE,
         annotation_col = col_annot, annotation_colors = ann_colors
     )
     return(p)
