@@ -2,27 +2,68 @@
 % Please edit documentation in R/cluster.R
 \name{gen_atac_mc_clust}
 \alias{gen_atac_mc_clust}
-\title{Cluster metacells based on atac profiles}
+\title{Cluster metacells based on atac profiles using the k-means algorithm}
 \usage{
 gen_atac_mc_clust(
   atac_mc,
+  use_prior_annot = TRUE,
   k = NULL,
   peak_set = NULL,
-  use_prior_annot = TRUE,
-  annot = "cell_type"
+  annot = "cell_type",
+  ...
 )
 }
 \arguments{
-\item{atac_mc}{a McATAC object}
+\item{atac_mc}{\itemize{
+\item an McATAC object
+}}
 
-\item{k}{number of clusters}
+\item{use_prior_annot}{(optional) when TRUE - use the metacell annotation to generate metacell clusters. Clusters would be generated based on a categorical field \code{annot} from the \code{metadata} slot in the McATAC object.}
 
-\item{peak_set}{a PeakIntervals object (or a misha intervals set). if NULL - the peaks from \code{atac_mc} would be used.}
+\item{k}{\itemize{
+\item (optional, when \code{use_prior_annot == F}) number of clusters to generate
+}}
 
-\item{use_prior_annot}{when TRUE - use the metacell annotation to generate metacell clusters. Clusters would be generated based on a categorical field \code{annot} from the \code{metadata} slot in the McATAC object.}
+\item{peak_set}{\itemize{
+\item a subset of peaks of \code{atac_mc$peaks} on which to cluster
+}}
 
-\item{annot}{name of the field to use when \code{use_prior_annot} is TRUE.}
+\item{annot}{\itemize{
+\item name of the field to use when \code{use_prior_annot == T}.
+}}
+
+\item{...}{
+  Arguments passed on to \code{\link[tglkmeans:TGL_kmeans]{tglkmeans::TGL_kmeans}}
+  \describe{
+    \item{\code{df}}{data frame. Each row is a single observation and each column is a dimension.
+the first column can contain id for each observation (if id_column is TRUE).}
+    \item{\code{metric}}{distance metric for kmeans++ seeding. can be 'euclid', 'pearson' or 'spearman'}
+    \item{\code{max_iter}}{maximal number of iterations}
+    \item{\code{min_delta}}{minimal change in assignments (fraction out of all observations) to continue iterating}
+    \item{\code{verbose}}{display algorithm messages}
+    \item{\code{keep_log}}{keep algorithm messages in 'log' field}
+    \item{\code{id_column}}{\code{df}'s first column contains the observation id}
+    \item{\code{reorder_func}}{function to reorder the clusters. operates on each center and orders by the result. e.g. \code{reorder_func = mean} would calculate the mean of each center and then would reorder the clusters accordingly. If \code{reorder_func = hclust} the centers would be ordered by hclust of the euclidian distance of the correlation matrix, i.e. \code{hclust(dist(cor(t(centers))))}
+if NULL, no reordering would be done.}
+    \item{\code{hclust_intra_clusters}}{run hierarchical clustering within each cluster and return an ordering of the observations.}
+    \item{\code{seed}}{seed for the c++ random number generator}
+    \item{\code{parallel}}{cluster every cluster parallely (if hclust_intra_clusters is true)}
+  }}
+}
+\value{
+a named numeric vector specifying the cluster for each metacell
 }
 \description{
-Cluster metacells based on atac profiles
+Cluster metacells based on atac profiles using the k-means algorithm
+}
+\examples{
+\dontrun{
+## Use "default clustering" - the existing annotations
+mc_clusters <- gen_atac_mc_clust(my_atac_mc, use_prior_annot = T)
+
+## Identify peaks of interest, namely peaks neighboring a set of feature genes, and use only them for clustering
+nei_peaks_feat_genes <- gintervals.neighbors(my_atac_mc$peaks, tss[tss$name \%in\% feature_genes, ], maxdist = 5e+5)
+peaks_of_interest <- nei_peaks_feat_genes[, c("chrom", "start", "end")]
+mc_clusters <- gen_atac_mc_clust(my_atac_mc, k = 16, peak_set = peaks_of_interest, use_prior_annot = F)
+}
 }

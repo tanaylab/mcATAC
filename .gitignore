@@ -8,3 +8,5 @@ README.html
 docs
 inst/doc
 pbmc_data/
+tests_notebook.ipynb
+.ipynb_checkpoints

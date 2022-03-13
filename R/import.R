@@ -103,7 +103,7 @@ import_from_10x <- function(dir, genome, metadata = NULL, matrix_fn = file.path(
     cli_ul("Importing features")
     features <- tgutil::fread(features_fn, col.names = c("name", "name2", "type", "chrom", "start", "end")) %>%
         as_tibble()
-    stopifnot(all(features$name == rownames(mat)))
+    cli_abortifnot(all(features$name == rownames(mat)))
 
     atac_peaks <- features %>%
         filter(type == "Peaks") %>%

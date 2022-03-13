@@ -7,7 +7,7 @@
 export_atac_clust_ucsc(
   mc_atac,
   track_prefix,
-  output_dir = ".",
+  output_dir = getwd(),
   clust_vec = NULL,
   normalization = "none"
 )
@@ -19,8 +19,7 @@ export_atac_clust_ucsc(
 
 \item{output_dir}{(optional) name of the directory to write files to}
 
-\item{clust_vec}{(optional) a vector of length #metacells representing an annotation/clustering
-(can be output of \code{gen_atac_mc_clust})}
+\item{clust_vec}{(optional) a vector of length #metacells representing an annotation/clustering (can be output of \code{gen_atac_mc_clust})}
 
 \item{normalization}{(optional) normalization method, either 'none', 'lfcom' (log2 fold-change over median), 'zs' (Z-scores)}
 }
