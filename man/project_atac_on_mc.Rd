@@ -9,8 +9,8 @@
 project_atac_on_mc(
   atac,
   cell_to_metacell = NULL,
-  min_int_frac = 0.1,
-  metadata = NULL
+  metadata = NULL,
+  min_int_frac = 0.5
 )
 
 project_atac_on_mc_from_metacell1(atac, scdb, mc_id, metadata = NULL)
@@ -23,9 +23,9 @@ project_atac_on_mc_from_h5ad(atac, h5ad_file, metadata = NULL)
 \item{cell_to_metacell}{a data frame with a column named "cell_id" with cell id and another column named "metacell" with the metacell the cell is
 part of.}
 
-\item{min_int_frac}{(optional) minimal expected fraction of intersection of barcodes (cell names) in ScATAC}
-
 \item{metadata}{per-metacell metadata. A data frame with a column called 'metacell' and additional metacell annotations.}
+
+\item{min_int_frac}{(optional) minimal expected fraction of intersection of barcodes (cell names) in ScATAC}
 
 \item{scdb}{a metacell1 \code{scdb} path}
 

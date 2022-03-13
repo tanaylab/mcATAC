@@ -8,8 +8,8 @@
 #' @param atac an ScATAC object
 #' @param cell_to_metacell a data frame with a column named "cell_id" with cell id and another column named "metacell" with the metacell the cell is
 #' part of.
-#' @param min_int_frac (optional) minimal expected fraction of intersection of barcodes (cell names) in ScATAC
 #' @param metadata per-metacell metadata. A data frame with a column called 'metacell' and additional metacell annotations.
+#' @param min_int_frac (optional) minimal expected fraction of intersection of barcodes (cell names) in ScATAC
 #'
 #' @return an McATAC object
 #'
@@ -20,7 +20,7 @@
 #' }
 #'
 #' @export
-project_atac_on_mc <- function(atac, cell_to_metacell = NULL, min_int_frac = 0.1, metadata = NULL) {
+project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5) {
     cell_to_metacell <- deframe(cell_to_metacell)
 
     assert_that(all(names(cell_to_metacell) %in% colnames(atac$mat)))
@@ -30,7 +30,7 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, min_int_frac = 0.1
     if (n_removed_cells > 0) {
         cli_alert_info("{.val {n_removed_cells}} cells (out of {.val {ncol(atac$mat)}}) do not have a metacell and have been removed.")
         if ((ncol(atac$mat) - n_removed_cells) <= round(min_int_frac * ncol(atac$mat))) {
-            cli_alert_warning("Intersect of ATAC mat colnames and mc names is less than {.field {scales::percent(min_int_frac)}}. Make sure you are projecting the right objects.")
+            cli_abort("Intersect of ATAC mat colnames and mc names is less than {.field {scales::percent(min_int_frac)}}. Make sure you are projecting the right objects. To override - set {.code min_int_frac=0}")
         }
     }
 
@@ -71,5 +71,5 @@ project_atac_on_mc_from_metacell1 <- function(atac, scdb, mc_id, metadata = NULL
 #' @export
 #' @rdname project_atac_on_mc
 project_atac_on_mc_from_h5ad <- function(atac, h5ad_file, metadata = NULL) {
-
+    # TODO
 }
