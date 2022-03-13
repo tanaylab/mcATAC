@@ -25,7 +25,8 @@ Imports:
     tidyr,
     Matrix,
     methods,
-    assertthat
+    assertthat,
+    withr
 Suggests: 
     testthat (>= 3.0.0),
     metacell,

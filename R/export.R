@@ -64,7 +64,7 @@ export_atac_clust_ucsc <- function(mc_atac, track_prefix, output_dir = getwd(), 
         atac_vec <- res_lst$atac_mc_mat_clust[, cl]
         misha.ext::fwrite_ucsc(
             intervals = dplyr::mutate(mc_atac$peaks, "score" = atac_vec),
-            file = paste0(output_dir, "/", track_prefix, "_", gsub("\\/", "_", cl), ".ucsc"),
+            file = file.path(output_dir, paste0(track_prefix, "_", gsub("\\/", "_", cl), ".ucsc")),
             name = paste0(track_prefix, "_", cl),
             color = res_lst$col_key[[as.character(cl)]],
             type = "bedGraph",

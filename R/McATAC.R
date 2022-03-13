@@ -23,6 +23,7 @@ print.McATAC <- function(x, ...) {
     cli::cli_text("Slots include:")
     cli_ul(c("{.code $mat}: a numeric matrix where rows are peaks and columns are metacells. Can be a sparse matrix."))
     cli_ul(c("{.code $peaks}: a misha intervals set with the peak definitions."))
+    cli_ul(c("{.code $genome}: genome assembly of the peaks"))
     if (!is.null(x$metadata)) {
         cli_ul(c("{.code $metadata}: a tibble with a column called 'metacell' and additional metacell annotations."))
     }
@@ -59,11 +60,14 @@ print.ScATAC <- function(x, ...) {
 }
 
 make_atac_object <- function(mat, peaks, genome, metadata, metadata_id_field, class_name) {
-    peaks <- PeakIntervals(peaks)
     if (nrow(mat) != nrow(peaks)) {
         cli_abort("Number of peaks is not equal to the matrix rows.")
     }
     rownames(mat) <- peak_names(peaks)
+
+    peaks <- PeakIntervals(peaks, genome)
+    mat <- mat[peak_names(peaks), ] # remove from matrix peaks that were filtered
+
 
     if (!is.null(metadata)) {
         if (is.character(metadata)) {

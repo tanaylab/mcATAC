@@ -8,11 +8,39 @@
 #' them occasionally (e.g. when creating h5ad files)
 #'
 #' @param intervals misha intervals (a data frame which has the following columns: 'chrom', 'start' and 'end')
+#' @param genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10".
 #' @return a PeakIntervals object
 #'
 #' @export
-PeakIntervals <- function(intervals) {
+PeakIntervals <- function(intervals, genome = NULL) {
     validate_peaks(intervals)
+
+    if (!is.null(genome)) {
+        withr::defer(gsetroot(GROOT))
+        gset_genome(genome)
+        bad_intervals <- intervals %>%
+            filter(chrom %!in% gintervals.all()$chrom)
+        if (nrow(bad_intervals) > 0) {
+            bad_chroms <- paste(unique(bad_intervals$chrom), collapse = ", ")
+            intervals <- intervals %>%
+                anti_join(bad_intervals, by = c("chrom", "start", "end"))
+            cli_alert_warning("removed {.field {nrow(bad_intervals)}} peak{?s} from the following chromosome(s) which are missing from {.field {genome}}: {.file {bad_chroms}}")
+        }
+        intervals$end[1] <- gintervals.all()$end[1] + 100
+        intervals$end[2] <- gintervals.all()$end[1] + 1e9
+        out_intervals <- intervals %>%
+            anti_join(
+                intervals %>%
+                    as.data.frame() %>%
+                    gintervals.force_range(),
+                by = c("chrom", "start", "end")
+            )
+        if (nrow(out_intervals) > 0) {
+            intervals <- intervals %>%
+                anti_join(out_intervals, by = c("chrom", "start", "end"))
+            cli_alert_warning("removed {.field {nrow(out_intervals)}} peak{?s} which {?was/were} outside of {.field {genome}} genome.")
+        }
+    }
 
     class(intervals) <- c("PeakIntervals", class(intervals))
     return(intervals)
