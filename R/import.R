@@ -11,7 +11,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' atac_sc <- import_from_10x("pbmc_data")
+#' atac_sc <- import_from_10x("pbmc_data", genome = "hg38")
 #' export_to_h5ad(atac_sc, "pbmc_data/atac_sc.h5ad")
 #' atac_sc_loaded <- import_from_h5ad("pbmc_data/atac_sc.h5ad")
 #' }

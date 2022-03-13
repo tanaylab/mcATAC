@@ -8,7 +8,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' atac_sc <- import_from_10x("pbmc_data")
+#' atac_sc <- import_from_10x("pbmc_data", genome = "hg38")
 #' export_to_h5ad(atac_sc, "pbmc_data/atac_sc.h5ad")
 #' }
 #'
@@ -58,7 +58,6 @@ export_to_h5ad <- function(object, out_file, ...) {
 #' @param normalization (optional) normalization method, either 'none', 'lfcom' (log2 fold-change over median), 'zs' (Z-scores)
 #'
 #' @export
-
 export_atac_clust_ucsc <- function(mc_atac, track_prefix, output_dir = getwd(), clust_vec = NULL, normalization = "none") {
     res_lst <- prepare_clusters(mc_atac, clust_vec, normalization)
     purrr::walk(res_lst$clusts, function(cl) {
@@ -123,8 +122,8 @@ export_atac_clust_misha <- function(mc_atac, track_prefix, description = NULL, c
 #' @param track_prefix prefix for track name
 #' @param description (optional) description for track (can be a glue-formatted expression)
 #' @param override (optional) whether to override an existing track; warning: may slow runtime substantially (due to reloading misha db)
-
 #' @return trknm - the name of the generated track in the misha database
+#' @export
 write_cluster_misha_track <- function(cl, atac_mc_mat_clust, track_prefix, description = NULL, override = FALSE) {
     atac_vec <- atac_mc_mat_clust[, cl]
     cl <- gsub("[\\/\\.-]", "_", cl)
@@ -157,11 +156,13 @@ write_cluster_misha_track <- function(cl, atac_mc_mat_clust, track_prefix, descr
 #' @param normalization (optional) normalization method, either 'none', 'lfcom' (log2 fold-change over median), 'zs' (Z-scores)
 #' @param eps_q if \code{normalization == 'lfcom'}, use quantile \code{eps_q} (default = 0.05) for regularizing log expression
 #' @return a list of:
-#' @return atac_mc_mat_clust - ATAC signal per peak averaged over clusters
-#' @return clusts - names of clusters
-#' @return col_key - mapping of cluster names to colors
+#' \itemize{
+#' \item{atac_mc_mat_clust: }{ATAC signal per peak averaged over clusters}
+#' \item{clusts: }{names of clusters}
+#' \item{col_key: }{mapping of cluster names to colors}
+#' }
 #'
-
+#' @export
 prepare_clusters <- function(mc_atac, clust_vec = NULL, normalization = "none", eps_q = 0.05) {
     if (is.null(clust_vec)) {
         if (!all(has_name(mc_atac$metadata, c("cell_type", "cluster")))) {

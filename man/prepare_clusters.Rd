@@ -22,12 +22,11 @@ prepare_clusters(
 }
 \value{
 a list of:
-
-atac_mc_mat_clust - ATAC signal per peak averaged over clusters
-
-clusts - names of clusters
-
-col_key - mapping of cluster names to colors
+\itemize{
+\item{atac_mc_mat_clust: }{ATAC signal per peak averaged over clusters}
+\item{clusts: }{names of clusters}
+\item{col_key: }{mapping of cluster names to colors}
+}
 }
 \description{
 Prepare peak clusters for export (backend function)

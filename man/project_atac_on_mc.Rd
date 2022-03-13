@@ -43,7 +43,7 @@ uses the output of the 'metacells' python package (metacell2).
 }
 \examples{
 \dontrun{
-atac_sc <- import_from_10x("pbmc_data")
+atac_sc <- import_from_10x("pbmc_data", genome = "hg38")
 atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")
 }
 

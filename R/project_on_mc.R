@@ -15,7 +15,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' atac_sc <- import_from_10x("pbmc_data")
+#' atac_sc <- import_from_10x("pbmc_data", genome = "hg38")
 #' atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")
 #' }
 #'
@@ -71,5 +71,19 @@ project_atac_on_mc_from_metacell1 <- function(atac, scdb, mc_id, metadata = NULL
 #' @export
 #' @rdname project_atac_on_mc
 project_atac_on_mc_from_h5ad <- function(atac, h5ad_file, metadata = NULL) {
-    # TODO
+    cli_alert_info("Reading {.file {h5ad_file}}")
+    adata <- anndata::read_h5ad(h5ad_file)
+    if (!("metacell" %in% colnames(adata$obs))) {
+        cli_abort("h5ad object doesn't have a {.field metacell} field.")
+    }
+
+    cell_to_metacell <- adata$obs %>%
+        rownames_to_column("cell_id") %>%
+        select(cell_id, metacell) %>%
+        as_tibble()
+
+    # TODO: deal with cell metadata
+    # TODO: test
+
+    return(project_atac_on_mc(atac, cell_to_metacell))
 }
