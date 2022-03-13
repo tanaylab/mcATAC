@@ -4,14 +4,15 @@
 \alias{import_from_h5ad}
 \title{Create an ScATAC,McATAC object from an h5ad file}
 \usage{
-import_from_h5ad(file, class = NULL)
+import_from_h5ad(file, class = NULL, genome = NULL)
 }
 \arguments{
 \item{file}{name of an h5ad file with ATAC data}
 
 \item{class}{is the file storing ScATAC or McATAC. If NULL - the class would be determined by the 'class' field in the 'uns' part
-of the h5ad file, if exists, and otherwise the class would be
-McATAC.}
+of the h5ad file, if exists and otherwise the class would be McATAC.}
+
+\item{genome}{genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10". If NULL - the assembly would be determined by the 'genome' field in the 'uns' part of the h5ad file.}
 }
 \value{
 an ScATAC/McATAC object

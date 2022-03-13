@@ -5,7 +5,9 @@
 \title{Create an ScATAC object from 10x directory}
 \usage{
 import_from_10x(
-  dir = NULL,
+  dir,
+  genome,
+  metadata = NULL,
   matrix_fn = file.path(dir, "matrix.mtx"),
   cells_fn = file.path(dir, "barcodes.tsv"),
   features_fn = file.path(dir, "features.tsv")
@@ -14,6 +16,10 @@ import_from_10x(
 \arguments{
 \item{dir}{10x directory. Should have the following files: 'matrix.mtx', 'barcodes.tsv' and 'features.tsv'.
 See 'Cell Ranger Arc' for more details: https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/overview/welcome}
+
+\item{genome}{genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"}
+
+\item{metadata}{data frame with a column called 'cell_id' and additional per-cell annotations, or the name of a delimited file which contains such annotations.}
 
 \item{matrix_fn}{if \code{dir} is missing, the filename of the matrix to import ("matrix.mtx" or "matrix.mtx.gz")}
 
@@ -29,7 +35,7 @@ Create an ScATAC object from 10x directory
 }
 \examples{
 \dontrun{
-atac <- import_from_10x("./pbmc_data")
+atac <- import_from_10x("./pbmc_data", genome = "hg38")
 atac
 }
 
