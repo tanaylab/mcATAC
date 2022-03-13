@@ -1,5 +1,5 @@
 test_that("import from 10x works", {
-    atac_sc <<- import_from_10x(raw_dir, "hg38")
+    atac_sc <- import_from_10x(raw_dir, "hg38")
     expect_equal(class(atac_sc), "ScATAC")
     expect_true(all(has_name(atac_sc, c("mat", "peaks", "genome", "metadata"))))
     expect_equal(nrow(atac_sc$mat), 108377)

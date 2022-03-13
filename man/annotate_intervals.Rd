@@ -2,14 +2,7 @@
 % Please edit documentation in R/annotate.R
 \name{annotate_intervals}
 \alias{annotate_intervals}
-\title{Annotate an intervals set
-ATAC peaks are classified into either 'promoter', 'intronic', 'exonic', 'ig_proximal' (intergenic-proximal), 'ig_distal' (intergenic-distal) or 'desert'.
-Promoter peaks are those less than \code{min_proximal} away from a TSS.
-Intronic peaks are within gene bodies, but not in an exon.
-Exonic peaks overlap exons.
-Intergenic-proximal peaks are less than \code{max_proximal} away from a TSS, but not within a gene body
-Intergenic-distal peaks are more than \code{min_distal} away from some TSS, and less than \code{max-distal} from any TSS, and not within a gene body.
-Desert peaks are at least \code{max_distal} from any known TSS (as defined by the \code{tss} interval set).}
+\title{Annotate an intervals set}
 \usage{
 annotate_intervals(
   intervals,
@@ -37,10 +30,9 @@ annotate_intervals(
 \item{exonic_peak_dist}{a parameter that allows proximity (without overlap) of peaks to exons that still classifies them as exonic peaks, as active transcription usually confers accessibility in the vicinity of exons, and this might confound a possible assignment of regulatory activity to an exon.}
 }
 \value{
-intervals - the input intervals set with an added field \code{peak_annot}
+intervals - the input intervals set with an added field called \code{peak_annot}
 }
 \description{
-Annotate an intervals set
 ATAC peaks are classified into either 'promoter', 'intronic', 'exonic', 'ig_proximal' (intergenic-proximal), 'ig_distal' (intergenic-distal) or 'desert'.
 Promoter peaks are those less than \code{min_proximal} away from a TSS.
 Intronic peaks are within gene bodies, but not in an exon.
