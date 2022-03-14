@@ -4,6 +4,7 @@
 #' @import dplyr
 #' @import ggplot2
 #' @import tgstat
+#' @import misha
 #' @importFrom Matrix t
 #' @importClassesFrom Matrix sparseMatrix
 #' @importFrom misha gtrack.create_sparse gintervals.load gintervals.neighbors
