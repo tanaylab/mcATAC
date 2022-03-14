@@ -15,12 +15,19 @@ fs::dir_create(raw_dir)
 system(glue("cp -rf /net/mraid14/export/tgdata/users/aviezerl/src/mcATAC/pbmc_data/* {raw_dir}/"))
 
 data(cell_to_metacell_pbmc_example)
-atac_sc <- import_from_10x(raw_dir, "hg38")
-atac_mc <- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example)
+atac_sc <<- import_from_10x(raw_dir, "hg38")
+atac_mc <<- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example)
+
+# Make atac_sc and atac_mc const in order to test them independetly
+lockBinding("atac_sc", globalenv())
+lockBinding("atac_mc", globalenv())
+
 
 withr::defer(
     {
         unlink(raw_dir)
+        unlockBinding("atac_sc", globalenv())
+        unlockBinding("atac_mc", globalenv())
     },
     teardown_env()
 )

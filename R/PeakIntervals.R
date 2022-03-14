@@ -26,8 +26,7 @@ PeakIntervals <- function(intervals, genome = NULL) {
                 anti_join(bad_intervals, by = c("chrom", "start", "end"))
             cli_alert_warning("removed {.field {nrow(bad_intervals)}} peak{?s} from the following chromosome(s) which are missing from {.field {genome}}: {.file {bad_chroms}}")
         }
-        intervals$end[1] <- gintervals.all()$end[1] + 100
-        intervals$end[2] <- gintervals.all()$end[1] + 1e9
+
         out_intervals <- intervals %>%
             anti_join(
                 intervals %>%
