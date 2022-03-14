@@ -22,13 +22,13 @@
     <loc>/index.html</loc>
   </url>
   <url>
-    <loc>/reference/McATAC.html</loc>
+    <loc>/reference/ATAC-class.html</loc>
+  </url>
+  <url>
+    <loc>/reference/ATAC.html</loc>
   </url>
   <url>
     <loc>/reference/PeakIntervals.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ScATAC.html</loc>
   </url>
   <url>
     <loc>/reference/annotate_intervals.html</loc>
@@ -67,6 +67,12 @@
     <loc>/reference/index.html</loc>
   </url>
   <url>
+    <loc>/reference/initialize-McATAC-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/initialize-ScATAC-method.html</loc>
+  </url>
+  <url>
     <loc>/reference/mcATAC-package.html</loc>
   </url>
   <url>
@@ -85,6 +91,15 @@
     <loc>/reference/plot_atac_rna_cor.html</loc>
   </url>
   <url>
+    <loc>/reference/prepare_clusters.html</loc>
+  </url>
+  <url>
     <loc>/reference/project_atac_on_mc.html</loc>
+  </url>
+  <url>
+    <loc>/reference/subset_peaks.html</loc>
+  </url>
+  <url>
+    <loc>/reference/write_cluster_misha_track.html</loc>
   </url>
 </urlset>

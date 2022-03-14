@@ -57,7 +57,12 @@ uses the output of the 'metacells' python package (metacell2).</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">project_atac_on_mc</span><span class="op">(</span><span class="va">atac</span>, <span class="va">cell_to_metacell</span>, metadata <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">project_atac_on_mc</span><span class="op">(</span>
+  <span class="va">atac</span>,
+  cell_to_metacell <span class="op">=</span> <span class="cn">NULL</span>,
+  metadata <span class="op">=</span> <span class="cn">NULL</span>,
+  min_int_frac <span class="op">=</span> <span class="fl">0.5</span>
+<span class="op">)</span>
 
 <span class="fu">project_atac_on_mc_from_metacell1</span><span class="op">(</span><span class="va">atac</span>, <span class="va">scdb</span>, <span class="va">mc_id</span>, metadata <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
@@ -69,10 +74,12 @@ uses the output of the 'metacells' python package (metacell2).</p>
     <dl><dt>atac</dt>
 <dd><p>an ScATAC object</p></dd>
 <dt>cell_to_metacell</dt>
-<dd><p>a data frame with a column named "cell_id" with cell id and
-another column named "metacell" with the metacell the cell is part of.</p></dd>
+<dd><p>a data frame with a column named "cell_id" with cell id and another column named "metacell" with the metacell the cell is
+part of.</p></dd>
 <dt>metadata</dt>
 <dd><p>per-metacell metadata. A data frame with a column called 'metacell' and additional metacell annotations.</p></dd>
+<dt>min_int_frac</dt>
+<dd><p>(optional) minimal expected fraction of intersection of barcodes (cell names) in ScATAC</p></dd>
 <dt>scdb</dt>
 <dd><p>a metacell1 <code>scdb</code> path</p></dd>
 <dt>mc_id</dt>
@@ -88,7 +95,7 @@ another column named "metacell" with the metacell the cell is part of.</p></dd>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="import_from_10x.html">import_from_10x</a></span><span class="op">(</span><span class="st">"pbmc_data"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="import_from_10x.html">import_from_10x</a></span><span class="op">(</span><span class="st">"pbmc_data"</span>, genome <span class="op">=</span> <span class="st">"hg38"</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu">project_atac_on_mc_from_metacell1</span><span class="op">(</span><span class="va">atac_sc</span>, <span class="st">"pbmc_data/scdb"</span>, <span class="st">"rna"</span><span class="op">)</span></span>
 <span class="r-in"><span class="op">}</span></span>
 <span class="r-in"></span>

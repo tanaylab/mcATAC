@@ -51,15 +51,29 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_atac_atac_cor</span><span class="op">(</span><span class="va">mc_atac</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_atac_atac_cor</span><span class="op">(</span><span class="va">mc_atac</span>, sp_f <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>mc_atac</dt>
 <dd><p>McATAC object</p></dd>
+<dt>sp_f</dt>
+<dd><p>whether to use Spearman correlation (default) or Pearson</p></dd>
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>p a pheatmap of ATAC metacell correlations</p>
+    </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in"><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu">plot_atac_atac_cor</span><span class="op">(</span><span class="va">my_atac_mc</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu">plot_atac_atac_cor</span><span class="op">(</span><span class="va">my_atac_mc</span>, sp_f <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span class="r-in"><span class="op">}</span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

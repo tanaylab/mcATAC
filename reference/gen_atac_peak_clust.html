@@ -51,7 +51,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">gen_atac_peak_clust</span><span class="op">(</span><span class="va">atac_mc</span>, <span class="va">k</span>, peak_set <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">gen_atac_peak_clust</span><span class="op">(</span><span class="va">atac_mc</span>, <span class="va">k</span>, peak_set <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -61,9 +61,60 @@
 <dt>k</dt>
 <dd><p>number of clusters</p></dd>
 <dt>peak_set</dt>
-<dd><p>a PeakInervals object (or a misha intervals set). if NULL - he peaks from <code>atac_mc</code> would be used.</p></dd>
-</dl></div>
+<dd><ul><li><p>(optional) a subset of peaks of <code>atac_mc@peaks</code> on which to cluster</p></li>
+</ul></dd>
+<dt>...</dt>
+<dd><p>Arguments passed on to <code><a href="https://rdrr.io/pkg/tglkmeans/man/TGL_kmeans.html" class="external-link">tglkmeans::TGL_kmeans</a></code></p><dl><dt><code>df</code></dt>
+<dd><p>data frame. Each row is a single observation and each column is a dimension.
+the first column can contain id for each observation (if id_column is TRUE).</p></dd>
 
+    <dt><code>metric</code></dt>
+<dd><p>distance metric for kmeans++ seeding. can be 'euclid', 'pearson' or 'spearman'</p></dd>
+
+    <dt><code>max_iter</code></dt>
+<dd><p>maximal number of iterations</p></dd>
+
+    <dt><code>min_delta</code></dt>
+<dd><p>minimal change in assignments (fraction out of all observations) to continue iterating</p></dd>
+
+    <dt><code>verbose</code></dt>
+<dd><p>display algorithm messages</p></dd>
+
+    <dt><code>keep_log</code></dt>
+<dd><p>keep algorithm messages in 'log' field</p></dd>
+
+    <dt><code>id_column</code></dt>
+<dd><p><code>df</code>'s first column contains the observation id</p></dd>
+
+    <dt><code>reorder_func</code></dt>
+<dd><p>function to reorder the clusters. operates on each center and orders by the result. e.g. <code>reorder_func = mean</code> would calculate the mean of each center and then would reorder the clusters accordingly. If <code>reorder_func = hclust</code> the centers would be ordered by hclust of the euclidian distance of the correlation matrix, i.e. <code>hclust(dist(cor(t(centers))))</code>
+if NULL, no reordering would be done.</p></dd>
+
+    <dt><code>hclust_intra_clusters</code></dt>
+<dd><p>run hierarchical clustering within each cluster and return an ordering of the observations.</p></dd>
+
+    <dt><code>seed</code></dt>
+<dd><p>seed for the c++ random number generator</p></dd>
+
+    <dt><code>parallel</code></dt>
+<dd><p>cluster every cluster parallely (if hclust_intra_clusters is true)</p></dd>
+
+  
+</dl></dd>
+</dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>atac_mc with added cluster_k_k column to atac_mc@peaks specifying the cluster for each enhancer</p>
+    </div>
+
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in"><span class="va">my_atac_mc</span> <span class="op">&lt;-</span> <span class="fu">gen_atac_peak_clust</span><span class="op">(</span><span class="va">my_atac_mc</span>, <span class="op">)</span></span>
+<span class="r-in"><span class="op">}</span></span>
+<span class="r-in"></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -51,17 +51,27 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">export_atac_clust_ucsc</span><span class="op">(</span><span class="va">mc_atac</span>, <span class="va">mc_atac_clust</span>, <span class="va">fn</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">export_atac_clust_ucsc</span><span class="op">(</span>
+  <span class="va">mc_atac</span>,
+  <span class="va">track_prefix</span>,
+  output_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,
+  clust_vec <span class="op">=</span> <span class="cn">NULL</span>,
+  normalization <span class="op">=</span> <span class="st">"none"</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>mc_atac</dt>
 <dd><p>McATAC object</p></dd>
-<dt>mc_atac_clust</dt>
-<dd><p>output of <code>gen_atac_mc_clust</code></p></dd>
-<dt>fn</dt>
-<dd><p>name of the genome browser file (should have a '.ucsc' extension)</p></dd>
+<dt>track_prefix</dt>
+<dd><p>prefix for generated misha tracks.</p></dd>
+<dt>output_dir</dt>
+<dd><p>(optional) name of the directory to write files to</p></dd>
+<dt>clust_vec</dt>
+<dd><p>(optional) a vector of length #metacells representing an annotation/clustering (can be output of <code>gen_atac_mc_clust</code>)</p></dd>
+<dt>normalization</dt>
+<dd><p>(optional) normalization method, either 'none', 'lfcom' (log2 fold-change over median), 'zs' (Z-scores)</p></dd>
 </dl></div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

@@ -52,7 +52,9 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">import_from_10x</span><span class="op">(</span>
-  dir <span class="op">=</span> <span class="cn">NULL</span>,
+  <span class="va">dir</span>,
+  <span class="va">genome</span>,
+  metadata <span class="op">=</span> <span class="cn">NULL</span>,
   matrix_fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="st">"matrix.mtx"</span><span class="op">)</span>,
   cells_fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="st">"barcodes.tsv"</span><span class="op">)</span>,
   features_fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="st">"features.tsv"</span><span class="op">)</span>
@@ -64,6 +66,10 @@
     <dl><dt>dir</dt>
 <dd><p>10x directory. Should have the following files: 'matrix.mtx', 'barcodes.tsv' and 'features.tsv'.
 See 'Cell Ranger Arc' for more details: https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/overview/welcome</p></dd>
+<dt>genome</dt>
+<dd><p>genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"</p></dd>
+<dt>metadata</dt>
+<dd><p>data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.</p></dd>
 <dt>matrix_fn</dt>
 <dd><p>if <code>dir</code> is missing, the filename of the matrix to import ("matrix.mtx" or "matrix.mtx.gz")</p></dd>
 <dt>cells_fn</dt>
@@ -79,7 +85,7 @@ See 'Cell Ranger Arc' for more details: https://support.10xgenomics.com/single-c
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="va">atac</span> <span class="op">&lt;-</span> <span class="fu">import_from_10x</span><span class="op">(</span><span class="st">"./pbmc_data"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">atac</span> <span class="op">&lt;-</span> <span class="fu">import_from_10x</span><span class="op">(</span><span class="st">"./pbmc_data"</span>, genome <span class="op">=</span> <span class="st">"hg38"</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">atac</span></span>
 <span class="r-in"><span class="op">}</span></span>
 <span class="r-in"></span>

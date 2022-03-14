@@ -56,19 +56,19 @@
 
       <dl><dt>
           
-          <code><a href="McATAC.html">McATAC()</a></code> 
+          <code><a href="ATAC-class.html">ATAC-class</a></code> 
         </dt>
-        <dd>Construct a new McATAC object</dd>
+        <dd>ATAC objects</dd>
+      </dl><dl><dt>
+          
+          <code><a href="ATAC.html">McATAC-class</a></code> 
+        </dt>
+        <dd>McATAC</dd>
       </dl><dl><dt>
           
           <code><a href="PeakIntervals.html">PeakIntervals()</a></code> 
         </dt>
         <dd>Construct a PeakIntervals object from misha intervals</dd>
-      </dl><dl><dt>
-          
-          <code><a href="ScATAC.html">ScATAC()</a></code> 
-        </dt>
-        <dd>Construct a new ScATAC object</dd>
       </dl><dl><dt>
           
           <code><a href="annotate_intervals.html">annotate_intervals()</a></code> 
@@ -103,7 +103,7 @@
           
           <code><a href="gen_atac_mc_clust.html">gen_atac_mc_clust()</a></code> 
         </dt>
-        <dd>Cluster metacells based on atac profiles</dd>
+        <dd>Cluster metacells based on atac profiles using the k-means algorithm</dd>
       </dl><dl><dt>
           
           <code><a href="gen_atac_peak_clust.html">gen_atac_peak_clust()</a></code> 
@@ -124,6 +124,16 @@
           <code><a href="import_from_h5ad.html">import_from_h5ad()</a></code> 
         </dt>
         <dd>Create an ScATAC,McATAC object from an h5ad file</dd>
+      </dl><dl><dt>
+          
+          <code><a href="initialize-McATAC-method.html">initialize(<i>&lt;McATAC&gt;</i>)</a></code> 
+        </dt>
+        <dd>Construct a new McATAC object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="initialize-ScATAC-method.html">initialize(<i>&lt;ScATAC&gt;</i>)</a></code> 
+        </dt>
+        <dd>Construct a new McATAC object</dd>
       </dl><dl><dt>
           
           <code><a href="peak_names.html">peak_names()</a></code> 
@@ -151,9 +161,24 @@
         <dd>Plot a cross-correlation matrix between RNA metacells and ATAC metacell scores</dd>
       </dl><dl><dt>
           
+          <code><a href="prepare_clusters.html">prepare_clusters()</a></code> 
+        </dt>
+        <dd>Prepare peak clusters for export (backend function)</dd>
+      </dl><dl><dt>
+          
           <code><a href="project_atac_on_mc.html">project_atac_on_mc()</a></code> <code><a href="project_atac_on_mc.html">project_atac_on_mc_from_metacell1()</a></code> <code><a href="project_atac_on_mc.html">project_atac_on_mc_from_h5ad()</a></code> 
         </dt>
         <dd>Given metacells (usually from RNA data), project ATAC counts to get a McATAC object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="subset_peaks.html">subset_peaks()</a></code> 
+        </dt>
+        <dd>Subset peaks of an McATAC object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="write_cluster_misha_track.html">write_cluster_misha_track()</a></code> 
+        </dt>
+        <dd>Generate a misha track for a metacell cluster (backend function)</dd>
       </dl></div>
   </main></div>
 

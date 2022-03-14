@@ -63,13 +63,15 @@ them occasionally (e.g. when creating h5ad files)</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">PeakIntervals</span><span class="op">(</span><span class="va">intervals</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">PeakIntervals</span><span class="op">(</span><span class="va">intervals</span>, genome <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>intervals</dt>
 <dd><p>misha intervals (a data frame which has the following columns: 'chrom', 'start' and 'end')</p></dd>
+<dt>genome</dt>
+<dd><p>genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10".</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
