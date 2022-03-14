@@ -4,7 +4,9 @@
 #' @import dplyr
 #' @import ggplot2
 #' @import tgstat
+#' @import misha
 #' @importFrom Matrix t
+#' @importClassesFrom Matrix sparseMatrix
 #' @importFrom misha gtrack.create_sparse gintervals.load gintervals.neighbors
 #' @importFrom misha.ext gintervals.neighbors1 gset_genome genome_exists
 #' @importFrom assertthat assert_that are_equal

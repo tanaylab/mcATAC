@@ -10,11 +10,11 @@
 #' }
 #' @export
 annotate_peaks <- function(atac) {
-    if (!has_name(atac, "peaks")) {
+    if (!methods::is(atac, "ATAC")) {
         cli_abort("{.field atac} doesn't have a field called {.field peaks}. You can annotate intervals directly using the {.code annotate_intervals} function.")
     }
 
-    atac$peaks <- annotate_intervals(atac$peaks, atac$genome)
+    atac@peaks <- annotate_intervals(atac@peaks, atac@genome)
     return(atac)
 }
 

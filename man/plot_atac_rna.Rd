@@ -39,7 +39,7 @@ p1 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4")
 ## Plot gene vs some peak of interest; here - expression of CD4 vs. promoter ATAC signal of CD8
 tss <- gintervals.load("intervs.global.tss")
 cd8_tss <- tss[which(tss$geneSymbol == "CD8")[[1]], ]
-peaks_near_cd8_tss <- misha::gintervals.neighbors(pbmc_atac_mc$peaks, cd8_tss, mindist = -2e+3, maxdist = 2e+3)
+peaks_near_cd8_tss <- misha::gintervals.neighbors(pbmc_atac_mc@peaks, cd8_tss, mindist = -2e+3, maxdist = 2e+3)
 nearest_peak <- peaks_near_cd8_tss[which.min(peaks_near_cd8_tss$dist), ]
 p2 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4", peak = nearest_peak[, "peak_name"])
 }

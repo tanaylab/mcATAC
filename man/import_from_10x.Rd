@@ -19,7 +19,7 @@ See 'Cell Ranger Arc' for more details: https://support.10xgenomics.com/single-c
 
 \item{genome}{genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"}
 
-\item{metadata}{data frame with a column called 'cell_id' and additional per-cell annotations, or the name of a delimited file which contains such annotations.}
+\item{metadata}{data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.}
 
 \item{matrix_fn}{if \code{dir} is missing, the filename of the matrix to import ("matrix.mtx" or "matrix.mtx.gz")}
 
