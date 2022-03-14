@@ -25,7 +25,7 @@ export_atac_clust_misha(
 
 \item{num_cores}{(required if parallel == TRUE) number of cores to use for parallel processing}
 
-\item{mc_atac_mat}{metacell ATAC matrix (like mc_atac$mat)}
+\item{mc_atac_mat}{metacell ATAC matrix (like mc_atac@mat)}
 }
 \value{
 track_names names of generated misha tracks

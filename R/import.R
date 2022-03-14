@@ -56,11 +56,11 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL) {
     }
 
     if (class == "McATAC") {
-        res <- McATAC(mat, peaks, genome, metadata)
-        cli_alert_success("Successfully loaded an {.var {class}} object with {.val {ncol(res$mat)}} metacells and {.val {nrow(res$mat)}} ATAC peaks")
+        res <- new("McATAC", mat, peaks, genome, metadata)
+        cli_alert_success("Successfully loaded an {.var {class}} object with {.val {ncol(res@mat)}} metacells and {.val {nrow(res@mat)}} ATAC peaks")
     } else {
-        res <- ScATAC(mat, peaks, genome, metadata)
-        cli_alert_success("Successfully loaded an {.var {class}} object with {.val {ncol(res$mat)}} cells and {.val {nrow(res$mat)}} ATAC peaks")
+        res <- new("ScATAC", mat, peaks, genome, metadata)
+        cli_alert_success("Successfully loaded an {.var {class}} object with {.val {ncol(res@mat)}} cells and {.val {nrow(res@mat)}} ATAC peaks")
     }
 
     return(res)
@@ -73,10 +73,11 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL) {
 #' @param matrix_fn if \code{dir} is missing, the filename of the matrix to import ("matrix.mtx" or "matrix.mtx.gz")
 #' @param cells_fn if \code{dir} is missing, the filename of the cells to import ("barcodes.tsv" or "barcodes.tsv.gz")
 #' @param features_fn if \code{dir} is missing, the filename of the features to import ("features.tsv" or "features.tsv.gz")
+#' @param genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
+#' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
 #'
 #' @return an ScATAC object
 #'
-#' @inheritParams ScATAC
 #' @examples
 #' \dontrun{
 #' atac <- import_from_10x("./pbmc_data", genome = "hg38")
@@ -112,7 +113,7 @@ import_from_10x <- function(dir, genome, metadata = NULL, matrix_fn = file.path(
     atac_mat <- mat[atac_peaks$peak_name, ]
     cli_alert_info("{.val {nrow(atac_mat)}} ATAC peaks")
 
-    res <- ScATAC(atac_mat, atac_peaks, genome = genome, metadata = metadata)
+    res <- new("ScATAC", atac_mat, atac_peaks, genome = genome, metadata = metadata)
     cli_alert_success("successfully imported to an ScATAC object with {.val {ncol(atac_mat)}} cells and {.val {nrow(atac_mat)}} ATAC peaks")
 
     return(res)

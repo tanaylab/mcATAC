@@ -12,7 +12,7 @@ subset_peaks(atac_mc, peak_set)
 }}
 
 \item{peak_set}{\itemize{
-\item a subset of peaks of \code{atac_mc$peaks} to keep
+\item a subset of peaks of \code{atac_mc@peaks} to keep
 }}
 }
 \description{
@@ -24,7 +24,7 @@ Subset peaks of an McATAC object
 mc_clusters <- gen_atac_mc_clust(my_atac_mc, use_prior_annot = T)
 
 ## Identify peaks of interest, namely peaks neighboring a set of feature genes, and subset by them
-nei_peaks_feat_genes <- gintervals.neighbors(my_atac_mc$peaks, tss[tss$name \%in\% feature_genes, ], maxdist = 5e+5)
+nei_peaks_feat_genes <- gintervals.neighbors(my_atac_mc@peaks, tss[tss$name \%in\% feature_genes, ], maxdist = 5e+5)
 peaks_of_interest <- nei_peaks_feat_genes[, c("chrom", "start", "end")]
 mc_clusters <- subset_peaks(my_atac_mc, peaks_of_interest)
 }

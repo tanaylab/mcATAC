@@ -12,7 +12,7 @@ gen_atac_peak_clust(atac_mc, k, peak_set = NULL, ...)
 \item{k}{number of clusters}
 
 \item{peak_set}{\itemize{
-\item (optional) a subset of peaks of \code{atac_mc$peaks} on which to cluster
+\item (optional) a subset of peaks of \code{atac_mc@peaks} on which to cluster
 }}
 
 \item{...}{
@@ -34,7 +34,7 @@ if NULL, no reordering would be done.}
   }}
 }
 \value{
-atac_mc with added cluster_k_{k} column to atac_mc$peaks specifying the cluster for each enhancer
+atac_mc with added cluster_k_{k} column to atac_mc@peaks specifying the cluster for each enhancer
 }
 \description{
 Cluster atac peaks based on atac distributions

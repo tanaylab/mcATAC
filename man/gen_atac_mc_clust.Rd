@@ -25,7 +25,7 @@ gen_atac_mc_clust(
 }}
 
 \item{peak_set}{\itemize{
-\item a subset of peaks of \code{atac_mc$peaks} on which to cluster
+\item a subset of peaks of \code{atac_mc@peaks} on which to cluster
 }}
 
 \item{annot}{\itemize{
@@ -62,7 +62,7 @@ Cluster metacells based on atac profiles using the k-means algorithm
 mc_clusters <- gen_atac_mc_clust(my_atac_mc, use_prior_annot = T)
 
 ## Identify peaks of interest, namely peaks neighboring a set of feature genes, and use only them for clustering
-nei_peaks_feat_genes <- gintervals.neighbors(my_atac_mc$peaks, tss[tss$name \%in\% feature_genes, ], maxdist = 5e+5)
+nei_peaks_feat_genes <- gintervals.neighbors(my_atac_mc@peaks, tss[tss$name \%in\% feature_genes, ], maxdist = 5e+5)
 peaks_of_interest <- nei_peaks_feat_genes[, c("chrom", "start", "end")]
 mc_clusters <- gen_atac_mc_clust(my_atac_mc, k = 16, peak_set = peaks_of_interest, use_prior_annot = F)
 }
