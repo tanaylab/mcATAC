@@ -68,7 +68,7 @@ gen_atac_mc_clust <- function(atac_mc, use_prior_annot = TRUE, k = NULL, peak_se
 #'
 #' @param atac_mc - an McATAC object
 #' @param peak_set - a subset of peaks of \code{atac_mc$peaks} to keep
-
+#' 
 #' @examples
 #' \dontrun{
 #' ## Use "default clustering" - the existing annotations
