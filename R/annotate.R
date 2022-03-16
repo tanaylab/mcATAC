@@ -45,15 +45,11 @@ annotate_peaks <- function(atac) {
 #' @export
 annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_proximal = 2e+04, min_distal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 0) {
 
-    # TODO: check whether 'tss' and 'exons' interval sets are already loaded
-
     if (missing(genome)) {
         cli_abort("Please Specify genome")
     }
     misha.ext::gset_genome(genome)
 
-    # }
-    ## Please check this \/ \/
     if (!rlang::env_has(nms = "tss")) {
         tss <- gintervals.load("intervs.global.tss")
     }
