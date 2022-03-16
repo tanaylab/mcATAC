@@ -77,8 +77,8 @@ find_blacklist_overlaps = function(scatac = NULL, mcatac = NULL, peaks = NULL, g
         cli_abort('Must specify genome if annotating peaks directly')
     }
     misha.ext::gset_genome(genome)
-    blacklist_name <- glue::glue('ENCODE_blacklist_{genome}'))
-    if (gintervals.exists() {
+    blacklist_name <- glue::glue('ENCODE_blacklist_{genome}')
+    if (gintervals.exists(blacklist_name)) {
         blacklist <- gintervals.load(blacklist_name)
     }
     nei_blk_pks = gintervals.neighbors(blacklist, peaks, maxdist = 0, mindist = 0, maxneighbors = 10)
