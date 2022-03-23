@@ -34,7 +34,7 @@ if NULL, no reordering would be done.}
   }}
 }
 \value{
-atac_mc with added cluster_k_{k} column to atac_mc@peaks specifying the cluster for each enhancer
+a tglkmeans clustering object
 }
 \description{
 Cluster atac peaks based on atac distributions

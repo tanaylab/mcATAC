@@ -25,10 +25,11 @@ blacklist_overlaps - a PeakIntervals object with peaks identified as overlapping
 }
 \description{
 Identify peaks in the data which overlap (or are adjacent to?) regions blacklisted by ENCODE as having universally high DNAse HS or ChIP signal (basically mapping artifacts)
+See https://doi.org/10.1038/s41598-019-45839-z for more details
 }
 \examples{
 \dontrun{
-my_intervals <- annotate_intervals(my_intervals, "mm10", min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
+blacklist_overlaps <- find_blacklist_overlaps(my_intervals, "mm10", min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
 table(my_intervals$peak_annot)
 }
 }

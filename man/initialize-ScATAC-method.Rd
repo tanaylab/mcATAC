@@ -2,7 +2,7 @@
 % Please edit documentation in R/McATAC.R
 \name{initialize,ScATAC-method}
 \alias{initialize,ScATAC-method}
-\title{Construct a new McATAC object}
+\title{Construct a new ScATAC object}
 \usage{
 \S4method{initialize}{ScATAC}(.Object, mat, peaks, genome, metadata = NULL)
 }
