@@ -111,6 +111,10 @@ import_from_10x <- function(dir, genome, metadata = NULL, matrix_fn = file.path(
         select(chrom, start, end, peak_name = name)
 
     atac_mat <- mat[atac_peaks$peak_name, ]
+    non_zero_inds <- which(Matrix::rowSums(atac_mat) > 0)
+    atac_peaks <- atac_peaks[non_zero_inds,]
+    atac_mat <- atac_mat[non_zero_inds,]
+
     cli_alert_info("{.val {nrow(atac_mat)}} ATAC peaks")
 
     res <- new("ScATAC", atac_mat, atac_peaks, genome = genome, metadata = metadata)

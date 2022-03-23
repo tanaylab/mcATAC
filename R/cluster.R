@@ -7,7 +7,8 @@
 #' @param peak_set - (optional) a subset of peaks of \code{atac_mc@peaks} on which to cluster
 
 #' @inheritDotParams tglkmeans::TGL_kmeans
-#' @return atac_mc with added cluster_k_{k} column to atac_mc@peaks specifying the cluster for each enhancer
+#' @return a tglkmeans clustering object
+
 #' @examples
 #' \dontrun{
 #' my_atac_mc <- gen_atac_peak_clust(my_atac_mc, )
@@ -18,9 +19,7 @@ gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL, ...) {
     if (!is.null(peak_set)) {
         atac_mc <- subset_peaks(atac_mc, peak_set)
     }
-    atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(atac_mc@mat), k, ...)
-    atac_mc@peaks[, glue::glue("cluster_k={k}")] <- atac_peak_km$cluster
-    return(atac_mc)
+    return(tglkmeans::TGL_kmeans(as.matrix(atac_mc@mat), k, ...))
 }
 
 #' Cluster metacells based on atac profiles using the k-means algorithm
@@ -51,7 +50,7 @@ gen_atac_mc_clust <- function(atac_mc, use_prior_annot = TRUE, k = NULL, peak_se
     }
     if (!use_prior_annot) {
         if (!is.null(k)) {
-            atac_mc_km <- tglkmeans::TGL_kmeans(as.matrix(atac_mc@mat), k, ...)
+            atac_mc_km <- tglkmeans::TGL_kmeans(t(as.matrix(atac_mc@mat)), k, ...)
             return(setNames(atac_mc_km$cluster, 1:length(atac_mc_km$cluster)))
         } else {
             cli_abort("Must choose k if clustering with use_prior_annot == FALSE")

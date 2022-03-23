@@ -1,5 +1,3 @@
-
-
 setClassUnion("any_matrix", c("sparseMatrix", "matrix"))
 setClassUnion("data.frame_or_null", c("data.frame", "NULL"))
 
@@ -23,7 +21,9 @@ ATAC <- setClass(
         mat = "any_matrix",
         peaks = "PeakIntervals",
         genome = "character",
-        metadata = "data.frame_or_null"
+        metadata = "data.frame_or_null",
+        ignore_peaks = "vector",
+        ignore_pmat = "any_matrix"
     ),
     contains = "VIRTUAL"
 )
@@ -228,3 +228,36 @@ setMethod(
         }
     }
 )
+
+#' Set ignored (i.e. blacklisted) peaks
+#'
+#' Given a list of peaks to ignore, this will cancel any previous policy for blacklisting and remove the given genes to the ignore_mat. Downstream algorithm usually ignore these genes altogether, for any purpose including normalization. However, ignored genes can be accessed and analyzed seperately for validation/tests or when they represent some relevant biology (e.g. cell cycle)
+#'
+#' @param mcatac an McATAC object
+#' @param ig_peaks a PeakIntervals object, or vector of peak names to ignore
+#'
+#' @export
+
+ignore_peaks <- function(obj = NULL, ig_peaks) {
+	if(missing(obj) && missing(scatac)) {
+		cli_abort('"obj" must be an ScATAC or McATAC object')
+	}
+    if(is.null(ig_peaks) | length(ig_peaks) == 0) {
+		cli_abort("Peaks to ignore should be specified (they are either NULL or length 0)")
+	}
+    if (is.null(dim(ig_peaks)) && length(ig_peaks) > 0) {
+        ig_peaks <- misha.ext::convert_10x_peak_names_to_misha_intervals(ig_peaks, add_intervalID = T)
+    }
+    obj@mat <- rbind(obj@mat, obj@ignore_pmat)
+    peaks_merge <- rbind(obj@peaks, obj@ignore_peaks)
+    new_ord <- with(peaks_merge, order(chrom, start))
+	obj@mat <- obj@mat[new_ord,]
+    obj@peaks <- peaks_merge[new_ord,]
+    obj@peaks$temp_intID <- 1:nrow(obj@peaks)
+    good_peaks = dplyr::anti_join(obj@peaks, ig_peaks, by = c('chrom', 'start', 'end'))
+    obj@ignore_peaks <- dplyr::semi_join(obj@peaks, ig_peaks, by = c('chrom', 'start', 'end'))
+    obj@ignore_pmat <- obj@mat[!(obj@peaks$temp_intID %in% obj@ignore_peaks$temp_intID),]
+    obj@mat <- obj@mat[obj@peaks$temp_intID %in% good_peaks$temp_intID,]
+	obj@peaks <- good_peaks[,c('chrom', 'start', 'end')]
+	return(obj)
+}

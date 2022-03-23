@@ -46,7 +46,7 @@ annotate_peaks <- function(atac) {
 annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_proximal = 2e+04, min_distal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 0) {
 
     if (missing(genome)) {
-        cli_abort("Please Specify genome")
+        cli_abort("Please Specify genome. Look for slot 'genome' in relevant McATAC/ScATAC object.")
     }
     misha.ext::gset_genome(genome)
 
@@ -56,7 +56,7 @@ annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_prox
     if (!rlang::env_has(nms = "exons")) {
         exons <- gintervals.load("intervs.global.exon")
     }
-
+    cn <- c("chrom", "start", "end", "peak_name")
     orig_class <- class(intervals)
     orig_fields <- colnames(intervals)
     intervals <- as.data.frame(intervals)
@@ -64,34 +64,37 @@ annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_prox
     if (!has_name(intervals, "intervalID")) {
         intervals <- intervals %>% mutate(intervalID = 1:n())
     }
-
+    cli_alert_info("Finding peaks in promoters...")
     nei_peak_prom <- gintervals.neighbors(intervals, tss, mindist = -min_proximal, maxdist = min_proximal)
+    cli_alert_info("Finding peaks in exons...")
     nei_peak_exon <- gintervals.neighbors(intervals, exons, mindist = -exonic_peak_dist, maxdist = exonic_peak_dist)
+    cli_alert_info("Finding peaks in introns...")
     gene_body_df <- get_gene_body_df(tss, exons)
     nei_peak_gb <- gintervals.neighbors(intervals, gene_body_df, maxdist = 0, mindist = 0)
 
-    prom_peaks <- nei_peak_prom$intervalID
-    exon_peaks <- nei_peak_exon$intervalID[!(nei_peak_exon$intervalID %in% prom_peaks)]
-    intron_peaks <- nei_peak_gb$intervalID[!(nei_peak_gb$intervalID %in% union(exon_peaks, prom_peaks))]
-    intID_left <- intervals$intervalID[!(intervals$intervalID %in% union(prom_peaks, union(exon_peaks, intron_peaks)))]
+    prom_peaks <- nei_peak_prom$peak_name
+    exon_peaks <- nei_peak_exon$peak_name[!(nei_peak_exon$peak_name %in% prom_peaks)]
+    intron_peaks <- nei_peak_gb$peak_name[!(nei_peak_gb$peak_name %in% union(exon_peaks, prom_peaks))]
+    intID_left <- intervals$peak_name[!(intervals$peak_name %in% union(prom_peaks, union(exon_peaks, intron_peaks)))]
 
-    nei_peak_tss_prox <- gintervals.neighbors(intervals[intervals$intervalID %in% intID_left, ], tss, mindist = min_proximal, maxdist = max_proximal)
-    nei_peak_tss_prox_neg <- gintervals.neighbors(intervals[intervals$intervalID %in% intID_left, ], tss, maxdist = -min_proximal, mindist = -max_proximal)
-
-    nei_peak_prox_all <- dplyr::anti_join(unique(rbind(nei_peak_tss_prox[, 1:4], nei_peak_tss_prox_neg[, 1:4])),
-        intervals[union(prom_peaks, union(exon_peaks, intron_peaks)), 1:4],
+    cli_alert_info("Finding proximal intergenic peaks...")
+    nei_peak_tss_prox <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, mindist = min_proximal, maxdist = max_proximal)
+    nei_peak_tss_prox_neg <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, maxdist = -min_proximal, mindist = -max_proximal)
+    nei_peak_prox_all <- dplyr::anti_join(unique(rbind(nei_peak_tss_prox[, cn], nei_peak_tss_prox_neg[, cn])),
+        intervals[union(prom_peaks, union(exon_peaks, intron_peaks)), cn],
         by = c("chrom", "start", "end")
     )
-    ig_prox_peaks <- nei_peak_prox_all$intervalID
-    intID_left <- intervals$intervalID[!(intervals$intervalID %in% unique(c(prom_peaks, exon_peaks, intron_peaks, ig_prox_peaks)))]
-    nei_peak_dist <- gintervals.neighbors(intervals[intervals$intervalID %in% intID_left, ], tss, mindist = min_distal, maxdist = max_distal)
-    nei_peak_dist_neg <- gintervals.neighbors(intervals[intervals$intervalID %in% intID_left, ], tss, maxdist = -min_distal, mindist = -max_distal)
-    nei_peak_dist_all <- dplyr::anti_join(unique(rbind(nei_peak_dist[, 1:4], nei_peak_dist_neg[, 1:4])),
-        intervals[union(ig_prox_peaks, union(prom_peaks, union(exon_peaks, intron_peaks))), 1:4],
+    ig_prox_peaks <- nei_peak_prox_all$peak_name
+    intID_left <- intervals$peak_name[!(intervals$peak_name %in% unique(c(prom_peaks, exon_peaks, intron_peaks, ig_prox_peaks)))]
+    cli_alert_info("Finding distal intergenic peaks...")
+    nei_peak_dist <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, mindist = min_distal, maxdist = max_distal)
+    nei_peak_dist_neg <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, maxdist = -min_distal, mindist = -max_distal)
+    nei_peak_dist_all <- dplyr::anti_join(unique(rbind(nei_peak_dist[, cn], nei_peak_dist_neg[, cn])),
+        intervals[union(ig_prox_peaks, union(prom_peaks, union(exon_peaks, intron_peaks))), cn],
         by = c("chrom", "start", "end")
     )
-    ig_dist_peaks <- nei_peak_dist_all$intervalID
-    desert_peaks <- intervals$intervalID[!(intervals$intervalID %in%
+    ig_dist_peaks <- nei_peak_dist_all$peak_name
+    desert_peaks <- intervals$peak_name[!(intervals$peak_name %in%
         unique(c(prom_peaks, exon_peaks, intron_peaks, ig_prox_peaks, ig_dist_peaks)))]
 
     res <- c(
@@ -106,7 +109,7 @@ annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_prox
     class(intervals) <- orig_class
     intervals <- intervals %>%
         select(any_of(orig_fields)) %>%
-        mutate(peak_annot = res[order(as.numeric(names(res)))])
+        mutate(peak_annot = res[order(match(names(res), intervals$peak_name))])
     return(intervals)
 }
 
