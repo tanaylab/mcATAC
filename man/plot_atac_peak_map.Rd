@@ -10,8 +10,7 @@ plot_atac_peak_map(
   filename,
   peak_clust = NULL,
   eps_q = 0.1,
-  height = NULL,
-  width = NULL
+  ...
 )
 }
 \arguments{
@@ -23,11 +22,11 @@ plot_atac_peak_map(
 
 \item{peak_clust}{(optional) output of \code{gen_atac_peak_clust}}
 
-\item{height}{height in pixels of saved image}
-
-\item{width}{width in pixels of saved image}
-
-\item{res}{resolution of saved image}
+\item{...}{
+  Arguments passed on to \code{\link[=save_pheatmap_png]{save_pheatmap_png}}
+  \describe{
+    \item{\code{}}{}
+  }}
 }
 \description{
 Plot normalized accessibility of peaks over metacells, ordered by clustering

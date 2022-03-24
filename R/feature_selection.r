@@ -23,17 +23,15 @@ filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NU
         low_max_peaks <- scatac@peaks$peak_name[rmx < minimal_max_umi]
     } 
     else {low_max_peaks <- c()}
-    if (!is.null(min_peak_length) || !is.null(max_peak_length)) {
-        peak_len <- scatac@peaks$end - scatac@peaks$start
-        if (!is.null(min_peak_length)) {
-            too_short_peaks <- scatac@peaks$peak_name[peak_len < min_peak_length]
-        } 
-        else {too_short_peaks <- c()}
-        if (!is.null(max_peak_length)) {
-            too_long_peaks <- scatac@peaks$peak_name[peak_len > max_peak_length]
-        } 
-        else {too_long_peaks <- c()}
-    }
+    peak_len <- scatac@peaks$end - scatac@peaks$start
+    if (!is.null(min_peak_length)) {
+        too_short_peaks <- scatac@peaks$peak_name[peak_len < min_peak_length]
+    } 
+    else {too_short_peaks <- c()}
+    if (!is.null(max_peak_length)) {
+        too_long_peaks <- scatac@peaks$peak_name[peak_len > max_peak_length]
+    } 
+    else {too_long_peaks <- c()}
     peaks_to_remove <- c(low_max_peaks, too_short_peaks, too_long_peaks)
     scatac <- atac_ignore_peaks(scatac, peaks_to_remove)
     return(scatac)
