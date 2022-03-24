@@ -33,13 +33,10 @@ filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NU
     } 
     else {too_long_peaks <- c()}
     peaks_to_remove <- c(low_max_peaks, too_short_peaks, too_long_peaks)
-    print(length(peaks_to_remove))
     if (length(peaks_to_remove) > 0) {
         scatac <- atac_ignore_peaks(scatac, peaks_to_remove)
     }
-    else {
-        cli_alert_warning('No peaks that violate the criteria were found. Returning original object')
-    }
+    else {cli_alert_warning('No peaks that violate the criteria were found. Returning original object')}
     return(scatac)
 }
     
