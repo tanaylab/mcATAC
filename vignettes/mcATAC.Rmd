@@ -76,7 +76,7 @@ atac_mc <- gen_atac_peak_clust(atac_mc, dyn_peaks)
 
 ## Export dynamic peaks to UCSC tracks
 ```{r cluster-peaks}
-export_atac_clust_ucsc(mc_atac = mc1, track_prefix = 'hum_pbmc_10x', normalization = 'lfcom')
+export_atac_clust_ucsc(mc_atac = atac_mc, track_prefix = 'hum_pbmc_10x', normalization = 'lfcom')
 ```
 
 ![UCSC track example](/vignettes/ucsc_output_example.png "Example of UCSC output on human PBMC data from 10X Genomics")

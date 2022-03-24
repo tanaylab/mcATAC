@@ -18,7 +18,8 @@ gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL, ...) {
     if (!is.null(peak_set)) {
         atac_mc <- subset_peaks(atac_mc, peak_set)
     }
-    return(tglkmeans::TGL_kmeans(as.matrix(atac_mc@mat), k, ...))
+    atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(atac_mc@mat), k, ...)
+    return(setNames(atac_peak_km$cluster, rownames(atac_mc@mat)))
 }
 
 #' Cluster metacells based on atac profiles using the k-means algorithm
