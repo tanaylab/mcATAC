@@ -65,7 +65,6 @@ filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NU
 #' }
 #' @export
 identify_dynamic_peaks <- function(mcatac, method = 'bmq', mean_thresh_q = 0.1, cov_q_thresh = 0.75, num_bins = 200, gmm_g = 4) {
-    mcatac@mat <- mcatac@mat + quantile(mns, mean_thresh_q)
     mns <- rowMeans(mcatac@mat)
     sds <- sparseMatrixStats::rowSds(mcatac@mat)
     covs <- sds/mns
@@ -75,6 +74,7 @@ identify_dynamic_peaks <- function(mcatac, method = 'bmq', mean_thresh_q = 0.1, 
     if (method == 'bmq') {
         lpm <- log10(mns)
         qcut <- cut(lpm, breaks <- seq(min(lpm), max(lpm), l=num_bins))
+        mn_thresh <- quantile(mns, mean_thresh_q)
         feat_select <- unlist(sapply(sort(unique(qcut[which(lpm >= log10(mn_thresh))])),
                              function(nm) rownames(mcatac@mat)[which(covs >= quantile(covs[qcut == nm], cov_q_thresh, na.rm=T) & qcut == nm)]))
         pred_df$is_bmq <- rownames(pred_df) %in% feat_select
@@ -91,9 +91,9 @@ identify_dynamic_peaks <- function(mcatac, method = 'bmq', mean_thresh_q = 0.1, 
         plot(X[,1], X[,2], main = glue::glue('Selected clusters - {clusters_selected}'), cex = 0.05)
         clrs = c('red', 'blue', 'green', 'cyan', 'purple', 'orange')
         purrr::walk(seq_along(clusters_selected), function(cl, i) {
-            points(X[fc == cl[[i]],1], X[fc == cl[[i]],2], col = clrs[[i]], cex= 0.05)
+            points(X[pred_df$fc == cl[[i]] & pred_df$diff > 0, 1], X[pred_df$fc == cl[[i]] & pred_df$diff > 0, 2], col = clrs[[i]], cex= 0.05)
         }, cl = clusters_selected)
-        return(mcatac@peaks[mcatac@peaks$peak_name %in% rownames(pred_df)[pred_df$fc %in% clusters_selected],])
+        return(mcatac@peaks[mcatac@peaks$peak_name %in% rownames(pred_df)[pred_df$fc %in% clusters_selected & pred_df$diff > 0],])
     }
     else {cli_abort('Method should be NULL, "bmq" or "gmm"')}
 }

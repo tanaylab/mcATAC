@@ -33,18 +33,19 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, m
             cli_abort("Intersect of ATAC mat colnames and mc names is less than {.field {scales::percent(min_int_frac)}}. Make sure you are projecting the right objects. To override - set {.code min_int_frac=0}")
         }
     }
+    non_zero_peaks <- which(Matrix::rowSums(sc_mat) > 0)
     sc_sizes <- Matrix::colSums(sc_mat)
     mc_sizes <- tapply(sc_sizes, cell_to_metacell, sum)
     eps <- quantile(mc_sizes, mc_size_eps_q)
-    mc_mat <- t(tgs_matrix_tapply(sc_mat, cell_to_metacell, mean))
+    mc_mat <- t(tgs_matrix_tapply(sc_mat[non_zero_peaks,], cell_to_metacell, mean))
     # mc_mat <- t(apply(mc_mat, 1, function(x) log2((x + eps)/median(x + eps))))
-    assert_that(are_equal(atac@peaks$peak_name, rownames(mc_mat)))
+    assert_that(are_equal(atac@peaks$peak_name[non_zero_peaks], rownames(mc_mat)))
     assert_that(all(colnames(mc_mat) %in% cell_to_metacell))
 
     # TODO: deal with cell metadata
     # Naive solution - tabulate metadata per metacell and concatenate...
 
-    mc_atac <- new("McATAC", mc_mat, atac@peaks, atac@genome, metadata)
+    mc_atac <- new("McATAC", mc_mat, atac@peaks[non_zero_peaks,], atac@genome, metadata)
     cli_alert_success("Created a new McATAC object with {.val {ncol(mc_atac@mat)}} metacells and {.val {nrow(mc_atac@mat)}} ATAC peaks.")
 
     return(mc_atac)

@@ -44,19 +44,18 @@ annotate_peaks <- function(atac) {
 #' my_intervals[which(toupper(my_intervals$closest_tss) == 'PCNA'),]
 #' }
 #' @export
-annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_proximal = 2e+04, min_distal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 0) {
+annotate_intervals <- function(intervals, genome, 
+                                min_proximal = 1e+03, max_proximal = 2e+04, 
+                                min_distal = 2e+04, max_distal = 1e+06, 
+                                exonic_peak_dist = 0, 
+                                tss <- gintervals.load("intervs.global.tss"),
+                                exons <- gintervals.load("intervs.global.exon")
+                                ) {
 
     if (missing(genome)) {
         cli_abort("Please Specify genome. Look for slot 'genome' in relevant McATAC/ScATAC object.")
     }
     misha.ext::gset_genome(genome)
-
-    if (!rlang::env_has(nms = "tss")) {
-        tss <- gintervals.load("intervs.global.tss")
-    }
-    if (!rlang::env_has(nms = "exons")) {
-        exons <- gintervals.load("intervs.global.exon")
-    }
     cn <- c("chrom", "start", "end", "peak_name")
     orig_class <- class(intervals)
     orig_fields <- colnames(intervals)
