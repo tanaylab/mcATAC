@@ -9,14 +9,15 @@ identify_dynamic_peaks(
   method = "bmq",
   mean_thresh_q = 0.1,
   cov_q_thresh = 0.75,
-  num_bins = 200
+  num_bins = 200,
+  gmm_g = 4
 )
 }
 \arguments{
 \item{mcatac}{the McATAC object to analyze}
 
 \item{method}{(optional) either 'bmq' (default) or 'gmm'; 'bmq' (binned-mean quantiles) bins the log-mean of all peaks (averaged across metacells) and
-selects all enhancers with a coefficient of variation above some quantile in each bin. More controlled
+selects all peaks with a coefficient of variation above some quantile in each bin. More controlled
 'gmm' fits a Gaussian mixture model to the log10(COV) vs. log10(mean) distribution,
 and selects peaks in clusters that show overdispersion in the COV.}
 
@@ -29,14 +30,15 @@ and selects peaks in clusters that show overdispersion in the COV.}
 \item{gmm_g}{(optional) number of groups for 'gmm'}
 }
 \value{
-dynamic_peaks - a PeakIntervals object with peaks identified as dynamic
+a PeakIntervals object with peaks identified as dynamic
 }
 \description{
 This function identifies "dynamic" peaks, i.e. those that have high expression only in a subset of the cells. They are identified by overdispersion in the coefficient of variation (std.dev./mean) per quantiles.
 }
 \examples{
 \dontrun{
-my_intervals <- annotate_intervals(my_intervals, "mm10", min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
+dynamic_peaks_by_bmq <- identify_dynamic_peaks(mcatac = my_mcatac, method = 'bmq',  mean_thresh_q = 0.1, cov_q_thresh = 0.6, num_bins = 100)
+dynamic_peaks_by_gmm <- identify_dynamic_peaks(mcatac = my_mcatac, method = 'gmm', gmm_g = 3)
 table(my_intervals$peak_annot)
 }
 }

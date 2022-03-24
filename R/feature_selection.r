@@ -9,26 +9,33 @@
 #' @return scatac - the filtered ScATAC object
 #' @examples
 #' \dontrun{
-#' my_scatac <- filter_features(my_scatac, "mm10", min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
-#' table(my_intervals$peak_annot)
+#' ## quantiles of peak lengths before filtering
+#' quantile(my_scatac@peaks$end - my_scatac@peaks$start, (0:10)/10)
+#' my_scatac <- filter_features(scatac = my_scatac, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
+#'
+#' ## quantiles of peak lengths after filtering
+#' quantile(my_scatac@peaks$end - my_scatac@peaks$start, (0:10)/10)
 #' }
 #' @export
 filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NULL, max_peak_length = NULL) {
     if (!is.null(minimal_max_umi)) {
         rmx <- sparseMatrixStats::rowMaxs(scatac@mat)
         low_max_peaks <- scatac@peaks$peak_name[rmx < minimal_max_umi]
-    } else {low_max_peaks <- c()}
+    } 
+    else {low_max_peaks <- c()}
     if (!is.null(min_peak_length) || !is.null(max_peak_length)) {
         peak_len <- scatac@peaks$end - scatac@peaks$start
         if (!is.null(min_peak_length)) {
-            too_short_peaks <- scatac@peaks$peak_name[scatac@peaks$len < min_peak_length]
-        } else {too_short_peaks <- c()}
+            too_short_peaks <- scatac@peaks$peak_name[peak_len < min_peak_length]
+        } 
+        else {too_short_peaks <- c()}
         if (!is.null(max_peak_length)) {
-            too_long_peaks <- scatac@peaks$peak_name[scatac@peaks$len > max_peak_length]
-        } else {too_long_peaks <- c()}
+            too_long_peaks <- scatac@peaks$peak_name[peak_len > max_peak_length]
+        } 
+        else {too_long_peaks <- c()}
     }
     peaks_to_remove <- c(low_max_peaks, too_short_peaks, too_long_peaks)
-    scatac <- ignore_peaks(scatac, peaks_to_remove)
+    scatac <- atac_ignore_peaks(scatac, peaks_to_remove)
     return(scatac)
 }
     
@@ -41,7 +48,7 @@ filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NU
 #' @description This function identifies "dynamic" peaks, i.e. those that have high expression only in a subset of the cells. They are identified by overdispersion in the coefficient of variation (std.dev./mean) per quantiles.
 #' @param mcatac the McATAC object to analyze
 #' @param method (optional) either 'bmq' (default) or 'gmm'; 'bmq' (binned-mean quantiles) bins the log-mean of all peaks (averaged across metacells) and
-#'   selects all enhancers with a coefficient of variation above some quantile in each bin. More controlled 
+#'   selects all peaks with a coefficient of variation above some quantile in each bin. More controlled 
 #'  'gmm' fits a Gaussian mixture model to the log10(COV) vs. log10(mean) distribution, 
 #'   and selects peaks in clusters that show overdispersion in the COV.
 #' @param mean_thresh_q (optional) threshold quantile on peaks' mean 
@@ -49,21 +56,22 @@ filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NU
 #' @param num_bins (optional) number of bins to divide features' means into
 #' @param gmm_g (optional) number of groups for 'gmm'
 #'
-#' @return dynamic_peaks - a PeakIntervals object with peaks identified as dynamic
+#' @return a PeakIntervals object with peaks identified as dynamic
 #' @examples
 #' \dontrun{
-#' my_intervals <- annotate_intervals(my_intervals, "mm10", min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
+#' dynamic_peaks_by_bmq <- identify_dynamic_peaks(mcatac = my_mcatac, method = 'bmq',  mean_thresh_q = 0.1, cov_q_thresh = 0.6, num_bins = 100)
+#' dynamic_peaks_by_gmm <- identify_dynamic_peaks(mcatac = my_mcatac, method = 'gmm', gmm_g = 3)
 #' table(my_intervals$peak_annot)
 #' }
 #' @export
-identify_dynamic_peaks <- function(mcatac, method = 'bmq', mean_thresh_q = 0.1, cov_q_thresh = 0.75, num_bins = 200) {
+identify_dynamic_peaks <- function(mcatac, method = 'bmq', mean_thresh_q = 0.1, cov_q_thresh = 0.75, num_bins = 200, gmm_g = 4) {
     mcatac@mat <- mcatac@mat + quantile(mns, mean_thresh_q)
     mns <- rowMeans(mcatac@mat)
-    sds <- MatrixGenerics::rowSds(mcatac@mat)
+    sds <- sparseMatrixStats::rowSds(mcatac@mat)
     covs <- sds/mns
     lmi <- lm(cov ~ mn, data <- as.data.frame(list('mn' <- log10(mns), 'cov' <- log10(covs))))
-    pred_df <- as.data.frame(list('pred' <- lmi$coefficients[[1]] + lmi$coefficients[[2]]*log10(mns), 'cov' <- log10(covs)))
-    pred_df <- dplyr::mutate(pred_df, diff = cov - pred)
+    pred_df <- data.frame('pred' = lmi$coefficients[[1]] + lmi$coefficients[[2]]*log10(mns), 'cov' = log10(covs))
+    pred_df <- mutate(pred_df, diff = cov - pred)
     if (method == 'bmq') {
         lpm <- log10(mns)
         qcut <- cut(lpm, breaks <- seq(min(lpm), max(lpm), l=num_bins))
@@ -94,40 +102,41 @@ identify_dynamic_peaks <- function(mcatac, method = 'bmq', mean_thresh_q = 0.1, 
 #'
 #' @description Identify peaks in the data which overlap (or are adjacent to?) regions blacklisted by ENCODE as having universally high DNAse HS or ChIP signal (basically mapping artifacts)
 #' See https://doi.org/10.1038/s41598-019-45839-z for more details
-#' @param scatac (optional) an ScATAC object
-#' @param mcatac (optional) an McATAC object
+#' @param atac (optional) an ScATAC or McATAC object
 #' @param peaks (optional) the intervals set to check
 #' @param genome (optional, required if checking peaks directly) the interval set to check
+#' @param max_dist_to_blacklist_region (optional) distance to nearest blacklist region which still qualifies for being blacklisted
 #'
 #' @return blacklist_overlaps - a PeakIntervals object with peaks identified as overlapping blacklisted regions
 #' @examples
 #' \dontrun{
-#' blacklist_overlaps <- find_blacklist_overlaps(my_intervals, "mm10", min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
-#' table(my_intervals$peak_annot)
+#' blacklist_overlaps <- find_blacklist_overlaps(atac = my_mcatac, max_dist_to_blacklist_region = 100)
+#' blacklist_overlaps <- find_blacklist_overlaps(peaks = my_peak_set, genome = 'mm10')
 #' }
 #' @export
-find_blacklist_overlaps = function(scatac = NULL, mcatac = NULL, peaks = NULL, genome = NULL) {
-    if (!is.null(scatac)) {
-        peaks <- scatac@peaks
-        genome <- scatac@genome
+find_blacklist_overlaps = function(atac = NULL, peaks = NULL, genome = NULL, max_dist_to_blacklist_region = 0) {
+    if (!is.null(atac) && is.null(peaks)) {
+        peaks <- atac@peaks
+        genome <- atac@genome
     }
-    else if (!is.null(mcatac)) {
-        peaks <- mcatac@peaks
-        genome <- mcatac@genome
+    else if (!is.null(atac) && !is.null(peaks)) {
+        cli_alert_warning('Both ATAC object and peaks specified, which is redundant. Ignoring peaks.')
+        peaks <- atac@peaks
+        genome <- atac@genome
     }
     else if (is.null(peaks)) {
         cli_abort('Must specify either scatac, mcatac or peaks')
     }
     else if (!is.null(peaks) && is.null(genome)) {
-        cli_abort('Must specify genome if annotating peaks directly')
+        cli_abort('Must specify genome if analyzing peaks directly')
     }
     peaks$intervalID <- 1:nrow(peaks)
     misha.ext::gset_genome(genome)
-    blacklist_name <- glue::glue('ENCODE_blacklist_{genome}')
+    blacklist_name <- glue::glue('ENCODE_blacklist')
     if (gintervals.exists(blacklist_name)) {
         blacklist <- gintervals.load(blacklist_name)
     }
-    nei_blk_pks <- gintervals.neighbors(blacklist, peaks, maxdist = 0, mindist = 0, maxneighbors = 10)
+    nei_blk_pks <- gintervals.neighbors(blacklist, peaks, maxdist = max_dist_to_blacklist_region, mindist = max_dist_to_blacklist_region, maxneighbors = 10)
     blacklist_overlaps <- peaks[unique(nei_blk_pks$intervalID),]
     return(blacklist_overlaps)
 }

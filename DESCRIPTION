@@ -9,24 +9,25 @@ Description: Metacell analysis for ATAC data
 License: MIT + file LICENSE
 Imports: 
     anndata,
+    assertthat,
     cli,
-    DelayedMatrixStats,
     dplyr,
     ggplot2,
     scales,
     glue,
+    Matrix,
+    mclust,
+    methods,
     misha,
     misha.ext (>= 0.0.3),
     pheatmap,
     purrr,
     rlang,
+    sparseMatrixStats,
     tgstat,
     tgutil,
     tibble,
     tidyr,
-    Matrix,
-    methods,
-    assertthat,
     withr
 Suggests: 
     testthat (>= 3.0.0),
@@ -40,7 +41,8 @@ Remotes:
     tanaylab/tgutil,
     tanaylab/metacell,
     tanaylab/tglkmeans,
-    tanaylab/chameleon
+    tanaylab/chameleon,
+    bioc::3.14/sparseMatrixStats
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: es

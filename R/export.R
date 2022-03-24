@@ -63,7 +63,7 @@ export_atac_clust_ucsc <- function(mc_atac, track_prefix, output_dir = getwd(), 
     purrr::walk(res_lst$clusts, function(cl) {
         atac_vec <- res_lst$atac_mc_mat_clust[, cl]
         misha.ext::fwrite_ucsc(
-            intervals = dplyr::mutate(mc_atac@peaks, "score" = atac_vec),
+            intervals = mutate(mc_atac@peaks, "score" = atac_vec),
             file = file.path(output_dir, paste0(track_prefix, "_", gsub("\\/", "_", cl), ".ucsc")),
             name = paste0(track_prefix, "_", cl),
             color = res_lst$col_key[[as.character(cl)]],
@@ -139,11 +139,11 @@ write_cluster_misha_track <- function(cl, atac_mc_mat_clust, track_prefix, descr
         gtrack.create_sparse(track = trknm, description = glue::glue(description), intervals = mc_atac@peaks, values = atac_vec)
     } else {
         if (override) {
-            gtrack.rm(trknm, f = T)
+            gtrack.rm(trknm, force = TRUE)
             gdb.reload()
             gtrack.create_sparse(track = trknm, description = glue::glue(description), intervals = mc_atac@peaks, values = atac_vec)
         } else {
-            cli_alert_warning("Track exists and \\code{override == FALSE}, no track written")
+            cli_alert_warning("Track exists and {.code override = FALSE}, no track written")
         }
     }
     return(trknm)

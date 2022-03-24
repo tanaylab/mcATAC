@@ -30,7 +30,7 @@ annotate_intervals(
 \item{exonic_peak_dist}{a parameter that allows proximity (without overlap) of peaks to exons that still classifies them as exonic peaks, as active transcription usually confers accessibility in the vicinity of exons, and this might confound a possible assignment of regulatory activity to an exon.}
 }
 \value{
-intervals - the input intervals set with an added field called \code{peak_annot}
+intervals - the input intervals set with added fields {.code peak_type} and {.code closest_tss}
 }
 \description{
 ATAC peaks are classified into either 'promoter', 'intronic', 'exonic', 'ig_proximal' (intergenic-proximal), 'ig_distal' (intergenic-distal) or 'desert'.
@@ -44,6 +44,7 @@ Desert peaks are at least \code{max_distal} from any known TSS (as defined by th
 \examples{
 \dontrun{
 my_intervals <- annotate_intervals(my_intervals, "mm10", min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
-table(my_intervals$peak_annot)
+table(my_intervals$peak_type)
+my_intervals[which(toupper(my_intervals$closest_tss) == 'PCNA'),]
 }
 }

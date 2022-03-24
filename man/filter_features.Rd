@@ -28,7 +28,11 @@ Remove ATAC peaks with low coverage, or that are too long etc.
 }
 \examples{
 \dontrun{
-my_scatac <- filter_features(my_scatac, "mm10", min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
-table(my_intervals$peak_annot)
+## quantiles of peak lengths before filtering
+quantile(my_scatac@peaks$end - my_scatac@peaks$start, (0:10)/10)
+my_scatac <- filter_features(scatac = my_scatac, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
+
+## quantiles of peak lengths after filtering
+quantile(my_scatac@peaks$end - my_scatac@peaks$start, (0:10)/10)
 }
 }

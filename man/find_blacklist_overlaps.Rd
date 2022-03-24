@@ -5,20 +5,20 @@
 \title{Find overlaps with ENCODE blacklists}
 \usage{
 find_blacklist_overlaps(
-  scatac = NULL,
-  mcatac = NULL,
+  atac = NULL,
   peaks = NULL,
-  genome = NULL
+  genome = NULL,
+  max_dist_to_blacklist_region = 0
 )
 }
 \arguments{
-\item{scatac}{(optional) an ScATAC object}
-
-\item{mcatac}{(optional) an McATAC object}
+\item{atac}{(optional) an ScATAC or McATAC object}
 
 \item{peaks}{(optional) the intervals set to check}
 
 \item{genome}{(optional, required if checking peaks directly) the interval set to check}
+
+\item{max_dist_to_blacklist_region}{(optional) distance to nearest blacklist region which still qualifies for being blacklisted}
 }
 \value{
 blacklist_overlaps - a PeakIntervals object with peaks identified as overlapping blacklisted regions
@@ -29,7 +29,7 @@ See https://doi.org/10.1038/s41598-019-45839-z for more details
 }
 \examples{
 \dontrun{
-blacklist_overlaps <- find_blacklist_overlaps(my_intervals, "mm10", min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
-table(my_intervals$peak_annot)
+blacklist_overlaps <- find_blacklist_overlaps(atac = my_mcatac, max_dist_to_blacklist_region = 100)
+blacklist_overlaps <- find_blacklist_overlaps(peaks = my_peak_set, genome = 'mm10')
 }
 }

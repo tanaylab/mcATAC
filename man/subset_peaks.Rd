@@ -15,6 +15,9 @@ subset_peaks(atac_mc, peak_set)
 \item a subset of peaks of \code{atac_mc@peaks} to keep
 }}
 }
+\value{
+the atac_mc object only with the peaks of interest (not saved in the "ignore_..." slots)
+}
 \description{
 Subset peaks of an McATAC object
 }

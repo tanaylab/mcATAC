@@ -36,11 +36,12 @@ annotate_peaks <- function(atac) {
 #' @param max_distal the maximum distance from any TSS, under which a peak is considered to be of a distal enhancer, and above which it is a 'desert' peak.
 #' @param exonic_peak_dist a parameter that allows proximity (without overlap) of peaks to exons that still classifies them as exonic peaks, as active transcription usually confers accessibility in the vicinity of exons, and this might confound a possible assignment of regulatory activity to an exon.
 #'
-#' @return intervals - the input intervals set with an added field called \code{peak_annot}
+#' @return intervals - the input intervals set with added fields {.code peak_type} and {.code closest_tss}
 #' @examples
 #' \dontrun{
 #' my_intervals <- annotate_intervals(my_intervals, "mm10", min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
-#' table(my_intervals$peak_annot)
+#' table(my_intervals$peak_type)
+#' my_intervals[which(toupper(my_intervals$closest_tss) == 'PCNA'),]
 #' }
 #' @export
 annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_proximal = 2e+04, min_distal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 0) {
@@ -72,6 +73,11 @@ annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_prox
     gene_body_df <- get_gene_body_df(tss, exons)
     nei_peak_gb <- gintervals.neighbors(intervals, gene_body_df, maxdist = 0, mindist = 0)
 
+    nei_peak_prom_all <- gintervals.neighbors(intervals, tss, mindist = -max_distal, maxdist = max_distal)
+    closest_tss <- deframe(nei_peak_prom_all[,c('peak_name', 'geneSymbol')])
+    closest_tss[!(intervals$peak_name %in% names(closest_tss))] <- NA
+    closest_tss <- closest_tss[order(match(names(closest_tss), intervals$peak_name))]
+
     prom_peaks <- nei_peak_prom$peak_name
     exon_peaks <- nei_peak_exon$peak_name[!(nei_peak_exon$peak_name %in% prom_peaks)]
     intron_peaks <- nei_peak_gb$peak_name[!(nei_peak_gb$peak_name %in% union(exon_peaks, prom_peaks))]
@@ -80,7 +86,7 @@ annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_prox
     cli_alert_info("Finding proximal intergenic peaks...")
     nei_peak_tss_prox <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, mindist = min_proximal, maxdist = max_proximal)
     nei_peak_tss_prox_neg <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, maxdist = -min_proximal, mindist = -max_proximal)
-    nei_peak_prox_all <- dplyr::anti_join(unique(rbind(nei_peak_tss_prox[, cn], nei_peak_tss_prox_neg[, cn])),
+    nei_peak_prox_all <- anti_join(unique(rbind(nei_peak_tss_prox[, cn], nei_peak_tss_prox_neg[, cn])),
         intervals[union(prom_peaks, union(exon_peaks, intron_peaks)), cn],
         by = c("chrom", "start", "end")
     )
@@ -89,7 +95,7 @@ annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_prox
     cli_alert_info("Finding distal intergenic peaks...")
     nei_peak_dist <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, mindist = min_distal, maxdist = max_distal)
     nei_peak_dist_neg <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, maxdist = -min_distal, mindist = -max_distal)
-    nei_peak_dist_all <- dplyr::anti_join(unique(rbind(nei_peak_dist[, cn], nei_peak_dist_neg[, cn])),
+    nei_peak_dist_all <- anti_join(unique(rbind(nei_peak_dist[, cn], nei_peak_dist_neg[, cn])),
         intervals[union(ig_prox_peaks, union(prom_peaks, union(exon_peaks, intron_peaks))), cn],
         by = c("chrom", "start", "end")
     )
@@ -109,7 +115,8 @@ annotate_intervals <- function(intervals, genome, min_proximal = 1e+03, max_prox
     class(intervals) <- orig_class
     intervals <- intervals %>%
         select(any_of(orig_fields)) %>%
-        mutate(peak_annot = res[order(match(names(res), intervals$peak_name))])
+        mutate(peak_annot = res[order(match(names(res), intervals$peak_name))],
+                closest_tss = closest_tss)
     return(intervals)
 }
 

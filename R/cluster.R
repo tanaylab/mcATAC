@@ -67,7 +67,7 @@ gen_atac_mc_clust <- function(atac_mc, use_prior_annot = TRUE, k = NULL, peak_se
 #'
 #' @param atac_mc - an McATAC object
 #' @param peak_set - a subset of peaks of \code{atac_mc@peaks} to keep
-#'
+#' @return the atac_mc object only with the peaks of interest (not saved in the "ignore_..." slots)
 #' @examples
 #' \dontrun{
 #' ## Use "default clustering" - the existing annotations
@@ -80,9 +80,8 @@ gen_atac_mc_clust <- function(atac_mc, use_prior_annot = TRUE, k = NULL, peak_se
 #' }
 #' @export
 subset_peaks <- function(atac_mc, peak_set) {
-    atac_mc@peaks$tmpID <- 1:nrow(atac_mc@peaks)
-    pks_filt <- dplyr::semi_join(atac_mc@peaks, peak_set, by = c("chrom", "start", "end"))
-    atac_mc@peaks <- atac_mc@peaks[pks_filt$tmpID, ]
-    atac_mc@mat <- atac_mc@mat[pks_filt$tmpID, ]
+    pks_filt <- semi_join(atac_mc@peaks, peak_set, by = c("chrom", "start", "end", "peak_name"))
+    atac_mc@peaks <- atac_mc@peaks[atac_mc@peaks$peak_name %in% pks_filt$peak_name, ]
+    atac_mc@mat <- atac_mc@mat[rownames(atac_mc@mat) %in% pks_filt$peak_name, ]
     return(atac_mc)
 }
