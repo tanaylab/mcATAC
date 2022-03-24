@@ -4,14 +4,30 @@
 \alias{plot_atac_peak_map}
 \title{Plot normalized accessibility of peaks over metacells, ordered by clustering}
 \usage{
-plot_atac_peak_map(mc_atac, mc_atac_clust, peak_clust)
+plot_atac_peak_map(
+  mc_atac,
+  mc_atac_clust,
+  filename,
+  peak_clust = NULL,
+  eps_q = 0.1,
+  height = NULL,
+  width = NULL
+)
 }
 \arguments{
 \item{mc_atac}{McATAC object}
 
-\item{mc_atac_clust}{output of \code{gen_atac_mc_clust}}
+\item{mc_atac_clust}{a clustering of metacells (e.g. output of {.code gen_atac_mc_clust})}
 
-\item{peak_clust}{output of \code{gen_atac_peak_clust}}
+\item{filename}{file name of saved image}
+
+\item{peak_clust}{(optional) output of \code{gen_atac_peak_clust}}
+
+\item{height}{height in pixels of saved image}
+
+\item{width}{width in pixels of saved image}
+
+\item{res}{resolution of saved image}
 }
 \description{
 Plot normalized accessibility of peaks over metacells, ordered by clustering

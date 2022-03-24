@@ -135,13 +135,38 @@ plot_atac_rna_cor <- function(mc_atac, rna_mat) {
 #' Plot normalized accessibility of peaks over metacells, ordered by clustering
 #'
 #' @param mc_atac McATAC object
-#' @param mc_atac_clust output of \code{gen_atac_mc_clust}
-#' @param peak_clust output of \code{gen_atac_peak_clust}
+#' @param mc_atac_clust a clustering of metacells (e.g. output of {.code gen_atac_mc_clust})
+#' @param filename file name of saved image
+#' @param peak_clust (optional) output of \code{gen_atac_peak_clust}
+#' @param height height in pixels of saved image
+#' @param width width in pixels of saved image
+#' @param res resolution of saved image
 #' @examples
 #' \dontrun{
 #'
 #' }
 #' @export
-plot_atac_peak_map <- function(mc_atac, mc_atac_clust, peak_clust) {
+plot_atac_peak_map <- function(mc_atac, mc_atac_clust, filename, peak_clust = NULL, eps_q = 0.1, height = NULL, width = NULL) {
     # the central heat map showing normalized accessibility of peaks over metacells, ordered by clustering
+    clrs = colorRampPalette(c('blue4', 'white', 'red4'))(100)
+    brks = c(seq(min(pmc_lfc), 0, l=50),
+        seq(0.01*(max(pmc_lfc) - min(pmc_lfc)), max(pmc_lfc), l=51))
+    col_annot <- tibble::column_to_rownames(mc_atac@metadata[,c('metacell', 'cell_type')])
+    ann_colors <- list('cell_type' = setNames(mc_atac@metadata[,'color'], mc_atac@metadata[,'cell_type']))
+    eps = quantile(rowMeans(mc_atac@mat), eps_q)
+    if (is.null(mc_atac_clust)) {
+        cli_abort('Must specify clustering of metacells (e.g. using {.code gen_atac_mc_clust})')
+    }
+    if (is.null(peak_clust)) {
+        cli_abort('Must specify clustering of peaks (e.g. using {.code gen_atac_peak_clust})')
+    }
+    mca_lfc = t(apply(mc_atac@mat, 1, function(x) log2((x + eps)/median(x + eps))))
+    colnames(mca_lfc) = 1:ncol(mca_lfc)
+    pp = pheatmap::pheatmap(pmc_lfc[order(peak_clust),mc_atac_clust], annotation_col = subset(col_annot, select = cell_type), 
+                        annotation_legend = FALSE,
+                        annotation_colors = ann_colors['cell_type'], 
+                        color = clrs, breaks = brks, cluster_cols = F, cluster_rows = F, show_colnames = F, show_rownames = F)
+    if (!dir.exists('./figs')) {dir.create('./figs')}
+    save_pheatmap_png(pp, glue::glue('./figs/{fn}'), height = height, width = width, res = res)
+    return(pp)
 }
