@@ -9,9 +9,9 @@
 #' pbmc_atac_mc <- annotate_peaks(pbmc_atac_mc)
 #' }
 #' @export
-annotate_peaks <- function(atac) {
+annotate_peaks <- function(atac) {    
     if (!methods::is(atac, "ATAC")) {
-        cli_abort("{.field atac} doesn't have a field called {.field peaks}. You can annotate intervals directly using the {.code annotate_intervals} function.")
+        cli_abort("{.field atac} is not an ScATAC or McATAC object. You can annotate intervals directly using the {.code annotate_intervals} function.")
     }
 
     atac@peaks <- annotate_intervals(atac@peaks, atac@genome)
