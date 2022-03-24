@@ -51,7 +51,7 @@ make_atac_object <- function(obj, mat, peaks, genome, metadata, metadata_id_fiel
     obj@peaks <- peaks
     obj@genome <- genome
     obj@ignore_peaks <- subset(peaks, subset = rep(FALSE, nrow(peaks)))
-    obj@ignore_pmat <- as(matrix(0, nrow = 0, ncol = ncol(atac_sc@mat)), 'dgCMatrix')
+    obj@ignore_pmat <- methods::as(matrix(0, nrow = 0, ncol = ncol(obj@mat)), 'dgCMatrix')
     validate_atac_object(obj)
     return(obj)
 }
