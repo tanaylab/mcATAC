@@ -144,7 +144,7 @@ plot_atac_rna_cor <- function(mc_atac, rna_mat) {
 #'
 #' }
 #' @export
-plot_atac_peak_map <- function(mc_atac, mc_atac_clust, filename, peak_clust = NULL, eps_q = 0.1, ...) {
+plot_atac_peak_map <- function(mc_atac, mc_atac_clust, filename, peak_clust, eps_q = 0.1, ...) {
     # the central heat map showing normalized accessibility of peaks over metacells, ordered by clustering
     clrs = colorRampPalette(c('blue4', 'white', 'red4'))(100)
     col_annot <- tibble::column_to_rownames(mc_atac@metadata[,c('metacell', 'cell_type')], 'metacell')
