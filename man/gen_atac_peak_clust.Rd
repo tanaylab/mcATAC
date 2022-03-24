@@ -41,7 +41,7 @@ Cluster atac peaks based on atac distributions
 }
 \examples{
 \dontrun{
-my_atac_mc <- gen_atac_peak_clust(my_atac_mc, )
+my_atac_mc <- gen_atac_peak_clust(my_atac_mc, k = 16)
 }
 
 }

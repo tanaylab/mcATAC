@@ -2,7 +2,6 @@
 #' Cluster atac peaks based on atac distributions
 #'
 #' @param atac_mc a McATAC object
-#' @param peak_set a PeakIntervals object (or a misha intervals set). if NULL - the peaks from \code{atac_mc} would be used.
 #' @param k number of clusters
 #' @param peak_set - (optional) a subset of peaks of \code{atac_mc@peaks} on which to cluster
 
@@ -11,7 +10,7 @@
 
 #' @examples
 #' \dontrun{
-#' my_atac_mc <- gen_atac_peak_clust(my_atac_mc, )
+#' my_atac_mc <- gen_atac_peak_clust(my_atac_mc, k = 16)
 #' }
 #'
 #' @export

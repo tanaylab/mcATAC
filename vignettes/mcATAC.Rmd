@@ -33,12 +33,16 @@ if (!dir.exists("pbmc_data")){
 }
 ```
 
-
 ## Import ATAC dataset
 
 ```{r import}
 atac_sc <- import_from_10x("pbmc_data", genome = "hg38")
 atac_sc
+```
+
+## Filter peaks by coverage and/or length
+```{r filter-peaks}
+atac_sc <- filter_features(scatac = atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
 ```
 
 
@@ -50,10 +54,33 @@ head(cell_to_metacell_pbmc_example)
 atac_mc <- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example)
 ```
 
+## Import annotations
+```{r import-annotations}
+atac_mc@metadata <- data(mcmd)
+```
+
 Or using a metacell1 object: 
 ```{r project-mc1, eval = FALSE}
 atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")
 ```
+
+## Identify dynamic peaks
+```{r dynamic-peaks}
+dyn_peaks <- identify_dynamic_peaks(mcatac = atac_mc, mean_thresh_q = 0.05)
+```
+
+## Cluster a peak set
+```{r cluster-peaks}
+atac_mc <- gen_atac_peak_clust(atac_mc, dyn_peaks)
+```
+
+## Export dynamic peaks to UCSC tracks
+```{r cluster-peaks}
+export_atac_clust_ucsc(mc_atac = mc1, track_prefix = 'hum_pbmc_10x', normalization = 'lfcom')
+```
+
+![UCSC track example](/vignettes/ucsc_output_example.png "Example of UCSC output on human PBMC data from 10X Genomics")
+
 
 
 ## Export to an h5ad file

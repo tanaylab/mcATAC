@@ -48,8 +48,8 @@ annotate_intervals <- function(intervals, genome,
                                 min_proximal = 1e+03, max_proximal = 2e+04, 
                                 min_distal = 2e+04, max_distal = 1e+06, 
                                 exonic_peak_dist = 0, 
-                                tss <- gintervals.load("intervs.global.tss"),
-                                exons <- gintervals.load("intervs.global.exon")
+                                tss = gintervals.load("intervs.global.tss"),
+                                exons = gintervals.load("intervs.global.exon")
                                 ) {
 
     if (missing(genome)) {

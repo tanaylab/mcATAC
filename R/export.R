@@ -165,18 +165,19 @@ write_cluster_misha_track <- function(cl, atac_mc_mat_clust, track_prefix, descr
 #' @export
 prepare_clusters <- function(mc_atac, clust_vec = NULL, normalization = "none", eps_q = 0.05) {
     if (is.null(clust_vec)) {
-        if (!all(has_name(mc_atac@metadata, c("cell_type", "cluster")))) {
+        if (!any(has_name(mc_atac@metadata, c("cell_type", "cluster")))) {
             cli_abort('There is no "cell_type" or "cluster" field in metadata and no clustering vector was supplied')
-        } else if (has_name("^cell_type$", colnames(mc_atac@metadata))) {
+        } else if (has_name(mc_atac@metadata, "cell_type")) {
             clust_vec <- unlist(mc_atac@metadata$cell_type)
-        } else if (has_name("^cluster_k_", colnames(mc_atac@metadata))) {
-            clust_vec <- unlist(mc_atac@metadata[, grep("^cluster_k_", colnames(mc_atac@metadata))[[1]]])
+        } else if (has_name(mc_atac@metadata, "cluster_")) {
+            clust_vec <- unlist(mc_atac@metadata[, grep("cluster_", colnames(mc_atac@metadata))[[1]]])
         } else {
-            cli_warn(glue::glue("No clustering vector identified. Clustering with k == {round(ncol(atac_mc)/10)"))
-            clust_vec <- gen_atac_mc_clust(atac_mc, k = round(ncol(atac_mc) / 10))
+            print(round(ncol(mc_atac@mat)/10))
+            cli_warn(glue::glue("No clustering vector identified. Clustering with k == {round(ncol(mc_atac@mat)/10)}"))
+            clust_vec <- gen_atac_mc_clust(mc_atac, k = round(ncol(mc_atac@mat) / 10))
         }
     }
-    if (!has_name("color", colnames(mc_atac@metadata))) {
+    if (!has_name(mc_atac@metadata, "color")) {
         num_clrs <- length(unique(clust_vec))
         col_key <- setNames(chameleon::distinct_colors(num_clrs)$name, sort(unique(clust_vec)))
     } else {

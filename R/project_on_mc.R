@@ -23,7 +23,6 @@
 #' @export
 project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5, mc_size_eps_q = 0.1) {
     cell_to_metacell <- deframe(cell_to_metacell)
-
     assert_that(all(names(cell_to_metacell) %in% colnames(atac@mat)))
     sc_mat <- atac@mat[, colnames(atac@mat) %in% names(cell_to_metacell), drop = FALSE]
     n_removed_cells <- ncol(atac@mat) - ncol(sc_mat)
@@ -51,7 +50,7 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, m
     return(mc_atac)
 }
 
-#'
+#' @param atac an ScATAC object
 #' @param scdb a metacell1 \code{scdb} path
 #' @param mc_id id of the metacell object within \code{scdb}
 #'
@@ -63,10 +62,14 @@ project_atac_on_mc_from_metacell1 <- function(atac, scdb, mc_id, metadata = NULL
     cell_to_metacell <- rna_mc@mc %>%
         enframe("cell_id", "metacell") %>%
         as_tibble()
-
-    # TODO: when rna_mc@colors and rna_mc@color_key exist - add them as metadata
-
-    return(project_atac_on_mc(atac, cell_to_metacell))
+    if (!is.null(rna_mc@colors)) {
+        md <- enframe(rna_mc@colors, name = 'metacell', value = 'color')
+    }
+    if (!is.null(rna_mc@color_key)) {
+        md <- enframe(rna_mc@colors, name = 'metacell', value = 'color')
+        md$cell_type <- rna_mc@color_key$cell_type[match(md$color, rna_mc@color_key$color)]
+    }
+    return(project_atac_on_mc(atac, cell_to_metacell, metadata = md))
 }
 
 #' @param atac an ScATAC object
