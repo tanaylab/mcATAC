@@ -113,12 +113,16 @@ import_from_10x <- function(dir, genome, metadata = NULL, matrix_fn = file.path(
     atac_mat <- mat[atac_peaks$peak_name, ]
     non_zero_inds <- which(Matrix::rowSums(atac_mat) > 0)
     atac_peaks <- atac_peaks[non_zero_inds, ]
+    n_all_zero <- nrow(atac_mat) - length(non_zero_inds)
     atac_mat <- atac_mat[non_zero_inds, ]
 
-    cli_alert_info("{.val {nrow(atac_mat)}} ATAC peaks")
+    if (n_all_zero > 0) {
+        cli_alert_info("Removed {.val {nrow(atac_mat)}} ATAC peaks which were all zero")
+    }
 
+    cli_alert_info("{.val {nrow(atac_mat)}} ATAC peaks")
     res <- new("ScATAC", atac_mat, atac_peaks, genome = genome, metadata = metadata)
-    cli_alert_success("successfully imported to an ScATAC object with {.val {ncol(atac_mat)}} cells and {.val {nrow(atac_mat)}} ATAC peaks")
+    cli_alert_success("successfully imported to an ScATAC object with {.val {ncol(res@mat)}} cells and {.val {nrow(res@mat)}} ATAC peaks")
 
     return(res)
 }

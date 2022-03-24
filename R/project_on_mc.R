@@ -10,7 +10,6 @@
 #' part of.
 #' @param metadata per-metacell metadata. A data frame with a column called 'metacell' and additional metacell annotations.
 #' @param min_int_frac (optional) minimal expected fraction of intersection of barcodes (cell names) in ScATAC
-#' @param mc_size_eps_q (optional) quantile of MC size (in UMIs) to add as epsilon for regularizing accessibility across MCs
 #'
 #' @return an McATAC object
 #'
@@ -21,7 +20,7 @@
 #' }
 #'
 #' @export
-project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5, mc_size_eps_q = 0.1) {
+project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5) {
     cell_to_metacell <- deframe(cell_to_metacell)
     assert_that(all(names(cell_to_metacell) %in% colnames(atac@mat)))
     sc_mat <- atac@mat[, colnames(atac@mat) %in% names(cell_to_metacell), drop = FALSE]
@@ -32,12 +31,13 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, m
             cli_abort("Intersect of ATAC mat colnames and mc names is less than {.field {scales::percent(min_int_frac)}}. Make sure you are projecting the right objects. To override - set {.code min_int_frac=0}")
         }
     }
-    non_zero_peaks <- which(Matrix::rowSums(sc_mat) > 0)
-    sc_sizes <- Matrix::colSums(sc_mat)
-    mc_sizes <- tapply(sc_sizes, cell_to_metacell, sum)
-    eps <- quantile(mc_sizes, mc_size_eps_q)
+
+    non_zero_peaks <- Matrix::rowSums(sc_mat) > 0
+    if (sum(!non_zero_peaks) > 0) {
+        cli_alert_info("Removed {.val {sum(!non_zero_peaks)}} all-zero peaks")
+    }
     mc_mat <- t(tgs_matrix_tapply(sc_mat[non_zero_peaks, ], cell_to_metacell, mean))
-    # mc_mat <- t(apply(mc_mat, 1, function(x) log2((x + eps)/median(x + eps))))
+
     assert_that(are_equal(atac@peaks$peak_name[non_zero_peaks], rownames(mc_mat)))
     assert_that(all(colnames(mc_mat) %in% cell_to_metacell))
 

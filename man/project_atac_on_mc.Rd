@@ -10,8 +10,7 @@ project_atac_on_mc(
   atac,
   cell_to_metacell = NULL,
   metadata = NULL,
-  min_int_frac = 0.5,
-  mc_size_eps_q = 0.1
+  min_int_frac = 0.5
 )
 
 project_atac_on_mc_from_metacell1(atac, scdb, mc_id, metadata = NULL)
@@ -27,8 +26,6 @@ part of.}
 \item{metadata}{per-metacell metadata. A data frame with a column called 'metacell' and additional metacell annotations.}
 
 \item{min_int_frac}{(optional) minimal expected fraction of intersection of barcodes (cell names) in ScATAC}
-
-\item{mc_size_eps_q}{(optional) quantile of MC size (in UMIs) to add as epsilon for regularizing accessibility across MCs}
 
 \item{scdb}{a metacell1 \code{scdb} path}
 
