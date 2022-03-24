@@ -166,16 +166,23 @@ setMethod(
     "show",
     signature = "McATAC",
     definition = function(object) {
-        cli::cli_text("An McATAC object with {.val {ncol(object@mat)}} metacells {.val {nrow(object@mat)}} ATAC peaks.")
-        cli::cli_text("Slots include:")
-        cli_ul(c("{.code @mat}: a numeric matrix where rows are peaks and columns are metacells. Can be a sparse matrix."))
-        cli_ul(c("{.code @peaks}: a misha intervals set with the peak definitions."))
-        cli_ul(c("{.code @genome}: genome assembly of the peaks"))
-        if (!is.null(object@metadata)) {
-            cli_ul(c("{.code @metadata}: a tibble with a column called 'metacell' and additional metacell annotations."))
-        }
+        print_atac_object(object, "McATAC", "metacell", "metacell")
     }
 )
+
+print_atac_object <- function(object, object_type, column_type, md_column) {
+    cli::cli_text("An {object_type} object with {.val {ncol(object@mat)}} {column_type}s and {.val {nrow(object@mat)}} ATAC peaks from {.field {object@genome}}.")
+    cli::cli_text("Slots include:")
+    cli_ul(c("{.code @mat}: a numeric matrix where rows are peaks and columns are {column_type}s. Can be a sparse matrix."))
+    cli_ul(c("{.code @peaks}: a misha intervals set with the peak definitions."))
+    cli_ul(c("{.code @genome}: genome assembly of the peaks"))
+    if (!is.null(object@metadata)) {
+        cli_ul(c("{.code @metadata}: a tibble with a column called '{md_column}' and additional {column_type} annotations."))
+    }
+    if (nrow(object@ignore_peaks) > 0) {
+        cli_alert("{.val {nrow(object@ignore_peaks)}} peaks are ignored. You can access them at {.code @ignore_peaks} and {.code @ignore_pmat}")
+    }
+}
 
 
 #' ScATAC
@@ -219,20 +226,14 @@ setMethod(
     "show",
     signature = "ScATAC",
     definition = function(object) {
-        cli::cli_text("An ScATAC object with {.val {ncol(object@mat)}} cells {.val {nrow(object@mat)}} ATAC peaks from {.field {object@genome}}.")
-        cli::cli_text("Slots include:")
-        cli_ul(c("{.code @mat}: a numeric matrix where rows are peaks and columns are cells. Can be a sparse matrix."))
-        cli_ul(c("{.code @peaks}: a misha intervals set with the peak definitions."))
-        cli_ul(c("{.code @genome}: genome assembly of the peaks"))
-        if (!is.null(object@metadata)) {
-            cli_ul(c("{.code @metadata}: a tibble with a column called 'cell_id' and additional cell annotations."))
-        }
+        print_atac_object(object, "ScATAC", "cell", "cell_id")
     }
 )
 
+
 #' Set ignored (i.e. blacklisted) peaks
 #'
-#' Given a list of peaks to ignore, this will cancel any previous policy for blacklisting and remove the given peaks from the {.code ignore_peaks} and {.code ignore_pmat} slots.
+#' Given a list of peaks to ignore, this will cancel any previous policy for blacklisting and remove the given peaks from the {.code ignore_peaks} and {.code ignore_pmat} slots. Note that the matrix and peaks would be reordered.
 #'
 #' @param atac an ScATAC or McATAC object
 #' @param ig_peaks a PeakIntervals object, or vector of peak names to ignore
@@ -243,19 +244,21 @@ setMethod(
 #'
 #' }
 #' @export
+atac_ignore_peaks <- function(atac, ig_peaks) {
+    assert_atac_object(atac_sc, "atac")
 
-atac_ignore_peaks <- function(atac = NULL, ig_peaks) {
-    if (missing(atac)) {
-        cli_abort('"atac" must be an ScATAC or McATAC object')
-    }
     if (is.null(ig_peaks) || length(ig_peaks) == 0) {
         cli_abort("Peaks to ignore should be specified (they are either NULL or length 0)")
     }
+
     if (is.null(dim(ig_peaks)) && length(ig_peaks) > 0 && is.character(ig_peaks)) {
         ig_peaks <- misha.ext::convert_10x_peak_names_to_misha_intervals(ig_peaks)
     }
+
+    ig_peaks <- ig_peaks %>% distinct(chrom, start, end, peak_name)
+
     atac@mat <- rbind(atac@mat, atac@ignore_pmat)
-    peaks_merge <- rbind(atac@peaks, atac@ignore_peaks)
+    peaks_merge <- bind_rows(atac@peaks, atac@ignore_peaks)
     cn <- c("chrom", "start", "end", "peak_name")
     new_ord <- with(peaks_merge, order(chrom, start))
     atac@mat <- atac@mat[new_ord, ]
@@ -263,8 +266,17 @@ atac_ignore_peaks <- function(atac = NULL, ig_peaks) {
     atac@peaks$temp_intID <- 1:nrow(atac@peaks)
     good_peaks <- anti_join(atac@peaks, ig_peaks, by = cn)
     atac@ignore_peaks <- semi_join(atac@peaks, ig_peaks, by = cn)
-    atac@ignore_pmat <- atac@mat[!(atac@peaks$temp_intID %in% atac@ignore_peaks$temp_intID), ]
+    atac@ignore_pmat <- atac@mat[atac@peaks$temp_intID %in% atac@ignore_peaks$temp_intID, ]
     atac@mat <- atac@mat[atac@peaks$temp_intID %in% good_peaks$temp_intID, ]
-    atac@peaks <- good_peaks[, cn]
+    atac@peaks <- good_peaks %>%
+        select(any_of(cn), everything()) %>%
+        select(-temp_intID)
+    atac@ignore_peaks <- atac@ignore_peaks %>% select(-temp_intID)
+
+    n_removed_peaks <- nrow(ig_peaks)
+    n_good_peaks <- nrow(atac@peaks)
+    n_tot_peaks <- n_removed_peaks + n_good_peaks
+
+    cli_alert_success("Removed {.val {n_removed_peaks}} peaks out of {.val {n_tot_peaks}} {.field ({scales::percent(n_removed_peaks/n_tot_peaks)})}. The object is left with {.val {n_good_peaks}} peaks.")
     return(atac)
 }

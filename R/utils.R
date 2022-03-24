@@ -16,3 +16,9 @@ check_files_exist <- function(files) {
 is_sparse_matrix <- function(mat) {
     return(methods::is(mat, "sparseMatrix"))
 }
+
+assert_atac_object <- function(obj, param) {
+    if (!methods::is(obj, "ATAC")) {
+        cli_abort("{.field {param}} must be an ScATAC or McATAC object")
+    }
+}

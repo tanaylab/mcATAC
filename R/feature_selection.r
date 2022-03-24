@@ -35,8 +35,17 @@ filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NU
     } else {
         too_long_peaks <- c()
     }
-    peaks_to_remove <- c(low_max_peaks, too_short_peaks, too_long_peaks)
+    peaks_to_remove <- unique(c(low_max_peaks, too_short_peaks, too_long_peaks))
     if (length(peaks_to_remove) > 0) {
+        if (length(low_max_peaks) > 0) {
+            cli::cli_li("{.val {length(low_max_peaks)}} features had a maximal UMI count less than {.field {minimal_max_umi}}")
+        }
+        if (length(too_short_peaks) > 0) {
+            cli::cli_li("{.val {length(too_short_peaks)}} features were shorter than {.field {min_peak_length}bp}")
+        }
+        if (length(too_long_peaks) > 0) {
+            cli::cli_li("{.val {length(too_long_peaks)}} features were longer than {.field {max_peak_length}bp}")
+        }
         scatac <- atac_ignore_peaks(scatac, peaks_to_remove)
     } else {
         cli_alert_warning("No peaks that violate the criteria were found. Returning original object")
