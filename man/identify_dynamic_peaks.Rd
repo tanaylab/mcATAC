@@ -37,8 +37,8 @@ This function identifies "dynamic" peaks, i.e. those that have high expression o
 }
 \examples{
 \dontrun{
-dynamic_peaks_by_bmq <- identify_dynamic_peaks(mcatac = my_mcatac, method = 'bmq',  mean_thresh_q = 0.1, cov_q_thresh = 0.6, num_bins = 100)
-dynamic_peaks_by_gmm <- identify_dynamic_peaks(mcatac = my_mcatac, method = 'gmm', gmm_g = 3)
+dynamic_peaks_by_bmq <- identify_dynamic_peaks(mcatac = my_mcatac, method = "bmq", mean_thresh_q = 0.1, cov_q_thresh = 0.6, num_bins = 100)
+dynamic_peaks_by_gmm <- identify_dynamic_peaks(mcatac = my_mcatac, method = "gmm", gmm_g = 3)
 table(my_intervals$peak_annot)
 }
 }

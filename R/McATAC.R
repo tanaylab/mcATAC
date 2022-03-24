@@ -51,7 +51,7 @@ make_atac_object <- function(obj, mat, peaks, genome, metadata, metadata_id_fiel
     obj@peaks <- peaks
     obj@genome <- genome
     obj@ignore_peaks <- subset(peaks, subset = rep(FALSE, nrow(peaks)))
-    obj@ignore_pmat <- methods::as(matrix(0, nrow = 0, ncol = ncol(obj@mat)), 'dgCMatrix')
+    obj@ignore_pmat <- methods::as(matrix(0, nrow = 0, ncol = ncol(obj@mat)), "dgCMatrix")
     validate_atac_object(obj)
     return(obj)
 }
@@ -232,39 +232,39 @@ setMethod(
 
 #' Set ignored (i.e. blacklisted) peaks
 #'
-#' Given a list of peaks to ignore, this will cancel any previous policy for blacklisting and remove the given peaks from the {.code ignore_peaks} and {.code ignore_pmat} slots. 
+#' Given a list of peaks to ignore, this will cancel any previous policy for blacklisting and remove the given peaks from the {.code ignore_peaks} and {.code ignore_pmat} slots.
 #'
 #' @param atac an ScATAC or McATAC object
 #' @param ig_peaks a PeakIntervals object, or vector of peak names to ignore
 #'
-#' @return 
+#' @return
 #' @examples
 #' \dontrun{
-#' 
+#'
 #' }
 #' @export
 
 atac_ignore_peaks <- function(atac = NULL, ig_peaks) {
-	if(missing(atac)) {
-		cli_abort('"atac" must be an ScATAC or McATAC object')
-	}
-    if(is.null(ig_peaks) || length(ig_peaks) == 0) {
-		cli_abort("Peaks to ignore should be specified (they are either NULL or length 0)")
-	}
+    if (missing(atac)) {
+        cli_abort('"atac" must be an ScATAC or McATAC object')
+    }
+    if (is.null(ig_peaks) || length(ig_peaks) == 0) {
+        cli_abort("Peaks to ignore should be specified (they are either NULL or length 0)")
+    }
     if (is.null(dim(ig_peaks)) && length(ig_peaks) > 0 && is.character(ig_peaks)) {
         ig_peaks <- misha.ext::convert_10x_peak_names_to_misha_intervals(ig_peaks)
     }
     atac@mat <- rbind(atac@mat, atac@ignore_pmat)
     peaks_merge <- rbind(atac@peaks, atac@ignore_peaks)
-    cn <- c('chrom', 'start', 'end', 'peak_name')
+    cn <- c("chrom", "start", "end", "peak_name")
     new_ord <- with(peaks_merge, order(chrom, start))
-	atac@mat <- atac@mat[new_ord,]
-    atac@peaks <- peaks_merge[new_ord,]
+    atac@mat <- atac@mat[new_ord, ]
+    atac@peaks <- peaks_merge[new_ord, ]
     atac@peaks$temp_intID <- 1:nrow(atac@peaks)
-    good_peaks = anti_join(atac@peaks, ig_peaks, by = cn)
+    good_peaks <- anti_join(atac@peaks, ig_peaks, by = cn)
     atac@ignore_peaks <- semi_join(atac@peaks, ig_peaks, by = cn)
-    atac@ignore_pmat <- atac@mat[!(atac@peaks$temp_intID %in% atac@ignore_peaks$temp_intID),]
-    atac@mat <- atac@mat[atac@peaks$temp_intID %in% good_peaks$temp_intID,]
-	atac@peaks <- good_peaks[,cn]
-	return(atac)
+    atac@ignore_pmat <- atac@mat[!(atac@peaks$temp_intID %in% atac@ignore_peaks$temp_intID), ]
+    atac@mat <- atac@mat[atac@peaks$temp_intID %in% good_peaks$temp_intID, ]
+    atac@peaks <- good_peaks[, cn]
+    return(atac)
 }

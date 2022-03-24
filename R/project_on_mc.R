@@ -36,7 +36,7 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, m
     sc_sizes <- Matrix::colSums(sc_mat)
     mc_sizes <- tapply(sc_sizes, cell_to_metacell, sum)
     eps <- quantile(mc_sizes, mc_size_eps_q)
-    mc_mat <- t(tgs_matrix_tapply(sc_mat[non_zero_peaks,], cell_to_metacell, mean))
+    mc_mat <- t(tgs_matrix_tapply(sc_mat[non_zero_peaks, ], cell_to_metacell, mean))
     # mc_mat <- t(apply(mc_mat, 1, function(x) log2((x + eps)/median(x + eps))))
     assert_that(are_equal(atac@peaks$peak_name[non_zero_peaks], rownames(mc_mat)))
     assert_that(all(colnames(mc_mat) %in% cell_to_metacell))
@@ -44,7 +44,7 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, m
     # TODO: deal with cell metadata
     # Naive solution - tabulate metadata per metacell and concatenate...
 
-    mc_atac <- new("McATAC", mc_mat, atac@peaks[non_zero_peaks,], atac@genome, metadata)
+    mc_atac <- new("McATAC", mc_mat, atac@peaks[non_zero_peaks, ], atac@genome, metadata)
     cli_alert_success("Created a new McATAC object with {.val {ncol(mc_atac@mat)}} metacells and {.val {nrow(mc_atac@mat)}} ATAC peaks.")
 
     return(mc_atac)
@@ -63,10 +63,10 @@ project_atac_on_mc_from_metacell1 <- function(atac, scdb, mc_id, metadata = NULL
         enframe("cell_id", "metacell") %>%
         as_tibble()
     if (!is.null(rna_mc@colors)) {
-        md <- enframe(rna_mc@colors, name = 'metacell', value = 'color')
+        md <- enframe(rna_mc@colors, name = "metacell", value = "color")
     }
     if (!is.null(rna_mc@color_key)) {
-        md <- enframe(rna_mc@colors, name = 'metacell', value = 'color')
+        md <- enframe(rna_mc@colors, name = "metacell", value = "color")
         md$cell_type <- rna_mc@color_key$cell_type[match(md$color, rna_mc@color_key$color)]
     }
     return(project_atac_on_mc(atac, cell_to_metacell, metadata = md))

@@ -102,12 +102,12 @@ export_atac_clust_misha <- function(mc_atac, track_prefix, description = NULL, c
     }
     if (parallel) {
         track_names <- parallel::mclapply(seq_along(res_lst$clusts), function(cl, i) {
-              write_cluster_misha_track(cl[[i]], res_lst$atac_mc_mat_clust, track_prefix, description = description[[i]])
-          }, cl = res_lst$clusts, mc.cores = num_cores)
+            write_cluster_misha_track(cl[[i]], res_lst$atac_mc_mat_clust, track_prefix, description = description[[i]])
+        }, cl = res_lst$clusts, mc.cores = num_cores)
     } else {
         track_names <- sapply(seq_along(res_lst$clusts), function(cl, i) {
-              write_cluster_misha_track(cl[[i]], res_lst$atac_mc_mat_clust, track_prefix, description = description[[i]])
-          }, cl = res_lst$clusts)
+            write_cluster_misha_track(cl[[i]], res_lst$atac_mc_mat_clust, track_prefix, description = description[[i]])
+        }, cl = res_lst$clusts)
     }
     gdb.reload()
     return(track_names)
@@ -172,7 +172,7 @@ prepare_clusters <- function(mc_atac, clust_vec = NULL, normalization = "none", 
         } else if (has_name(mc_atac@metadata, "cluster_")) {
             clust_vec <- unlist(mc_atac@metadata[, grep("cluster_", colnames(mc_atac@metadata))[[1]]])
         } else {
-            print(round(ncol(mc_atac@mat)/10))
+            print(round(ncol(mc_atac@mat) / 10))
             cli_warn(glue::glue("No clustering vector identified. Clustering with k == {round(ncol(mc_atac@mat)/10)}"))
             clust_vec <- gen_atac_mc_clust(mc_atac, k = round(ncol(mc_atac@mat) / 10))
         }

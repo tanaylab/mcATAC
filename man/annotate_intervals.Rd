@@ -10,7 +10,7 @@ annotate_intervals(
   min_proximal = 1000,
   max_proximal = 20000,
   min_distal = 20000,
-  max_distal = 1e+06,
+  max_distal = 1000000,
   exonic_peak_dist = 0,
   tss = gintervals.load("intervs.global.tss"),
   exons = gintervals.load("intervs.global.exon")
@@ -47,6 +47,6 @@ Desert peaks are at least \code{max_distal} from any known TSS (as defined by th
 \dontrun{
 my_intervals <- annotate_intervals(my_intervals, "mm10", min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
 table(my_intervals$peak_type)
-my_intervals[which(toupper(my_intervals$closest_tss) == 'PCNA'),]
+my_intervals[which(toupper(my_intervals$closest_tss) == "PCNA"), ]
 }
 }
