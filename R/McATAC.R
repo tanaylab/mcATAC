@@ -245,7 +245,7 @@ setMethod(
 #' }
 #' @export
 atac_ignore_peaks <- function(atac, ig_peaks) {
-    assert_atac_object(atac_sc, "atac")
+    assert_atac_object(atac)
 
     if (is.null(ig_peaks) || length(ig_peaks) == 0) {
         cli_abort("Peaks to ignore should be specified (they are either NULL or length 0)")

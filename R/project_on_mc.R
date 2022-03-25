@@ -21,6 +21,7 @@
 #'
 #' @export
 project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5) {
+    assert_atac_object(atac)
     cell_to_metacell <- deframe(cell_to_metacell)
     assert_that(all(names(cell_to_metacell) %in% colnames(atac@mat)))
     sc_mat <- atac@mat[, colnames(atac@mat) %in% names(cell_to_metacell), drop = FALSE]
@@ -57,6 +58,7 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, m
 #' @export
 #' @rdname project_atac_on_mc
 project_atac_on_mc_from_metacell1 <- function(atac, scdb, mc_id, metadata = NULL) {
+    assert_atac_object(atac)
     metacell::scdb_init(scdb, force_reinit = TRUE)
     rna_mc <- metacell::scdb_mc(mc_id)
     cell_to_metacell <- rna_mc@mc %>%
@@ -78,6 +80,7 @@ project_atac_on_mc_from_metacell1 <- function(atac, scdb, mc_id, metadata = NULL
 #' @export
 #' @rdname project_atac_on_mc
 project_atac_on_mc_from_h5ad <- function(atac, h5ad_file, metadata = NULL) {
+    assert_atac_object(atac)
     cli_alert_info("Reading {.file {h5ad_file}}")
     adata <- anndata::read_h5ad(h5ad_file)
     if (!("metacell" %in% colnames(adata$obs))) {

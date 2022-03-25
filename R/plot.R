@@ -24,7 +24,7 @@ plot_atac_rna <- function(mc_atac, mc_rna, gene, peak = NULL, max_dist_to_promot
 
     ### Placeholder for checking class of mc_rna
     if (class(mc) == "tgMCCov") {
-        eps_rna <- quantile(rowMeans(mc_rna@e_gc), 0.05)
+        eps_rna <- quantile(Matrix::rowMeans(mc_rna@e_gc), 0.05)
         rv <- log2(mc_rna@e_gc[gene, ] + eps_rna)
     }
     # else if (mc_rna is a metacells metacell UMI matrix) {

@@ -183,7 +183,7 @@ prepare_clusters <- function(mc_atac, clust_vec = NULL, normalization = "none", 
     } else {
         col_key <- tibble::deframe(unique(mc_atac@metadata[, c("cell_type", "color")]))
     }
-    eps <- quantile(rowMeans(mc_atac@mat), eps_q)
+    eps <- quantile(Matrix::rowMeans(mc_atac@mat), eps_q)
     if (normalization == "lfcom") {
         atac_mc_mat <- t(apply(mc_atac@mat, 1, function(x) log2((x + eps) / median(x + eps))))
         cli_alert_info("Using eps_q={eps_q} and eps = {eps} for regularization")

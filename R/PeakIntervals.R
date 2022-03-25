@@ -102,5 +102,5 @@ peak_names <- function(peaks) {
 #'
 #' @export
 gen_peak_features <- function(atac, min_fold, min_abs, only_promoters = FALSE, upstream = 500, downstream = 50) {
-
+    assert_atac_object(atac)
 }
