@@ -60,17 +60,21 @@ export_to_h5ad <- function(object, out_file, ...) {
 #' @export
 export_atac_clust_ucsc <- function(mc_atac, track_prefix, output_dir = getwd(), clust_vec = NULL, normalization = "none") {
     res_lst <- prepare_clusters(mc_atac, clust_vec, normalization)
-    purrr::walk(res_lst$clusts, function(cl) {
+    fns <- purrr::map_chr(res_lst$clusts, function(cl) {
         atac_vec <- res_lst$atac_mc_mat_clust[, cl]
+        fn <- file.path(output_dir, paste0(track_prefix, "_", gsub("\\/", "_", cl), ".ucsc"))
         misha.ext::fwrite_ucsc(
             intervals = mutate(mc_atac@peaks, "score" = atac_vec),
-            file = file.path(output_dir, paste0(track_prefix, "_", gsub("\\/", "_", cl), ".ucsc")),
+            file = fn,
             name = paste0(track_prefix, "_", cl),
             color = res_lst$col_key[[as.character(cl)]],
             type = "bedGraph",
             description = glue::glue("UCSC track for cluster {cl} of dataset {track_prefix}")
         )
+        return(fn)
     })
+    cli_alert_success("Successfully exported to ucsc. Files generated:")
+    purrr::walk(fns, cli_ul)
 }
 
 
