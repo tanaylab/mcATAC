@@ -75,7 +75,7 @@ table(peak_clust)
 ```
 
 ## Export dynamic peaks to UCSC tracks
-```{r cluster-peaks}
+```{r export-to-ucsc}
 outdir <- tempdir()
 export_atac_clust_ucsc(mc_atac = atac_mc, track_prefix = 'hum_pbmc_10x', normalization = 'lfcom', output_dir = outdir)
 ```
