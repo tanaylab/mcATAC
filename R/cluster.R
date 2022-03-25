@@ -19,7 +19,7 @@ gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL, ...) {
     if (!is.null(peak_set)) {
         atac_mc <- subset_peaks(atac_mc, peak_set)
     }
-    atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(atac_mc@mat), k, ...)
+    atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(atac_mc@mat), k, id_column = FALSE, ...)
     return(setNames(atac_peak_km$cluster, rownames(atac_mc@mat)))
 }
 
