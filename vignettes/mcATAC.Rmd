@@ -70,12 +70,14 @@ dyn_peaks <- identify_dynamic_peaks(mcatac = atac_mc, mean_thresh_q = 0.05)
 
 ## Cluster a peak set
 ```{r cluster-peaks}
-atac_mc <- gen_atac_peak_clust(atac_mc, dyn_peaks)
+peak_clust <- gen_atac_peak_clust(atac_mc, k = 30, peak_set = dyn_peaks)
+table(peak_clust)
 ```
 
 ## Export dynamic peaks to UCSC tracks
 ```{r cluster-peaks}
-export_atac_clust_ucsc(mc_atac = atac_mc, track_prefix = 'hum_pbmc_10x', normalization = 'lfcom')
+outdir <- tempdir()
+export_atac_clust_ucsc(mc_atac = atac_mc, track_prefix = 'hum_pbmc_10x', normalization = 'lfcom', output_dir = outdir)
 ```
 
 ![UCSC track example](/vignettes/ucsc_output_example.png "Example of UCSC output on human PBMC data from 10X Genomics")
