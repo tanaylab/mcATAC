@@ -8,7 +8,7 @@
 #' @param atac an ScATAC object
 #' @param cell_to_metacell a data frame with a column named "cell_id" with cell id and another column named "metacell" with the metacell the cell is
 #' part of.
-#' @param metadata per-metacell metadata. A data frame with a column called 'metacell' and additional metacell annotations.
+#' @param metadata (optional) per-metacell metadata. A data frame with a column called 'metacell' and additional metacell annotations.
 #' @param min_int_frac (optional) minimal expected fraction of intersection of barcodes (cell names) in ScATAC
 #'
 #' @return an McATAC object
@@ -37,7 +37,7 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, m
     if (sum(!non_zero_peaks) > 0) {
         cli_alert_info("Removed {.val {sum(!non_zero_peaks)}} all-zero peaks")
     }
-    mc_mat <- t(tgs_matrix_tapply(sc_mat[non_zero_peaks, ], cell_to_metacell, mean))
+    mc_mat <- t(tgs_matrix_tapply(sc_mat[non_zero_peaks, ], cell_to_metacell, sum))
 
     assert_that(are_equal(atac@peaks$peak_name[non_zero_peaks], rownames(mc_mat)))
     assert_that(all(colnames(mc_mat) %in% cell_to_metacell))
