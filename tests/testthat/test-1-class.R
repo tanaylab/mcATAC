@@ -27,3 +27,9 @@ test_that("export works", {
     expect_true(mean(atac_mc@mat - atac_mc1@mat) <= 1e-9)
     expect_equal(atac_mc@peaks, atac_mc1@peaks, ignore_attr = TRUE)
 })
+
+test_that("add_metadata works", {
+    data(mcmd)
+    atac_mc1 <- add_mc_metadata(atac_mc, mcmd)
+    expect_true(all(colnames(atac_mc1@mat) == atac_mc1@metadata$metacell))
+})

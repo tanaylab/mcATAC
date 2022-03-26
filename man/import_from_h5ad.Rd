@@ -18,7 +18,8 @@ of the h5ad file, if exists and otherwise the class would be McATAC.}
 an ScATAC/McATAC object
 }
 \description{
-Create an ScATAC,McATAC object from an h5ad file
+Reads an ATAC object from an h5ad file. Peak data is taken from the 'X' section and metadata is taken from 'obs'.
+The 'var' section can contain a special field called 'ignore' which marks peaks that should be ignored.
 }
 \examples{
 \dontrun{

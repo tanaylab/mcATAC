@@ -21,11 +21,21 @@ export_to_h5ad <- function(object, out_file, ...) {
     mat <- t(mat)
 
     peaks <- as.data.frame(object@peaks)
+
+    if (nrow(object@ignore_peaks) > 0) {
+        peaks <- bind_rows(
+            peaks %>% mutate(ignore = FALSE),
+            object@ignore_peaks %>% mutate(ignore = TRUE)
+        ) %>% as.data.frame()
+
+        mat <- cbind(mat, t(object@ignore_pmat))
+    }
+
     rownames(peaks) <- peak_names(peaks)
 
     if (!is.null(object@metadata)) {
         metadata <- data.frame(rowname = colnames(object@mat)) %>%
-            left_join(metadata) %>%
+            bind_cols(object@metadata) %>%
             column_to_rownames("rowname")
     } else {
         metadata <- NULL

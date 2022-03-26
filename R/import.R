@@ -7,6 +7,9 @@
 #' of the h5ad file, if exists and otherwise the class would be McATAC.
 #' @param genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10". If NULL - the assembly would be determined by the 'genome' field in the 'uns' part of the h5ad file.
 #'
+#' @description Reads an ATAC object from an h5ad file. Peak data is taken from the 'X' section and metadata is taken from 'obs'.
+#' The 'var' section can contain a special field called 'ignore' which marks peaks that should be ignored.
+#'
 #' @return an ScATAC/McATAC object
 #'
 #' @examples
@@ -31,6 +34,7 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL) {
     peaks <- as_tibble(peaks)
 
     metadata <- adata$obs
+    metadata <- metadata %>% mutate(across(where(is.factor), as.character))
     if (ncol(metadata) == 0) {
         metadata <- NULL
     }
@@ -55,11 +59,18 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL) {
         }
     }
 
+    res <- new(class, mat, peaks, genome, metadata)
+
+    if (has_name(peaks, "ignore")) {
+        peaks_to_remove <- peaks$peak_name[peaks$ignore]
+        res <- atac_ignore_peaks(res, peaks_to_remove)
+        res@peaks <- res@peaks %>% select(-ignore)
+        res@ignore_peaks <- res@ignore_peaks %>% select(-ignore)
+    }
+
     if (class == "McATAC") {
-        res <- new("McATAC", mat, peaks, genome, metadata)
         cli_alert_success("Successfully loaded an {.var {class}} object with {.val {ncol(res@mat)}} metacells and {.val {nrow(res@mat)}} ATAC peaks")
     } else {
-        res <- new("ScATAC", mat, peaks, genome, metadata)
         cli_alert_success("Successfully loaded an {.var {class}} object with {.val {ncol(res@mat)}} cells and {.val {nrow(res@mat)}} ATAC peaks")
     }
 

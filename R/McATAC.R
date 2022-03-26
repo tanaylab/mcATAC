@@ -22,7 +22,7 @@ ATAC <- setClass(
         peaks = "PeakIntervals",
         genome = "character",
         metadata = "data.frame_or_null",
-        ignore_peaks = "vector",
+        ignore_peaks = "data.frame",
         ignore_pmat = "dgCMatrix"
     ),
     contains = "VIRTUAL"
@@ -129,6 +129,22 @@ setMethod(
         return(.Object)
     }
 )
+
+#' Add per-metacell metadata to an McATAC object
+#'
+#' @param mcatac an McATAC object
+#' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
+#'
+#' @examples
+#' \dontrun{
+#' data(mcmd)
+#' mc_atac <- add_metadata(mc_atac, mcmd)
+#' }
+#'
+#' @export
+add_mc_metadata <- function(mcatac, metadata) {
+    add_metadata(mcatac, metadata, "metacell")
+}
 
 add_metadata <- function(obj, metadata, metadata_id_field) {
     if (!is.null(metadata)) {
@@ -247,8 +263,9 @@ setMethod(
 atac_ignore_peaks <- function(atac, ig_peaks) {
     assert_atac_object(atac)
 
-    if (is.null(ig_peaks) || length(ig_peaks) == 0) {
-        cli_abort("Peaks to ignore should be specified (they are either NULL or length 0)")
+    if (length(ig_peaks) == 0) {
+        cli_alert_warning("Peaks to ignore should be specified (they are either NULL or length 0), returning original object.")
+        return(atac)
     }
 
     if (is.null(dim(ig_peaks)) && length(ig_peaks) > 0 && is.character(ig_peaks)) {

@@ -61,7 +61,7 @@ atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")
 ## Import annotations
 ```{r import-annotations}
 data(mcmd)
-atac_mc@metadata <- mcmd
+mc_atac <- add_mc_metadata(mc_atac, mcmd)
 ```
 ## Identify dynamic peaks
 ```{r dynamic-peaks}

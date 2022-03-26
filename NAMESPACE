@@ -2,6 +2,7 @@
 
 export("%!in%")
 export(PeakIntervals)
+export(add_mc_metadata)
 export(annotate_intervals)
 export(annotate_peaks)
 export(atac_ignore_peaks)

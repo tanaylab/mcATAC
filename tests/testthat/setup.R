@@ -16,7 +16,9 @@ system(glue("cp -rf /net/mraid14/export/tgdata/users/aviezerl/src/mcATAC/pbmc_da
 
 data(cell_to_metacell_pbmc_example)
 atac_sc <<- import_from_10x(raw_dir, "hg38")
-atac_mc <<- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example)
+
+data(mcmd)
+atac_mc <<- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example, mcmd)
 
 # Make atac_sc and atac_mc const in order to test them independetly
 lockBinding("atac_sc", globalenv())
