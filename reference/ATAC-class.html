@@ -57,7 +57,15 @@ McATAC extend the ATAC object by adding metadata and additional slots.</p>
     <h2 id="slots">Slots<a class="anchor" aria-label="anchor" href="#slots"></a></h2>
     
 
-<dl><dt><code>mat</code></dt>
+<dl><dt><code>id</code></dt>
+<dd><p>an identifier for the object, e.g. "pbmc".</p></dd>
+
+
+<dt><code>description</code></dt>
+<dd><p>description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"</p></dd>
+
+
+<dt><code>mat</code></dt>
 <dd><p>a numeric matrix where rows are peaks and columns are cells/metacells. Can be a sparse matrix.</p></dd>
 
 
@@ -71,6 +79,10 @@ McATAC extend the ATAC object by adding metadata and additional slots.</p>
 
 <dt><code>metadata</code></dt>
 <dd><p>data frame with a column called 'metacell' and additional metacell annotations for McATAC, or 'cell_id' and per-cell annotatoins for ScATAC. The constructor can also include or the name of a delimited file which contains such annotations.</p></dd>
+
+
+<dt><code>path</code></dt>
+<dd><p>original path from which the object was loaded (optional)</p></dd>
 
 
 </dl></div>

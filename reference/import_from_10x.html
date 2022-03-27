@@ -54,6 +54,8 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">import_from_10x</span><span class="op">(</span>
   <span class="va">dir</span>,
   <span class="va">genome</span>,
+  id <span class="op">=</span> <span class="cn">NULL</span>,
+  description <span class="op">=</span> <span class="cn">NULL</span>,
   metadata <span class="op">=</span> <span class="cn">NULL</span>,
   matrix_fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="st">"matrix.mtx"</span><span class="op">)</span>,
   cells_fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="st">"barcodes.tsv"</span><span class="op">)</span>,
@@ -68,8 +70,12 @@
 See 'Cell Ranger Arc' for more details: https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/overview/welcome</p></dd>
 <dt>genome</dt>
 <dd><p>genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"</p></dd>
+<dt>id</dt>
+<dd><p>an identifier for the object, e.g. "pbmc". If NULL - a random id would be assigned.</p></dd>
+<dt>description</dt>
+<dd><p>(Optional) description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)".</p></dd>
 <dt>metadata</dt>
-<dd><p>data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.</p></dd>
+<dd><p>(Optional) data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.</p></dd>
 <dt>matrix_fn</dt>
 <dd><p>if <code>dir</code> is missing, the filename of the matrix to import ("matrix.mtx" or "matrix.mtx.gz")</p></dd>
 <dt>cells_fn</dt>

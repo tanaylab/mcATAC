@@ -88,20 +88,35 @@
 <h2 id="import-atac-dataset">Import ATAC dataset<a class="anchor" aria-label="anchor" href="#import-atac-dataset"></a>
 </h2>
 <div class="sourceCode"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_from_10x.html">import_from_10x</a></span><span class="op">(</span><span class="st">"pbmc_data"</span>, genome <span class="op">=</span> <span class="st">"hg38"</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_from_10x.html">import_from_10x</a></span><span class="op">(</span><span class="st">"pbmc_data"</span>, genome <span class="op">=</span> <span class="st">"hg38"</span>, id <span class="op">=</span> <span class="st">"pbmc"</span>, description <span class="op">=</span> <span class="st">"PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"</span><span class="op">)</span>
 <span class="co">#&gt; • Importing matrix</span>
 <span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Imported a matrix of <span style="color: #0000BB;">11909</span> cells and <span style="color: #0000BB;">144978</span> features</span>
 <span class="co">#&gt; • Importing features</span>
-<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #0000BB;">108377</span> ATAC peaks</span>
-<span class="co">#&gt; <span style="color: #BBBB00;">!</span> removed <span style="color: #00BB00;">33</span> peaks from the following chromosome(s) which are missing from <span style="color: #00BB00;">hg38</span>: <span style="color: #0000BB;">KI270727.1, GL000194.1, GL000205.2, GL000195.1, GL000219.1, KI270734.1, KI270721.1, KI270726.1, KI270713.1</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">✔</span> successfully imported to an ScATAC object with <span style="color: #0000BB;">11909</span> cells and <span style="color: #0000BB;">108377</span> ATAC peaks</span>
+<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Removed <span style="color: #0000BB;">107861</span> ATAC peaks which were all zero</span>
+<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #0000BB;">107861</span> ATAC peaks</span>
+<span class="co">#&gt; <span style="color: #BBBB00;">!</span> removed <span style="color: #00BB00;">32</span> peaks from the following chromosome(s) which are missing from <span style="color: #00BB00;">hg38</span>: <span style="color: #0000BB;">KI270727.1, GL000194.1, GL000205.2, GL000195.1, GL000219.1, KI270734.1, KI270721.1, KI270726.1, KI270713.1</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">✔</span> successfully imported to an ScATAC object with <span style="color: #0000BB;">11909</span> cells and <span style="color: #0000BB;">107829</span> ATAC peaks</span>
 <span class="va">atac_sc</span>
-<span class="co">#&gt; An ScATAC object with <span style="color: #0000BB;">11909</span> cells <span style="color: #0000BB;">108344</span> ATAC peaks from <span style="color: #00BB00;">hg38</span>.</span>
+<span class="co">#&gt; <span style="color: #0000BB;">&lt;ScATAC&gt;</span> object with <span style="color: #0000BB;">11909</span> cells and <span style="color: #0000BB;">107829</span> ATAC peaks from <span style="color: #00BB00;">hg38</span>.</span>
+<span class="co">#&gt; id: <span style="color: #0000BB;">"pbmc"</span></span>
+<span class="co">#&gt; description: <span style="color: #0000BB;">"PBMC from a healthy donor - granulocytes removed through cell</span></span>
+<span class="co">#&gt; <span style="color: #0000BB;">sorting (10k)"</span></span>
+<span class="co">#&gt; loaded from: <span style="color: #0000BB;">pbmc_data/matrix.mtx.gz</span></span>
 <span class="co">#&gt; Slots include:</span>
 <span class="co">#&gt; • `@mat`: a numeric matrix where rows are peaks and columns are cells. Can be a</span>
 <span class="co">#&gt; sparse matrix.</span>
 <span class="co">#&gt; • `@peaks`: a misha intervals set with the peak definitions.</span>
 <span class="co">#&gt; • `@genome`: genome assembly of the peaks</span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="filter-peaks-by-coverage-andor-length">Filter peaks by coverage and/or length<a class="anchor" aria-label="anchor" href="#filter-peaks-by-coverage-andor-length"></a>
+</h2>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/filter_features.html">filter_features</a></span><span class="op">(</span>scatac <span class="op">=</span> <span class="va">atac_sc</span>, minimal_max_umi <span class="op">=</span> <span class="fl">3</span>, min_peak_length <span class="op">=</span> <span class="fl">200</span>, max_peak_length <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span>
+<span class="co">#&gt; • <span style="color: #0000BB;">6923</span> features had a maximal UMI count less than <span style="color: #00BB00;">3</span></span>
+<span class="co">#&gt; • <span style="color: #0000BB;">8544</span> features were shorter than <span style="color: #00BB00;">200bp</span></span>
+<span class="co">#&gt; • <span style="color: #0000BB;">37160</span> features were longer than <span style="color: #00BB00;">1000bp</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">✔</span> Removed <span style="color: #0000BB;">46380</span> peaks out of <span style="color: #0000BB;">107829</span> <span style="color: #00BB00;">(43%)</span>. The object is left with <span style="color: #0000BB;">61449</span> peaks.</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="project-rna-metacells">Project RNA metacells<a class="anchor" aria-label="anchor" href="#project-rna-metacells"></a>
@@ -120,18 +135,79 @@
 <span class="co">#&gt; <span style="color: #BCBCBC;">6</span> AAACATGCAAGGTCCT-1       30</span>
 <span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project_atac_on_mc.html">project_atac_on_mc</a></span><span class="op">(</span><span class="va">atac_sc</span>, <span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span>
 <span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #0000BB;">3198</span> cells (out of <span style="color: #0000BB;">11909</span>) do not have a metacell and have been removed.</span>
-<span class="co">#&gt; <span style="color: #00BB00;">✔</span> Created a new McATAC object with <span style="color: #0000BB;">97</span> metacells and <span style="color: #0000BB;">108344</span> ATAC peaks.</span></code></pre></div>
+<span class="co">#&gt; • Setting <span style="color: #00BB00;">egc</span> cell size to <span style="color: #0000BB;">68812</span> (the <span style="color: #0000BB;">0.1</span> quantile of metacell sizes)</span>
+<span class="co">#&gt; <span style="color: #00BB00;">✔</span> Created a new McATAC object with <span style="color: #0000BB;">97</span> metacells and <span style="color: #0000BB;">61449</span> ATAC peaks.</span>
+<span class="va">atac_mc</span>
+<span class="co">#&gt; <span style="color: #0000BB;">&lt;McATAC&gt;</span> object with <span style="color: #0000BB;">97</span> metacells and <span style="color: #0000BB;">61449</span> ATAC peaks from <span style="color: #00BB00;">hg38</span>.</span>
+<span class="co">#&gt; id: <span style="color: #0000BB;">"pbmc"</span></span>
+<span class="co">#&gt; description: <span style="color: #0000BB;">"PBMC from a healthy donor - granulocytes removed through cell</span></span>
+<span class="co">#&gt; <span style="color: #0000BB;">sorting (10k)"</span></span>
+<span class="co">#&gt; Slots include:</span>
+<span class="co">#&gt;   • `@mat`: a numeric matrix where rows are peaks and columns are metacells.</span>
+<span class="co">#&gt;   Can be a sparse matrix.</span>
+<span class="co">#&gt;   • `@peaks`: a misha intervals set with the peak definitions.</span>
+<span class="co">#&gt;   • `@genome`: genome assembly of the peaks</span>
+<span class="co">#&gt;   • `@egc`: a numeric matrix which contains normalized metacell accessibility.</span>
+<span class="co">#&gt;   • `@fp`: a matrix showing for each peak (row) the relative enrichment of umis</span>
+<span class="co">#&gt;   in log2 scale.</span></code></pre></div>
 <p>Or using a metacell1 object:</p>
 <div class="sourceCode"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project_atac_on_mc.html">project_atac_on_mc_from_metacell1</a></span><span class="op">(</span><span class="va">atac_sc</span>, <span class="st">"pbmc_data/scdb"</span>, <span class="st">"rna"</span><span class="op">)</span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="import-annotations">Import annotations<a class="anchor" aria-label="anchor" href="#import-annotations"></a>
+</h2>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mcmd</span><span class="op">)</span>
+<span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_mc_metadata.html">add_mc_metadata</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="va">mcmd</span><span class="op">)</span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="identify-dynamic-peaks">Identify dynamic peaks<a class="anchor" aria-label="anchor" href="#identify-dynamic-peaks"></a>
+</h2>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">dyn_peaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/identify_dynamic_peaks.html">identify_dynamic_peaks</a></span><span class="op">(</span>mcatac <span class="op">=</span> <span class="va">atac_mc</span>, mean_thresh_q <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span>
+<span class="co">#&gt; • Plotting log10(mean) vs log10(sd/mean)</span>
+<span class="co">#&gt; <span style="color: #00BB00;">✔</span> Identified <span style="color: #0000BB;">14783</span> dynamic peaks (out of <span style="color: #0000BB;">61449</span>) using the <span style="color: #00BB00;">'bmq'</span> method.</span></code></pre></div>
+<p><img src="mcATAC_files/figure-html/dynamic-peaks-1.png" width="700"></p>
+</div>
+<div class="section level2">
+<h2 id="cluster-a-peak-set">Cluster a peak set<a class="anchor" aria-label="anchor" href="#cluster-a-peak-set"></a>
+</h2>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">peak_clust</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_atac_peak_clust.html">gen_atac_peak_clust</a></span><span class="op">(</span><span class="va">atac_mc</span>, k <span class="op">=</span> <span class="fl">30</span>, peak_set <span class="op">=</span> <span class="va">dyn_peaks</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">peak_clust</span><span class="op">)</span>
+<span class="co">#&gt; peak_clust</span>
+<span class="co">#&gt;    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16 </span>
+<span class="co">#&gt;  203  985  116   78 1211  288  659 2336  580  187  397  182 1702  900  286  134 </span>
+<span class="co">#&gt;   17   18   19   20   21   22   23   24   25   26   27   28   29   30 </span>
+<span class="co">#&gt;  274   42  340 1124  288   77  920  125  389   41  223   51  163  482</span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="export-dynamic-peaks-to-ucsc-tracks">Export dynamic peaks to UCSC tracks<a class="anchor" aria-label="anchor" href="#export-dynamic-peaks-to-ucsc-tracks"></a>
+</h2>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">outdir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>
+<span class="fu"><a href="../reference/export_atac_clust_ucsc.html">export_atac_clust_ucsc</a></span><span class="op">(</span>mc_atac <span class="op">=</span> <span class="va">atac_mc</span>, track_prefix <span class="op">=</span> <span class="st">'hum_pbmc_10x'</span>, normalization <span class="op">=</span> <span class="st">'lfcom'</span>, output_dir <span class="op">=</span> <span class="va">outdir</span><span class="op">)</span>
+<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Using eps_q=0.05 and eps = 0.731958762886598 for regularization</span>
+<span class="co">#&gt; <span style="color: #00BB00;">✔</span> Successfully exported to ucsc. Files generated:</span>
+<span class="co">#&gt;   • /tmp/Rtmp3wn6GL/hum_pbmc_10x_B.ucsc</span>
+<span class="co">#&gt;   • /tmp/Rtmp3wn6GL/hum_pbmc_10x_DC.ucsc</span>
+<span class="co">#&gt;   • /tmp/Rtmp3wn6GL/hum_pbmc_10x_Monocyte.ucsc</span>
+<span class="co">#&gt;   • /tmp/Rtmp3wn6GL/hum_pbmc_10x_NK.ucsc</span>
+<span class="co">#&gt;   • /tmp/Rtmp3wn6GL/hum_pbmc_10x_T.ucsc</span>
+<span class="co">#&gt;   • /tmp/Rtmp3wn6GL/hum_pbmc_10x_T_CD8.ucsc</span>
+<span class="co">#&gt;   • /tmp/Rtmp3wn6GL/hum_pbmc_10x_Undetermined.ucsc</span></code></pre></div>
+<div class="figure">
+<img src="../../../../../../../../../articles/ucsc_output_example.png" title="Example of UCSC output on human PBMC data from 10X Genomics" alt="UCSC track example"><p class="caption">UCSC track example</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="export-to-an-h5ad-file">Export to an h5ad file<a class="anchor" aria-label="anchor" href="#export-to-an-h5ad-file"></a>
 </h2>
 <div class="sourceCode"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/export_to_h5ad.html">export_to_h5ad</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="st">"pbmc_data/atac_mc.h5ad"</span>, compression <span class="op">=</span> <span class="st">"gzip"</span><span class="op">)</span>
-<span class="co">#&gt; • Creating an AnnData object</span>
-<span class="co">#&gt; • Writing to file</span>
+<span class="co">#&gt;   • Creating an AnnData object</span>
+<span class="co">#&gt;   • Writing to file</span>
 <span class="co">#&gt; <span style="color: #00BB00;">✔</span> Successfully exported to <span style="color: #0000BB;">pbmc_data/atac_mc.h5ad</span></span>
 <span class="co"># Load using: atac_mc &lt;- import_from_h5ad("pbmc_data/atac_mc.h5ad")</span></code></pre></div>
 </div>

@@ -104,13 +104,13 @@ if NULL, no reordering would be done.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>atac_mc with added cluster_k_k column to atac_mc@peaks specifying the cluster for each enhancer</p>
+    <p>a tglkmeans clustering object</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="va">my_atac_mc</span> <span class="op">&lt;-</span> <span class="fu">gen_atac_peak_clust</span><span class="op">(</span><span class="va">my_atac_mc</span>, <span class="op">)</span></span>
+<span class="r-in"><span class="va">my_atac_mc</span> <span class="op">&lt;-</span> <span class="fu">gen_atac_peak_clust</span><span class="op">(</span><span class="va">my_atac_mc</span>, k <span class="op">=</span> <span class="fl">16</span><span class="op">)</span></span>
 <span class="r-in"><span class="op">}</span></span>
 <span class="r-in"></span>
 </code></pre></div>
