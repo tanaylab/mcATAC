@@ -11,7 +11,8 @@
   genome,
   id = NULL,
   description = NULL,
-  metadata = NULL
+  metadata = NULL,
+  path = ""
 )
 }
 \arguments{
@@ -26,6 +27,8 @@
 \item{description}{description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"}
 
 \item{metadata}{data frame with a column called 'cell_id' and additional per-cell annotations, or the name of a delimited file which contains such annotations.}
+
+\item{path}{path from which the object was loaded (optional)}
 }
 \description{
 ScATAC is a shallow object holding ATAC data over cells.

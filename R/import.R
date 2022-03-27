@@ -77,9 +77,9 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
             mc_size_eps_q <- 0.1
             cli_alert_warning("h5ad file doesn't have the {.field mc_size_eps_q} at the {.file uns} section. Using the default: {.val {mc_size_eps_q}")
         }
-        res <- new("McATAC", mat, peaks, genome, id, description, metadata, mc_size_eps_q = mc_size_eps_q)
+        res <- new("McATAC", mat, peaks, genome, id, description, metadata, mc_size_eps_q = mc_size_eps_q, path = file)
     } else {
-        res <- new("ScATAC", mat, peaks, genome, id, description, metadata)
+        res <- new("ScATAC", mat, peaks, genome, id, description, metadata, path = file)
     }
 
     if (has_name(peaks, "ignore")) {
@@ -156,7 +156,7 @@ import_from_10x <- function(dir, genome, id = NULL, description = NULL, metadata
     }
 
     cli_alert_info("{.val {nrow(atac_mat)}} ATAC peaks")
-    res <- new("ScATAC", atac_mat, atac_peaks, genome = genome, id = id, description = description, metadata = metadata)
+    res <- new("ScATAC", atac_mat, atac_peaks, genome = genome, id = id, description = description, metadata = metadata, path = matrix_fn)
     cli_alert_success("successfully imported to an ScATAC object with {.val {ncol(res@mat)}} cells and {.val {nrow(res@mat)}} ATAC peaks")
 
     return(res)

@@ -12,7 +12,8 @@
   id = NULL,
   description = NULL,
   metadata = NULL,
-  mc_size_eps_q = 0.1
+  mc_size_eps_q = 0.1,
+  path = ""
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ projection was done using RNA metacells"}
 
 \item{mc_size_eps_q}{(optional) quantile of MC size (in UMIs) to scale the number of UMIs per metacell. \eqn{egc_ij} would then be
 the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quantile of metacell sizes.}
+
+\item{path}{path from which the object was loaded (optional)}
 }
 \description{
 McATAC is a shallow object holding ATAC data over metacells.

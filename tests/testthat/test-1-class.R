@@ -6,6 +6,7 @@ test_that("import from 10x works", {
     expect_equal(peak_names(atac_sc@peaks), atac_sc@peaks$peak_name)
     expect_equal(atac_sc@id, "pbmc")
     expect_equal(atac_sc@description, "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
+    expect_equal(atac_sc@path, file.path(raw_dir, "matrix.mtx"))
 })
 
 test_that("projection works", {
@@ -38,6 +39,7 @@ test_that("export works", {
     expect_equal(atac_mc@metadata, atac_mc1@metadata, ignore_attr = TRUE)
     expect_equal(atac_mc@id, atac_mc1@id)
     expect_equal(atac_mc@description, atac_mc1@description)
+    expect_equal(atac_mc1@path, fs::path(raw_dir, "atac_mc.h5ad"))
 })
 
 test_that("add_metadata works", {

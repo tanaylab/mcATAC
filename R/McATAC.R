@@ -14,7 +14,8 @@ setOldClass("PeakIntervals")
 #' @slot mat a numeric matrix where rows are peaks and columns are cells/metacells. Can be a sparse matrix.
 #' @slot peaks misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).
 #' @slot genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
-#' @slot (optional) metadata data frame with a column called 'metacell' and additional metacell annotations for McATAC, or 'cell_id' and per-cell annotatoins for ScATAC. The constructor can also include or the name of a delimited file which contains such annotations.
+#' @slot metadata data frame with a column called 'metacell' and additional metacell annotations for McATAC, or 'cell_id' and per-cell annotatoins for ScATAC. The constructor can also include or the name of a delimited file which contains such annotations.
+#' @slot path original path from which the object was loaded (optional)
 #'
 #' @exportClass ATAC
 ATAC <- setClass(
@@ -27,7 +28,8 @@ ATAC <- setClass(
         genome = "character",
         metadata = "data.frame_or_null",
         ignore_peaks = "data.frame",
-        ignore_pmat = "dgCMatrix"
+        ignore_pmat = "dgCMatrix",
+        path = "character"
     ),
     contains = "VIRTUAL"
 )
@@ -35,14 +37,14 @@ ATAC <- setClass(
 setMethod(
     "initialize",
     signature = "ATAC",
-    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL) {
-        .Object <- make_atac_object(.Object, mat, peaks, genome, id, description)
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, path = "") {
+        .Object <- make_atac_object(.Object, mat, peaks, genome, id, description, path = path)
         validate_atac_object(.Object)
         return(.Object)
     }
 )
 
-make_atac_object <- function(obj, mat, peaks, genome, id, description, metadata, metadata_id_field) {
+make_atac_object <- function(obj, mat, peaks, genome, id, description, path, metadata, metadata_id_field) {
     if (nrow(mat) != nrow(peaks)) {
         cli_abort("Number of peaks is not equal to the matrix rows.")
     }
@@ -60,6 +62,7 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, metadata,
 
     obj@id <- id
     obj@description <- description
+    obj@path <- path
     obj@mat <- mat
     obj@peaks <- peaks
     obj@genome <- genome
@@ -139,6 +142,7 @@ McATAC <- setClass(
 #' @param description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k),
 #' projection was done using RNA metacells"
 #' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
+#' @param path path from which the object was loaded (optional)
 #'
 #' @description McATAC is a shallow object holding ATAC data over metacells.
 #' Minimally it should include a count matrix of peaks over metacells, and \code{PeakIntervals} which hold the coordinates
@@ -149,8 +153,8 @@ McATAC <- setClass(
 setMethod(
     "initialize",
     signature = "McATAC",
-    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, mc_size_eps_q = 0.1) {
-        .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description)
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, mc_size_eps_q = 0.1, path = "") {
+        .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description, path = path)
         validate_atac_object(.Object)
         .Object <- add_metadata(.Object, metadata, "metacell")
         .Object@egc <- calc_mc_egc(.Object, mc_size_eps_q)
@@ -240,6 +244,9 @@ print_atac_object <- function(object, object_type, column_type, md_column) {
     if (object@description != "") {
         cli::cli_text(c("description: {.val {object@description}}"))
     }
+    if (object@path != "") {
+        cli::cli_text(c("loaded from: {.file {object@path}}"))
+    }
     cli::cli_text("Slots include:")
     cli_ul(c("{.code @mat}: a numeric matrix where rows are peaks and columns are {column_type}s. Can be a sparse matrix."))
     cli_ul(c("{.code @peaks}: a misha intervals set with the peak definitions."))
@@ -277,6 +284,8 @@ ScATAC <- setClass(
 #' @param peaks misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).
 #' @param genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
 #' @param metadata data frame with a column called 'cell_id' and additional per-cell annotations, or the name of a delimited file which contains such annotations.
+#' @param path path from which the object was loaded (optional)
+#'
 #' @description ScATAC is a shallow object holding ATAC data over cells.
 #' Minimally it should include a count matrix of peaks over cells, and \code{PeakIntervals} which hold the coordinates
 #' of the peaks.
@@ -286,8 +295,8 @@ ScATAC <- setClass(
 setMethod(
     "initialize",
     signature = "ScATAC",
-    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL) {
-        .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description)
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, path = "") {
+        .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description, path = path)
         validate_atac_object(.Object)
         .Object <- add_metadata(.Object, metadata, "cell_id")
         return(.Object)
