@@ -7,32 +7,33 @@
 plot_atac_peak_map(
   mc_atac,
   mc_atac_clust,
-  filename,
   peak_clust,
-  eps_q = 0.1,
-  ...
+  filepath = NULL,
+  dev = NULL,
+  clrs = colorRampPalette(c("blue4", "white", "red4"))(100),
+  seed = 1337
 )
 }
 \arguments{
 \item{mc_atac}{McATAC object}
 
-\item{mc_atac_clust}{a clustering of metacells (e.g. output of {.code gen_atac_mc_clust})}
+\item{mc_atac_clust}{output of \code{gen_atac_mc_clust}}
 
-\item{filename}{file name of saved image}
+\item{peak_clust}{output of \code{gen_atac_peak_clust}}
 
-\item{peak_clust}{(optional) output of \code{gen_atac_peak_clust}}
+\item{filepath}{(optional) path and filename of where to save the figure; if unspecified, figure isn't saved}
 
-\item{...}{
-  Arguments passed on to \code{\link[=save_pheatmap_png]{save_pheatmap_png}}
-  \describe{
-    \item{\code{}}{}
-  }}
+\item{dev}{(optional; default - png) graphical device to save figure with}
+}
+\value{
+a pheatmap figure
 }
 \description{
 Plot normalized accessibility of peaks over metacells, ordered by clustering
 }
 \examples{
 \dontrun{
-
+    peak_clust <- gen_atac_peak_clust(my_mcatac, 16)
+    plot_atac_peak_map(my_mcatac, my_mcatac@metadata, peak_clust, './my_figures/my_mcatac_heatmap.png')
 }
 }

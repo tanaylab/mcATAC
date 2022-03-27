@@ -24,10 +24,12 @@ assert_atac_object <- function(obj, param = deparse(substitute(obj))) {
 }
 
 #' Function to save pheatmaps
+#' @inheritParams png
 #'
+
 #' @export
-save_pheatmap_png <- function(x, filename, width = 2500, height = 2500, res = 150) {
-    png(filename, width = width, height = height, res = res)
+save_pheatmap_png <- function(x, filename, dev = png, width = 2000, height = 2000, res = 150) {
+    dev(filename, width = width, height = height, res = res)
     grid::grid.newpage()
     grid::grid.draw(x$gtable)
     dev.off()

@@ -23,7 +23,6 @@ Imports:
     pheatmap,
     purrr,
     rlang,
-    randomNames,
     sparseMatrixStats,
     tgstat,
     tgutil,

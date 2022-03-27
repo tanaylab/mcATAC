@@ -4,7 +4,14 @@
 \alias{save_pheatmap_png}
 \title{Function to save pheatmaps}
 \usage{
-save_pheatmap_png(x, filename, width = 2500, height = 2500, res = 150)
+save_pheatmap_png(
+  x,
+  filename,
+  dev = png,
+  width = 2000,
+  height = 2000,
+  res = 150
+)
 }
 \description{
 Function to save pheatmaps
