@@ -10,6 +10,7 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
+  dpi = 300,
   comment = "#>"
 )
 ```
@@ -25,7 +26,7 @@ Download the following dataset from 10x:
 [PBMC from a healthy donor - granulocytes removed through cell sorting (10k) (Filtered feature barcode matrix MEX (DIR))](https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k?)
 
 
-And extract it's contents to a directory called `pbmc_data`.
+And extract it's contents to a directory called `pbmc_data`:
 
 ```{r download-data}
 if (!dir.exists("pbmc_data")){
@@ -65,7 +66,7 @@ data(mcmd)
 atac_mc <- add_mc_metadata(atac_mc, mcmd)
 ```
 ## Identify dynamic peaks
-```{r dynamic-peaks}
+```{r dynamic-peaks, dpi=300, fig.width=7, fig.height=7}
 dyn_peaks <- identify_dynamic_peaks(mcatac = atac_mc, mean_thresh_q = 0.05)
 ```
 
@@ -81,7 +82,7 @@ outdir <- tempdir()
 export_atac_clust_ucsc(mc_atac = atac_mc, track_prefix = 'hum_pbmc_10x', normalization = 'lfcom', output_dir = outdir)
 ```
 
-![UCSC track example](/vignettes/ucsc_output_example.png "Example of UCSC output on human PBMC data from 10X Genomics")
+![UCSC track example](ucsc_output_example.png "Example of UCSC output on human PBMC data from 10X Genomics")
 
 
 
