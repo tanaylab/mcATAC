@@ -7,6 +7,7 @@
 identify_dynamic_peaks(
   mcatac,
   method = "bmq",
+  plot = TRUE,
   mean_thresh_q = 0.1,
   cov_q_thresh = 0.75,
   num_bins = 200,
@@ -21,6 +22,9 @@ selects all peaks with a coefficient of variation above some quantile in each bi
 'gmm' fits a Gaussian mixture model to the log10(COV) vs. log10(mean) distribution,
 and selects peaks in clusters that show overdispersion in the COV.}
 
+\item{plot}{plot the peak mean vs coefficient of variation (both in log10 scale). Note that it is highly recommended to look at the
+scatter plot before proceeding, so set this parameter to FALSE only \strong{after} you made sure that the scatter looks reasonable.}
+
 \item{mean_thresh_q}{(optional) threshold quantile on peaks' mean}
 
 \item{cov_q_thresh}{(optional) threshold on minimum COV quantile to consider as dynamic in each bin}
@@ -30,15 +34,14 @@ and selects peaks in clusters that show overdispersion in the COV.}
 \item{gmm_g}{(optional) number of groups for 'gmm'}
 }
 \value{
-a PeakIntervals object with peaks identified as dynamic
+a PeakIntervals object with peaks identified as dynamic. If \code{plot = TRUE} the selected points would plotted.
 }
 \description{
 This function identifies "dynamic" peaks, i.e. those that have high expression only in a subset of the cells. They are identified by overdispersion in the coefficient of variation (std.dev./mean) per quantiles.
 }
 \examples{
 \dontrun{
-dynamic_peaks_by_bmq <- identify_dynamic_peaks(mcatac = my_mcatac, method = 'bmq',  mean_thresh_q = 0.1, cov_q_thresh = 0.6, num_bins = 100)
-dynamic_peaks_by_gmm <- identify_dynamic_peaks(mcatac = my_mcatac, method = 'gmm', gmm_g = 3)
-table(my_intervals$peak_annot)
+dynamic_peaks_by_bmq <- identify_dynamic_peaks(mcatac, method = "bmq", mean_thresh_q = 0.1, cov_q_thresh = 0.6, num_bins = 100)
+dynamic_peaks_by_gmm <- identify_dynamic_peaks(mcatac, method = "gmm", gmm_g = 3)
 }
 }

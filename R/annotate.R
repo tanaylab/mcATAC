@@ -11,7 +11,7 @@
 #' @export
 annotate_peaks <- function(atac) {
     if (!methods::is(atac, "ATAC")) {
-        cli_abort("{.field atac} doesn't have a field called {.field peaks}. You can annotate intervals directly using the {.code annotate_intervals} function.")
+        cli_abort("{.field atac} is not an ScATAC or McATAC object. You can annotate intervals directly using the {.code annotate_intervals} function.")
     }
 
     atac@peaks <- annotate_intervals(atac@peaks, atac@genome)
@@ -41,17 +41,15 @@ annotate_peaks <- function(atac) {
 #' \dontrun{
 #' my_intervals <- annotate_intervals(my_intervals, "mm10", min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
 #' table(my_intervals$peak_type)
-#' my_intervals[which(toupper(my_intervals$closest_tss) == 'PCNA'),]
+#' my_intervals[which(toupper(my_intervals$closest_tss) == "PCNA"), ]
 #' }
 #' @export
-annotate_intervals <- function(intervals, genome, 
-                                min_proximal = 1e+03, max_proximal = 2e+04, 
-                                min_distal = 2e+04, max_distal = 1e+06, 
-                                exonic_peak_dist = 0, 
-                                tss = gintervals.load("intervs.global.tss"),
-                                exons = gintervals.load("intervs.global.exon")
-                                ) {
-
+annotate_intervals <- function(intervals, genome,
+                               min_proximal = 1e+03, max_proximal = 2e+04,
+                               min_distal = 2e+04, max_distal = 1e+06,
+                               exonic_peak_dist = 0,
+                               tss = gintervals.load("intervs.global.tss"),
+                               exons = gintervals.load("intervs.global.exon")) {
     if (missing(genome)) {
         cli_abort("Please Specify genome. Look for slot 'genome' in relevant McATAC/ScATAC object.")
     }
@@ -73,7 +71,7 @@ annotate_intervals <- function(intervals, genome,
     nei_peak_gb <- gintervals.neighbors(intervals, gene_body_df, maxdist = 0, mindist = 0)
 
     nei_peak_prom_all <- gintervals.neighbors(intervals, tss, mindist = -max_distal, maxdist = max_distal)
-    closest_tss <- deframe(nei_peak_prom_all[,c('peak_name', 'geneSymbol')])
+    closest_tss <- deframe(nei_peak_prom_all[, c("peak_name", "geneSymbol")])
     closest_tss[!(intervals$peak_name %in% names(closest_tss))] <- NA
     closest_tss <- closest_tss[order(match(names(closest_tss), intervals$peak_name))]
 
@@ -83,15 +81,7 @@ annotate_intervals <- function(intervals, genome,
     intID_left <- intervals$peak_name[!(intervals$peak_name %in% union(prom_peaks, union(exon_peaks, intron_peaks)))]
 
     cli_alert_info("Finding proximal intergenic peaks...")
-    nei_peak_tss_prox <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, mindist = min_proximal, maxdist = max_proximal)
-    nei_peak_tss_prox_neg <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, maxdist = -min_proximal, mindist = -max_proximal)
-    nei_peak_prox_all <- anti_join(unique(rbind(nei_peak_tss_prox[, cn], nei_peak_tss_prox_neg[, cn])),
-        intervals[union(prom_peaks, union(exon_peaks, intron_peaks)), cn],
-        by = c("chrom", "start", "end")
-    )
-    ig_prox_peaks <- nei_peak_prox_all$peak_name
     intID_left <- intervals$peak_name[!(intervals$peak_name %in% unique(c(prom_peaks, exon_peaks, intron_peaks, ig_prox_peaks)))]
-    cli_alert_info("Finding distal intergenic peaks...")
     nei_peak_dist <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, mindist = min_distal, maxdist = max_distal)
     nei_peak_dist_neg <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, maxdist = -min_distal, mindist = -max_distal)
     nei_peak_dist_all <- anti_join(unique(rbind(nei_peak_dist[, cn], nei_peak_dist_neg[, cn])),
@@ -114,8 +104,10 @@ annotate_intervals <- function(intervals, genome,
     class(intervals) <- orig_class
     intervals <- intervals %>%
         select(any_of(orig_fields)) %>%
-        mutate(peak_annot = res[order(match(names(res), intervals$peak_name))],
-                closest_tss = closest_tss)
+        mutate(
+            peak_annot = res[order(match(names(res), intervals$peak_name))],
+            closest_tss = closest_tss
+        )
     return(intervals)
 }
 

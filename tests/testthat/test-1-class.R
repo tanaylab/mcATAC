@@ -1,27 +1,49 @@
 test_that("import from 10x works", {
     expect_equal(class(atac_sc), "ScATAC", ignore_attr = TRUE)
-    expect_equal(nrow(atac_sc@mat), 108344)
+    expect_equal(nrow(atac_sc@mat), 107829)
     expect_equal(ncol(atac_sc@mat), 11909)
     expect_equal(colnames(atac_sc@peaks), c("chrom", "start", "end", "peak_name"))
     expect_equal(peak_names(atac_sc@peaks), atac_sc@peaks$peak_name)
+    expect_equal(atac_sc@id, "pbmc")
+    expect_equal(atac_sc@description, "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
+    expect_equal(atac_sc@path, file.path(raw_dir, "matrix.mtx"))
 })
 
 test_that("projection works", {
     expect_equal(class(atac_mc), "McATAC", ignore_attr = TRUE)
-    expect_equal(nrow(atac_mc@mat), 108344)
+    expect_equal(nrow(atac_mc@mat), 107687)
     expect_equal(ncol(atac_mc@mat), length(unique(cell_to_metacell_pbmc_example$metacell)))
     expect_setequal(colnames(atac_mc@mat), cell_to_metacell_pbmc_example$metacell)
     expect_equal(colnames(atac_mc@peaks), c("chrom", "start", "end", "peak_name"))
     expect_equal(peak_names(atac_mc@peaks), atac_mc@peaks$peak_name)
+    expect_equal(colSums(atac_mc@egc), rep(quantile(colSums(atac_mc@mat), 0.1), ncol(atac_mc@egc)), ignore_attr = TRUE)
+    expect_equal(atac_mc@id, "pbmc")
+    expect_equal(atac_mc@description, "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
 })
 
 test_that("projection from a metacell1 object works", {
     atac_mc1 <- project_atac_on_mc_from_metacell1(atac_sc, fs::path(raw_dir, "scdb"), "rna")
-    expect_equal(atac_mc, atac_mc1)
+    expect_equal(atac_mc@mat, atac_mc1@mat)
+    expect_equal(atac_mc@peaks, atac_mc1@peaks)
 })
 
 test_that("export works", {
     export_to_h5ad(atac_mc, fs::path(raw_dir, "atac_mc.h5ad"), compression = "gzip")
     atac_mc1 <- import_from_h5ad(fs::path(raw_dir, "atac_mc.h5ad"))
-    expect_equal(atac_mc, atac_mc1, ignore_attr = TRUE)
+    expect_true(mean(abs(atac_mc@mat - atac_mc1@mat)) <= 1e-9)
+    expect_true(mean(abs(atac_mc@egc - atac_mc1@egc)) <= 1e-9)
+    expect_true(mean(abs(atac_mc@fp - atac_mc1@fp)) <= 1e-9)
+    expect_equal(atac_mc@peaks, atac_mc1@peaks, ignore_attr = TRUE)
+    expect_equal(atac_mc@mc_size_eps_q, atac_mc1@mc_size_eps_q)
+    expect_equal(atac_mc@genome, atac_mc1@genome)
+    expect_equal(atac_mc@metadata, atac_mc1@metadata, ignore_attr = TRUE)
+    expect_equal(atac_mc@id, atac_mc1@id)
+    expect_equal(atac_mc@description, atac_mc1@description)
+    expect_equal(atac_mc1@path, fs::path(raw_dir, "atac_mc.h5ad"))
+})
+
+test_that("add_metadata works", {
+    data(mcmd)
+    atac_mc1 <- add_mc_metadata(atac_mc, mcmd)
+    expect_true(all(colnames(atac_mc1@mat) == atac_mc1@metadata$metacell))
 })

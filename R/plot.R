@@ -24,7 +24,7 @@ plot_atac_rna <- function(mc_atac, mc_rna, gene, peak = NULL, max_dist_to_promot
 
     ### Placeholder for checking class of mc_rna
     if (class(mc) == "tgMCCov") {
-        eps_rna <- quantile(rowMeans(mc_rna@e_gc), 0.05)
+        eps_rna <- quantile(Matrix::rowMeans(mc_rna@e_gc), 0.05)
         rv <- log2(mc_rna@e_gc[gene, ] + eps_rna)
     }
     # else if (mc_rna is a metacells metacell UMI matrix) {
@@ -146,25 +146,31 @@ plot_atac_rna_cor <- function(mc_atac, rna_mat) {
 #' @export
 plot_atac_peak_map <- function(mc_atac, mc_atac_clust, filename, peak_clust, eps_q = 0.1, ...) {
     # the central heat map showing normalized accessibility of peaks over metacells, ordered by clustering
-    clrs = colorRampPalette(c('blue4', 'white', 'red4'))(100)
-    col_annot <- tibble::column_to_rownames(mc_atac@metadata[,c('metacell', 'cell_type')], 'metacell')
-    ann_colors <- list('cell_type' = setNames(unlist(mc_atac@metadata[,'color']), unlist(mc_atac@metadata[,'cell_type'])))
-    eps = quantile(rowMeans(mc_atac@mat), eps_q)
+    clrs <- colorRampPalette(c("blue4", "white", "red4"))(100)
+    col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")
+    ann_colors <- list("cell_type" = setNames(unlist(mc_atac@metadata[, "color"]), unlist(mc_atac@metadata[, "cell_type"])))
+    eps <- quantile(rowMeans(mc_atac@mat), eps_q)
     if (is.null(mc_atac_clust)) {
-        cli_abort('Must specify clustering of metacells (e.g. using {.code gen_atac_mc_clust})')
+        cli_abort("Must specify clustering of metacells (e.g. using {.code gen_atac_mc_clust})")
     }
     if (is.null(peak_clust)) {
-        cli_abort('Must specify clustering of peaks (e.g. using {.code gen_atac_peak_clust})')
+        cli_abort("Must specify clustering of peaks (e.g. using {.code gen_atac_peak_clust})")
     }
-    mca_lfc = t(apply(mc_atac@mat, 1, function(x) log2((x + eps)/median(x + eps))))
-    brks = c(seq(min(mca_lfc), 0, l=50),
-        seq(0.01*(max(mca_lfc) - min(mca_lfc)), max(mca_lfc), l=51))
-    colnames(mca_lfc) = 1:ncol(mca_lfc)
-    pp = pheatmap::pheatmap(mca_lfc[peak_clust,mc_atac_clust], annotation_col = subset(col_annot, select = cell_type), 
-                        annotation_legend = FALSE,
-                        annotation_colors = ann_colors['cell_type'], 
-                        color = clrs, breaks = brks, cluster_cols = F, cluster_rows = F, show_colnames = F, show_rownames = F)
-    if (!dir.exists('./figs')) {dir.create('./figs')}
-    save_pheatmap_png(pp, glue::glue('./figs/{filename}'), ...)
+    mca_lfc <- t(apply(mc_atac@mat, 1, function(x) log2((x + eps) / median(x + eps))))
+    brks <- c(
+        seq(min(mca_lfc), 0, l = 50),
+        seq(0.01 * (max(mca_lfc) - min(mca_lfc)), max(mca_lfc), l = 51)
+    )
+    colnames(mca_lfc) <- 1:ncol(mca_lfc)
+    pp <- pheatmap::pheatmap(mca_lfc[peak_clust, mc_atac_clust],
+        annotation_col = subset(col_annot, select = cell_type),
+        annotation_legend = FALSE,
+        annotation_colors = ann_colors["cell_type"],
+        color = clrs, breaks = brks, cluster_cols = F, cluster_rows = F, show_colnames = F, show_rownames = F
+    )
+    if (!dir.exists("./figs")) {
+        dir.create("./figs")
+    }
+    save_pheatmap_png(pp, glue::glue("./figs/{filename}"), ...)
     return(pp)
 }

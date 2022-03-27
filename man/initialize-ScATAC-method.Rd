@@ -4,7 +4,16 @@
 \alias{initialize,ScATAC-method}
 \title{Construct a new ScATAC object}
 \usage{
-\S4method{initialize}{ScATAC}(.Object, mat, peaks, genome, metadata = NULL)
+\S4method{initialize}{ScATAC}(
+  .Object,
+  mat,
+  peaks,
+  genome,
+  id = NULL,
+  description = NULL,
+  metadata = NULL,
+  path = ""
+)
 }
 \arguments{
 \item{mat}{a numeric matrix where rows are peaks and columns are cells. Can be a sparse matrix.}
@@ -13,7 +22,13 @@
 
 \item{genome}{genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"}
 
+\item{id}{an identifier for the object, e.g. "pbmc".}
+
+\item{description}{description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"}
+
 \item{metadata}{data frame with a column called 'cell_id' and additional per-cell annotations, or the name of a delimited file which contains such annotations.}
+
+\item{path}{path from which the object was loaded (optional)}
 }
 \description{
 ScATAC is a shallow object holding ATAC data over cells.

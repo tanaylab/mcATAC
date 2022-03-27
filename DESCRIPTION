@@ -23,12 +23,14 @@ Imports:
     pheatmap,
     purrr,
     rlang,
+    randomNames,
     sparseMatrixStats,
     tgstat,
     tgutil,
     tibble,
     tidyr,
-    withr
+    withr,
+    magrittr
 Suggests: 
     testthat (>= 3.0.0),
     metacell,

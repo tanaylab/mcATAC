@@ -19,11 +19,17 @@ is_sparse_matrix <- function(mat) {
 
 #' Function to save pheatmaps
 #'
+#'
 #' @export
+save_pheatmap_png <- function(x, filename, width = 2500, height = 2500, res = 150) {
+    png(filename, width = width, height = height, res = res)
+    grid::grid.newpage()
+    grid::grid.draw(x$gtable)
+    dev.off()
+}
 
-save_pheatmap_png <- function(x, filename, width=2500, height=2500, res = 150) {
-  png(filename, width = width, height = height, res = res)
-  grid::grid.newpage()
-  grid::grid.draw(x$gtable)
-  dev.off()
+assert_atac_object <- function(obj, param = deparse(substitute(obj))) {
+    if (!methods::is(obj, "ATAC")) {
+        cli_abort("{.field {param}} must be an ScATAC or McATAC object", call = parent.frame(1))
+    }
 }

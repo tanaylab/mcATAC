@@ -8,7 +8,7 @@ plot_atac_peak_map(
   mc_atac,
   mc_atac_clust,
   filename,
-  peak_clust = NULL,
+  peak_clust,
   eps_q = 0.1,
   ...
 )

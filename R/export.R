@@ -21,14 +21,36 @@ export_to_h5ad <- function(object, out_file, ...) {
     mat <- t(mat)
 
     peaks <- as.data.frame(object@peaks)
+
+    if (nrow(object@ignore_peaks) > 0) {
+        peaks <- bind_rows(
+            peaks %>% mutate(ignore = FALSE),
+            object@ignore_peaks %>% mutate(ignore = TRUE)
+        ) %>% as.data.frame()
+
+        mat <- cbind(mat, t(object@ignore_pmat))
+    }
+
     rownames(peaks) <- peak_names(peaks)
 
     if (!is.null(object@metadata)) {
         metadata <- data.frame(rowname = colnames(object@mat)) %>%
-            left_join(metadata) %>%
+            bind_cols(object@metadata) %>%
             column_to_rownames("rowname")
     } else {
         metadata <- NULL
+    }
+
+    uns <- list(class = class(object)[1], genome = object@genome)
+
+    # add all other slots
+    slots <- methods::slotNames(object)
+    slots <- slots[slots %!in% c(
+        "egc", "fp", "mat", "peaks", "genome", "metadata",
+        "ignore_peaks", "ignore_pmat"
+    )]
+    for (s in slots) {
+        uns[[s]] <- slot(object, s)
     }
 
     cli_ul("Creating an AnnData object")
@@ -36,7 +58,7 @@ export_to_h5ad <- function(object, out_file, ...) {
         X = mat,
         var = peaks,
         obs = metadata,
-        uns = list(class = class(object)[1], genome = object@genome)
+        uns = uns
     )
 
     cli_ul("Writing to file")
@@ -60,17 +82,21 @@ export_to_h5ad <- function(object, out_file, ...) {
 #' @export
 export_atac_clust_ucsc <- function(mc_atac, track_prefix, output_dir = getwd(), clust_vec = NULL, normalization = "none") {
     res_lst <- prepare_clusters(mc_atac, clust_vec, normalization)
-    purrr::walk(res_lst$clusts, function(cl) {
+    fns <- purrr::map_chr(res_lst$clusts, function(cl) {
         atac_vec <- res_lst$atac_mc_mat_clust[, cl]
+        fn <- file.path(output_dir, paste0(track_prefix, "_", gsub("\\/", "_", cl), ".ucsc"))
         misha.ext::fwrite_ucsc(
             intervals = mutate(mc_atac@peaks, "score" = atac_vec),
-            file = file.path(output_dir, paste0(track_prefix, "_", gsub("\\/", "_", cl), ".ucsc")),
+            file = fn,
             name = paste0(track_prefix, "_", cl),
             color = res_lst$col_key[[as.character(cl)]],
             type = "bedGraph",
             description = glue::glue("UCSC track for cluster {cl} of dataset {track_prefix}")
         )
+        return(fn)
     })
+    cli_alert_success("Successfully exported to ucsc. Files generated:")
+    purrr::walk(fns, cli_ul)
 }
 
 
@@ -102,12 +128,12 @@ export_atac_clust_misha <- function(mc_atac, track_prefix, description = NULL, c
     }
     if (parallel) {
         track_names <- parallel::mclapply(seq_along(res_lst$clusts), function(cl, i) {
-              write_cluster_misha_track(cl[[i]], res_lst$atac_mc_mat_clust, track_prefix, description = description[[i]])
-          }, cl = res_lst$clusts, mc.cores = num_cores)
+            write_cluster_misha_track(cl[[i]], res_lst$atac_mc_mat_clust, track_prefix, description = description[[i]])
+        }, cl = res_lst$clusts, mc.cores = num_cores)
     } else {
         track_names <- sapply(seq_along(res_lst$clusts), function(cl, i) {
-              write_cluster_misha_track(cl[[i]], res_lst$atac_mc_mat_clust, track_prefix, description = description[[i]])
-          }, cl = res_lst$clusts)
+            write_cluster_misha_track(cl[[i]], res_lst$atac_mc_mat_clust, track_prefix, description = description[[i]])
+        }, cl = res_lst$clusts)
     }
     gdb.reload()
     return(track_names)
@@ -172,7 +198,7 @@ prepare_clusters <- function(mc_atac, clust_vec = NULL, normalization = "none", 
         } else if (has_name(mc_atac@metadata, "cluster_")) {
             clust_vec <- unlist(mc_atac@metadata[, grep("cluster_", colnames(mc_atac@metadata))[[1]]])
         } else {
-            print(round(ncol(mc_atac@mat)/10))
+            print(round(ncol(mc_atac@mat) / 10))
             cli_warn(glue::glue("No clustering vector identified. Clustering with k == {round(ncol(mc_atac@mat)/10)}"))
             clust_vec <- gen_atac_mc_clust(mc_atac, k = round(ncol(mc_atac@mat) / 10))
         }
@@ -183,7 +209,7 @@ prepare_clusters <- function(mc_atac, clust_vec = NULL, normalization = "none", 
     } else {
         col_key <- tibble::deframe(unique(mc_atac@metadata[, c("cell_type", "color")]))
     }
-    eps <- quantile(rowMeans(mc_atac@mat), eps_q)
+    eps <- quantile(Matrix::rowMeans(mc_atac@mat), eps_q)
     if (normalization == "lfcom") {
         atac_mc_mat <- t(apply(mc_atac@mat, 1, function(x) log2((x + eps) / median(x + eps))))
         cli_alert_info("Using eps_q={eps_q} and eps = {eps} for regularization")

@@ -15,10 +15,11 @@
 #'
 #' @export
 gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL, ...) {
+    assert_atac_object(atac_mc)
     if (!is.null(peak_set)) {
         atac_mc <- subset_peaks(atac_mc, peak_set)
     }
-    atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(atac_mc@mat), k, ...)
+    atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(atac_mc@mat), k, id_column = FALSE, ...)
     return(setNames(atac_peak_km$cluster, rownames(atac_mc@mat)))
 }
 
@@ -45,6 +46,7 @@ gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL, ...) {
 #' }
 #' @export
 gen_atac_mc_clust <- function(atac_mc, use_prior_annot = TRUE, k = NULL, peak_set = NULL, annot = "cell_type", ...) {
+    assert_atac_object(atac_mc)
     if (!is.null(peak_set)) {
         atac_mc <- subset_peaks(atac_mc, peak_set)
     }
@@ -80,6 +82,7 @@ gen_atac_mc_clust <- function(atac_mc, use_prior_annot = TRUE, k = NULL, peak_se
 #' }
 #' @export
 subset_peaks <- function(atac_mc, peak_set) {
+    assert_atac_object(atac_mc)
     pks_filt <- semi_join(atac_mc@peaks, peak_set, by = c("chrom", "start", "end", "peak_name"))
     atac_mc@peaks <- atac_mc@peaks[atac_mc@peaks$peak_name %in% pks_filt$peak_name, ]
     atac_mc@mat <- atac_mc@mat[rownames(atac_mc@mat) %in% pks_filt$peak_name, ]

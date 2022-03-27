@@ -4,7 +4,7 @@
 \alias{atac_ignore_peaks}
 \title{Set ignored (i.e. blacklisted) peaks}
 \usage{
-atac_ignore_peaks(atac = NULL, ig_peaks)
+atac_ignore_peaks(atac, ig_peaks)
 }
 \arguments{
 \item{atac}{an ScATAC or McATAC object}
@@ -15,7 +15,7 @@ atac_ignore_peaks(atac = NULL, ig_peaks)
 
 }
 \description{
-Given a list of peaks to ignore, this will cancel any previous policy for blacklisting and remove the given peaks from the {.code ignore_peaks} and {.code ignore_pmat} slots.
+Given a list of peaks to ignore, this will cancel any previous policy for blacklisting and remove the given peaks from the {.code ignore_peaks} and {.code ignore_pmat} slots. Note that the matrix and peaks would be reordered.
 }
 \examples{
 \dontrun{
