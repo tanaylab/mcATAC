@@ -30,7 +30,7 @@ Write a McATAC or ScATAC object to an h5ad file
 }
 \examples{
 \dontrun{
-atac_sc <- import_from_10x("pbmc_data")
+atac_sc <- import_from_10x("pbmc_data", genome = "hg38")
 export_to_h5ad(atac_sc, "pbmc_data/atac_sc.h5ad")
 }
 

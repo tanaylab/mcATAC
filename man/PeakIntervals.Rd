@@ -4,10 +4,12 @@
 \alias{PeakIntervals}
 \title{Construct a PeakIntervals object from misha intervals}
 \usage{
-PeakIntervals(intervals)
+PeakIntervals(intervals, genome = NULL)
 }
 \arguments{
 \item{intervals}{misha intervals (a data frame which has the following columns: 'chrom', 'start' and 'end')}
+
+\item{genome}{genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10".}
 }
 \value{
 a PeakIntervals object

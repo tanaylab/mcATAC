@@ -4,14 +4,24 @@
 \alias{export_atac_clust_ucsc}
 \title{Generate a ucsc genome browser file for each metacell cluster}
 \usage{
-export_atac_clust_ucsc(mc_atac, mc_atac_clust, fn)
+export_atac_clust_ucsc(
+  mc_atac,
+  track_prefix,
+  output_dir = getwd(),
+  clust_vec = NULL,
+  normalization = "none"
+)
 }
 \arguments{
 \item{mc_atac}{McATAC object}
 
-\item{mc_atac_clust}{output of \code{gen_atac_mc_clust}}
+\item{track_prefix}{prefix for generated misha tracks.}
 
-\item{fn}{name of the genome browser file (should have a '.ucsc' extension)}
+\item{output_dir}{(optional) name of the directory to write files to}
+
+\item{clust_vec}{(optional) a vector of length #metacells representing an annotation/clustering (can be output of \code{gen_atac_mc_clust})}
+
+\item{normalization}{(optional) normalization method, either 'none', 'lfcom' (log2 fold-change over median), 'zs' (Z-scores)}
 }
 \description{
 Generate a ucsc genome browser file for each metacell cluster
