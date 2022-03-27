@@ -151,10 +151,7 @@ plot_atac_rna_cor <- function(mc_atac, rna_mat) {
 plot_atac_peak_map <- function(mc_atac, mc_atac_clust, peak_clust, 
                                 filepath = NULL, 
                                 dev = NULL,
-                                clrs = colorRampPalette(c("blue4", "white", "red4"))(100), 
-                                seed = 1337) {
-    # the central heat map showing normalized accessibility of peaks over metacells, ordered by clustering
-    set.seed(seed)
+                                clrs = colorRampPalette(c("blue4", "white", "red4"))(100)) {
     if (is.null(dev)) {dev <- png}
     if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
         col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")
@@ -169,14 +166,12 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust, peak_clust,
         col_annot <- tibble::column_to_rownames(col_annot, "metacell")
         ann_colors <- list("cell_type" = deframe(color_key))
     }
-    # eps <- quantile(rowMeans(mc_atac@mat), eps_q)
     if (is.null(mc_atac_clust)) {
         cli_abort("Must specify clustering of metacells (e.g. using {.code gen_atac_mc_clust})")
     }
     if (is.null(peak_clust)) {
         cli_abort("Must specify clustering of peaks (e.g. using {.code gen_atac_peak_clust})")
     }
-    # mca_lfc <- t(apply(mc_atac@mat, 1, function(x) log2((x + eps) / median(x + eps))))
     mca_lfc <- mc_atac@fp
     brks <- c(
         seq(min(mca_lfc), 0, l = 50),
