@@ -9,6 +9,8 @@ setOldClass("PeakIntervals")
 #' @description ATAC is a shallow object holding ATAC data over cells/metacells. Minimally it should include a count matrix of peaks over cells/metacells, \code{PeakIntervals} which hold the coordinates of the peaks and the id of the genome assembly of the peaks. ScATAC and
 #' McATAC extend the ATAC object by adding metadata and additional slots.
 #'
+#' @slot id an identifier for the object, e.g. "pbmc".
+#' @slot description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
 #' @slot mat a numeric matrix where rows are peaks and columns are cells/metacells. Can be a sparse matrix.
 #' @slot peaks misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).
 #' @slot genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
@@ -18,6 +20,8 @@ setOldClass("PeakIntervals")
 ATAC <- setClass(
     "ATAC",
     slots = c(
+        id = "character",
+        description = "character",
         mat = "any_matrix",
         peaks = "PeakIntervals",
         genome = "character",
@@ -31,14 +35,14 @@ ATAC <- setClass(
 setMethod(
     "initialize",
     signature = "ATAC",
-    definition = function(.Object, mat, peaks, genome) {
-        .Object <- make_atac_object(.Object, mat, peaks, genome)
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL) {
+        .Object <- make_atac_object(.Object, mat, peaks, genome, id, description)
         validate_atac_object(.Object)
         return(.Object)
     }
 )
 
-make_atac_object <- function(obj, mat, peaks, genome, metadata, metadata_id_field) {
+make_atac_object <- function(obj, mat, peaks, genome, id, description, metadata, metadata_id_field) {
     if (nrow(mat) != nrow(peaks)) {
         cli_abort("Number of peaks is not equal to the matrix rows.")
     }
@@ -47,6 +51,15 @@ make_atac_object <- function(obj, mat, peaks, genome, metadata, metadata_id_fiel
     peaks <- PeakIntervals(peaks, genome)
     mat <- mat[peak_names(peaks), ] # remove from matrix peaks that were filtered
 
+    if (is.null(id)) {
+        id <- gsub(" ", "_", randomNames::randomNames(n = 1, name.order = "first.last", name.sep = "_"))
+        cli_alert("No id was given, setting id to {.field {id}}")
+    }
+
+    description <- description %||% ""
+
+    obj@id <- id
+    obj@description <- description
     obj@mat <- mat
     obj@peaks <- peaks
     obj@genome <- genome
@@ -122,6 +135,9 @@ McATAC <- setClass(
 #' @param mat a numeric matrix where rows are peaks and columns are metacells. Can be a sparse matrix.
 #' @param peaks misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).
 #' @param genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
+#' @param id an identifier for the object, e.g. "pbmc".
+#' @param description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k),
+#' projection was done using RNA metacells"
 #' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
 #'
 #' @description McATAC is a shallow object holding ATAC data over metacells.
@@ -133,8 +149,8 @@ McATAC <- setClass(
 setMethod(
     "initialize",
     signature = "McATAC",
-    definition = function(.Object, mat, peaks, genome, metadata = NULL, mc_size_eps_q = 0.1) {
-        .Object <- make_atac_object(.Object, mat, peaks, genome)
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, mc_size_eps_q = 0.1) {
+        .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description)
         validate_atac_object(.Object)
         .Object <- add_metadata(.Object, metadata, "metacell")
         .Object@egc <- calc_mc_egc(.Object, mc_size_eps_q)
@@ -217,7 +233,13 @@ setMethod(
 )
 
 print_atac_object <- function(object, object_type, column_type, md_column) {
-    cli::cli_text("An {object_type} object with {.val {ncol(object@mat)}} {column_type}s and {.val {nrow(object@mat)}} ATAC peaks from {.field {object@genome}}.")
+    cli::cli_text("{.cls {object_type}} object with {.val {ncol(object@mat)}} {column_type}s and {.val {nrow(object@mat)}} ATAC peaks from {.field {object@genome}}.")
+    if (object@id != "") {
+        cli::cli_text(c("id: {.val {object@id}}"))
+    }
+    if (object@description != "") {
+        cli::cli_text(c("description: {.val {object@description}}"))
+    }
     cli::cli_text("Slots include:")
     cli_ul(c("{.code @mat}: a numeric matrix where rows are peaks and columns are {column_type}s. Can be a sparse matrix."))
     cli_ul(c("{.code @peaks}: a misha intervals set with the peak definitions."))
@@ -249,6 +271,8 @@ ScATAC <- setClass(
 
 #' Construct a new ScATAC object
 #'
+#' @param id an identifier for the object, e.g. "pbmc".
+#' @param description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
 #' @param mat a numeric matrix where rows are peaks and columns are cells. Can be a sparse matrix.
 #' @param peaks misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).
 #' @param genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
@@ -262,8 +286,8 @@ ScATAC <- setClass(
 setMethod(
     "initialize",
     signature = "ScATAC",
-    definition = function(.Object, mat, peaks, genome, metadata = NULL) {
-        .Object <- make_atac_object(.Object, mat, peaks, genome)
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL) {
+        .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description)
         validate_atac_object(.Object)
         .Object <- add_metadata(.Object, metadata, "cell_id")
         return(.Object)

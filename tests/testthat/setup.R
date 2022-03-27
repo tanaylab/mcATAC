@@ -15,7 +15,7 @@ fs::dir_create(raw_dir)
 system(glue("cp -rf /net/mraid14/export/tgdata/users/aviezerl/src/mcATAC/pbmc_data/* {raw_dir}/"))
 
 data(cell_to_metacell_pbmc_example)
-atac_sc <<- import_from_10x(raw_dir, "hg38")
+atac_sc <<- import_from_10x(raw_dir, "hg38", id = "pbmc", description = "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
 
 data(mcmd)
 atac_mc <<- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example, metadata = mcmd, min_int_frac = 0.5, mc_size_eps_q = 0.1)

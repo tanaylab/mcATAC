@@ -4,6 +4,8 @@ test_that("import from 10x works", {
     expect_equal(ncol(atac_sc@mat), 11909)
     expect_equal(colnames(atac_sc@peaks), c("chrom", "start", "end", "peak_name"))
     expect_equal(peak_names(atac_sc@peaks), atac_sc@peaks$peak_name)
+    expect_equal(atac_sc@id, "pbmc")
+    expect_equal(atac_sc@description, "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
 })
 
 test_that("projection works", {
@@ -14,6 +16,8 @@ test_that("projection works", {
     expect_equal(colnames(atac_mc@peaks), c("chrom", "start", "end", "peak_name"))
     expect_equal(peak_names(atac_mc@peaks), atac_mc@peaks$peak_name)
     expect_equal(colSums(atac_mc@egc), rep(quantile(colSums(atac_mc@mat), 0.1), ncol(atac_mc@egc)), ignore_attr = TRUE)
+    expect_equal(atac_mc@id, "pbmc")
+    expect_equal(atac_mc@description, "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
 })
 
 test_that("projection from a metacell1 object works", {
@@ -32,6 +36,8 @@ test_that("export works", {
     expect_equal(atac_mc@mc_size_eps_q, atac_mc1@mc_size_eps_q)
     expect_equal(atac_mc@genome, atac_mc1@genome)
     expect_equal(atac_mc@metadata, atac_mc1@metadata, ignore_attr = TRUE)
+    expect_equal(atac_mc@id, atac_mc1@id)
+    expect_equal(atac_mc@description, atac_mc1@description)
 })
 
 test_that("add_metadata works", {

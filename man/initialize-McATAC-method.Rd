@@ -4,7 +4,16 @@
 \alias{initialize,McATAC-method}
 \title{Construct a new McATAC object}
 \usage{
-\S4method{initialize}{McATAC}(.Object, mat, peaks, genome, metadata = NULL, mc_size_eps_q = 0.1)
+\S4method{initialize}{McATAC}(
+  .Object,
+  mat,
+  peaks,
+  genome,
+  id = NULL,
+  description = NULL,
+  metadata = NULL,
+  mc_size_eps_q = 0.1
+)
 }
 \arguments{
 \item{mat}{a numeric matrix where rows are peaks and columns are metacells. Can be a sparse matrix.}
@@ -12,6 +21,11 @@
 \item{peaks}{misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).}
 
 \item{genome}{genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"}
+
+\item{id}{an identifier for the object, e.g. "pbmc".}
+
+\item{description}{description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k),
+projection was done using RNA metacells"}
 
 \item{metadata}{data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.}
 

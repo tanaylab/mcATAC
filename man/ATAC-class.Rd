@@ -12,6 +12,10 @@ McATAC extend the ATAC object by adding metadata and additional slots.
 \section{Slots}{
 
 \describe{
+\item{\code{id}}{an identifier for the object, e.g. "pbmc".}
+
+\item{\code{description}}{description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"}
+
 \item{\code{mat}}{a numeric matrix where rows are peaks and columns are cells/metacells. Can be a sparse matrix.}
 
 \item{\code{peaks}}{misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).}

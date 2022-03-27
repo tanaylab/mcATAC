@@ -11,12 +11,27 @@ project_atac_on_mc(
   cell_to_metacell = NULL,
   metadata = NULL,
   min_int_frac = 0.5,
-  mc_size_eps_q = 0.1
+  mc_size_eps_q = 0.1,
+  id = NULL,
+  description = NULL
 )
 
-project_atac_on_mc_from_metacell1(atac, scdb, mc_id, metadata = NULL)
+project_atac_on_mc_from_metacell1(
+  atac,
+  scdb,
+  mc_id,
+  metadata = NULL,
+  id = NULL,
+  description = NULL
+)
 
-project_atac_on_mc_from_h5ad(atac, h5ad_file, metadata = NULL)
+project_atac_on_mc_from_h5ad(
+  atac,
+  h5ad_file,
+  metadata = NULL,
+  id = NULL,
+  description = NULL
+)
 }
 \arguments{
 \item{atac}{an ScATAC object}
@@ -30,6 +45,10 @@ part of.}
 
 \item{mc_size_eps_q}{(optional) quantile of MC size (in UMIs) to scale the number of UMIs per metacell. \eqn{egc_ij} would then be
 the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quantile of metacell sizes.}
+
+\item{id}{an identifier for the object, e.g. "pbmc". If NULL - the id would be taken from the scATAC object \code{atac}.}
+
+\item{description}{an identifier for the object, e.g. "pbmc". If NULL - the description would be taken from the scATAC object \code{atac}}
 
 \item{scdb}{a metacell1 \code{scdb} path}
 
