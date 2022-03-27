@@ -52,6 +52,7 @@ atac_sc <- filter_features(scatac = atac_sc, minimal_max_umi = 3, min_peak_lengt
 data(cell_to_metacell_pbmc_example)
 head(cell_to_metacell_pbmc_example)
 atac_mc <- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example)
+atac_mc
 ```
 
 Or using a metacell1 object: 
@@ -61,7 +62,7 @@ atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")
 ## Import annotations
 ```{r import-annotations}
 data(mcmd)
-mc_atac <- add_mc_metadata(mc_atac, mcmd)
+atac_mc <- add_mc_metadata(atac_mc, mcmd)
 ```
 ## Identify dynamic peaks
 ```{r dynamic-peaks}

@@ -41,12 +41,24 @@ export_to_h5ad <- function(object, out_file, ...) {
         metadata <- NULL
     }
 
+    uns <- list(class = class(object)[1], genome = object@genome)
+
+    # add all other slots
+    slots <- methods::slotNames(object)
+    slots <- slots[slots %!in% c(
+        "egc", "fp", "mat", "peaks", "genome", "metadata",
+        "ignore_peaks", "ignore_pmat"
+    )]
+    for (s in slots) {
+        uns[[s]] <- slot(object, s)
+    }
+
     cli_ul("Creating an AnnData object")
     adata <- anndata::AnnData(
         X = mat,
         var = peaks,
         obs = metadata,
-        uns = list(class = class(object)[1], genome = object@genome)
+        uns = uns
     )
 
     cli_ul("Writing to file")

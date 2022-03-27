@@ -18,6 +18,6 @@ McATAC extend the ATAC object by adding metadata and additional slots.
 
 \item{\code{genome}}{genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"}
 
-\item{\code{metadata}}{data frame with a column called 'metacell' and additional metacell annotations for McATAC, or 'cell_id' and per-cell annotatoins for ScATAC. The constructor can also include or the name of a delimited file which contains such annotations.}
+\item{\code{(optional)}}{metadata data frame with a column called 'metacell' and additional metacell annotations for McATAC, or 'cell_id' and per-cell annotatoins for ScATAC. The constructor can also include or the name of a delimited file which contains such annotations.}
 }}
 

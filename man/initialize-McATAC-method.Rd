@@ -4,7 +4,7 @@
 \alias{initialize,McATAC-method}
 \title{Construct a new McATAC object}
 \usage{
-\S4method{initialize}{McATAC}(.Object, mat, peaks, genome, metadata = NULL)
+\S4method{initialize}{McATAC}(.Object, mat, peaks, genome, metadata = NULL, mc_size_eps_q = 0.1)
 }
 \arguments{
 \item{mat}{a numeric matrix where rows are peaks and columns are metacells. Can be a sparse matrix.}
@@ -14,6 +14,9 @@
 \item{genome}{genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"}
 
 \item{metadata}{data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.}
+
+\item{mc_size_eps_q}{(optional) quantile of MC size (in UMIs) to scale the number of UMIs per metacell. \eqn{egc_ij} would then be
+the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quantile of metacell sizes.}
 }
 \description{
 McATAC is a shallow object holding ATAC data over metacells.

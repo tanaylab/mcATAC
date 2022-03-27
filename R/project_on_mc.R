@@ -10,6 +10,8 @@
 #' part of.
 #' @param metadata (optional) per-metacell metadata. A data frame with a column called 'metacell' and additional metacell annotations.
 #' @param min_int_frac (optional) minimal expected fraction of intersection of barcodes (cell names) in ScATAC
+#' @param mc_size_eps_q (optional) quantile of MC size (in UMIs) to scale the number of UMIs per metacell. \eqn{egc_ij} would then be
+#'  the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quantile of metacell sizes.
 #'
 #' @return an McATAC object
 #'
@@ -20,7 +22,7 @@
 #' }
 #'
 #' @export
-project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5) {
+project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5, mc_size_eps_q = 0.1) {
     assert_atac_object(atac)
     cell_to_metacell <- deframe(cell_to_metacell)
     assert_that(all(names(cell_to_metacell) %in% colnames(atac@mat)))
@@ -45,7 +47,7 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, m
     # TODO: deal with cell metadata
     # Naive solution - tabulate metadata per metacell and concatenate...
 
-    mc_atac <- new("McATAC", mc_mat, atac@peaks[non_zero_peaks, ], atac@genome, metadata)
+    mc_atac <- new("McATAC", mc_mat, atac@peaks[non_zero_peaks, ], atac@genome, metadata, mc_size_eps_q = mc_size_eps_q)
     cli_alert_success("Created a new McATAC object with {.val {ncol(mc_atac@mat)}} metacells and {.val {nrow(mc_atac@mat)}} ATAC peaks.")
 
     return(mc_atac)

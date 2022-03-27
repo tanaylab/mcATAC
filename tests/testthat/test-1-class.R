@@ -13,6 +13,7 @@ test_that("projection works", {
     expect_setequal(colnames(atac_mc@mat), cell_to_metacell_pbmc_example$metacell)
     expect_equal(colnames(atac_mc@peaks), c("chrom", "start", "end", "peak_name"))
     expect_equal(peak_names(atac_mc@peaks), atac_mc@peaks$peak_name)
+    expect_equal(colSums(atac_mc@egc), rep(quantile(colSums(atac_mc@mat), 0.1), ncol(atac_mc@egc)), ignore_attr = TRUE)
 })
 
 test_that("projection from a metacell1 object works", {
@@ -24,8 +25,13 @@ test_that("projection from a metacell1 object works", {
 test_that("export works", {
     export_to_h5ad(atac_mc, fs::path(raw_dir, "atac_mc.h5ad"), compression = "gzip")
     atac_mc1 <- import_from_h5ad(fs::path(raw_dir, "atac_mc.h5ad"))
-    expect_true(mean(atac_mc@mat - atac_mc1@mat) <= 1e-9)
+    expect_true(mean(abs(atac_mc@mat - atac_mc1@mat)) <= 1e-9)
+    expect_true(mean(abs(atac_mc@egc - atac_mc1@egc)) <= 1e-9)
+    expect_true(mean(abs(atac_mc@fp - atac_mc1@fp)) <= 1e-9)
     expect_equal(atac_mc@peaks, atac_mc1@peaks, ignore_attr = TRUE)
+    expect_equal(atac_mc@mc_size_eps_q, atac_mc1@mc_size_eps_q)
+    expect_equal(atac_mc@genome, atac_mc1@genome)
+    expect_equal(atac_mc@metadata, atac_mc1@metadata, ignore_attr = TRUE)
 })
 
 test_that("add_metadata works", {

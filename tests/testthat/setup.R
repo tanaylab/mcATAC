@@ -18,7 +18,7 @@ data(cell_to_metacell_pbmc_example)
 atac_sc <<- import_from_10x(raw_dir, "hg38")
 
 data(mcmd)
-atac_mc <<- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example, mcmd)
+atac_mc <<- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example, metadata = mcmd, min_int_frac = 0.5, mc_size_eps_q = 0.1)
 
 # Make atac_sc and atac_mc const in order to test them independetly
 lockBinding("atac_sc", globalenv())

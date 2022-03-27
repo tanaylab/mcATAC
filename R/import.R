@@ -59,7 +59,17 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL) {
         }
     }
 
-    res <- new(class, mat, peaks, genome, metadata)
+    if (class == "McATAC") {
+        if (!is.null(adata$uns[["mc_size_eps_q"]])) {
+            mc_size_eps_q <- adata$uns[["mc_size_eps_q"]]
+        } else {
+            mc_size_eps_q <- 0.1
+            cli_alert_warning("h5ad file doesn't have the {.field mc_size_eps_q} at the {.file uns} section. Using the default: {.val {mc_size_eps_q}")
+        }
+        res <- new("McATAC", mat, peaks, genome, metadata, mc_size_eps_q = mc_size_eps_q)
+    } else {
+        res <- new("ScATAC", mat, peaks, genome, metadata)
+    }
 
     if (has_name(peaks, "ignore")) {
         peaks_to_remove <- peaks$peak_name[peaks$ignore]

@@ -12,7 +12,7 @@ setOldClass("PeakIntervals")
 #' @slot mat a numeric matrix where rows are peaks and columns are cells/metacells. Can be a sparse matrix.
 #' @slot peaks misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).
 #' @slot genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
-#' @slot metadata data frame with a column called 'metacell' and additional metacell annotations for McATAC, or 'cell_id' and per-cell annotatoins for ScATAC. The constructor can also include or the name of a delimited file which contains such annotations.
+#' @slot (optional) metadata data frame with a column called 'metacell' and additional metacell annotations for McATAC, or 'cell_id' and per-cell annotatoins for ScATAC. The constructor can also include or the name of a delimited file which contains such annotations.
 #'
 #' @exportClass ATAC
 ATAC <- setClass(
@@ -100,10 +100,19 @@ validate_atac_object_params <- function(mat, peaks, genome) {
 #'
 #' An ATAC object with data over metacells
 #'
+#' @slot egc normalized metacell accessibility (fraction of accessibility per metacell scaled to the \code{mc_size_eps_q} quantile of
+#' metacell size)
+#' @slot fp a matrix showing for each peak (row) the relative enrichment of umis in log2 scale, i.e. \eqn{log2((1 + egc) / median(1 + egc))}
+#'
 #' @rdname ATAC
 #' @exportClass McATAC
 McATAC <- setClass(
     "McATAC",
+    slots = c(
+        egc = "any_matrix",
+        fp = "any_matrix",
+        mc_size_eps_q = "numeric"
+    ),
     contains = "ATAC"
 )
 
@@ -114,21 +123,42 @@ McATAC <- setClass(
 #' @param peaks misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).
 #' @param genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
 #' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
+#'
 #' @description McATAC is a shallow object holding ATAC data over metacells.
 #' Minimally it should include a count matrix of peaks over metacells, and \code{PeakIntervals} which hold the coordinates
 #' of the peaks.
 #'
+#' @inheritParams project_atac_on_mc
 #' @export
 setMethod(
     "initialize",
     signature = "McATAC",
-    definition = function(.Object, mat, peaks, genome, metadata = NULL) {
+    definition = function(.Object, mat, peaks, genome, metadata = NULL, mc_size_eps_q = 0.1) {
         .Object <- make_atac_object(.Object, mat, peaks, genome)
         validate_atac_object(.Object)
         .Object <- add_metadata(.Object, metadata, "metacell")
+        .Object@egc <- calc_mc_egc(.Object, mc_size_eps_q)
+        .Object@fp <- calc_mc_fp(.Object)
+        .Object@mc_size_eps_q <- mc_size_eps_q
         return(.Object)
     }
 )
+
+calc_mc_egc <- function(mcatac, mc_size_eps_q = 0.1) {
+    mc_mat <- mcatac@mat
+    mc_sum <- colSums(mc_mat, na.rm = TRUE)
+    fractions <- t(t(mc_mat) / mc_sum)
+    quant_size <- quantile(mc_sum, mc_size_eps_q, na.rm = TRUE)
+    cli_li("Setting {.field egc} cell size to {.val {quant_size}} (the {.val {mc_size_eps_q}} quantile of metacell sizes)")
+    egc <- fractions * quant_size
+    return(egc)
+}
+
+calc_mc_fp <- function(mcatac) {
+    log_egc <- log2(1 + mcatac@egc)
+    mc_fp <- log_egc - sparseMatrixStats::rowMedians(log_egc, na.rm = TRUE)
+    return(mc_fp)
+}
 
 #' Add per-metacell metadata to an McATAC object
 #'
@@ -192,6 +222,10 @@ print_atac_object <- function(object, object_type, column_type, md_column) {
     cli_ul(c("{.code @mat}: a numeric matrix where rows are peaks and columns are {column_type}s. Can be a sparse matrix."))
     cli_ul(c("{.code @peaks}: a misha intervals set with the peak definitions."))
     cli_ul(c("{.code @genome}: genome assembly of the peaks"))
+    if (object_type == "McATAC") {
+        cli_ul(c("{.code @egc}: a numeric matrix which contains normalized metacell accessibility."))
+        cli_ul(c("{.code @fp}: a matrix showing for each peak (row) the relative enrichment of umis in log2 scale."))
+    }
     if (!is.null(object@metadata)) {
         cli_ul(c("{.code @metadata}: a tibble with a column called '{md_column}' and additional {column_type} annotations."))
     }
