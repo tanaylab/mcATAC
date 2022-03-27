@@ -10,6 +10,7 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
+  dpi = 300,
   comment = "#>"
 )
 ```
@@ -25,7 +26,7 @@ Download the following dataset from 10x:
 [PBMC from a healthy donor - granulocytes removed through cell sorting (10k) (Filtered feature barcode matrix MEX (DIR))](https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k?)
 
 
-And extract it's contents to a directory called `pbmc_data`.
+And extract it's contents to a directory called `pbmc_data`:
 
 ```{r download-data}
 if (!dir.exists("pbmc_data")){
@@ -33,12 +34,16 @@ if (!dir.exists("pbmc_data")){
 }
 ```
 
-
 ## Import ATAC dataset
 
 ```{r import}
-atac_sc <- import_from_10x("pbmc_data")
+atac_sc <- import_from_10x("pbmc_data", genome = "hg38", id = "pbmc", description = "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
 atac_sc
+```
+
+## Filter peaks by coverage and/or length
+```{r filter-peaks}
+atac_sc <- filter_features(scatac = atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
 ```
 
 
@@ -48,12 +53,37 @@ atac_sc
 data(cell_to_metacell_pbmc_example)
 head(cell_to_metacell_pbmc_example)
 atac_mc <- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example)
+atac_mc
 ```
 
 Or using a metacell1 object: 
 ```{r project-mc1, eval = FALSE}
 atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")
 ```
+## Import annotations
+```{r import-annotations}
+data(mcmd)
+atac_mc <- add_mc_metadata(atac_mc, mcmd)
+```
+## Identify dynamic peaks
+```{r dynamic-peaks, dpi=300, fig.width=7, fig.height=7}
+dyn_peaks <- identify_dynamic_peaks(mcatac = atac_mc, mean_thresh_q = 0.05)
+```
+
+## Cluster a peak set
+```{r cluster-peaks}
+peak_clust <- gen_atac_peak_clust(atac_mc, k = 30, peak_set = dyn_peaks)
+table(peak_clust)
+```
+
+## Export dynamic peaks to UCSC tracks
+```{r export-to-ucsc}
+outdir <- tempdir()
+export_atac_clust_ucsc(mc_atac = atac_mc, track_prefix = 'hum_pbmc_10x', normalization = 'lfcom', output_dir = outdir)
+```
+
+![UCSC track example](ucsc_output_example.png "Example of UCSC output on human PBMC data from 10X Genomics")
+
 
 
 ## Export to an h5ad file

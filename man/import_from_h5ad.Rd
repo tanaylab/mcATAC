@@ -4,24 +4,37 @@
 \alias{import_from_h5ad}
 \title{Create an ScATAC,McATAC object from an h5ad file}
 \usage{
-import_from_h5ad(file, class = NULL)
+import_from_h5ad(
+  file,
+  class = NULL,
+  genome = NULL,
+  id = NULL,
+  description = NULL
+)
 }
 \arguments{
 \item{file}{name of an h5ad file with ATAC data}
 
 \item{class}{is the file storing ScATAC or McATAC. If NULL - the class would be determined by the 'class' field in the 'uns' part
-of the h5ad file, if exists, and otherwise the class would be
-McATAC.}
+of the h5ad file, if exists and otherwise the class would be McATAC.}
+
+\item{genome}{genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10". If NULL - the assembly would be determined by the 'genome' field in the 'uns' part of the h5ad file.}
+
+\item{id}{an identifier for the object, e.g. "pbmc". If NULL - the id would be determined by the 'id' field in the 'uns' part of the
+h5ad file, and if this doesn't exist - a random id would be assigned.}
+
+\item{description}{description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)". If NULL - the id would be determined by the 'description' field in the 'uns' part of the h5ad file}
 }
 \value{
 an ScATAC/McATAC object
 }
 \description{
-Create an ScATAC,McATAC object from an h5ad file
+Reads an ATAC object from an h5ad file. Peak data is taken from the 'X' section and metadata is taken from 'obs'.
+The 'var' section can contain a special field called 'ignore' which marks peaks that should be ignored.
 }
 \examples{
 \dontrun{
-atac_sc <- import_from_10x("pbmc_data")
+atac_sc <- import_from_10x("pbmc_data", genome = "hg38")
 export_to_h5ad(atac_sc, "pbmc_data/atac_sc.h5ad")
 atac_sc_loaded <- import_from_h5ad("pbmc_data/atac_sc.h5ad")
 }

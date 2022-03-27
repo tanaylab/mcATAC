@@ -11,7 +11,7 @@ plot_atac_rna_cor(mc_atac, rna_mat)
 
 \item{rna_mat}{an RNA metacell count matrix, where metacells are in columns and genes are in rows}
 
-\item{gene_field}{name of a field in \code{mc_atac$peaks} which contains the gene names. If NULL - the peaks would be
+\item{gene_field}{name of a field in \code{mc_atac@peaks} which contains the gene names. If NULL - the peaks would be
 transformed to promoter peaks and the gene names would be taken from the promoter gene names.}
 }
 \description{

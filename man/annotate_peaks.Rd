@@ -15,3 +15,8 @@ the original \code{atac} object, with the peaks annotated using \code{annotate_i
 \description{
 Annotate ATAC peaks
 }
+\examples{
+\dontrun{
+pbmc_atac_mc <- annotate_peaks(pbmc_atac_mc)
+}
+}

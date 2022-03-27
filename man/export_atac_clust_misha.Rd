@@ -4,16 +4,31 @@
 \alias{export_atac_clust_misha}
 \title{Generate a misha track for each atac metacell cluster}
 \usage{
-export_atac_clust_misha(mc_atac, mc_atac_clust, clust_names)
+export_atac_clust_misha(
+  mc_atac,
+  track_prefix,
+  description = NULL,
+  clust_vec = NULL,
+  normalization = "none",
+  parallel = FALSE,
+  num_cores = NULL
+)
 }
 \arguments{
-\item{mc_atac}{McATAC object}
-
-\item{mc_atac_clust}{output of \code{gen_atac_mc_clust}}
-
-\item{clust_names}{names for each metacell cluster}
-
 \item{track_prefix}{prefix for generated misha tracks.}
+
+\item{description}{(optional) description for tracks (can be a glue-formatted expression)}
+
+\item{clust_vec}{(optional) a vector of length #metacells representing an annotation/clustering (can be output of \code{gen_atac_mc_clust})}
+
+\item{parallel}{(optional) run function with parallel processing}
+
+\item{num_cores}{(required if parallel == TRUE) number of cores to use for parallel processing}
+
+\item{mc_atac_mat}{metacell ATAC matrix (like mc_atac@mat)}
+}
+\value{
+track_names names of generated misha tracks
 }
 \description{
 generate a track for each metacell cluster, of the form \code{track_prefix.name}, where names
