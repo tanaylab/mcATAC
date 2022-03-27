@@ -73,6 +73,73 @@
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="st">"pbmc_data"</span><span class="op">)</span><span class="op">)</span><span class="op">{</span>
+  <span class="fu"><a href="reference/download_pbmc_example_data.html">download_pbmc_example_data</a></span><span class="op">(</span><span class="op">)</span>
+<span class="op">}</span></code></pre></div>
+<div class="section level3">
+<h3 id="import-atac-dataset">Import ATAC dataset<a class="anchor" aria-label="anchor" href="#import-atac-dataset"></a>
+</h3>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/import_from_10x.html">import_from_10x</a></span><span class="op">(</span><span class="st">"pbmc_data"</span>, genome <span class="op">=</span> <span class="st">"hg38"</span>, id <span class="op">=</span> <span class="st">"pbmc"</span>, description <span class="op">=</span> <span class="st">"PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"</span><span class="op">)</span>
+<span class="co">#&gt;   • Importing matrix</span>
+<span class="co">#&gt; ℹ Imported a matrix of 11909 cells and 144978 features</span>
+<span class="co">#&gt;   • Importing features</span>
+<span class="co">#&gt; ℹ Removed 107861 ATAC peaks which were all zero</span>
+<span class="co">#&gt; ℹ 107861 ATAC peaks</span>
+<span class="co">#&gt; ! removed 32 peaks from the following chromosome(s) which are missing from hg38: 'KI270727.1, GL000194.1, GL000205.2, GL000195.1, GL000219.1, KI270734.1, KI270721.1, KI270726.1, KI270713.1'</span>
+<span class="co">#&gt; ✔ successfully imported to an ScATAC object with 11909 cells and 107829 ATAC peaks</span>
+<span class="va">atac_sc</span>
+<span class="co">#&gt; &lt;ScATAC&gt; object with 11909 cells and 107829 ATAC peaks from hg38.</span>
+<span class="co">#&gt; id: "pbmc"</span>
+<span class="co">#&gt; description: "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"</span>
+<span class="co">#&gt; loaded from: 'pbmc_data/matrix.mtx'</span>
+<span class="co">#&gt; Slots include:</span>
+<span class="co">#&gt;   • `@mat`: a numeric matrix where rows are peaks and columns are cells. Can be a sparse matrix.</span>
+<span class="co">#&gt;   • `@peaks`: a misha intervals set with the peak definitions.</span>
+<span class="co">#&gt;   • `@genome`: genome assembly of the peaks</span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="filter-peaks-by-coverage-andor-length">Filter peaks by coverage and/or length<a class="anchor" aria-label="anchor" href="#filter-peaks-by-coverage-andor-length"></a>
+</h3>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/filter_features.html">filter_features</a></span><span class="op">(</span>scatac <span class="op">=</span> <span class="va">atac_sc</span>, minimal_max_umi <span class="op">=</span> <span class="fl">3</span>, min_peak_length <span class="op">=</span> <span class="fl">200</span>, max_peak_length <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span>
+<span class="co">#&gt; • 6923 features had a maximal UMI count less than 3</span>
+<span class="co">#&gt; • 8544 features were shorter than 200bp</span>
+<span class="co">#&gt; • 37160 features were longer than 1000bp</span>
+<span class="co">#&gt; ✔ Removed 46380 peaks out of 107829 (43%). The object is left with 61449 peaks.</span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="project-rna-metacells">Project RNA metacells<a class="anchor" aria-label="anchor" href="#project-rna-metacells"></a>
+</h3>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span>
+<span class="co">#&gt; # A tibble: 6 x 2</span>
+<span class="co">#&gt;              cell_id metacell</span>
+<span class="co">#&gt; 1 AAACAGCCAATCCCTT-1       44</span>
+<span class="co">#&gt; 2 AAACAGCCAATGCGCT-1       22</span>
+<span class="co">#&gt; 3 AAACAGCCACCAACCG-1        7</span>
+<span class="co">#&gt; 4 AAACAGCCAGGATAAC-1       24</span>
+<span class="co">#&gt; 5 AAACAGCCAGTTTACG-1       32</span>
+<span class="co">#&gt; 6 AAACATGCAAGGTCCT-1       30</span></code></pre></div>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/project_atac_on_mc.html">project_atac_on_mc</a></span><span class="op">(</span><span class="va">atac_sc</span>, <span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span>
+<span class="co">#&gt; ℹ 3198 cells (out of 11909) do not have a metacell and have been removed.</span>
+<span class="co">#&gt; • Setting egc cell size to 68812 (the 0.1 quantile of metacell sizes)</span>
+<span class="co">#&gt; ✔ Created a new McATAC object with 97 metacells and 61449 ATAC peaks.</span>
+<span class="va">atac_mc</span>
+<span class="co">#&gt; &lt;McATAC&gt; object with 97 metacells and 61449 ATAC peaks from hg38.</span>
+<span class="co">#&gt; id: "pbmc"</span>
+<span class="co">#&gt; description: "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"</span>
+<span class="co">#&gt; Slots include:</span>
+<span class="co">#&gt;   • `@mat`: a numeric matrix where rows are peaks and columns are metacells. Can be a sparse matrix.</span>
+<span class="co">#&gt;   • `@peaks`: a misha intervals set with the peak definitions.</span>
+<span class="co">#&gt;   • `@genome`: genome assembly of the peaks</span>
+<span class="co">#&gt;   • `@egc`: a numeric matrix which contains normalized metacell accessibility.</span>
+<span class="co">#&gt;   • `@fp`: a matrix showing for each peak (row) the relative enrichment of umis in log2 scale.</span></code></pre></div>
+<p>See more at the <a href="https://tanaylab.github.io/mcATAC/articles/mcATAC.html" class="external-link">vignette</a></p>
+</div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
