@@ -137,8 +137,9 @@ identify_dynamic_peaks <- function(mcatac, method = "bmq", plot = TRUE, mean_thr
 #' See https://doi.org/10.1038/s41598-019-45839-z for more details
 #' @param atac (optional) an ScATAC or McATAC object
 #' @param peaks (optional) the intervals set to check
-#' @param genome (optional, required if checking peaks directly) the interval set to check
+#' @param genome (optional, required if checking peaks directly) the genome of the peaks
 #' @param max_dist_to_blacklist_region (optional) distance to nearest blacklist region which still qualifies for being blacklisted
+#' @param blacklist_name name of the blacklist intervals to use (default: "ENCODE.blacklist")
 #'
 #' @return blacklist_overlaps - a PeakIntervals object with peaks identified as overlapping blacklisted regions
 #' @examples
@@ -147,7 +148,7 @@ identify_dynamic_peaks <- function(mcatac, method = "bmq", plot = TRUE, mean_thr
 #' blacklist_overlaps <- find_blacklist_overlaps(peaks = my_peak_set, genome = "mm10")
 #' }
 #' @export
-find_blacklist_overlaps <- function(atac = NULL, peaks = NULL, genome = NULL, max_dist_to_blacklist_region = 0) {
+find_blacklist_overlaps <- function(atac = NULL, peaks = NULL, genome = NULL, max_dist_to_blacklist_region = 0, blacklist_name = "ENCODE.blacklist") {
     assert_atac_object(atac)
     if (!is.null(atac) && is.null(peaks)) {
         peaks <- atac@peaks
@@ -161,13 +162,14 @@ find_blacklist_overlaps <- function(atac = NULL, peaks = NULL, genome = NULL, ma
     } else if (!is.null(peaks) && is.null(genome)) {
         cli_abort("Must specify genome if analyzing peaks directly")
     }
-    peaks$intervalID <- 1:nrow(peaks)
+
     misha.ext::gset_genome(genome)
-    blacklist_name <- glue::glue("ENCODE_blacklist")
-    if (gintervals.exists(blacklist_name)) {
-        blacklist <- gintervals.load(blacklist_name)
+    if (!gintervals.exists(blacklist_name)) {
+        cli_abort("Blacklist intervals {.field {blacklist_name}} does not exist")
     }
-    nei_blk_pks <- gintervals.neighbors(blacklist, peaks, maxdist = max_dist_to_blacklist_region, mindist = max_dist_to_blacklist_region, maxneighbors = 10)
-    blacklist_overlaps <- peaks[unique(nei_blk_pks$intervalID), ]
+    nei_blk_pks <- misha.ext::gintervals.filter(as.data.frame(peaks), blacklist_name, max_distance = max_dist_to_blacklist_region)
+
+    blacklist_overlaps <- peaks %>% filter(peak_name %in% nei_blk_pks$peak_name)
+
     return(blacklist_overlaps)
 }
