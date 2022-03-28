@@ -316,10 +316,11 @@ setMethod(
 
 #' Set ignored (i.e. blacklisted) peaks
 #'
-#' Given a list of peaks to ignore, this will cancel any previous policy for blacklisting and remove the given peaks from the {.code ignore_peaks} and {.code ignore_pmat} slots. Note that the matrix and peaks would be reordered.
+#' Given a list of peaks to ignore, this will remove the given peaks from the {.code ignore_peaks} and {.code ignore_pmat} slots. Note that the matrix and peaks would be reordered.
 #'
 #' @param atac an ScATAC or McATAC object
 #' @param ig_peaks a PeakIntervals object, or vector of peak names to ignore
+#' @param reset rest the current ignore policy if exists. When set to \code{TRUE}, the current ignore policy will be removed, otherwise the new ignore policy will be appended to the current one.
 #'
 #' @return
 #' @examples
@@ -327,7 +328,7 @@ setMethod(
 #'
 #' }
 #' @export
-atac_ignore_peaks <- function(atac, ig_peaks) {
+atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
     assert_atac_object(atac)
 
     if (length(ig_peaks) == 0) {
@@ -340,6 +341,17 @@ atac_ignore_peaks <- function(atac, ig_peaks) {
     }
 
     ig_peaks <- ig_peaks %>% distinct(chrom, start, end, peak_name)
+    n_cur_ig <- nrow(ig_peaks)
+    n_prev_ig <- nrow(atac@ignore_peaks)
+    if (n_prev_ig > 0) {
+        if (!reset) {
+            ig_peaks <- bind_rows(atac@ignore_peaks, ig_peaks) %>%
+                distinct(chrom, start, end, peak_name)
+            cli_alert_warning("Adding to previous ignore policy ({.val {n_prev_ig}} peaks).")
+        } else {
+            cli_alert_warning("Previous ignore policy ({.val {n_prev_ig}} peaks) is being reset.")
+        }
+    }
 
     atac@mat <- rbind(atac@mat, atac@ignore_pmat)
     peaks_merge <- bind_rows(atac@peaks, atac@ignore_peaks)
@@ -361,6 +373,11 @@ atac_ignore_peaks <- function(atac, ig_peaks) {
     n_good_peaks <- nrow(atac@peaks)
     n_tot_peaks <- n_removed_peaks + n_good_peaks
 
-    cli_alert_success("Removed {.val {n_removed_peaks}} peaks out of {.val {n_tot_peaks}} {.field ({scales::percent(n_removed_peaks/n_tot_peaks)})}. The object is left with {.val {n_good_peaks}} peaks.")
+    if (n_prev_ig == 0) {
+        cli_alert_success("Removed {.val {n_removed_peaks}} peaks out of {.val {n_tot_peaks}} {.field ({scales::percent(n_removed_peaks/n_tot_peaks)})}. The object is left with {.val {n_good_peaks}} peaks.")
+    } else {
+        cli_alert_success("Removed {.val {n_cur_ig}} peaks out of {.val {n_tot_peaks}} {.field ({scales::percent(n_cur_ig/n_tot_peaks)})}. The object is left with {.val {n_good_peaks}} peaks {.field ({scales::percent(n_removed_peaks/n_tot_peaks)})}.")
+    }
+
     return(atac)
 }
