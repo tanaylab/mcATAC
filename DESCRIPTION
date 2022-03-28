@@ -22,6 +22,7 @@ Imports:
     misha.ext (>= 0.0.3),
     pheatmap,
     purrr,
+    randomNames,
     rlang,
     sparseMatrixStats,
     tgstat,
