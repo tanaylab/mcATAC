@@ -54,7 +54,7 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, path, met
     mat <- mat[peak_names(peaks), ] # remove from matrix peaks that were filtered
 
     if (is.null(id)) {
-        # id <- gsub(" ", "_", randomNames::randomNames(n = 1, name.order = "first.last", name.sep = "_"))
+        id <- gsub(" ", "_", randomNames::randomNames(n = 1, name.order = "first.last", name.sep = "_"))
         cli_alert("No id was given, setting id to {.field {id}}")
     }
 
