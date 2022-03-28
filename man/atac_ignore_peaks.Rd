@@ -11,7 +11,7 @@ atac_ignore_peaks(atac, ig_peaks, reset = FALSE)
 
 \item{ig_peaks}{a PeakIntervals object, or vector of peak names to ignore}
 
-\item{reset}{rest current ignore policy if exists. When set to \code{TRUE}, the current ignore policy will be removed, otherwise the new ignore policy will be appended to the current one.}
+\item{reset}{rest the current ignore policy if exists. When set to \code{TRUE}, the current ignore policy will be removed, otherwise the new ignore policy will be appended to the current one.}
 }
 \value{
 

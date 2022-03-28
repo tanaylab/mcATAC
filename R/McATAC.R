@@ -320,7 +320,7 @@ setMethod(
 #'
 #' @param atac an ScATAC or McATAC object
 #' @param ig_peaks a PeakIntervals object, or vector of peak names to ignore
-#' @param reset rest current ignore policy if exists. When set to \code{TRUE}, the current ignore policy will be removed, otherwise the new ignore policy will be appended to the current one.
+#' @param reset rest the current ignore policy if exists. When set to \code{TRUE}, the current ignore policy will be removed, otherwise the new ignore policy will be appended to the current one.
 #'
 #' @return
 #' @examples
