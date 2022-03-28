@@ -41,11 +41,21 @@ atac_sc <- import_from_10x("pbmc_data", genome = "hg38", id = "pbmc", descriptio
 atac_sc
 ```
 
-## Filter peaks by coverage and/or length
+## Filter peaks 
+
+### by coverage and/or length
 ```{r filter-peaks}
 atac_sc <- filter_features(scatac = atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
 ```
 
+### by overlap with known blacklist regions 
+
+```{r filter-peaks-blacklist}
+blacklist_overlaps <- find_blacklist_overlaps(atac_sc)
+atac_sc <- atac_ignore_peaks(atac_sc, blacklist_overlaps, reset = FALSE)
+```
+
+> See [https://doi.org/10.1038/s41598-019-45839-z]
 
 ## Project RNA metacells 
 

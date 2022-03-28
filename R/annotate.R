@@ -51,7 +51,7 @@ annotate_intervals <- function(intervals, genome,
                                tss = gintervals.load("intervs.global.tss"),
                                exons = gintervals.load("intervs.global.exon")) {
     if (missing(genome)) {
-        cli_abort("Please Specify genome. Look for slot 'genome' in relevant McATAC/ScATAC object.")
+        cli_abort("Please Specify genome. Look for slot '@genome' in relevant McATAC/ScATAC object.")
     }
     misha.ext::gset_genome(genome)
     cn <- c("chrom", "start", "end", "peak_name")
