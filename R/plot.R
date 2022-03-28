@@ -141,6 +141,7 @@ plot_atac_rna_cor <- function(mc_atac, rna_mat) {
 #' @param filepath (optional) path and filename of where to save the figure; if unspecified, figure isn't saved
 #' @param dev (optional; default - png) graphical device to save figure with
 #' @inheritParams dev
+#' @inheritParams save_pheatmap_png
 #' 
 #' @return a pheatmap figure
 #' @examples
@@ -160,8 +161,10 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust, peak_clust,
                                 peak_annotation = NULL,
                                 filepath = NULL, 
                                 dev = NULL,
+                                main = NULL,
                                 clrs = colorRampPalette(c("blue4", "white", "red4"))(100)) {
     if (is.null(dev)) {dev <- png}
+    if (is.null(main)) {main = mc_atac@id}
     annotation_row <- NULL
     if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
         col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")
@@ -202,7 +205,7 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust, peak_clust,
         annotation_col = subset(col_annot, select = cell_type),
         annotation_legend = FALSE,
         annotation_colors = ann_colors,
-        annotation_row = annotation_row,
+        annotation_row = annotation_row, main = main,
         color = clrs, breaks = brks, cluster_cols = F, cluster_rows = F, show_colnames = F, show_rownames = F
     )
     if (!is.null(filepath)) {
