@@ -8,7 +8,8 @@ find_blacklist_overlaps(
   atac = NULL,
   peaks = NULL,
   genome = NULL,
-  max_dist_to_blacklist_region = 0
+  max_dist_to_blacklist_region = 0,
+  blacklist_name = "ENCODE.blacklist"
 )
 }
 \arguments{
@@ -16,9 +17,11 @@ find_blacklist_overlaps(
 
 \item{peaks}{(optional) the intervals set to check}
 
-\item{genome}{(optional, required if checking peaks directly) the interval set to check}
+\item{genome}{(optional, required if checking peaks directly) the genome of the peaks}
 
 \item{max_dist_to_blacklist_region}{(optional) distance to nearest blacklist region which still qualifies for being blacklisted}
+
+\item{blacklist_name}{name of the blacklist intervals to use (default: "ENCODE.blacklist")}
 }
 \value{
 blacklist_overlaps - a PeakIntervals object with peaks identified as overlapping blacklisted regions
