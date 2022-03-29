@@ -54,8 +54,94 @@ filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NU
 }
 
 
+#' Plot the distribution of the peak length
+#'
+#' @param atac an ScATAC or McATAC object
+#'
+#' @return a ggplot object with the distribution of peak length
+#'
+#' @examples
+#' \dontrun{
+#' plot_peak_length_distribution(scatac)
+#' }
+#'
+#' @export
+plot_peak_length_distribution <- function(atac) {
+    gg <- atac@peaks %>%
+        mutate(len = end - start) %>%
+        ggplot(aes(x = len)) +
+        stat_density() +
+        scale_x_log10() +
+        labs(
+            x = "Peak length (bp)",
+            y = "Density",
+            title = "Peak length distribution",
+            subtitle = glue("n = {nrow(atac@peaks)}"),
+            caption = glue("object id: {atac@id}")
+        )
+
+    return(gg)
+}
+
+#' Plot the coverage distribution of the peaks
+#'
+#' @param atac an ScATAC or McATAC object
+#'
+#' @return a ggplot object with the distribution of peak coverage
+#'
+#' @examples
+#' \dontrun{
+#' plot_peak_coverage_distribution(scatac)
+#' }
+#' @export
+plot_peak_coverage_distribution <- function(atac) {
+    gg <- atac@peaks %>%
+        mutate(cov = sparseMatrixStats::rowSums2(atac@mat)) %>%
+        ggplot(aes(x = cov)) +
+        stat_density() +
+        scale_x_log10() +
+        labs(
+            x = "# of UMIs",
+            y = "Density",
+            title = glue("Peak coverage distribution"),
+            subtitle = glue("n = {nrow(atac@peaks)}"),
+            caption = glue("object id: {atac@id}")
+        )
+    return(gg)
+}
 
 
+#' Plot the maximal per-cell coverage distribution of the peaks
+#'
+#' @param atac an ScATAC or McATAC object
+#'
+#' @return a ggplot object with the distribution of maximal per-cell coverage for each peak
+#'
+#' @examples
+#' \dontrun{
+#' plot_peak_max_cov_distribution(scatac)
+#' }
+#'
+#' @export
+plot_peak_max_cov_distribution <- function(atac) {
+    gg <- atac@peaks %>%
+        mutate(cov = sparseMatrixStats::rowMaxs(atac@mat)) %>%
+        count(cov) %>%
+        mutate(
+            cov = ifelse(cov > 10, ">10", as.character(cov)),
+            cov = factor(cov, levels = c(0:10, ">10"))
+        ) %>%
+        ggplot(aes(x = cov, y = n)) +
+        geom_col() +
+        labs(
+            x = "Maximal per-cell coverage",
+            y = "Density",
+            title = glue("Maximal per-cell coverage distribution"),
+            subtitle = glue("n = {nrow(atac@peaks)}"),
+            caption = glue("object id: {atac@id}")
+        )
+    return(gg)
+}
 
 #' Find dynamic peaks in McATAC matrix
 #'
