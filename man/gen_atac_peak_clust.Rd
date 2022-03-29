@@ -34,7 +34,7 @@ if NULL, no reordering would be done.}
   }}
 }
 \value{
-a tglkmeans clustering object
+a named numeric vector specifying the cluster for each peak
 }
 \description{
 Cluster atac peaks based on atac distributions

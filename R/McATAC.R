@@ -119,6 +119,7 @@ validate_atac_object_params <- function(mat, peaks, genome) {
 #' @slot egc normalized metacell accessibility (fraction of accessibility per metacell scaled to the \code{mc_size_eps_q} quantile of
 #' metacell size)
 #' @slot fp a matrix showing for each peak (row) the relative enrichment of umis in log2 scale, i.e. \eqn{log2((1 + egc) / median(1 + egc))}
+#' @slot mc_size_eps_q quantile of MC size (in UMIs) to scale the number of UMIs per metacell. See \code{project_atac_on_mc}
 #'
 #' @rdname ATAC
 #' @exportClass McATAC
@@ -127,7 +128,8 @@ McATAC <- setClass(
     slots = c(
         egc = "any_matrix",
         fp = "any_matrix",
-        mc_size_eps_q = "numeric"
+        mc_size_eps_q = "numeric",
+        rna_egc = "any_matrix"
     ),
     contains = "ATAC"
 )
@@ -178,52 +180,6 @@ calc_mc_fp <- function(mcatac) {
     log_egc <- log2(1 + mcatac@egc)
     mc_fp <- log_egc - sparseMatrixStats::rowMedians(log_egc, na.rm = TRUE)
     return(mc_fp)
-}
-
-#' Add per-metacell metadata to an McATAC object
-#'
-#' @param mcatac an McATAC object
-#' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
-#'
-#' @examples
-#' \dontrun{
-#' data(mcmd)
-#' mc_atac <- add_metadata(mc_atac, mcmd)
-#' }
-#'
-#' @export
-add_mc_metadata <- function(mcatac, metadata) {
-    add_metadata(mcatac, metadata, "metacell")
-}
-
-add_metadata <- function(obj, metadata, metadata_id_field) {
-    if (!is.null(metadata)) {
-        if (is.character(metadata)) {
-            metadata <- tgutil::fread(metadata)
-        }
-        if (!is.data.frame(metadata)) {
-            cli_abort("{.field metadata} is not a data frame")
-        }
-
-        metadata <- as_tibble(metadata)
-
-        if (!has_name(metadata, metadata_id_field)) {
-            cli_abort("{.field metadata} doesn't have the required field {.field {metadata_id_field}}")
-        }
-
-        metadata <- as_tibble(metadata)
-
-        # make sure that all cells/metacells exist within the matrix
-        missing_cells <- metadata[[metadata_id_field]] %!in% colnames(obj@mat)
-        if (any(missing_cells)) {
-            missing_cells <- paste(unique(metadata[[metadata_id_field]][missing_cells]), collapse = ", ")
-            cli_abort("The following {metadata_id_field}s are missing from {.field mat} colnames: {.val {missing_cells}}")
-        }
-    }
-
-    obj@metadata <- metadata
-
-    return(obj)
 }
 
 #' @export

@@ -6,25 +6,29 @@
 \usage{
 plot_atac_rna(
   mc_atac,
-  mc_rna,
   gene,
+  mc_rna = NULL,
   peak = NULL,
   max_dist_to_promoter_peak = 500,
-  eps_q = 0.05
+  normalize_atac = TRUE,
+  eps_rna = 0.00001,
+  tss_intervals = "intervs.global.tss"
 )
 }
 \arguments{
 \item{mc_atac}{a McATAC object}
 
-\item{mc_rna}{a \code{metacell1} 'mc' object or a \code{metacells} metacell UMI matrix}
-
 \item{gene}{name of the gene to plot}
 
-\item{peak}{name of the peak to plot. If NULL - the promoter of \code{gene} would be shown}
+\item{mc_rna}{a \code{metacell1} 'mc' object or a \code{metacells} metacell UMI matrix (a matrix where each row is a gene and each column is a metacell). Can be NULL if \code{mc_atac} already contains the gene expression data (added by \code{add_mc_rna}).}
+
+\item{peak}{name of the peak to plot. If NULL - the promoter of \code{gene} would be shown. You can get the peak names from \code{atac@peaks$peak_name}}
 
 \item{max_dist_to_promoter_peak}{how far from \code{gene}'s TSS to search for a promoter-proximal peak}
 
-\item{eps_q}{quantile of mean expression distribution to add as regularization when calculating log expression. Promoter ATAC signal has been observed empirically to often be linearly correlated with log of gene expression.}
+\item{normalize_atac}{whether to use normalized atac profiles (default: TRUE)}
+
+\item{eps_rna}{added regularization when calculating log expression (Default: 1e-5). Promoter ATAC signal has been observed empirically to often be linearly correlated with log of gene expression.}
 }
 \value{
 a ggplot object with the scatter plot
