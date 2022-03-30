@@ -2,11 +2,12 @@
 #'
 #' @param mc_atac a McATAC object
 #' @param gene name of the gene to plot
+#' @param atac_promoter name of the promoter to plot. By default this would be the rna gene \code{gene}.
 #' @param mc_rna a \code{metacell1} 'mc' object or a \code{metacells} metacell UMI matrix (a matrix where each row is a gene and each column is a metacell). Can be NULL if \code{mc_atac} already contains the gene expression data (added by \code{add_mc_rna}).
-#' @param peak name of the peak to plot. If NULL - the promoter of \code{gene} would be shown. You can get the peak names from \code{atac@peaks$peak_name}
-#' @param max_dist_to_promoter_peak how far from \code{gene}'s TSS to search for a promoter-proximal peak
+#' @param peak name of the peak to plot. If NULL - the promoter of \code{atac_promoter} would be shown. You can get the peak names from \code{atac@peaks$peak_name}
 #' @param normalize_atac whether to use normalized atac profiles (default: TRUE)
 #' @param eps_rna added regularization when calculating log expression (Default: 1e-5). Promoter ATAC signal has been observed empirically to often be linearly correlated with log of gene expression.
+#' @param plot_object_id plot the object id of the \code{mc_atac} object in the bottom left corner of the plot (default: TRUE)
 #'
 #' @return a ggplot object with the scatter plot
 #'
@@ -14,66 +15,58 @@
 #' \dontrun{
 #' p1 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4")
 #'
-#' ## Plot gene vs some peak of interest; here - expression of CD4 vs. promoter ATAC signal of CD8
-#' tss <- gintervals.load("intervs.global.tss")
-#' cd8_tss <- tss[which(tss$geneSymbol == "CD8")[[1]], ]
-#' peaks_near_cd8_tss <- misha::gintervals.neighbors(pbmc_atac_mc@peaks, cd8_tss, mindist = -2e+3, maxdist = 2e+3)
-#' nearest_peak <- peaks_near_cd8_tss[which.min(peaks_near_cd8_tss$dist), ]
-#' p2 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4", peak = nearest_peak[, "peak_name"])
+#' p2 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4", atac_promoter = "CD8")
+#'
+#' # Plot gene vs some peak of interest
+#' peak <- mc_atac@peaks[1]$peak_name
+#' p3 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4", peak = peak)
 #' }
+#'
+#' @inheritParams get_promoter_peaks
 #' @export
-plot_atac_rna <- function(mc_atac, gene, mc_rna = NULL, peak = NULL, max_dist_to_promoter_peak = 5e+2, normalize_atac = TRUE, eps_rna = 1e-5, tss_intervals = "intervs.global.tss") {
-    if (has_rna(mc_atac)) {
-        if (is.null(mc_rna)) {
-            cli_abort("No gene expression data in the McATAC object. Use {.code add_mc_rna()} to add it or provide the {.field mc_rna} parameter.")
-        } else {
-            mc_atac <- add_mc_rna(mc_atac, mc_rna)
-        }
+plot_atac_rna <- function(mc_atac, gene, atac_promoter = gene, mc_rna = NULL, peak = NULL, max_dist_to_promoter_peak = 5e+2, normalize_atac = TRUE, eps_rna = 1e-5, tss_intervals = "intervs.global.tss", plot_object_id = TRUE) {
+    assert_atac_object(mc_atac, class = "McATAC")
+
+    if (!has_rna(mc_atac) && is.null(mc_rna)) {
+        cli_abort("No gene expression data in the McATAC object. Use {.code add_mc_rna()} to add it or provide the {.field mc_rna} parameter.")
+    }
+
+    if (!is.null(mc_rna)) {
+        mc_atac <- add_mc_rna(mc_atac, mc_rna)
     }
 
     rv <- log2(mc_atac@rna_egc[gene, ] + eps_rna)
 
     if (is.null(peak)) {
-        if (!gintervals.exists(tss_intervals)) {
-            cli_abort("{.val {tss_intervals}} intervals do not exist. You can either define the peak explicitly or import them from ucsc")
-        }
-        tss <- gintervals.load(tss_intervals)
-        tss_gene <- tss[tss$geneSymbol == gene, c("chrom", "start", "end", "geneSymbol")]
-        if (nrow(tss_gene) == 0) {
-            cli_abort("Peak not supplied and gene TSS location not found")
-        } else if (nrow(tss_gene) > 1) {
-            cli_alert("The gene {.val {gene}} has {.val {nrow(tss_gene)}} alternative promoters. Summing the ATAC signal from all of them")
+        peaks <- get_promoter_peaks(mc_atac@peaks, atac_promoter, max_dist_to_promoter_peak = max_dist_to_promoter_peak, tss_intervals = tss_intervals)
+
+        if (is.null(peak) && length(peaks) == 0) {
+            cli_abort("{.field peak} was not supplied and no relevant promoter peak was found for gene {.val {atac_promoter}}. Check if your ATAC matrix should have a peak for this gene's promoter.")
+        } else if (length(peaks) > 1) {
+            cli_alert("The gene {.val {atac_promoter}} has multiple ({.val {length(peaks)}}) peaks within {.val {max_dist_to_promoter_peak}} bp of its TSS. Summing the ATAC signal from all of them.")
         }
 
-        nei_peaks_tss <- misha.ext::gintervals.neighbors1(
-            tss_gene[, 1:3],
-            as.data.frame(mc_atac@peaks),
-            mindist = -max_dist_to_promoter_peak,
-            maxdist = max_dist_to_promoter_peak,
-            maxneighbors = 500
-        ) %>%
-            filter(!is.na(peak_name))
-
-        peak <- unique(nei_peaks_tss$peak_name)
-        peak_range <- misha.ext::convert_10x_peak_names_to_misha_intervals(peak) %>%
-            summarise(chrom = chrom[1], start = min(start), end = max(end)) %>%
-            peak_names()
-        peak_str <- glue("{peak_range} ({length(peak)} peaks)")
-
-        if (length(peak) == 0) {
-            cli_abort("{.field peak} was not supplied and no relevant promoter peak was found for gene {.val {gene}}. Check if your ATAC matrix should have a peak for this gene's promoter.")
-        } else if (length(peak) > 1) {
-            cli_alert("The gene {.val {gene}} has multiple ({.val {length(peak)}}) peaks within {.val {max_dist_to_promoter_peak}} bp of its TSS. Summing the ATAC signal from all of them.")
+        if (length(peaks) > 1) {
+            peak_range <- misha.ext::convert_10x_peak_names_to_misha_intervals(peaks) %>%
+                summarise(chrom = chrom[1], start = min(start), end = max(end)) %>%
+                peak_names()
+            peak_str <- glue("{peak_range} ({length(peaks)} peaks)")
+        } else {
+            peak_str <- peaks
         }
     } else {
+        if (peak %!in% mc_atac@peaks$peak_name) {
+            cli_abort("{.val {peak}} is not a peak in the McATAC object.")
+        }
+        peaks <- peak
         peak_str <- peak
     }
 
     if (normalize_atac) {
-        av <- colSums(mc_atac@egc[peak, ])
+        av <- colSums(mc_atac@egc[peaks, , drop = FALSE])
         ylab <- "ATAC (normalized)"
     } else {
-        av <- colSums(mc_atac@mat[peak, ])
+        av <- colSums(mc_atac@mat[peaks, , drop = FALSE])
         ylab <- "ATAC (not normalized)"
     }
 
@@ -103,15 +96,36 @@ plot_atac_rna <- function(mc_atac, gene, mc_rna = NULL, peak = NULL, max_dist_to
             geom_point()
     }
 
+    if (!is.null(peak)) {
+        title <- gene
+        subtitle <- glue("ATAC of {peak_str} vs. RNA, R^2 = {round(cor_r2, digits=2)}")
+        caption <- ""
+    } else if (atac_promoter == gene) {
+        title <- gene
+        subtitle <- glue("ATAC of promoter vs. RNA, R^2 = {round(cor_r2, digits=2)}")
+        caption <- glue("Promoter: {peak_str}")
+    } else { # atac_promoter != gene and no peak was supplied
+        title <- glue("ATAC of {atac_promoter} promoter vs. {gene} RNA")
+        subtitle <- glue("R^2 = {round(cor_r2, digits=2)}")
+        caption <- glue("Promoter: {peak_str}")
+    }
+
+    if (plot_object_id) {
+        caption <- paste(caption, glue("object id: {mc_atac@id}"), sep = "\n")
+    }
+
     gg <- gg +
         labs(
-            title = gene,
-            subtitle = glue("ATAC of {peak_str} vs. RNA, R^2 = {round(cor_r2, digits=2)}"),
+            title = title,
+            subtitle = subtitle,
             x = "log2(gene expression)",
             y = ylab,
-            caption = glue("object id: {mc_atac@id}")
+            caption = caption
         ) +
-        theme(plot.subtitle = ggtext::element_markdown())
+        theme(
+            plot.subtitle = ggtext::element_markdown(),
+            plot.caption = element_text(hjust = 0)
+        )
 
     return(gg)
 }

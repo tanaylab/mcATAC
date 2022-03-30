@@ -21,5 +21,7 @@ metacell size)}
 \item{\code{fp}}{a matrix showing for each peak (row) the relative enrichment of umis in log2 scale, i.e. \eqn{log2((1 + egc) / median(1 + egc))}}
 
 \item{\code{mc_size_eps_q}}{quantile of MC size (in UMIs) to scale the number of UMIs per metacell. See \code{project_atac_on_mc}}
+
+\item{\code{rna_egc}}{normalized gene expression per gene per metacell (optional). Can be created using \code{add_rna_egc}}
 }}
 

@@ -12,7 +12,7 @@ filter_features(
 )
 }
 \arguments{
-\item{scatac}{the McATAC object to analyze}
+\item{scatac}{the ScATAC object to analyze}
 
 \item{minimal_max_umi}{(optional) threshold on minimum maximal coverage - i.e. remove all peaks that DON'T have a cell with at least \code{abs_cov_thresh} UMIs}
 

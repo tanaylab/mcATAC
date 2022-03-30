@@ -7,12 +7,14 @@
 plot_atac_rna(
   mc_atac,
   gene,
+  atac_promoter = gene,
   mc_rna = NULL,
   peak = NULL,
   max_dist_to_promoter_peak = 500,
   normalize_atac = TRUE,
   eps_rna = 0.00001,
-  tss_intervals = "intervs.global.tss"
+  tss_intervals = "intervs.global.tss",
+  plot_object_id = TRUE
 )
 }
 \arguments{
@@ -20,15 +22,21 @@ plot_atac_rna(
 
 \item{gene}{name of the gene to plot}
 
+\item{atac_promoter}{name of the promoter to plot. By default this would be the rna gene \code{gene}.}
+
 \item{mc_rna}{a \code{metacell1} 'mc' object or a \code{metacells} metacell UMI matrix (a matrix where each row is a gene and each column is a metacell). Can be NULL if \code{mc_atac} already contains the gene expression data (added by \code{add_mc_rna}).}
 
-\item{peak}{name of the peak to plot. If NULL - the promoter of \code{gene} would be shown. You can get the peak names from \code{atac@peaks$peak_name}}
+\item{peak}{name of the peak to plot. If NULL - the promoter of \code{atac_promoter} would be shown. You can get the peak names from \code{atac@peaks$peak_name}}
 
-\item{max_dist_to_promoter_peak}{how far from \code{gene}'s TSS to search for a promoter-proximal peak}
+\item{max_dist_to_promoter_peak}{how far from \code{gene}'s TSS to search for promoter-proximal peaks. Default: 500}
 
 \item{normalize_atac}{whether to use normalized atac profiles (default: TRUE)}
 
 \item{eps_rna}{added regularization when calculating log expression (Default: 1e-5). Promoter ATAC signal has been observed empirically to often be linearly correlated with log of gene expression.}
+
+\item{tss_intervals}{name of the intervals set containing the TSSs}
+
+\item{plot_object_id}{plot the object id of the \code{mc_atac} object in the bottom left corner of the plot (default: TRUE)}
 }
 \value{
 a ggplot object with the scatter plot
@@ -40,11 +48,11 @@ Plot a scatter of gene expression vs an atac profile
 \dontrun{
 p1 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4")
 
-## Plot gene vs some peak of interest; here - expression of CD4 vs. promoter ATAC signal of CD8
-tss <- gintervals.load("intervs.global.tss")
-cd8_tss <- tss[which(tss$geneSymbol == "CD8")[[1]], ]
-peaks_near_cd8_tss <- misha::gintervals.neighbors(pbmc_atac_mc@peaks, cd8_tss, mindist = -2e+3, maxdist = 2e+3)
-nearest_peak <- peaks_near_cd8_tss[which.min(peaks_near_cd8_tss$dist), ]
-p2 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4", peak = nearest_peak[, "peak_name"])
+p2 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4", atac_promoter = "CD8")
+
+# Plot gene vs some peak of interest
+peak <- mc_atac@peaks[1]$peak_name
+p3 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4", peak = peak)
 }
+
 }

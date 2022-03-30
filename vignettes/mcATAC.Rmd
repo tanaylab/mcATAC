@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(mcATAC)
+ggplot2::theme_set(ggplot2::theme_classic())
 ```
 
 ## Download dataset
@@ -116,6 +117,21 @@ export_atac_clust_ucsc(mc_atac = atac_mc, track_prefix = 'hum_pbmc_10x', normali
 ![UCSC track example](ucsc_output_example.png "Example of UCSC output on human PBMC data from 10X Genomics")
 
 
+## Add expression data 
+
+```{r add-rna}
+data(rna_mc_mat)
+atac_mc <- add_mc_rna(atac_mc, rna_mc_mat)
+```
+
+## Plot accesability vs expression 
+
+```{r atac-rna-scatter-1}
+plot_atac_rna(atac_mc, "CD4")
+```
+### For a single gene
+
+```
 
 ## Export to an h5ad file
 

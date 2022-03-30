@@ -15,10 +15,10 @@
 add_mc_rna <- function(mcatac, mc_rna) {
     assert_atac_object(mcatac, class = "McATAC")
 
-    if (class(mc) == "tgMCCov") {
+    if ("tgMCCov" %in% class(mc_rna)) {
         egc <- mc_rna@e_gc
     } else if (is.matrix(mc_rna) || is_sparse_matrix(mc_rna)) {
-        egc <- t(t(mc_rna) / colSums(mc_sum))
+        egc <- t(t(mc_rna) / colSums(mc_rna))
     } else {
         cli_abort("mc_rna must be a tgMCCov object (from the metacell package) or a matrix.")
     }
@@ -42,6 +42,18 @@ add_mc_rna <- function(mcatac, mc_rna) {
     return(mcatac)
 }
 
+#' Does the McATAC object contain per-metacell gene expression data?
+#'
+#' @param mc_atac an McATAC object
+#'
+#' @return TRUE if the McATAC object contains per-metacell gene expression data, FALSE otherwise
+#'
+#' @examples
+#' \dontrun{
+#' has_rna(mc_atac)
+#' }
+#'
+#' @export
 has_rna <- function(mc_atac) {
-    return(is.null(nrow(mc_atac@rna_egc)) || nrow(mc_atac@rna_egc) == 0)
+    return(!is.null(nrow(mc_atac@rna_egc)) && nrow(mc_atac@rna_egc) > 0)
 }

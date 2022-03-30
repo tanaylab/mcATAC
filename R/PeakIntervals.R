@@ -91,6 +91,47 @@ peak_names <- function(peaks) {
     return(peak_names)
 }
 
+#' Get the names of the peaks close to a gene promoter
+#'
+#' @param peaks a PeakIntervals object
+#' @param gene a gene name, e.g. "CD4"
+#' @param max_dist_to_promoter_peak how far from \code{gene}'s TSS to search for promoter-proximal peaks. Default: 500
+#' @param tss_intervals name of the intervals set containing the TSSs
+#'
+#' @return names of the peaks close to \code{gene}'s promoter. If no peaks are found, NULL is returned.
+#'
+#' @examples
+#' \dontrun{
+#' get_promoter_peaks(mc_atac@peaks, "CD4")
+#' }
+#' @export
+get_promoter_peaks <- function(peaks, gene, max_dist_to_promoter_peak = 5e+2, tss_intervals = "intervs.global.tss") {
+    assert_that(methods::is(peaks, "PeakIntervals"))
+    if (!gintervals.exists(tss_intervals)) {
+        cli_abort("{.val {tss_intervals}} intervals do not exist. You can either define the peak explicitly or import them from ucsc")
+    }
+    tss <- gintervals.load(tss_intervals)
+    tss_gene <- tss[tss$geneSymbol == gene, c("chrom", "start", "end", "geneSymbol")]
+    if (nrow(tss_gene) == 0) {
+        return(NULL)
+    } else if (nrow(tss_gene) > 1) {
+        cli_alert("The gene {.val {gene}} has {.val {nrow(tss_gene)}} alternative promoters. Summing the ATAC signal from all of them.")
+    }
+
+    nei_peaks_tss <- misha.ext::gintervals.neighbors1(
+        tss_gene[, 1:3],
+        as.data.frame(peaks),
+        mindist = -max_dist_to_promoter_peak,
+        maxdist = max_dist_to_promoter_peak,
+        maxneighbors = 500
+    ) %>%
+        filter(!is.na(peak_name))
+
+    peak <- unique(nei_peaks_tss$peak_name)
+
+    return(peak)
+}
+
 #' Select peaks features by minimal coverage and threshold max-min fold
 #'
 #' @param atac a McATAC or ScATAC object

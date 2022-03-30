@@ -1,7 +1,7 @@
 #' Filter features by summary statistics
 #'
 #' @description Remove ATAC peaks with low coverage, or that are too long etc.
-#' @param scatac the McATAC object to analyze
+#' @param scatac the ScATAC object to analyze
 #' @param minimal_max_umi (optional) threshold on minimum maximal coverage - i.e. remove all peaks that DON'T have a cell with at least \code{abs_cov_thresh} UMIs
 #' @param min_peak_length (optional) remove all peaks that are less than \code{min_cov_thresh} base-pairs long
 #' @param max_peak_length (optional) remove all peaks that are more than \code{min_cov_thresh} base-pairs long

@@ -120,6 +120,7 @@ validate_atac_object_params <- function(mat, peaks, genome) {
 #' metacell size)
 #' @slot fp a matrix showing for each peak (row) the relative enrichment of umis in log2 scale, i.e. \eqn{log2((1 + egc) / median(1 + egc))}
 #' @slot mc_size_eps_q quantile of MC size (in UMIs) to scale the number of UMIs per metacell. See \code{project_atac_on_mc}
+#' @slot rna_egc normalized gene expression per gene per metacell (optional). Can be created using \code{add_rna_egc}
 #'
 #' @rdname ATAC
 #' @exportClass McATAC
@@ -210,6 +211,9 @@ print_atac_object <- function(object, object_type, column_type, md_column) {
     if (object_type == "McATAC") {
         cli_ul(c("{.code @egc}: a numeric matrix which contains normalized metacell accessibility."))
         cli_ul(c("{.code @fp}: a matrix showing for each peak (row) the relative enrichment of umis in log2 scale."))
+        if (has_rna(object)) {
+            cli_ul(c("{.code @rna_egc}: a numeric matrix which contains normalized RNA expression per gene (rows) per metacell (columns)."))
+        }
     }
     if (!is.null(object@metadata)) {
         cli_ul(c("{.code @metadata}: a tibble with a column called '{md_column}' and additional {column_type} annotations."))
