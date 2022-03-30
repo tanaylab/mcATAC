@@ -115,7 +115,7 @@ get_promoter_peaks <- function(peaks, gene, max_dist_to_promoter_peak = 5e+2, ts
     if (nrow(tss_gene) == 0) {
         return(NULL)
     } else if (nrow(tss_gene) > 1) {
-        cli_alert("The gene {.val {gene}} has {.val {nrow(tss_gene)}} alternative promoters. Summing the ATAC signal from all of them.")
+        cli_alert("The gene {.val {gene}} has {.val {nrow(tss_gene)}} alternative promoters.")
     }
 
     nei_peaks_tss <- misha.ext::gintervals.neighbors1(

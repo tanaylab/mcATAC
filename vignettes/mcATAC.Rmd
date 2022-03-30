@@ -126,11 +126,22 @@ atac_mc <- add_mc_rna(atac_mc, rna_mc_mat)
 
 ## Plot accesability vs expression 
 
+Between a gene and its promoter:
+
 ```{r atac-rna-scatter-1}
 plot_atac_rna(atac_mc, "CD4")
 ```
-### For a single gene
 
+Between a gene and a promoter of a different gene: 
+
+```{r atac-rna-scatter-2}
+plot_atac_rna(atac_mc, "CD4", "CD8A")
+```
+
+Between a gene and an arbitrary peak:
+
+```{r atac-rna-scatter-3}
+plot_atac_rna(atac_mc, "CD4", peak = atac_mc@peaks$peak_name[1])
 ```
 
 ## Export to an h5ad file

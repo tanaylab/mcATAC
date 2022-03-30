@@ -124,7 +124,8 @@ plot_atac_rna <- function(mc_atac, gene, atac_promoter = gene, mc_rna = NULL, pe
         ) +
         theme(
             plot.subtitle = ggtext::element_markdown(),
-            plot.caption = element_text(hjust = 0)
+            plot.caption = element_text(hjust = 0),
+            aspect.ratio = 1
         )
 
     return(gg)
