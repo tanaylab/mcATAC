@@ -3,6 +3,7 @@
 #'
 #' @param atac_mc a McATAC object
 #' @param k number of clusters
+#' @param cluster_on (optional; default - fp) what matrix (\code{mat}/\code{fp}/\code{egc})to cluster on
 #' @param peak_set - (optional) a subset of peaks of \code{atac_mc@peaks} on which to cluster
 
 #' @inheritDotParams tglkmeans::TGL_kmeans
@@ -10,16 +11,19 @@
 
 #' @examples
 #' \dontrun{
-#' my_atac_mc <- gen_atac_peak_clust(my_atac_mc, k = 16)
+#'      my_atac_mc <- gen_atac_peak_clust(my_atac_mc, k = 16, cluster_on = 'mat')
+#'
+#'      dyn_p <- identify_dynamic_peaks(my_atac_mc)
+#'      my_atac_mc <- gen_atac_peak_clust(my_atac_mc, k = 16, cluster_on = 'fp', peak_set = dyn_p)
 #' }
 #'
 #' @export
-gen_atac_peak_clust <- function(atac_mc, k, peak_set = NULL, ...) {
+gen_atac_peak_clust <- function(atac_mc, k, cluster_on = 'fp', peak_set = NULL, ...) {
     assert_atac_object(atac_mc)
     if (!is.null(peak_set)) {
         atac_mc <- subset_peaks(atac_mc, peak_set)
     }
-    atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(atac_mc@mat), k, id_column = FALSE, ...)
+    atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(slot(atac_mc, cluster_on)), k, id_column = FALSE, ...)
     return(setNames(atac_peak_km$cluster, rownames(atac_mc@mat)))
 }
 
