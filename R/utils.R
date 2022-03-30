@@ -28,7 +28,7 @@ assert_atac_object <- function(obj, param = deparse(substitute(obj))) {
 #'
 
 #' @export
-save_pheatmap_png <- function(x, filename, dev = png, width = 2000, height = 2000, res = 150) {
+save_pheatmap <- function(x, filename, dev = png, width = 2000, height = 2000, res = 150) {
     dev(filename, width = width, height = height, res = res)
     grid::grid.newpage()
     grid::grid.draw(x$gtable)

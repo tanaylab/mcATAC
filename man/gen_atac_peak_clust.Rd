@@ -4,12 +4,14 @@
 \alias{gen_atac_peak_clust}
 \title{Cluster atac peaks based on atac distributions}
 \usage{
-gen_atac_peak_clust(atac_mc, k, peak_set = NULL, ...)
+gen_atac_peak_clust(atac_mc, k, cluster_on = "fp", peak_set = NULL, ...)
 }
 \arguments{
 \item{atac_mc}{a McATAC object}
 
 \item{k}{number of clusters}
+
+\item{cluster_on}{(optional; default - fp) what matrix (\code{mat}/\code{fp}/\code{egc})to cluster on}
 
 \item{peak_set}{\itemize{
 \item (optional) a subset of peaks of \code{atac_mc@peaks} on which to cluster
@@ -41,7 +43,10 @@ Cluster atac peaks based on atac distributions
 }
 \examples{
 \dontrun{
-my_atac_mc <- gen_atac_peak_clust(my_atac_mc, k = 16)
+     my_atac_mc <- gen_atac_peak_clust(my_atac_mc, k = 16, cluster_on = 'mat')
+
+     dyn_p <- identify_dynamic_peaks(my_atac_mc)
+     my_atac_mc <- gen_atac_peak_clust(my_atac_mc, k = 16, cluster_on = 'fp', peak_set = dyn_p)
 }
 
 }

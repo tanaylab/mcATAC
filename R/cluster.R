@@ -19,6 +19,9 @@
 #'
 #' @export
 gen_atac_peak_clust <- function(atac_mc, k, cluster_on = 'fp', peak_set = NULL, ...) {
+    if (cluster_on %!in% c('fp', 'mat', 'egc')) {
+        cli_abort("{.var cluster_on} must be either 'fp', 'mat' or 'egc'")
+    }
     assert_atac_object(atac_mc)
     if (!is.null(peak_set)) {
         atac_mc <- subset_peaks(atac_mc, peak_set)

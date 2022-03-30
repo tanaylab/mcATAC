@@ -8,18 +8,21 @@ plot_atac_peak_map(
   mc_atac,
   mc_atac_clust,
   peak_clust,
+  peak_annotation = NULL,
   filepath = NULL,
-  dev = NULL,
-  clrs = colorRampPalette(c("blue4", "white", "red4"))(100),
-  seed = 1337
+  dev = png,
+  main = NULL,
+  clrs = colorRampPalette(c("blue4", "white", "red4"))(100)
 )
 }
 \arguments{
 \item{mc_atac}{McATAC object}
 
-\item{mc_atac_clust}{output of \code{gen_atac_mc_clust}}
+\item{mc_atac_clust}{output of \code{gen_atac_mc_clust} (for meaningful visuals, make sure this is ordered by cluster)}
 
-\item{peak_clust}{output of \code{gen_atac_peak_clust}}
+\item{peak_clust}{output of \code{gen_atac_peak_clust} or other clustering of peaks (for meaningful visuals, make sure this is ordered by cluster)}
+
+\item{peak_annotation}{(optional) a list of a named vector and a dataframe conforming to the pheatmap \code{annotation_colors} and \code{annotation_row} conventions}
 
 \item{filepath}{(optional) path and filename of where to save the figure; if unspecified, figure isn't saved}
 
@@ -34,6 +37,13 @@ Plot normalized accessibility of peaks over metacells, ordered by clustering
 \examples{
 \dontrun{
     peak_clust <- gen_atac_peak_clust(my_mcatac, 16)
-    plot_atac_peak_map(my_mcatac, my_mcatac@metadata, peak_clust, './my_figures/my_mcatac_heatmap.png')
+    plot_atac_peak_map(my_mcatac, order(my_mcatac@metadata$cell_type), order(peak_clust), './my_figures/my_mcatac_heatmap.png')
+
+    ## Peak annotation example
+    is_dyn <- setNames(as.numeric(rownames(my_mcatac@mat) \%in\% my_mcatac_dynamic_peaks_only@peaks$peak_name), rownames(my_mcatac@mat))
+    pa1 <- list('is_dyn' = setNames(c('black', 'red'), c(0,1)))
+    pa2 <- tibble::column_to_rownames(enframe(is_dyn, name = 'peak_name', value = 'is_dyn'), 'peak_name') 
+    pa <- list(pa1, pa2)
+    plot_atac_peak_map(my_mcatac, mc_atac_clust = order(my_mcatac@metadata$cell_type), peak_annotation = pa)
 }
 }
