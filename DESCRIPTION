@@ -30,7 +30,8 @@ Imports:
     tibble,
     tidyr,
     withr,
-    magrittr
+    magrittr,
+    grDevices
 Suggests: 
     testthat (>= 3.0.0),
     metacell,

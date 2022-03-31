@@ -9,10 +9,11 @@ plot_atac_peak_map(
   mc_atac_clust,
   peak_clust,
   peak_annotation = NULL,
-  filepath = NULL,
+  filename = NULL,
   dev = png,
-  main = NULL,
-  clrs = colorRampPalette(c("blue4", "white", "red4"))(100)
+  main = mc_atac@id,
+  clrs = colorRampPalette(c("blue4", "white", "red4"))(100),
+  ...
 )
 }
 \arguments{
@@ -24,26 +25,36 @@ plot_atac_peak_map(
 
 \item{peak_annotation}{(optional) a list of a named vector and a dataframe conforming to the pheatmap \code{annotation_colors} and \code{annotation_row} conventions}
 
-\item{filepath}{(optional) path and filename of where to save the figure; if unspecified, figure isn't saved}
+\item{filename}{(optional) path and filename of where to save the figure; if unspecified, figure isn't saved}
 
 \item{dev}{(optional; default - png) graphical device to save figure with}
+
+\item{...}{
+  Arguments passed on to \code{\link[=save_pheatmap]{save_pheatmap}}
+  \describe{
+    \item{\code{width}}{the width of the device.}
+    \item{\code{height}}{the height of the device.}
+    \item{\code{res}}{The nominal resolution in ppi which will be recorded in the
+    bitmap file, if a positive integer.  Also used for \code{units}
+    other than the default, and to convert points to pixels.}
+  }}
 }
 \value{
-a pheatmap figure
+a pheatmap figure.
 }
 \description{
 Plot normalized accessibility of peaks over metacells, ordered by clustering
 }
 \examples{
 \dontrun{
-    peak_clust <- gen_atac_peak_clust(my_mcatac, 16)
-    plot_atac_peak_map(my_mcatac, order(my_mcatac@metadata$cell_type), order(peak_clust), './my_figures/my_mcatac_heatmap.png')
+peak_clust <- gen_atac_peak_clust(my_mcatac, 16)
+plot_atac_peak_map(my_mcatac, order(my_mcatac@metadata$cell_type), order(peak_clust), "./my_figures/my_mcatac_heatmap.png")
 
-    ## Peak annotation example
-    is_dyn <- setNames(as.numeric(rownames(my_mcatac@mat) \%in\% my_mcatac_dynamic_peaks_only@peaks$peak_name), rownames(my_mcatac@mat))
-    pa1 <- list('is_dyn' = setNames(c('black', 'red'), c(0,1)))
-    pa2 <- tibble::column_to_rownames(enframe(is_dyn, name = 'peak_name', value = 'is_dyn'), 'peak_name') 
-    pa <- list(pa1, pa2)
-    plot_atac_peak_map(my_mcatac, mc_atac_clust = order(my_mcatac@metadata$cell_type), peak_annotation = pa)
+## Peak annotation example
+is_dyn <- setNames(as.numeric(rownames(my_mcatac@mat) \%in\% my_mcatac_dynamic_peaks_only@peaks$peak_name), rownames(my_mcatac@mat))
+pa1 <- list("is_dyn" = setNames(c("black", "red"), c(0, 1)))
+pa2 <- tibble::column_to_rownames(enframe(is_dyn, name = "peak_name", value = "is_dyn"), "peak_name")
+pa <- list(pa1, pa2)
+plot_atac_peak_map(my_mcatac, mc_atac_clust = order(my_mcatac@metadata$cell_type), peak_annotation = pa)
 }
 }

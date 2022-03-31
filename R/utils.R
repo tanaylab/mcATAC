@@ -23,10 +23,15 @@ assert_atac_object <- function(obj, param = deparse(substitute(obj))) {
     }
 }
 
-#' Function to save pheatmaps
-#' @inheritParams png
+#' Function to save pheatmaps to disk while showing them on screen
 #'
-
+#' @description \code{pheatmap::pheatmap} accepts a parameter called \code{filename} which
+#' saves the pheatmap to disk. However, then the heatmap is not shown on screen.
+#' This function is a workaround to show the heatmap on screen and save it to disk.
+#'
+#' @param dev name of the device to save the pheatmap. e.g. "png" or "pdf"
+#' @inheritParams grDevices::png
+#'
 #' @export
 save_pheatmap <- function(x, filename, dev = png, width = 2000, height = 2000, res = 150) {
     dev(filename, width = width, height = height, res = res)

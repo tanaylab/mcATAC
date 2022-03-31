@@ -2,10 +2,32 @@
 % Please edit documentation in R/utils.R
 \name{save_pheatmap}
 \alias{save_pheatmap}
-\title{Function to save pheatmaps}
+\title{Function to save pheatmaps to disk while showing them on screen}
 \usage{
 save_pheatmap(x, filename, dev = png, width = 2000, height = 2000, res = 150)
 }
+\arguments{
+\item{filename}{the output file path.
+    The page number is substituted if a C integer format is included in
+    the character string, as in the default.  (The result must be less
+    than \code{PATH_MAX} characters long, and may be truncated if not.
+    See \code{\link[grDevices]{postscript}} for further details.)  Tilde expansion
+    is performed where supported by the platform.  An input with
+    a marked encoding is converted to the native encoding on an error is
+    given.}
+
+\item{dev}{name of the device to save the pheatmap. e.g. "png" or "pdf"}
+
+\item{width}{the width of the device.}
+
+\item{height}{the height of the device.}
+
+\item{res}{The nominal resolution in ppi which will be recorded in the
+    bitmap file, if a positive integer.  Also used for \code{units}
+    other than the default, and to convert points to pixels.}
+}
 \description{
-Function to save pheatmaps
+\code{pheatmap::pheatmap} accepts a parameter called \code{filename} which
+saves the pheatmap to disk. However, then the heatmap is not shown on screen.
+This function is a workaround to show the heatmap on screen and save it to disk.
 }

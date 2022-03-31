@@ -3,23 +3,23 @@
 #'
 #' @param atac_mc a McATAC object
 #' @param k number of clusters
-#' @param cluster_on (optional; default - fp) what matrix (\code{mat}/\code{fp}/\code{egc})to cluster on
+#' @param cluster_on (optional; default - fp) which matrix (\code{mat}/\code{fp}/\code{egc})to cluster on
 #' @param peak_set - (optional) a subset of peaks of \code{atac_mc@peaks} on which to cluster
-
+#'
 #' @inheritDotParams tglkmeans::TGL_kmeans
 #' @return a tglkmeans clustering object
 
 #' @examples
 #' \dontrun{
-#'      my_atac_mc <- gen_atac_peak_clust(my_atac_mc, k = 16, cluster_on = 'mat')
+#' my_atac_mc <- gen_atac_peak_clust(my_atac_mc, k = 16, cluster_on = "mat")
 #'
-#'      dyn_p <- identify_dynamic_peaks(my_atac_mc)
-#'      my_atac_mc <- gen_atac_peak_clust(my_atac_mc, k = 16, cluster_on = 'fp', peak_set = dyn_p)
+#' dyn_p <- identify_dynamic_peaks(my_atac_mc)
+#' my_atac_mc <- gen_atac_peak_clust(my_atac_mc, k = 16, cluster_on = "fp", peak_set = dyn_p)
 #' }
 #'
 #' @export
-gen_atac_peak_clust <- function(atac_mc, k, cluster_on = 'fp', peak_set = NULL, ...) {
-    if (cluster_on %!in% c('fp', 'mat', 'egc')) {
+gen_atac_peak_clust <- function(atac_mc, k, cluster_on = "fp", peak_set = NULL, ...) {
+    if (cluster_on %!in% c("fp", "mat", "egc")) {
         cli_abort("{.var cluster_on} must be either 'fp', 'mat' or 'egc'")
     }
     assert_atac_object(atac_mc)
