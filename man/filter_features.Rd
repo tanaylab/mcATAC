@@ -8,17 +8,20 @@ filter_features(
   scatac,
   minimal_max_umi = NULL,
   min_peak_length = NULL,
-  max_peak_length = NULL
+  max_peak_length = NULL,
+  max_peak_density = NULL
 )
 }
 \arguments{
-\item{scatac}{the McATAC object to analyze}
+\item{scatac}{the ScATAC object to analyze}
 
 \item{minimal_max_umi}{(optional) threshold on minimum maximal coverage - i.e. remove all peaks that DON'T have a cell with at least \code{abs_cov_thresh} UMIs}
 
 \item{min_peak_length}{(optional) remove all peaks that are less than \code{min_cov_thresh} base-pairs long}
 
 \item{max_peak_length}{(optional) remove all peaks that are more than \code{min_cov_thresh} base-pairs long}
+
+\item{max_peak_density}{(optional) remove all peaks that have more than \code{max_peak_density} UMIs per 100bp}
 }
 \value{
 scatac - the filtered ScATAC object

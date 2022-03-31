@@ -17,6 +17,8 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(mcATAC)
+library(ggplot2)
+ggplot2::theme_set(ggplot2::theme_classic())
 ```
 
 ## Download dataset
@@ -44,8 +46,39 @@ atac_sc
 ## Filter peaks 
 
 ### by coverage and/or length
+
+Plot the length distribution:
+
+```{r plot-peak-len}
+plot_peak_length_distribution(atac_sc)
+```
+
+Plot the coverage distribution:
+
+```{r plot-peak-cov}
+plot_peak_coverage_distribution(atac_sc)
+```
+
+Plot the distribution of the maximal number of peaks per cell for each peak:
+
+```{r plot-peak-max-cov}
+plot_peak_max_cov_distribution(atac_sc)
+```
+
+Filter the peaks by length and coverage:
+
 ```{r filter-peaks}
-atac_sc <- filter_features(scatac = atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
+atac_sc <- filter_features(atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
+```
+
+Identify outliers using coverage density: 
+
+```{r plot-peak-density}
+plot_peak_coverage_density(atac_sc) + geom_hline(yintercept = 250, linetype = "dashed", color = "red")
+```
+
+```{r filter-peaks-cov-density}
+atac_sc <- filter_features(atac_sc, max_peak_density = 250)
 ```
 
 ### by overlap with known blacklist regions 
@@ -101,6 +134,32 @@ export_atac_clust_ucsc(mc_atac = atac_mc, track_prefix = 'hum_pbmc_10x', normali
 ![UCSC track example](ucsc_output_example.png "Example of UCSC output on human PBMC data from 10X Genomics")
 
 
+## Add expression data 
+
+```{r add-rna}
+data(rna_mc_mat)
+atac_mc <- add_mc_rna(atac_mc, rna_mc_mat)
+```
+
+## Plot accesability vs expression 
+
+Between a gene and its promoter:
+
+```{r atac-rna-scatter-1}
+plot_atac_rna(atac_mc, "CD4")
+```
+
+Between a gene and a promoter of a different gene: 
+
+```{r atac-rna-scatter-2}
+plot_atac_rna(atac_mc, "CD4", "CD8A")
+```
+
+Between a gene and an arbitrary peak:
+
+```{r atac-rna-scatter-3}
+plot_atac_rna(atac_mc, "CD4", peak = atac_mc@peaks$peak_name[1])
+```
 
 ## Export to an h5ad file
 
