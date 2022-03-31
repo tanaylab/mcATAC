@@ -130,6 +130,7 @@ McATAC <- setClass(
         egc = "any_matrix",
         fp = "any_matrix",
         mc_size_eps_q = "numeric",
+        cell_to_metacell = "data.frame_or_null",
         rna_egc = "any_matrix"
     ),
     contains = "ATAC"
@@ -144,6 +145,7 @@ McATAC <- setClass(
 #' @param id an identifier for the object, e.g. "pbmc".
 #' @param description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k),
 #' projection was done using RNA metacells"
+#' @param cell_to_metacell a data frame mapping 'cell_id' to 'metacell' (optional). See \code{project_atac_on_mc}
 #' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
 #' @param path path from which the object was loaded (optional)
 #'
@@ -156,14 +158,15 @@ McATAC <- setClass(
 setMethod(
     "initialize",
     signature = "McATAC",
-    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, mc_size_eps_q = 0.1, path = "") {
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, cell_to_metacell = NULL, mc_size_eps_q = 0.1, path = "") {
         .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description, path = path)
         validate_atac_object(.Object)
         .Object <- add_metadata(.Object, metadata, "metacell")
         .Object@egc <- calc_mc_egc(.Object, mc_size_eps_q)
         .Object@fp <- calc_mc_fp(.Object)
         .Object@mc_size_eps_q <- mc_size_eps_q
-        .Object@rna_egc <- matrix(0, nrow = 0, ncol = ncol(.Object@mat), dimnames = list(NULL, colnames(.Object@mat)))
+        .Object@rna_egc <- matrix(0, nrow = 0, ncol = ncol(.Object@mat), dimnames = list(NULL, colnames(.Object@mat)))        
+        .Object@cell_to_metacell <- cell_to_metacell
         return(.Object)
     }
 )

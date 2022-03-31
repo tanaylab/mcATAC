@@ -50,7 +50,9 @@ export_to_h5ad <- function(object, out_file, ...) {
         "ignore_peaks", "ignore_pmat", "rna_egc"
     )]
     for (s in slots) {
-        uns[[s]] <- slot(object, s)
+        if (!is.null(slot(object, s))){
+            uns[[s]] <- slot(object, s)
+        }        
     }
 
     if (uns$class == "McATAC" && has_rna(object)) {
