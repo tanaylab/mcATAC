@@ -22,3 +22,12 @@ test_that("plot_atac_rna works", {
     plot_atac_rna(atac_mc, "CD4") %>% expect_ggplot_ok()
     plot_atac_rna(atac_mc, "CD4", peak = atac_mc@peaks$peak_name[1], plot_object_id = TRUE, normalize_atac = FALSE) %>% expect_ggplot_ok()
 })
+
+test_that("export of rna egc works", {
+    atac_mc <- add_mc_rna(atac_mc, rna_mc_mat)
+    export_to_h5ad(atac_mc, fs::path(raw_dir, "atac_mc.h5ad"), compression = "gzip")
+    atac_mc1 <- import_from_h5ad(fs::path(raw_dir, "atac_mc.h5ad"))
+    expect_true(mean(abs(atac_mc@rna_egc - atac_mc1@rna_egc)) <= 1e-9)
+    expect_equal(rownames(atac_mc@rna_egc), rownames(atac_mc1@rna_egc))
+    expect_equal(colnames(atac_mc@rna_egc), colnames(atac_mc1@rna_egc))
+})

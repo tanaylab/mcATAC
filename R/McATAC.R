@@ -163,6 +163,7 @@ setMethod(
         .Object@egc <- calc_mc_egc(.Object, mc_size_eps_q)
         .Object@fp <- calc_mc_fp(.Object)
         .Object@mc_size_eps_q <- mc_size_eps_q
+        .Object@rna_egc <- matrix(0, nrow = 0, ncol = ncol(.Object@mat), dimnames = list(NULL, colnames(.Object@mat)))
         return(.Object)
     }
 )
