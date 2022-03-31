@@ -135,13 +135,84 @@ plot_atac_rna_cor <- function(mc_atac, rna_mat) {
 #' Plot normalized accessibility of peaks over metacells, ordered by clustering
 #'
 #' @param mc_atac McATAC object
-#' @param mc_atac_clust output of \code{gen_atac_mc_clust}
-#' @param peak_clust output of \code{gen_atac_peak_clust}
+#' @param mc_atac_clust output of \code{gen_atac_mc_clust} (for meaningful visuals, make sure this is ordered by cluster)
+#' @param peak_clust output of \code{gen_atac_peak_clust} or other clustering of peaks (for meaningful visuals, make sure this is ordered by cluster)
+#' @param peak_annotation (optional) a list of a named vector and a dataframe conforming to the pheatmap \code{annotation_colors} and \code{annotation_row} conventions
+#' @param filename (optional) path and filename of where to save the figure; if unspecified, figure isn't saved
+#' @param dev (optional; default - png) graphical device to save figure with
+#'
+#' @inheritDotParams save_pheatmap
+#'
+#' @return a pheatmap figure.
 #' @examples
 #' \dontrun{
+#' peak_clust <- gen_atac_peak_clust(my_mcatac, 16)
+#' plot_atac_peak_map(my_mcatac, order(my_mcatac@metadata$cell_type), order(peak_clust), "./my_figures/my_mcatac_heatmap.png")
 #'
+#' ## Peak annotation example
+#' is_dyn <- setNames(as.numeric(rownames(my_mcatac@mat) %in% my_mcatac_dynamic_peaks_only@peaks$peak_name), rownames(my_mcatac@mat))
+#' pa1 <- list("is_dyn" = setNames(c("black", "red"), c(0, 1)))
+#' pa2 <- tibble::column_to_rownames(enframe(is_dyn, name = "peak_name", value = "is_dyn"), "peak_name")
+#' pa <- list(pa1, pa2)
+#' plot_atac_peak_map(my_mcatac, mc_atac_clust = order(my_mcatac@metadata$cell_type), peak_annotation = pa)
 #' }
 #' @export
-plot_atac_peak_map <- function(mc_atac, mc_atac_clust, peak_clust) {
-    # the central heat map showing normalized accessibility of peaks over metacells, ordered by clustering
+plot_atac_peak_map <- function(mc_atac, mc_atac_clust, peak_clust,
+                               peak_annotation = NULL,
+                               filename = NULL,
+                               dev = png,
+                               main = mc_atac@id,
+                               clrs = colorRampPalette(c("blue4", "white", "red4"))(100),
+                               ...) {
+    if (is.null(mc_atac_clust)) {
+        cli_abort("Must specify clustering of metacells (e.g. using {.code gen_atac_mc_clust})")
+    }
+    if (is.null(peak_clust)) {
+        cli_abort("Must specify clustering of peaks (e.g. using {.code gen_atac_peak_clust})")
+    }
+    annotation_row <- NULL
+    if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
+        col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")
+        ann_colors <- list("cell_type" = setNames(unlist(mc_atac@metadata[, "color"]), unlist(mc_atac@metadata[, "cell_type"])))
+    } else {
+        cts <- unique(mc_atac_clust)
+        color_key <- enframe(setNames(chameleon::distinct_colors(length(cts)), cts), name = "cell_type", value = "color")
+        col_annot <- enframe(setNames(
+            as.numeric(names(mc_atac_clust)),
+            color_key$color[match(mc_atac_clust, color_key$cell_type)]
+        ),
+        name = "metacell", value = "cell_type"
+        )
+        col_annot <- tibble::column_to_rownames(col_annot, "metacell")
+        ann_colors <- list("cell_type" = deframe(color_key))
+    }
+
+    mca_lfc <- mc_atac@fp
+    brks <- c(
+        seq(min(mca_lfc), 0, l = 50),
+        seq(0.01 * (max(mca_lfc) - min(mca_lfc)), max(mca_lfc), l = 51)
+    )
+    colnames(mca_lfc) <- 1:ncol(mca_lfc)
+    if (!is.null(peak_annotation)) {
+        if (length(peak_annotation) != 2 || sapply(peak_annotation, class) != c("list", "data.frame")) {
+            cli_abort("{.field peak_annotation} must be a list containing: 1. a list containing a named vector; 2. a dataframe of one column. See examples and compare with pheatmap docs/examples.")
+        }
+        if (!class(peak_annotation[[2]][, 1]) %in% c("numeric", "character")) {
+            cli_abort("Peak annotation column in peak annotation dataframe must be of a numeric or character class")
+        }
+        annotation_row <- peak_annotation[[2]]
+        ann_colors[names(peak_annotation[[1]])] <- peak_annotation[[1]]
+    }
+    pp <- pheatmap::pheatmap(mca_lfc[peak_clust, mc_atac_clust],
+        annotation_col = subset(col_annot, select = cell_type),
+        annotation_legend = FALSE,
+        annotation_colors = ann_colors,
+        annotation_row = annotation_row, main = main,
+        color = clrs, breaks = brks, cluster_cols = FALSE, cluster_rows = FALSE, show_colnames = FALSE, show_rownames = FALSE
+    )
+
+    if (!is.null(filename)) {
+        save_pheatmap(pp, filename = filename, dev = dev, ...)
+    }
+    return(pp)
 }
