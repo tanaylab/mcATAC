@@ -28,7 +28,6 @@ test_that("projection from a metacell1 object works", {
 })
 
 test_that("export works", {
-    browser()
     export_to_h5ad(atac_mc, fs::path(raw_dir, "atac_mc.h5ad"), compression = "gzip")
     atac_mc1 <- import_from_h5ad(fs::path(raw_dir, "atac_mc.h5ad"))
     expect_true(mean(abs(atac_mc@mat - atac_mc1@mat)) <= 1e-9)
