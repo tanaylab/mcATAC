@@ -27,7 +27,7 @@ ATAC <- setClass(
         peaks = "PeakIntervals",
         genome = "character",
         metadata = "data.frame_or_null",
-        ignore_peaks = "data.frame",
+        ignore_peaks = "PeakIntervals",
         ignore_pmat = "dgCMatrix",
         path = "character"
     ),

@@ -22,8 +22,8 @@ Imports:
     misha.ext (>= 0.0.3),
     pheatmap,
     purrr,
-    rlang,
     randomNames,
+    rlang,
     sparseMatrixStats,
     tgstat,
     tgutil,
@@ -33,6 +33,7 @@ Imports:
     magrittr,
     ggtext,
     scattermore
+    grDevices
 Suggests: 
     testthat (>= 3.0.0),
     metacell,
