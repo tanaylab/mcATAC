@@ -55,20 +55,23 @@
   <span class="va">scatac</span>,
   minimal_max_umi <span class="op">=</span> <span class="cn">NULL</span>,
   min_peak_length <span class="op">=</span> <span class="cn">NULL</span>,
-  max_peak_length <span class="op">=</span> <span class="cn">NULL</span>
+  max_peak_length <span class="op">=</span> <span class="cn">NULL</span>,
+  max_peak_density <span class="op">=</span> <span class="cn">NULL</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>scatac</dt>
-<dd><p>the McATAC object to analyze</p></dd>
+<dd><p>the ScATAC object to analyze</p></dd>
 <dt>minimal_max_umi</dt>
 <dd><p>(optional) threshold on minimum maximal coverage - i.e. remove all peaks that DON'T have a cell with at least <code>abs_cov_thresh</code> UMIs</p></dd>
 <dt>min_peak_length</dt>
 <dd><p>(optional) remove all peaks that are less than <code>min_cov_thresh</code> base-pairs long</p></dd>
 <dt>max_peak_length</dt>
 <dd><p>(optional) remove all peaks that are more than <code>min_cov_thresh</code> base-pairs long</p></dd>
+<dt>max_peak_density</dt>
+<dd><p>(optional) remove all peaks that have more than <code>max_peak_density</code> UMIs per 100bp</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>

@@ -51,7 +51,17 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_atac_peak_map</span><span class="op">(</span><span class="va">mc_atac</span>, <span class="va">mc_atac_clust</span>, <span class="va">peak_clust</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_atac_peak_map</span><span class="op">(</span>
+  <span class="va">mc_atac</span>,
+  <span class="va">mc_atac_clust</span>,
+  <span class="va">peak_clust</span>,
+  peak_annotation <span class="op">=</span> <span class="cn">NULL</span>,
+  filename <span class="op">=</span> <span class="cn">NULL</span>,
+  dev <span class="op">=</span> <span class="va">png</span>,
+  main <span class="op">=</span> <span class="va">mc_atac</span><span class="op">@</span><span class="va">id</span>,
+  clrs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/colorRamp.html" class="external-link">colorRampPalette</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blue4"</span>, <span class="st">"white"</span>, <span class="st">"red4"</span><span class="op">)</span><span class="op">)</span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>,
+  <span class="va">...</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -59,15 +69,47 @@
     <dl><dt>mc_atac</dt>
 <dd><p>McATAC object</p></dd>
 <dt>mc_atac_clust</dt>
-<dd><p>output of <code>gen_atac_mc_clust</code></p></dd>
+<dd><p>output of <code>gen_atac_mc_clust</code> (for meaningful visuals, make sure this is ordered by cluster)</p></dd>
 <dt>peak_clust</dt>
-<dd><p>output of <code>gen_atac_peak_clust</code></p></dd>
+<dd><p>output of <code>gen_atac_peak_clust</code> or other clustering of peaks (for meaningful visuals, make sure this is ordered by cluster)</p></dd>
+<dt>peak_annotation</dt>
+<dd><p>(optional) a list of a named vector and a dataframe conforming to the pheatmap <code>annotation_colors</code> and <code>annotation_row</code> conventions</p></dd>
+<dt>filename</dt>
+<dd><p>(optional) path and filename of where to save the figure; if unspecified, figure isn't saved</p></dd>
+<dt>dev</dt>
+<dd><p>(optional; default - png) graphical device to save figure with</p></dd>
+<dt>...</dt>
+<dd><p>Arguments passed on to <code><a href="save_pheatmap.html">save_pheatmap</a></code></p><dl><dt><code>width</code></dt>
+<dd><p>the width of the device.</p></dd>
+
+    <dt><code>height</code></dt>
+<dd><p>the height of the device.</p></dd>
+
+    <dt><code>res</code></dt>
+<dd><p>The nominal resolution in ppi which will be recorded in the
+    bitmap file, if a positive integer.  Also used for <code>units</code>
+    other than the default, and to convert points to pixels.</p></dd>
+
+  
+</dl></dd>
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>a pheatmap figure.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in"><span class="va">peak_clust</span> <span class="op">&lt;-</span> <span class="fu"><a href="gen_atac_peak_clust.html">gen_atac_peak_clust</a></span><span class="op">(</span><span class="va">my_mcatac</span>, <span class="fl">16</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu">plot_atac_peak_map</span><span class="op">(</span><span class="va">my_mcatac</span>, <span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">my_mcatac</span><span class="op">@</span><span class="va">metadata</span><span class="op">$</span><span class="va">cell_type</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">peak_clust</span><span class="op">)</span>, <span class="st">"./my_figures/my_mcatac_heatmap.png"</span><span class="op">)</span></span>
 <span class="r-in"></span>
+<span class="r-in"><span class="co">## Peak annotation example</span></span>
+<span class="r-in"><span class="va">is_dyn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">my_mcatac</span><span class="op">@</span><span class="va">mat</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">my_mcatac_dynamic_peaks_only</span><span class="op">@</span><span class="va">peaks</span><span class="op">$</span><span class="va">peak_name</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">my_mcatac</span><span class="op">@</span><span class="va">mat</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">pa1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"is_dyn"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="st">"red"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">pa2</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/rownames.html" class="external-link">column_to_rownames</a></span><span class="op">(</span><span class="fu">enframe</span><span class="op">(</span><span class="va">is_dyn</span>, name <span class="op">=</span> <span class="st">"peak_name"</span>, value <span class="op">=</span> <span class="st">"is_dyn"</span><span class="op">)</span>, <span class="st">"peak_name"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">pa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">pa1</span>, <span class="va">pa2</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu">plot_atac_peak_map</span><span class="op">(</span><span class="va">my_mcatac</span>, mc_atac_clust <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">my_mcatac</span><span class="op">@</span><span class="va">metadata</span><span class="op">$</span><span class="va">cell_type</span><span class="op">)</span>, peak_annotation <span class="op">=</span> <span class="va">pa</span><span class="op">)</span></span>
 <span class="r-in"><span class="op">}</span></span>
 </code></pre></div>
     </div>
