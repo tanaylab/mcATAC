@@ -251,7 +251,7 @@ find_blacklist_overlaps <- function(atac = NULL, peaks = NULL, genome = NULL, ma
 
     misha.ext::gset_genome(genome)
     if (!gintervals.exists(blacklist_name)) {
-        cli_abort("Blacklist intervals {.field {blacklist_name}} does not exist")
+        cli_abort("Blacklist intervals {.field {blacklist_name}} do not exist")
     }
     nei_blk_pks <- misha.ext::gintervals.filter(as.data.frame(peaks), blacklist_name, max_distance = max_dist_to_blacklist_region)
 
