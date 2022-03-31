@@ -32,7 +32,7 @@ Imports:
     withr,
     magrittr,
     ggtext,
-    scattermore
+    scattermore,
     grDevices
 Suggests: 
     testthat (>= 3.0.0),
