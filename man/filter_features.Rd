@@ -8,7 +8,8 @@ filter_features(
   scatac,
   minimal_max_umi = NULL,
   min_peak_length = NULL,
-  max_peak_length = NULL
+  max_peak_length = NULL,
+  max_peak_density = NULL
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ filter_features(
 \item{min_peak_length}{(optional) remove all peaks that are less than \code{min_cov_thresh} base-pairs long}
 
 \item{max_peak_length}{(optional) remove all peaks that are more than \code{min_cov_thresh} base-pairs long}
+
+\item{max_peak_density}{(optional) remove all peaks that have more than \code{max_peak_density} UMIs per 100bp}
 }
 \value{
 scatac - the filtered ScATAC object

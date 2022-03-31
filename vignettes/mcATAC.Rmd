@@ -58,6 +58,12 @@ Plot the coverage distribution:
 plot_peak_coverage_distribution(atac_sc)
 ```
 
+Plot the coverage density: 
+
+```{r plot-peak-density}
+plot_peak_coverage_density(atac_sc)
+```
+
 Plot the distribution of the maximal number of peaks per cell for each peak:
 
 ```{r plot-peak-max-cov}
@@ -67,7 +73,7 @@ plot_peak_max_cov_distribution(atac_sc)
 Filter the peaks by length and coverage:
 
 ```{r filter-peaks}
-atac_sc <- filter_features(scatac = atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
+atac_sc <- filter_features(scatac = atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000, max_peak_density = 300)
 ```
 
 ### by overlap with known blacklist regions 

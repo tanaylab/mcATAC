@@ -31,7 +31,8 @@ Imports:
     tidyr,
     withr,
     magrittr,
-    ggtext
+    ggtext,
+    scattermore
 Suggests: 
     testthat (>= 3.0.0),
     metacell,

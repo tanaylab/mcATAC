@@ -1,3 +1,38 @@
+#' Calculate coverage statistics of the peaks
+#'
+#' @description For each peak, calculate:
+#' \enumerate{
+#' \item{cov: }{The total number of UMIs in the peak}
+#' \item{max_cov: }{The maximal per-cell coverage of the peak}
+#' \item{len: }{The length of the peak}
+#' \item{cov_density: }{The number of UMIs the number of UMIs per \code{scale} bp.}
+#' }
+#'
+#' @param atac an ScATAC or McATAC object
+#' @param scale for the 'cov_density' field, calculate the number of UMIs per \code{scale}
+#' bp (default: 100)
+#'
+#' @return a data frame with peaks, and their length ('len'), their total coverage ('cov'),
+#' maximal per-cell coverage ('max_cov') and their coverage density ('cov_density')
+#'
+#' @examples
+#' \dontrun{
+#' get_peak_coverage_stats(atac)
+#' }
+#'
+#' @export
+get_peak_coverage_stats <- function(atac, scale = 100) {
+    assert_atac_object(atac)
+    df <- atac@peaks %>%
+        mutate(
+            len = end - start,
+            cov = sparseMatrixStats::rowSums2(atac@mat),
+            max_cov = sparseMatrixStats::rowMaxs(atac@mat),
+            cov_density = cov / len * scale
+        )
+    return(df)
+}
+
 #' Filter features by summary statistics
 #'
 #' @description Remove ATAC peaks with low coverage, or that are too long etc.
@@ -5,6 +40,7 @@
 #' @param minimal_max_umi (optional) threshold on minimum maximal coverage - i.e. remove all peaks that DON'T have a cell with at least \code{abs_cov_thresh} UMIs
 #' @param min_peak_length (optional) remove all peaks that are less than \code{min_cov_thresh} base-pairs long
 #' @param max_peak_length (optional) remove all peaks that are more than \code{min_cov_thresh} base-pairs long
+#' @param max_peak_density (optional) remove all peaks that have more than \code{max_peak_density} UMIs per 100bp
 #'
 #' @return scatac - the filtered ScATAC object
 #' @examples
@@ -17,25 +53,35 @@
 #' quantile(my_scatac@peaks$end - my_scatac@peaks$start, (0:10) / 10)
 #' }
 #' @export
-filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NULL, max_peak_length = NULL) {
-    if (!is.null(minimal_max_umi)) {
-        rmx <- sparseMatrixStats::rowMaxs(scatac@mat)
-        low_max_peaks <- scatac@peaks$peak_name[rmx < minimal_max_umi]
-    } else {
-        low_max_peaks <- c()
-    }
-    peak_len <- scatac@peaks$end - scatac@peaks$start
+filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NULL, max_peak_length = NULL, max_peak_density = NULL) {
+    assert_atac_object(scatac)
+    peak_stats <- get_peak_coverage_stats(scatac, scale = 100)
+
     if (!is.null(min_peak_length)) {
-        too_short_peaks <- scatac@peaks$peak_name[peak_len < min_peak_length]
+        too_short_peaks <- scatac@peaks$peak_name[peak_stats$len < min_peak_length]
     } else {
         too_short_peaks <- c()
     }
+
     if (!is.null(max_peak_length)) {
-        too_long_peaks <- scatac@peaks$peak_name[peak_len > max_peak_length]
+        too_long_peaks <- scatac@peaks$peak_name[peak_stats$len > max_peak_length]
     } else {
         too_long_peaks <- c()
     }
-    peaks_to_remove <- unique(c(low_max_peaks, too_short_peaks, too_long_peaks))
+
+    if (!is.null(minimal_max_umi)) {
+        low_max_peaks <- scatac@peaks$peak_name[peak_stats$max_cov < minimal_max_umi]
+    } else {
+        low_max_peaks <- c()
+    }
+
+    if (!is.null(max_peak_density)) {
+        too_dens_peaks <- scatac@peaks$peak_name[peak_stats$cov_density > max_peak_density]
+    } else {
+        too_dens_peaks <- c()
+    }
+
+    peaks_to_remove <- unique(c(low_max_peaks, too_short_peaks, too_long_peaks, too_dens_peaks))
     if (length(peaks_to_remove) > 0) {
         if (length(low_max_peaks) > 0) {
             cli::cli_li("{.val {length(low_max_peaks)}} features had a maximal UMI count less than {.field {minimal_max_umi}}")
@@ -45,6 +91,9 @@ filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NU
         }
         if (length(too_long_peaks) > 0) {
             cli::cli_li("{.val {length(too_long_peaks)}} features were longer than {.field {max_peak_length}bp}")
+        }
+        if (length(too_dens_peaks) > 0) {
+            cli::cli_li("{.val {length(too_dens_peaks)}} features had a peak density of more than {.field {max_peak_density}} UMIs per 100bp")
         }
         scatac <- atac_ignore_peaks(scatac, peaks_to_remove)
     } else {
@@ -67,8 +116,8 @@ filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NU
 #'
 #' @export
 plot_peak_length_distribution <- function(atac) {
-    gg <- atac@peaks %>%
-        mutate(len = end - start) %>%
+    assert_atac_object(atac)
+    gg <- get_peak_coverage_stats(atac) %>%
         ggplot(aes(x = len)) +
         stat_density() +
         scale_x_log10() +
@@ -95,8 +144,8 @@ plot_peak_length_distribution <- function(atac) {
 #' }
 #' @export
 plot_peak_coverage_distribution <- function(atac) {
-    gg <- atac@peaks %>%
-        mutate(cov = sparseMatrixStats::rowSums2(atac@mat)) %>%
+    assert_atac_object(atac)
+    gg <- get_peak_coverage_stats(atac) %>%
         ggplot(aes(x = cov)) +
         stat_density() +
         scale_x_log10() +
@@ -124,19 +173,51 @@ plot_peak_coverage_distribution <- function(atac) {
 #'
 #' @export
 plot_peak_max_cov_distribution <- function(atac) {
-    gg <- atac@peaks %>%
-        mutate(cov = sparseMatrixStats::rowMaxs(atac@mat)) %>%
-        count(cov) %>%
+    assert_atac_object(atac)
+    gg <- get_peak_coverage_stats(atac) %>%
+        count(max_cov) %>%
         mutate(
-            cov = ifelse(cov > 10, ">10", as.character(cov)),
-            cov = factor(cov, levels = c(0:10, ">10"))
+            max_cov = ifelse(max_cov > 10, ">10", as.character(max_cov)),
+            max_cov = factor(max_cov, levels = c(as.character(0:10), ">10")),
+            p = n / sum(n)
         ) %>%
-        ggplot(aes(x = cov, y = n)) +
+        ggplot(aes(x = max_cov, y = p)) +
         geom_col() +
+        scale_y_continuous(labels = scales::percent) +
         labs(
             x = "Maximal per-cell coverage",
-            y = "Density",
+            y = "% of peaks",
             title = glue("Maximal per-cell coverage distribution"),
+            subtitle = glue("n = {nrow(atac@peaks)}"),
+            caption = glue("object id: {atac@id}")
+        )
+    return(gg)
+}
+
+#' Plot the coverage density of the peaks
+#'
+#' @description For each peak, plot a scatter of the peak length vs the number
+#' of UMIs per \code{scale} bp.
+#'
+#' @inheritParams get_peak_coverage_stats
+#' @inheritParams scattermore::geom_scattermore
+#'
+#' @examples
+#' \dontrun{
+#' plot_peak_coverage_density(atac)
+#' }
+#'
+#' @export
+plot_peak_coverage_density <- function(atac, scale = 100, pointsize = 1.5) {
+    assert_atac_object(atac)
+    gg <- get_peak_coverage_stats(atac, scale = scale) %>%
+        ggplot(aes(x = len, y = cov_density)) +
+        scattermore::geom_scattermore(pointsize = 1.5) +
+        scale_x_log10() +
+        labs(
+            x = "Read length (bp)",
+            y = glue("Reads per {scale} bp"),
+            title = glue("Peak coverage density"),
             subtitle = glue("n = {nrow(atac@peaks)}"),
             caption = glue("object id: {atac@id}")
         )
