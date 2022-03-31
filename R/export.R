@@ -53,7 +53,7 @@ export_to_h5ad <- function(object, out_file, ...) {
         uns[[s]] <- slot(object, s)
     }
 
-    if (has_rna(object)) {
+    if (uns$class == "McATAC" && has_rna(object)) {
         uns[["rna_egc"]] <- object@rna_egc
         uns[["rna_mcs"]] <- colnames(object@rna_egc)
         uns[["rna_gene_names"]] <- rownames(object@rna_egc)

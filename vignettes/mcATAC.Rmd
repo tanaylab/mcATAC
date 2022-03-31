@@ -152,7 +152,7 @@ plot_atac_rna(atac_mc, "CD4")
 Between a gene and a promoter of a different gene: 
 
 ```{r atac-rna-scatter-2}
-plot_atac_rna(atac_mc, "CD4", "CD8A")
+plot_atac_rna(atac_mc, "CD4", "GZMK")
 ```
 
 Between a gene and an arbitrary peak:
