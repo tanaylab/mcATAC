@@ -71,7 +71,7 @@ Filter the peaks by length and coverage:
 atac_sc <- filter_features(atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
 ```
 
-Filter also by coverage density: 
+Identify outliers using coverage density: 
 
 ```{r plot-peak-density}
 plot_peak_coverage_density(atac_sc) + geom_hline(yintercept = 250, linetype = "dashed", color = "red")
