@@ -22,9 +22,9 @@ if (!dir.exists("pbmc_data")){
 
 ``` r
 atac_sc <- import_from_10x("pbmc_data", genome = "hg38", id = "PBMC", description = "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
-#>   • Importing matrix
+#> • Importing matrix
 #> ℹ Imported a matrix of 11909 cells and 144978 features
-#>   • Importing features
+#> • Importing features
 #> ℹ Removed 107861 ATAC peaks which were all zero
 #> ℹ 107861 ATAC peaks
 #> ! removed 32 peaks from the following chromosome(s) which are missing from hg38: 'KI270727.1, GL000194.1, GL000205.2, GL000195.1, GL000219.1, KI270734.1, KI270721.1, KI270726.1, KI270713.1'
@@ -38,9 +38,9 @@ atac_sc
 #> description: "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
 #> loaded from: 'pbmc_data/matrix.mtx'
 #> Slots include:
-#>   • `@mat`: a numeric matrix where rows are peaks and columns are cells. Can be a sparse matrix.
-#>   • `@peaks`: a misha intervals set with the peak definitions.
-#>   • `@genome`: genome assembly of the peaks
+#> • `@mat`: a numeric matrix where rows are peaks and columns are cells. Can be a sparse matrix.
+#> • `@peaks`: a misha intervals set with the peak definitions.
+#> • `@genome`: genome assembly of the peaks
 ```
 
 ### Filter peaks by coverage and/or length
@@ -146,8 +146,8 @@ atac_mc <- add_mc_rna(atac_mc, rna_mc_mat)
 ```
 
 ``` r
-plot_atac_rna(atac_mc, "CD4")
-#> → The gene "CD4" has 9 alternative promoters.
+plot_atac_rna(atac_mc, "GZMK")
+#> → The gene "GZMK" has 2 alternative promoters.
 ```
 
 <img src="man/figures/README-atac-rna-scatter-1-1.png" width="100%" />

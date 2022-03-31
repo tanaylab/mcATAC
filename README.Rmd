@@ -11,6 +11,9 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+devtools::load_all(export_all = FALSE)
+library(ggplot2)
+ggplot2::theme_set(ggplot2::theme_classic())
 ```
 
 # mcATAC
@@ -102,7 +105,7 @@ atac_mc <- add_mc_rna(atac_mc, rna_mc_mat)
 ```
 
 ```{r atac-rna-scatter-1}
-plot_atac_rna(atac_mc, "CD4")
+plot_atac_rna(atac_mc, "GZMK")
 ```
 
 
