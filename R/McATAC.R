@@ -119,6 +119,8 @@ validate_atac_object_params <- function(mat, peaks, genome) {
 #' @slot egc normalized metacell accessibility (fraction of accessibility per metacell scaled to the \code{mc_size_eps_q} quantile of
 #' metacell size)
 #' @slot fp a matrix showing for each peak (row) the relative enrichment of umis in log2 scale, i.e. \eqn{log2((1 + egc) / median(1 + egc))}
+#' @slot mc_size_eps_q quantile of MC size (in UMIs) to scale the number of UMIs per metacell. See \code{project_atac_on_mc}
+#' @slot rna_egc normalized gene expression per gene per metacell (optional). Can be created using \code{add_rna_egc}
 #'
 #' @rdname ATAC
 #' @exportClass McATAC
@@ -127,7 +129,8 @@ McATAC <- setClass(
     slots = c(
         egc = "any_matrix",
         fp = "any_matrix",
-        mc_size_eps_q = "numeric"
+        mc_size_eps_q = "numeric",
+        rna_egc = "any_matrix"
     ),
     contains = "ATAC"
 )
@@ -160,6 +163,7 @@ setMethod(
         .Object@egc <- calc_mc_egc(.Object, mc_size_eps_q)
         .Object@fp <- calc_mc_fp(.Object)
         .Object@mc_size_eps_q <- mc_size_eps_q
+        .Object@rna_egc <- matrix(0, nrow = 0, ncol = ncol(.Object@mat), dimnames = list(NULL, colnames(.Object@mat)))
         return(.Object)
     }
 )
@@ -178,52 +182,6 @@ calc_mc_fp <- function(mcatac) {
     log_egc <- log2(1 + mcatac@egc)
     mc_fp <- log_egc - sparseMatrixStats::rowMedians(log_egc, na.rm = TRUE)
     return(mc_fp)
-}
-
-#' Add per-metacell metadata to an McATAC object
-#'
-#' @param mcatac an McATAC object
-#' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
-#'
-#' @examples
-#' \dontrun{
-#' data(mcmd)
-#' mc_atac <- add_metadata(mc_atac, mcmd)
-#' }
-#'
-#' @export
-add_mc_metadata <- function(mcatac, metadata) {
-    add_metadata(mcatac, metadata, "metacell")
-}
-
-add_metadata <- function(obj, metadata, metadata_id_field) {
-    if (!is.null(metadata)) {
-        if (is.character(metadata)) {
-            metadata <- tgutil::fread(metadata)
-        }
-        if (!is.data.frame(metadata)) {
-            cli_abort("{.field metadata} is not a data frame")
-        }
-
-        metadata <- as_tibble(metadata)
-
-        if (!has_name(metadata, metadata_id_field)) {
-            cli_abort("{.field metadata} doesn't have the required field {.field {metadata_id_field}}")
-        }
-
-        metadata <- as_tibble(metadata)
-
-        # make sure that all cells/metacells exist within the matrix
-        missing_cells <- metadata[[metadata_id_field]] %!in% colnames(obj@mat)
-        if (any(missing_cells)) {
-            missing_cells <- paste(unique(metadata[[metadata_id_field]][missing_cells]), collapse = ", ")
-            cli_abort("The following {metadata_id_field}s are missing from {.field mat} colnames: {.val {missing_cells}}")
-        }
-    }
-
-    obj@metadata <- metadata
-
-    return(obj)
 }
 
 #' @export
@@ -254,6 +212,9 @@ print_atac_object <- function(object, object_type, column_type, md_column) {
     if (object_type == "McATAC") {
         cli_ul(c("{.code @egc}: a numeric matrix which contains normalized metacell accessibility."))
         cli_ul(c("{.code @fp}: a matrix showing for each peak (row) the relative enrichment of umis in log2 scale."))
+        if (has_rna(object)) {
+            cli_ul(c("{.code @rna_egc}: a numeric matrix which contains normalized RNA expression per gene (rows) per metacell (columns)."))
+        }
     }
     if (!is.null(object@metadata)) {
         cli_ul(c("{.code @metadata}: a tibble with a column called '{md_column}' and additional {column_type} annotations."))

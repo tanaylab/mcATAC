@@ -47,10 +47,16 @@ export_to_h5ad <- function(object, out_file, ...) {
     slots <- methods::slotNames(object)
     slots <- slots[slots %!in% c(
         "egc", "fp", "mat", "peaks", "genome", "metadata",
-        "ignore_peaks", "ignore_pmat"
+        "ignore_peaks", "ignore_pmat", "rna_egc"
     )]
     for (s in slots) {
         uns[[s]] <- slot(object, s)
+    }
+
+    if (has_rna(object)) {
+        uns[["rna_egc"]] <- object@rna_egc
+        uns[["rna_mcs"]] <- colnames(object@rna_egc)
+        uns[["rna_gene_names"]] <- rownames(object@rna_egc)
     }
 
     cli_ul("Creating an AnnData object")

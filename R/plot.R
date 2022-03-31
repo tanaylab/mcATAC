@@ -1,73 +1,133 @@
 #' Plot a scatter of gene expression vs an atac profile
 #'
 #' @param mc_atac a McATAC object
-#' @param mc_rna a \code{metacell1} 'mc' object or a \code{metacells} metacell UMI matrix
 #' @param gene name of the gene to plot
-#' @param peak name of the peak to plot. If NULL - the promoter of \code{gene} would be shown
-#' @param max_dist_to_promoter_peak how far from \code{gene}'s TSS to search for a promoter-proximal peak
-#' @param eps_q quantile of mean expression distribution to add as regularization when calculating log expression. Promoter ATAC signal has been observed empirically to often be linearly correlated with log of gene expression.
+#' @param atac_promoter name of the promoter to plot. By default this would be the rna gene \code{gene}.
+#' @param mc_rna a \code{metacell1} 'mc' object or a \code{metacells} metacell UMI matrix (a matrix where each row is a gene and each column is a metacell). Can be NULL if \code{mc_atac} already contains the gene expression data (added by \code{add_mc_rna}).
+#' @param peak name of the peak to plot. If NULL - the promoter of \code{atac_promoter} would be shown. You can get the peak names from \code{atac@peaks$peak_name}
+#' @param normalize_atac whether to use normalized atac profiles (default: TRUE)
+#' @param eps_rna added regularization when calculating log expression (Default: 1e-5). Promoter ATAC signal has been observed empirically to often be linearly correlated with log of gene expression.
+#' @param plot_object_id plot the object id of the \code{mc_atac} object in the bottom left corner of the plot (default: TRUE)
+#'
 #' @return a ggplot object with the scatter plot
 #'
 #' @examples
 #' \dontrun{
 #' p1 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4")
 #'
-#' ## Plot gene vs some peak of interest; here - expression of CD4 vs. promoter ATAC signal of CD8
-#' tss <- gintervals.load("intervs.global.tss")
-#' cd8_tss <- tss[which(tss$geneSymbol == "CD8")[[1]], ]
-#' peaks_near_cd8_tss <- misha::gintervals.neighbors(pbmc_atac_mc@peaks, cd8_tss, mindist = -2e+3, maxdist = 2e+3)
-#' nearest_peak <- peaks_near_cd8_tss[which.min(peaks_near_cd8_tss$dist), ]
-#' p2 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4", peak = nearest_peak[, "peak_name"])
+#' p2 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4", atac_promoter = "CD8")
+#'
+#' # Plot gene vs some peak of interest
+#' peak <- mc_atac@peaks[1]$peak_name
+#' p3 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4", peak = peak)
 #' }
+#'
+#' @inheritParams get_promoter_peaks
 #' @export
-plot_atac_rna <- function(mc_atac, mc_rna, gene, peak = NULL, max_dist_to_promoter_peak = 5e+2, eps_q = 0.05) {
+plot_atac_rna <- function(mc_atac, gene, atac_promoter = gene, mc_rna = NULL, peak = NULL, max_dist_to_promoter_peak = 5e+2, normalize_atac = TRUE, eps_rna = 1e-5, tss_intervals = "intervs.global.tss", plot_object_id = TRUE) {
+    assert_atac_object(mc_atac, class = "McATAC")
 
-    ### Placeholder for checking class of mc_rna
-    if (class(mc) == "tgMCCov") {
-        eps_rna <- quantile(Matrix::rowMeans(mc_rna@e_gc), 0.05)
-        rv <- log2(mc_rna@e_gc[gene, ] + eps_rna)
+    if (!has_rna(mc_atac) && is.null(mc_rna)) {
+        cli_abort("No gene expression data in the McATAC object. Use {.code add_mc_rna()} to add it or provide the {.field mc_rna} parameter.")
     }
-    # else if (mc_rna is a metacells metacell UMI matrix) {
-    #   eps_rna <- quantile(rowMeans(mc2_mc@UMI_mat), 0.05)
-    #   rv <- log2(mc2_mc@UMI_mat[gene, ] + eps_rna)
-    # }
-    # else {cli_abort('mc_rna is not a valid metacell1 or metacells metacell matrix')}
-    ### end placeholder
+
+    if (!is.null(mc_rna)) {
+        mc_atac <- add_mc_rna(mc_atac, mc_rna)
+    }
+
+    rv <- log2(mc_atac@rna_egc[gene, ] + eps_rna)
 
     if (is.null(peak)) {
-        tss <- gintervals.load("tss")
-        tss_gene <- tss[tss$geneSymbol == gene, c("chrom", "start", "end", "geneSymbol")]
-        if (nrow(tss_gene) == 0) {
-            cli_abort("Peak not supplied and gene TSS location not found")
+        peaks <- get_promoter_peaks(mc_atac@peaks, atac_promoter, max_dist_to_promoter_peak = max_dist_to_promoter_peak, tss_intervals = tss_intervals)
+
+        if (is.null(peak) && length(peaks) == 0) {
+            cli_abort("{.field peak} was not supplied and no relevant promoter peak was found for gene {.val {atac_promoter}}. Check if your ATAC matrix should have a peak for this gene's promoter.")
+        } else if (length(peaks) > 1) {
+            cli_alert("The gene {.val {atac_promoter}} has multiple ({.val {length(peaks)}}) peaks within {.val {max_dist_to_promoter_peak}} bp of its TSS. Summing the ATAC signal from all of them.")
         }
-        nei_peaks_tss <- gintervals.neighbors(tss_gene[, 1:3], as.data.frame(mc_atac@peaks),
-            mindist = -max_dist_to_promoter_peak,
-            maxdist = max_dist_to_promoter_peak
-        )
-        if (nrow(nei_peaks_tss) == 0) {
-            cli_abort("Peak not supplied and no relevant promoter peak found for gene. Check if your ATAC matrix should have a peak for this gene's promoter.")
-        }
-        prom_peak <- nei_peaks_tss[which.min(nei_peaks_tss$dist), 4:6]
-        if (length(unlist(stringr::str_split(rownames(mc_atac@mat_[[1]]), "-"))) == 3) {
-            peak <- paste0(unlist(prom_peak), collapse = "-")
+
+        if (length(peaks) > 1) {
+            peak_range <- misha.ext::convert_10x_peak_names_to_misha_intervals(peaks) %>%
+                summarise(chrom = chrom[1], start = min(start), end = max(end)) %>%
+                peak_names()
+            peak_str <- glue("{peak_range} ({length(peaks)} peaks)")
         } else {
-            peak <- paste0(prom_peak[[1]], ":", prom_peak[[2]], "-", prom_peak[[3]])
+            peak_str <- peaks
         }
-        av <- mc_atac@mat[peak, ]
     } else {
-        av <- mc_atac[peak, ]
+        if (peak %!in% mc_atac@peaks$peak_name) {
+            cli_abort("{.val {peak}} is not a peak in the McATAC object.")
+        }
+        peaks <- peak
+        peak_str <- peak
     }
 
-    if (any(grepl("color", colnames(mc_atac@metadata)))) {
-        clrs <- unique(mc_atac@metadata[, c("cell_type", "color")])
+    if (normalize_atac) {
+        av <- colSums(mc_atac@egc[peaks, , drop = FALSE])
+        ylab <- "ATAC (normalized)"
     } else {
-        clrs <- as.data.frame(list("cell_type" = "all_mc", "color" = "black"))
+        av <- colSums(mc_atac@mat[peaks, , drop = FALSE])
+        ylab <- "ATAC (not normalized)"
     }
-    df <- as.data.frame(list("atac" = av, "rna" = rv, "cell_type" = unlist(mc_atac@metadata[, "cell_type"])))
-    gg <- ggplot2::ggplot(df, aes(x = rna, y = atac, color = cell_type)) +
-        ggplot2::geom_point() +
-        labs(title = glue::glue("{gene} - ATAC of {peak} vs. RNA"), x = "log2 e_gc", y = "ATAC (not normalized)") +
-        scale_color_manual(values = setNames(unlist(clrs[, "color"]), unlist(clrs[, "cell_type"])))
+
+    # take only metacells which exist in both atac and rna
+    both_mcs <- intersect(names(av), names(rv))
+    av <- av[both_mcs]
+    rv <- rv[both_mcs]
+
+    cor_r2 <- cor.test(rv, av)$estimate
+
+    df <- tibble(
+        metacell = names(av),
+        atac = av,
+        rna = rv
+    )
+
+    if (all(has_name(mc_atac@metadata, c("cell_type", "color")))) {
+        df <- df %>%
+            left_join(mc_atac@metadata %>%
+                mutate(metacell = as.character(metacell)) %>%
+                select(metacell, cell_type, color), by = "metacell")
+        gg <- ggplot(df, aes(x = rna, y = atac, fill = cell_type)) +
+            geom_point(shape = 21) +
+            scale_fill_manual(name = "Cell type", values = get_cell_type_colors(mc_atac@metadata))
+    } else {
+        gg <- ggplot(df, aes(x = rna, y = atac)) +
+            geom_point()
+    }
+
+    if (!is.null(peak)) {
+        title <- gene
+        subtitle <- glue("ATAC of {peak_str} vs. RNA, R^2 = {round(cor_r2, digits=2)}")
+        caption <- ""
+    } else if (atac_promoter == gene) {
+        title <- gene
+        subtitle <- glue("ATAC of promoter vs. RNA, R^2 = {round(cor_r2, digits=2)}")
+        caption <- glue("Promoter: {peak_str}")
+    } else { # atac_promoter != gene and no peak was supplied
+        title <- glue("ATAC of {atac_promoter} promoter vs. {gene} RNA")
+        subtitle <- glue("R^2 = {round(cor_r2, digits=2)}")
+        caption <- glue("Promoter: {peak_str}")
+    }
+
+    if (plot_object_id) {
+        caption <- paste(caption, glue("object id: {mc_atac@id}"), sep = "\n")
+    }
+
+    gg <- gg +
+        labs(
+            title = title,
+            subtitle = subtitle,
+            x = "log2(gene expression)",
+            y = ylab,
+            caption = caption
+        ) +
+        theme(
+            plot.subtitle = ggtext::element_markdown(),
+            plot.caption = element_text(hjust = 0),
+            aspect.ratio = 1
+        )
+
     return(gg)
 }
 

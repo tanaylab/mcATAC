@@ -11,6 +11,9 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+devtools::load_all(export_all = FALSE)
+library(ggplot2)
+ggplot2::theme_set(ggplot2::theme_classic())
 ```
 
 # mcATAC
@@ -34,15 +37,42 @@ if (!dir.exists("pbmc_data")){
 ### Import ATAC dataset
 
 ```{r import}
-atac_sc <- import_from_10x("pbmc_data", genome = "hg38", id = "pbmc", description = "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
+atac_sc <- import_from_10x("pbmc_data", genome = "hg38", id = "PBMC", description = "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
+```
+
+```{r atac-sc}
 atac_sc
 ```
 
 ### Filter peaks by coverage and/or length
+
+Plot the length distribution:
+
+```{r plot-peak-len}
+plot_peak_length_distribution(atac_sc)
+```
+
+Plot the coverage distribution:
+
+```{r plot-peak-cov}
+plot_peak_coverage_distribution(atac_sc)
+```
+
+Filter: 
+
 ```{r filter-peaks}
 atac_sc <- filter_features(scatac = atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
 ```
 
+Identify outliers using coverage density: 
+
+```{r plot-peak-density}
+plot_peak_coverage_density(atac_sc) + geom_hline(yintercept = 250, linetype = "dashed", color = "red")
+```
+
+```{r filter-peaks-cov-density}
+atac_sc <- filter_features(atac_sc, max_peak_density = 250)
+```
 
 ### Project RNA metacells 
 
@@ -55,5 +85,28 @@ head(cell_to_metacell_pbmc_example)
 atac_mc <- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example)
 atac_mc
 ```
+
+```{r atac-mc}
+atac_mc
+```
+
+### Add metadata
+
+```{r add-metadata}
+data(mcmd)
+atac_mc <- add_mc_metadata(atac_mc, mcmd)
+```
+
+## Import RNA expression data 
+
+```{r add-rna}
+data(rna_mc_mat)
+atac_mc <- add_mc_rna(atac_mc, rna_mc_mat)
+```
+
+```{r atac-rna-scatter-1}
+plot_atac_rna(atac_mc, "GZMK")
+```
+
 
 See more at the [vignette](https://tanaylab.github.io/mcATAC/articles/mcATAC.html)

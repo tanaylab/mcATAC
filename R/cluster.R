@@ -7,7 +7,7 @@
 #' @param peak_set - (optional) a subset of peaks of \code{atac_mc@peaks} on which to cluster
 #'
 #' @inheritDotParams tglkmeans::TGL_kmeans
-#' @return a tglkmeans clustering object
+#' @return a named numeric vector specifying the cluster for each peak
 
 #' @examples
 #' \dontrun{

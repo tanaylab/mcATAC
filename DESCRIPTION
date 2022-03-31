@@ -31,6 +31,8 @@ Imports:
     tidyr,
     withr,
     magrittr,
+    ggtext,
+    scattermore
     grDevices
 Suggests: 
     testthat (>= 3.0.0),
