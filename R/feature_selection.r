@@ -58,43 +58,43 @@ filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NU
     peak_stats <- get_peak_coverage_stats(scatac, scale = 100)
 
     if (!is.null(min_peak_length)) {
-        too_short_peaks <- scatac@peaks$peak_name[peak_stats$len < min_peak_length]
-    } else {
-        too_short_peaks <- c()
+        too_short_peaks <- peak_stats$peak_name[peak_stats$len < min_peak_length]
+        if (length(too_short_peaks) > 0) {
+            peak_stats <- peak_stats %>%
+                filter(peak_name %!in% too_short_peaks)
+            cli::cli_li("{.val {length(too_short_peaks)}} features were shorter than {.field {min_peak_length}bp}")
+        }
     }
 
     if (!is.null(max_peak_length)) {
-        too_long_peaks <- scatac@peaks$peak_name[peak_stats$len > max_peak_length]
-    } else {
-        too_long_peaks <- c()
+        too_long_peaks <- peak_stats$peak_name[peak_stats$len > max_peak_length]
+        if (length(too_long_peaks) > 0) {
+            peak_stats <- peak_stats %>%
+                filter(peak_name %!in% too_long_peaks)
+            cli::cli_li("{.val {length(too_long_peaks)}} features were longer than {.field {max_peak_length}bp}")
+        }
     }
 
     if (!is.null(minimal_max_umi)) {
-        low_max_peaks <- scatac@peaks$peak_name[peak_stats$max_cov < minimal_max_umi]
-    } else {
-        low_max_peaks <- c()
+        low_max_peaks <- peak_stats$peak_name[peak_stats$max_cov < minimal_max_umi]
+        if (length(low_max_peaks) > 0) {
+            peak_stats <- peak_stats %>%
+                filter(peak_name %!in% low_max_peaks)
+            cli::cli_li("{.val {length(low_max_peaks)}} features had a maximal UMI count less than {.field {minimal_max_umi}}")
+        }
     }
 
     if (!is.null(max_peak_density)) {
-        too_dens_peaks <- scatac@peaks$peak_name[peak_stats$cov_density > max_peak_density]
-    } else {
-        too_dens_peaks <- c()
-    }
-
-    peaks_to_remove <- unique(c(low_max_peaks, too_short_peaks, too_long_peaks, too_dens_peaks))
-    if (length(peaks_to_remove) > 0) {
-        if (length(low_max_peaks) > 0) {
-            cli::cli_li("{.val {length(low_max_peaks)}} features had a maximal UMI count less than {.field {minimal_max_umi}}")
-        }
-        if (length(too_short_peaks) > 0) {
-            cli::cli_li("{.val {length(too_short_peaks)}} features were shorter than {.field {min_peak_length}bp}")
-        }
-        if (length(too_long_peaks) > 0) {
-            cli::cli_li("{.val {length(too_long_peaks)}} features were longer than {.field {max_peak_length}bp}")
-        }
+        too_dens_peaks <- peak_stats$peak_name[peak_stats$cov_density > max_peak_density]
         if (length(too_dens_peaks) > 0) {
+            peak_stats <- peak_stats %>%
+                filter(peak_name %!in% too_dens_peaks)
             cli::cli_li("{.val {length(too_dens_peaks)}} features had a peak density of more than {.field {max_peak_density}} UMIs per 100bp")
         }
+    }
+
+    peaks_to_remove <- setdiff(scatac@peaks$peak_name, peak_stats$peak_name)
+    if (length(peaks_to_remove) > 0) {
         scatac <- atac_ignore_peaks(scatac, peaks_to_remove)
     } else {
         cli_alert_warning("No peaks that violate the criteria were found. Returning original object")
@@ -201,6 +201,7 @@ plot_peak_max_cov_distribution <- function(atac) {
 #'
 #' @inheritParams get_peak_coverage_stats
 #' @inheritParams scattermore::geom_scattermore
+#' @inheritDotParams scattermore::geom_scattermore
 #'
 #' @examples
 #' \dontrun{
@@ -208,11 +209,11 @@ plot_peak_max_cov_distribution <- function(atac) {
 #' }
 #'
 #' @export
-plot_peak_coverage_density <- function(atac, scale = 100, pointsize = 1.5) {
+plot_peak_coverage_density <- function(atac, scale = 100, pointsize = 1.5, ...) {
     assert_atac_object(atac)
     gg <- get_peak_coverage_stats(atac, scale = scale) %>%
         ggplot(aes(x = len, y = cov_density)) +
-        scattermore::geom_scattermore(pointsize = 1.5) +
+        scattermore::geom_scattermore(pointsize = 1.5, ...) +
         scale_x_log10() +
         labs(
             x = "Read length (bp)",
