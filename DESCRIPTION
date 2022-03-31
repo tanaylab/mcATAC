@@ -22,15 +22,16 @@ Imports:
     misha.ext (>= 0.0.3),
     pheatmap,
     purrr,
-    rlang,
     randomNames,
+    rlang,
     sparseMatrixStats,
     tgstat,
     tgutil,
     tibble,
     tidyr,
     withr,
-    magrittr
+    magrittr,
+    grDevices
 Suggests: 
     testthat (>= 3.0.0),
     metacell,
