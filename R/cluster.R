@@ -91,7 +91,10 @@ gen_atac_mc_clust <- function(atac_mc, use_prior_annot = TRUE, k = NULL, peak_se
 subset_peaks <- function(atac_mc, peak_set) {
     assert_atac_object(atac_mc)
     pks_filt <- semi_join(atac_mc@peaks, peak_set, by = c("chrom", "start", "end", "peak_name"))
+    cli_alert_info("Subsetting {.var atac_mc} from {.val {nrow(atac_mc@peaks)}} peaks to {.val {nrow(pks_filt)}} peaks. Note: this does modify @ignore_pmat and @ignore_peaks.")
     atac_mc@peaks <- atac_mc@peaks[atac_mc@peaks$peak_name %in% pks_filt$peak_name, ]
     atac_mc@mat <- atac_mc@mat[rownames(atac_mc@mat) %in% pks_filt$peak_name, ]
+    atac_mc@fp <- atac_mc@fp[rownames(atac_mc@fp) %in% pks_filt$peak_name, ]
+    atac_mc@egc <- atac_mc@egc[rownames(atac_mc@egc) %in% pks_filt$peak_name, ]
     return(atac_mc)
 }
