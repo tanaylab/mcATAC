@@ -4,10 +4,12 @@
 \alias{peak_names}
 \title{Return the names of PeakIntervals}
 \usage{
-peak_names(peaks)
+peak_names(peaks, promoters = FALSE)
 }
 \arguments{
 \item{peaks}{a PeakIntervals object or misha intervals}
+
+\item{promoters}{are the peaks promoters? When true, the peak names (which are gene names) are returned.}
 }
 \value{
 the field called 'peak_name' if exists in \code{peaks}, or the coordinates seperated by an underscore.
