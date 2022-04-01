@@ -103,3 +103,5 @@ project_atac_on_mc_from_h5ad <- function(atac, h5ad_file, metadata = NULL, id = 
 
     return(project_atac_on_mc(atac, cell_to_metacell, metadata = metadata, id = id, description = description))
 }
+
+
