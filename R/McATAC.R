@@ -16,6 +16,7 @@ setOldClass("PeakIntervals")
 #' @slot genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
 #' @slot metadata data frame with a column called 'metacell' and additional metacell annotations for McATAC, or 'cell_id' and per-cell annotatoins for ScATAC. The constructor can also include or the name of a delimited file which contains such annotations.
 #' @slot path original path from which the object was loaded (optional)
+#' @slot promoters are the peaks promoters (optional). When peaks are promoters the peak name would be the gene name instead of coordinates.
 #'
 #' @exportClass ATAC
 ATAC <- setClass(
@@ -29,7 +30,8 @@ ATAC <- setClass(
         metadata = "data.frame_or_null",
         ignore_peaks = "PeakIntervals",
         ignore_pmat = "dgCMatrix",
-        path = "character"
+        path = "character",
+        promoters = "logical"
     ),
     contains = "VIRTUAL"
 )
@@ -68,6 +70,7 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, path, met
     obj@genome <- genome
     obj@ignore_peaks <- subset(peaks, subset = rep(FALSE, nrow(peaks)))
     obj@ignore_pmat <- methods::as(matrix(0, nrow = 0, ncol = ncol(obj@mat)), "dgCMatrix")
+    obj@promoters <- FALSE
     validate_atac_object(obj)
     return(obj)
 }
@@ -78,12 +81,12 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, path, met
 #'
 #' @noRd
 validate_atac_object <- function(obj) {
-    validate_atac_object_params(obj@mat, obj@peaks, obj@genome)
+    validate_atac_object_params(obj@mat, obj@peaks, obj@genome, obj@promoters)
 }
 
 
 
-validate_atac_object_params <- function(mat, peaks, genome) {
+validate_atac_object_params <- function(mat, peaks, genome, promoters = FALSE) {
     if (is.null(genome)) {
         cli_abort("{.field genome} is missing")
     }
@@ -105,7 +108,7 @@ validate_atac_object_params <- function(mat, peaks, genome) {
     }
 
     # make sure the matrix rownames are the peak names
-    if (any(rownames(mat) != peak_names(peaks))) {
+    if (any(rownames(mat) != peak_names(peaks, promoters))) {
         cli_abort("rownames of the matrix are not the same as the peak names.")
     }
 }
@@ -165,7 +168,7 @@ setMethod(
         .Object@egc <- calc_mc_egc(.Object, mc_size_eps_q)
         .Object@fp <- calc_mc_fp(.Object)
         .Object@mc_size_eps_q <- mc_size_eps_q
-        .Object@rna_egc <- matrix(0, nrow = 0, ncol = ncol(.Object@mat), dimnames = list(NULL, colnames(.Object@mat)))        
+        .Object@rna_egc <- matrix(0, nrow = 0, ncol = ncol(.Object@mat), dimnames = list(NULL, colnames(.Object@mat)))
         .Object@cell_to_metacell <- cell_to_metacell
         return(.Object)
     }
@@ -206,7 +209,10 @@ print_atac_object <- function(object, object_type, column_type, md_column) {
         cli::cli_text(c("description: {.val {object@description}}"))
     }
     if (object@path != "") {
-        cli::cli_text(c("loaded from: {.file {object@path}}"))
+        cli::cli_text(c("Loaded from: {.file {object@path}}"))
+    }
+    if (object@promoters) {
+        cli::cli_text(c("A promoter object (peaks are on promoters)"))
     }
     cli::cli_text("Slots include:")
     cli_ul(c("{.code @mat}: a numeric matrix where rows are peaks and columns are {column_type}s. Can be a sparse matrix."))
