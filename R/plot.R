@@ -200,6 +200,7 @@ plot_atac_rna_cor <- function(mc_atac, rna_mat) {
 #' @param peak_annotation (optional) a list of a named vector and a dataframe conforming to the pheatmap \code{annotation_colors} and \code{annotation_row} conventions
 #' @param filename (optional) path and filename of where to save the figure; if unspecified, figure isn't saved
 #' @param dev (optional; default - png) graphical device to save figure with
+#' @param clrs (optional) colorRampPalette vector of colors for scaling colors in heatmap
 #'
 #' @inheritDotParams save_pheatmap
 #'
@@ -217,19 +218,26 @@ plot_atac_rna_cor <- function(mc_atac, rna_mat) {
 #' plot_atac_peak_map(my_mcatac, mc_atac_clust = order(my_mcatac@metadata$cell_type), peak_annotation = pa)
 #' }
 #' @export
-plot_atac_peak_map <- function(mc_atac, mc_atac_clust, peak_clust,
-                               peak_annotation = NULL,
-                               filename = NULL,
-                               dev = png,
-                               main = mc_atac@id,
+plot_atac_peak_map <- function(mc_atac, mc_atac_clust = NULL, peak_clust = NULL,
+                               peak_annotation = NULL, filename = NULL,
+                               dev = png, main = mc_atac@id,
                                clrs = colorRampPalette(c("blue4", "white", "red4"))(100),
                                ...) {
     if (is.null(mc_atac_clust)) {
-        cli_abort("Must specify clustering of metacells (e.g. using {.code gen_atac_mc_clust})")
+        if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
+            mc_atac_clust <- deframe(mc_atac@metadata[,c("metacell", "cell_type")], name = 'metacell', value = 'cell_type')
+        }
+        else {
+            hc <- hclust(tgs_dist(t(mc_atac@fp)))
+            mc_atac_clust <- match(as.numeric(hc$labels), hc$order)
+        }
     }
     if (is.null(peak_clust)) {
-        cli_abort("Must specify clustering of peaks (e.g. using {.code gen_atac_peak_clust})")
+        cli_alert_info('No peak clustering specified. Generating peak clusters, which may take up to a minute for ~1e+5 peaks.')
+        peak_clust <- gen_atac_peak_clust(mc_atac, clustering_algoritm = 'louvain')
     }
+    mc_atac_clust <- order(mc_atac_clust)
+    peak_clust <- order(peak_clust)
     annotation_row <- NULL
     if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
         col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")

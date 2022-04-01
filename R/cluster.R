@@ -3,6 +3,7 @@
 #'
 #' @param atac_mc a McATAC object
 #' @param k number of clusters
+#' @param clustering_algoritm (optional) either "kmeans" or "louvain"
 #' @param cluster_on (optional; default - fp) which matrix (\code{mat}/\code{fp}/\code{egc})to cluster on
 #' @param peak_set - (optional) a subset of peaks of \code{atac_mc@peaks} on which to cluster
 #'
@@ -18,7 +19,8 @@
 #' }
 #'
 #' @export
-gen_atac_peak_clust <- function(atac_mc, k, cluster_on = "fp", peak_set = NULL, ...) {
+gen_atac_peak_clust <- function(atac_mc, k, clustering_algoritm = "kmeans", cluster_on = "fp", peak_set = NULL, ...) {
+    louvain_k <- 5
     if (cluster_on %!in% c("fp", "mat", "egc")) {
         cli_abort("{.var cluster_on} must be either 'fp', 'mat' or 'egc'")
     }
@@ -26,8 +28,23 @@ gen_atac_peak_clust <- function(atac_mc, k, cluster_on = "fp", peak_set = NULL, 
     if (!is.null(peak_set)) {
         atac_mc <- subset_peaks(atac_mc, peak_set)
     }
-    atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(slot(atac_mc, cluster_on)), k, id_column = FALSE, ...)
-    return(setNames(atac_peak_km$cluster, rownames(atac_mc@mat)))
+    if (clustering_algoritm == "kmeans" && is.null(k)) {
+        cli_abort("Specify {.var k} when clustering with kmeans")
+    }
+    if (clustering_algoritm == "louvain") {
+        if (is.null(k)) {k <- louvain_k}
+        else {
+            mca_knn = tgs_cor_knn(x = t(atac_mc@fp), y = t(atac_mc@fp), knn = k, spearman = T)
+            gknn <- igraph::graph_from_data_frame(mca_knn[,c('col1', 'col2')], directed = F)
+            louv_cl <- igraph::cluster_louvain(graph = gknn)
+            atac_peak_cl <- setNames(louv_cl$membership, rownames(atac_mc@mat))
+        }
+    }
+    else {
+        atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(slot(atac_mc, cluster_on)), k, id_column = FALSE, ...)
+        atac_peak_cl <- setNames(atac_peak_km$cluster, rownames(atac_mc@mat))
+    }
+    return(atac_peak_cl)
 }
 
 #' Cluster metacells based on atac profiles using the k-means algorithm
