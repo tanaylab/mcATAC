@@ -262,21 +262,6 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust, peak_clust,
     }
     annotation_row <- NULL
     mc_annot <- generate_mc_annotation(mc_atac)
-    if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
-        col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")
-        ann_colors <- list("cell_type" = setNames(unlist(mc_atac@metadata[, "color"]), unlist(mc_atac@metadata[, "cell_type"])))
-    } else {
-        cts <- unique(mc_atac_clust)
-        color_key <- enframe(setNames(chameleon::distinct_colors(length(cts)), cts), name = "cell_type", value = "color")
-        col_annot <- enframe(setNames(
-            as.numeric(names(mc_atac_clust)),
-            color_key$color[match(mc_atac_clust, color_key$cell_type)]
-        ),
-        name = "metacell", value = "cell_type"
-        )
-        col_annot <- tibble::column_to_rownames(col_annot, "metacell")
-        ann_colors <- list("cell_type" = deframe(color_key))
-    }
     col_annot <- mc_annot[[1]]
     ann_colors <- mc_annot[[2]]
     mca_lfc <- mc_atac@fp
