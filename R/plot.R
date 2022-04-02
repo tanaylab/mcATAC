@@ -184,32 +184,53 @@ plot_atac_atac_cor <- function(mc_atac, sp_f = TRUE) {
 #'
 #' @param mc_atac McATAC object
 #' @param rna_mat an RNA metacell count matrix, where metacells are in columns and genes are in rows
-#' @param gene_field either \code{closest_tss} or \code{closest_exon_gene} -- field names in \code{mc_atac@peaks} which contain gene names. If NULL - the peaks would be
-#' @param tss_dist (optional) maximal absolute distance to a TSS to be considered a promoter peak
+#' @param gene_field (optional) either \code{closest_tss} or \code{closest_exon_gene} -- field names in \code{mc_atac@peaks} which contain gene names. If NULL - the peaks would be
 #' transformed to promoter peaks and the gene names would be taken from the promoter gene names.
+#' @param tss_dist (optional) maximal absolute distance to a TSS to be considered a promoter peak
 #'
+
+#' @examples
+#' \dontrun{
+#' # Plot correlation of ATAC promoter peaks vs. log2 gene expression fraction (regularized)
+#' arc_prom <- plot_atac_rna_cor(mc_atac = mc_atac, rna_mat = log2(mc@e_gc + 1e-05))
+#'
+#' # Plot correlation of all available ATAC peaks (whose nearest TSS is of an expressed gene) vs. log2 gene expression fraction (regularized) of that gene
+#' arc_tss <- plot_atac_rna_cor(mc_atac = mc_atac, rna_mat = log2(mc@e_gc + 1e-05), gene_field = 'closest_tss')
+#'
+#' # Plot correlation of all available ATAC peaks (whose nearest exon is of an expressed gene) vs. log2 gene expression fraction (regularized) of that gene
+#' arc_exon <- plot_atac_rna_cor(mc_atac = mc_atac, rna_mat = log2(mc@e_gc + 1e-05), gene_field = 'closest_exon_gene')
+#' }
 #' @export
-plot_atac_rna_cor <- function(mc_atac, rna_mat, gene_field, tss_dist = 5e+2) {
-    if (has_name(mc_atac@peaks, gene_field)) {
+plot_atac_rna_cor <- function(mc_atac, rna_mat, gene_field = NULL, tss_dist = 5e+2) {
+    if (!is.null(gene_field) && has_name(mc_atac@peaks, gene_field)) {
         gb <- intersect(unique(unlist(mc_atac@peaks[,gene_field])), rownames(rna_mat))
-        non_na_inds <- which(!is.na(unlist(mc_atac@peaks[,gene_field])))
+        ulgf <- unlist(mc_atac@peaks[,gene_field])
+        non_na_inds <- which(!is.na(ulgf) & ulgf %in% gb)
         genes_of_peaks <- unlist(mc_atac@peaks[non_na_inds,gene_field])
-        atac_mat <- mc_atac@mat[non_na_inds,]
+        atac_mat <- mc_atac@egc[non_na_inds,]
     }
     else {
-        nei_peak_prom <- gintervals.neighbors(intervals, tss, mindist = -tss_dist, maxdist = tss_dist)
+        tss <- gintervals.load('intervs.global.tss')
+        nei_peak_prom <- gintervals.neighbors(as.data.frame(mc_atac@peaks), tss, mindist = -tss_dist, maxdist = tss_dist)
         prom_peaks_genes <- nei_peak_prom[,c('peak_name', 'geneSymbol', 'dist')]
         min_inds <- sapply(unique(prom_peaks_genes$geneSymbol), function(u) {
             inds <- which(prom_peaks_genes$geneSymbol == u)
-            return(inds[which.min(prom_peaks_genes$dist)])
+            res <- inds[which.min(prom_peaks_genes$dist[inds])]
+            return(res)
         })
-        atac_mat <- atac_mat[prom_peaks_genes$peak_name[min_inds],]
+        atac_mat <- mc_atac@egc[prom_peaks_genes$peak_name[min_inds],]
         genes_of_peaks <- prom_peaks_genes$geneSymbol[min_inds]
         gb <- intersect(genes_of_peaks, rownames(rna_mat))
+        gp_in <- genes_of_peaks %in% gb
+        atac_mat <- atac_mat[gp_in,]
+        genes_of_peaks <- genes_of_peaks[gp_in]
     }
-    gb <- gb[order(match(gb, rownames(rna_mat)))]
-    atac_mat_ord <- atac_mat[order(match(genes_of_peaks, gb)),]
-    rna_mat_ord <- rna_mat[match(genes_of_peaks, gb),]
+    atac_mat_ord <- atac_mat
+    print(head(atac_mat_ord[,1:6]))
+    rownames(atac_mat_ord) <- genes_of_peaks
+    rna_match <- match(genes_of_peaks, rownames(rna_mat))
+    rna_mat_ord <- rna_mat[rna_match,]
+    print(head(rna_mat_ord[,1:6]))
     atac_rna_cor <- tgs_cor(atac_mat_ord, rna_mat_ord, spearman = T)
     if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
         col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")
@@ -217,9 +238,18 @@ plot_atac_rna_cor <- function(mc_atac, rna_mat, gene_field, tss_dist = 5e+2) {
     }
     else {
         cli_alert_info('No metacell annotation detected. Clustering metacells.')
-
+        mc_annot <- generate_mc_annotation(mc_atac = mc_atac)
+        col_annot <- mc_annot[[1]]
+        ann_colors <- mc_annot[[2]]
     }
-    return(atac_rna_cor)
+    p <- pheatmap::pheatmap(atac_rna_cor,
+        cluster_rows = TRUE, cluster_cols = TRUE,
+        show_rownames = TRUE, show_colnames = TRUE,
+        annotation_col = col_annot, 
+        annotation_row = col_annot,
+        annotation_colors = ann_colors, silent = FALSE
+    )
+    return(p)
 }
 
 #' Plot normalized accessibility of peaks over metacells, ordered by clustering
