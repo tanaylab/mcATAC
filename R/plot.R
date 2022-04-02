@@ -184,12 +184,42 @@ plot_atac_atac_cor <- function(mc_atac, sp_f = TRUE) {
 #'
 #' @param mc_atac McATAC object
 #' @param rna_mat an RNA metacell count matrix, where metacells are in columns and genes are in rows
-#' @param gene_field name of a field in \code{mc_atac@peaks} which contains the gene names. If NULL - the peaks would be
+#' @param gene_field either \code{closest_tss} or \code{closest_exon_gene} -- field names in \code{mc_atac@peaks} which contain gene names. If NULL - the peaks would be
+#' @param tss_dist (optional) maximal absolute distance to a TSS to be considered a promoter peak
 #' transformed to promoter peaks and the gene names would be taken from the promoter gene names.
 #'
 #' @export
-plot_atac_rna_cor <- function(mc_atac, rna_mat) {
+plot_atac_rna_cor <- function(mc_atac, rna_mat, gene_field, tss_dist = 5e+2) {
+    if (has_name(mc_atac@peaks, gene_field)) {
+        gb <- intersect(unique(unlist(mc_atac@peaks[,gene_field])), rownames(rna_mat))
+        non_na_inds <- which(!is.na(unlist(mc_atac@peaks[,gene_field])))
+        genes_of_peaks <- unlist(mc_atac@peaks[non_na_inds,gene_field])
+        atac_mat <- mc_atac@mat[non_na_inds,]
+    }
+    else {
+        nei_peak_prom <- gintervals.neighbors(intervals, tss, mindist = -tss_dist, maxdist = tss_dist)
+        prom_peaks_genes <- nei_peak_prom[,c('peak_name', 'geneSymbol', 'dist')]
+        min_inds <- sapply(unique(prom_peaks_genes$geneSymbol), function(u) {
+            inds <- which(prom_peaks_genes$geneSymbol == u)
+            return(inds[which.min(prom_peaks_genes$dist)])
+        })
+        atac_mat <- atac_mat[prom_peaks_genes$peak_name[min_inds],]
+        genes_of_peaks <- prom_peaks_genes$geneSymbol[min_inds]
+        gb <- intersect(genes_of_peaks, rownames(rna_mat))
+    }
+    gb <- gb[order(match(gb, rownames(rna_mat)))]
+    atac_mat_ord <- atac_mat[order(match(genes_of_peaks, gb)),]
+    rna_mat_ord <- rna_mat[match(genes_of_peaks, gb),]
+    atac_rna_cor <- tgs_cor(atac_mat_ord, rna_mat_ord, spearman = T)
+    if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
+        col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")
+        ann_colors <- list("cell_type" = setNames(unlist(mc_atac@metadata[, "color"]), unlist(mc_atac@metadata[, "cell_type"])))
+    }
+    else {
+        cli_alert_info('No metacell annotation detected. Clustering metacells.')
 
+    }
+    return(atac_rna_cor)
 }
 
 #' Plot normalized accessibility of peaks over metacells, ordered by clustering
@@ -231,6 +261,7 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust, peak_clust,
         cli_abort("Must specify clustering of peaks (e.g. using {.code gen_atac_peak_clust})")
     }
     annotation_row <- NULL
+    mc_annot <- generate_mc_annotation(mc_atac)
     if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
         col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")
         ann_colors <- list("cell_type" = setNames(unlist(mc_atac@metadata[, "color"]), unlist(mc_atac@metadata[, "cell_type"])))
@@ -246,7 +277,8 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust, peak_clust,
         col_annot <- tibble::column_to_rownames(col_annot, "metacell")
         ann_colors <- list("cell_type" = deframe(color_key))
     }
-
+    col_annot <- mc_annot[[1]]
+    ann_colors <- mc_annot[[2]]
     mca_lfc <- mc_atac@fp
     brks <- c(
         seq(min(mca_lfc), 0, l = 50),

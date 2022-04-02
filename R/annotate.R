@@ -69,12 +69,10 @@ annotate_intervals <- function(intervals, genome,
     cli_alert_info("Finding peaks in introns...")
     gene_body_df <- get_gene_body_df(tss, exons)
     nei_peak_gb <- gintervals.neighbors(intervals, gene_body_df, maxdist = 0, mindist = 0)
-
-    nei_peak_prom_all <- gintervals.neighbors(intervals, tss, mindist = -max_distal, maxdist = max_distal)
-    closest_tss <- deframe(nei_peak_prom_all[, c("peak_name", "geneSymbol")])
-    closest_tss[!(intervals$peak_name %in% names(closest_tss))] <- NA
-    closest_tss <- closest_tss[order(match(names(closest_tss), intervals$peak_name))]
-
+    cli_alert_info("Finding nearest TSS...")
+    closest_tss <- get_nearest_feature_instance(intervals = intervals, feature_set = tss, maxdist = max_distal)
+    cli_alert_info("Finding nearest exon...")
+    closest_exon_gene <- get_nearest_feature_instance(intervals = intervals, feature_set = exons, maxdist = max_distal)
     prom_peaks <- nei_peak_prom$peak_name
     exon_peaks <- nei_peak_exon$peak_name[!(nei_peak_exon$peak_name %in% prom_peaks)]
     intron_peaks <- nei_peak_gb$peak_name[!(nei_peak_gb$peak_name %in% union(exon_peaks, prom_peaks))]
@@ -114,7 +112,8 @@ annotate_intervals <- function(intervals, genome,
         select(any_of(orig_fields)) %>%
         mutate(
             peak_annot = res[order(match(names(res), intervals$peak_name))],
-            closest_tss = closest_tss
+            closest_tss = closest_tss,
+            closest_exon_gene = closest_exon_gene
         )
     return(intervals)
 }
@@ -147,4 +146,21 @@ get_gene_body_df <- function(tss, exons) {
     gene_body_df[, 2:4] <- apply(gene_body_df[, 2:4], 2, as.numeric)
     gene_body_df <- gene_body_df[with(gene_body_df, order(chrom, start)), ]
     return(gene_body_df)
+}
+
+#' Generate dataframe of approximate gene bodies (edges of first and last exons) - backend function
+#'
+#' @param intervals query interval set
+#' @param feature_set reference feature set to query
+#' @param maxdist (optional) maximal absolute distance to search for feature
+#'
+#' @return gene_body_df a misha intervals set approximating starts and ends of genes
+#'
+#' @noRd
+get_nearest_feature_instance <- function(intervals, feature_set, maxdist = 1e+6) {
+    nei_peak_feat <- gintervals.neighbors(intervals, feature_set, mindist = -maxdist, maxdist = maxdist)
+    closest_feat <- deframe(nei_peak_feat[, c("peak_name", "geneSymbol")])
+    closest_feat[intervals$peak_name[!(intervals$peak_name %in% names(closest_feat))]] <- NA
+    closest_feat <- closest_feat[order(match(names(closest_feat), intervals$peak_name))]
+    return(closest_feat)
 }
