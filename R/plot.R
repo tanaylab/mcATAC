@@ -189,7 +189,9 @@ plot_atac_atac_cor <- function(mc_atac, sp_f = TRUE) {
 #'
 #' @export
 plot_atac_rna_cor <- function(mc_atac, rna_mat) {
+    if (has_name(mc_atac@peaks, gene_field)) {
 
+    }
 }
 
 #' Plot normalized accessibility of peaks over metacells, ordered by clustering
@@ -225,36 +227,23 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust = NULL, peak_clust = NULL,
                                ...) {
     if (is.null(mc_atac_clust)) {
         if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
-            mc_atac_clust <- deframe(mc_atac@metadata[,c("metacell", "cell_type")], name = 'metacell', value = 'cell_type')
+            mc_atac_clust <- deframe(mc_atac@metadata[,c("metacell", "cell_type")])
         }
         else {
             hc <- hclust(tgs_dist(t(mc_atac@fp)))
             mc_atac_clust <- match(as.numeric(hc$labels), hc$order)
         }
     }
-    if (is.null(peak_clust)) {
-        cli_alert_info('No peak clustering specified. Generating peak clusters, which may take up to a minute for ~1e+5 peaks.')
-        peak_clust <- gen_atac_peak_clust(mc_atac, clustering_algoritm = 'louvain')
-    }
-    mc_atac_clust <- order(mc_atac_clust)
-    peak_clust <- order(peak_clust)
-    annotation_row <- NULL
+    lmcoefs <- setNames(c(15.9252182670872,0.00089588822113778), c("(Intercept)", "x"))
+    row_annot <- NULL
     if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
         col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")
         ann_colors <- list("cell_type" = setNames(unlist(mc_atac@metadata[, "color"]), unlist(mc_atac@metadata[, "cell_type"])))
     } else {
-        cts <- unique(mc_atac_clust)
-        color_key <- enframe(setNames(chameleon::distinct_colors(length(cts)), cts), name = "cell_type", value = "color")
-        col_annot <- enframe(setNames(
-            as.numeric(names(mc_atac_clust)),
-            color_key$color[match(mc_atac_clust, color_key$cell_type)]
-        ),
-        name = "metacell", value = "cell_type"
-        )
-        col_annot <- tibble::column_to_rownames(col_annot, "metacell")
-        ann_colors <- list("cell_type" = deframe(color_key))
+        mc_annot <- generate_pheatmap_annotation(mc_atac_clust, feature_type = 'metacell', feature_annotation = 'cluster')
+        col_annot <- mc_annot[[1]]
+        ann_colors <- mc_annot[[2]]
     }
-
     mca_lfc <- mc_atac@fp
     brks <- c(
         seq(min(mca_lfc), 0, l = 50),
@@ -268,17 +257,28 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust = NULL, peak_clust = NULL,
         if (!class(peak_annotation[[2]][, 1]) %in% c("numeric", "character")) {
             cli_abort("Peak annotation column in peak annotation dataframe must be of a numeric or character class")
         }
-        annotation_row <- peak_annotation[[2]]
+        row_annot <- peak_annotation[[2]]
         ann_colors[names(peak_annotation[[1]])] <- peak_annotation[[1]]
     }
+    else {
+        if (is.null(peak_clust)) {
+            cli_alert_info('No peak clustering specified. Generating peak clusters.')
+            peak_clust <- gen_atac_peak_clust(mc_atac, clustering_algoritm = 'louvain')
+        }
+        peak_annot <- generate_pheatmap_annotation(peak_clust, feature_type = 'peak', feature_annotation = 'cluster')
+        row_annot <- peak_annot[[1]]
+        ann_colors[names(peak_annot[[1]])] <- peak_annot[[2]]
+    }
+    mc_atac_clust <- order(mc_atac_clust)
+    peak_clust <- order(peak_clust)
+    cli_alert_info("Expected time to plot is roughly {.val {round(lmcoefs[[1]] + length(peak_clust)*lmcoefs[[2]], 0)}}s")
     pp <- pheatmap::pheatmap(mca_lfc[peak_clust, mc_atac_clust],
         annotation_col = subset(col_annot, select = cell_type),
         annotation_legend = FALSE,
         annotation_colors = ann_colors,
-        annotation_row = annotation_row, main = main,
+        annotation_row = row_annot, main = main,
         color = clrs, breaks = brks, cluster_cols = FALSE, cluster_rows = FALSE, show_colnames = FALSE, show_rownames = FALSE
     )
-
     if (!is.null(filename)) {
         save_pheatmap(pp, filename = filename, dev = dev, ...)
     }

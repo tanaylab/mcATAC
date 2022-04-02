@@ -2,7 +2,7 @@
 #' Cluster atac peaks based on atac distributions
 #'
 #' @param atac_mc a McATAC object
-#' @param k number of clusters
+#' @param k number of clusters; must be specified if \code{clustering_algoritm == 'kmeans'}
 #' @param clustering_algoritm (optional) either "kmeans" or "louvain"
 #' @param cluster_on (optional; default - fp) which matrix (\code{mat}/\code{fp}/\code{egc})to cluster on
 #' @param peak_set - (optional) a subset of peaks of \code{atac_mc@peaks} on which to cluster
@@ -19,7 +19,7 @@
 #' }
 #'
 #' @export
-gen_atac_peak_clust <- function(atac_mc, k, clustering_algoritm = "kmeans", cluster_on = "fp", peak_set = NULL, ...) {
+gen_atac_peak_clust <- function(atac_mc, k = NULL, clustering_algoritm = "kmeans", cluster_on = "fp", peak_set = NULL, ...) {
     louvain_k <- 5
     if (cluster_on %!in% c("fp", "mat", "egc")) {
         cli_abort("{.var cluster_on} must be either 'fp', 'mat' or 'egc'")
@@ -33,12 +33,11 @@ gen_atac_peak_clust <- function(atac_mc, k, clustering_algoritm = "kmeans", clus
     }
     if (clustering_algoritm == "louvain") {
         if (is.null(k)) {k <- louvain_k}
-        else {
-            mca_knn = tgs_cor_knn(x = t(atac_mc@fp), y = t(atac_mc@fp), knn = k, spearman = T)
-            gknn <- igraph::graph_from_data_frame(mca_knn[,c('col1', 'col2')], directed = F)
-            louv_cl <- igraph::cluster_louvain(graph = gknn)
-            atac_peak_cl <- setNames(louv_cl$membership, rownames(atac_mc@mat))
-        }
+        mca_knn = tgs_cor_knn(x = t(atac_mc@fp), y = t(atac_mc@fp), knn = k, spearman = T)
+        gknn <- igraph::graph_from_data_frame(mca_knn[,c('col1', 'col2')], directed = F)
+        louv_cl <- igraph::cluster_louvain(graph = gknn)
+        print('hello')
+        atac_peak_cl <- setNames(louv_cl$membership, rownames(atac_mc@mat))
     }
     else {
         atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(slot(atac_mc, cluster_on)), k, id_column = FALSE, ...)
