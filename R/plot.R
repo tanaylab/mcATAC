@@ -99,7 +99,7 @@ plot_atac_rna <- function(mc_atac, gene, atac_promoter = gene, mc_rna = NULL, pe
     if (!is.null(peak)) {
         title <- gene
         subtitle <- glue("ATAC of {peak_str} vs. RNA, R^2 = {round(cor_r2, digits=2)}")
-        caption <- ""
+        caption <- ggplot2::waiver()
     } else if (atac_promoter == gene) {
         title <- gene
         subtitle <- glue("ATAC of promoter vs. RNA, R^2 = {round(cor_r2, digits=2)}")
