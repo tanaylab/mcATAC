@@ -61,7 +61,7 @@ export_to_h5ad <- function(object, out_file, ...) {
         uns[["rna_gene_names"]] <- rownames(object@rna_egc)
     }
 
-    cli_ul("Creating an AnnData object")
+    cli_li("Creating an AnnData object")
     adata <- anndata::AnnData(
         X = mat,
         var = peaks,
@@ -69,7 +69,7 @@ export_to_h5ad <- function(object, out_file, ...) {
         uns = uns
     )
 
-    cli_ul("Writing to file")
+    cli_li("Writing to file")
     anndata::write_h5ad(
         adata,
         out_file,
@@ -104,7 +104,7 @@ export_atac_clust_ucsc <- function(mc_atac, track_prefix, output_dir = getwd(), 
         return(fn)
     })
     cli_alert_success("Successfully exported to ucsc. Files generated:")
-    purrr::walk(fns, cli_ul)
+    purrr::walk(fns, cli_li)
 }
 
 

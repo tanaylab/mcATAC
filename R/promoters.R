@@ -100,4 +100,3 @@ calc_prom_rna_cor <- function(atac_mc, rm_zeros = TRUE, match_genes = FALSE, spe
 
     return(cm)
 }
-
