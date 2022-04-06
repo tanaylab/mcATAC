@@ -25,7 +25,7 @@
 #' @export
 import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, description = NULL) {
     check_files_exist(file)
-    cli_ul("Reading {.file {file}}")
+    cli_li("Reading {.file {file}}")
     adata <- anndata::read_h5ad(file)
 
     mat <- t(adata$X)
@@ -138,11 +138,11 @@ import_from_10x <- function(dir, genome, id = NULL, description = NULL, metadata
     }
     check_files_exist(c(matrix_fn, cells_fn, features_fn))
 
-    cli_ul("Importing matrix")
+    cli_li("Importing matrix")
     mat <- tgutil::fread_mm(matrix_fn, row.names = features_fn, col.names = cells_fn)
     cli_alert_info("Imported a matrix of {.val {ncol(mat)}} cells and {.val {nrow(mat)}} features")
 
-    cli_ul("Importing features")
+    cli_li("Importing features")
     features <- tgutil::fread(features_fn, col.names = c("name", "name2", "type", "chrom", "start", "end")) %>%
         as_tibble()
     stopifnot(all(features$name == rownames(mat)))

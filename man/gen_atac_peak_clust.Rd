@@ -9,22 +9,17 @@ gen_atac_peak_clust(
   k = NULL,
   clustering_algoritm = "kmeans",
   cluster_on = "fp",
-  peak_set = NULL,
   ...
 )
 }
 \arguments{
 \item{atac_mc}{a McATAC object}
 
-\item{k}{number of clusters; must be specified if \code{clustering_algoritm == 'kmeans'}}
+\item{k}{number of clusters; must be specified if \code{clustering_algoritm = 'kmeans'}}
 
 \item{clustering_algoritm}{(optional) either "kmeans" or "louvain"}
 
 \item{cluster_on}{(optional; default - fp) which matrix (\code{mat}/\code{fp}/\code{egc})to cluster on}
-
-\item{peak_set}{\itemize{
-\item (optional) a subset of peaks of \code{atac_mc@peaks} on which to cluster
-}}
 
 \item{...}{
   Arguments passed on to \code{\link[tglkmeans:TGL_kmeans]{tglkmeans::TGL_kmeans}}

@@ -2,10 +2,9 @@
 #' Cluster atac peaks based on atac distributions
 #'
 #' @param atac_mc a McATAC object
-#' @param k number of clusters; must be specified if \code{clustering_algoritm == 'kmeans'}
+#' @param k number of clusters; must be specified if \code{clustering_algoritm = 'kmeans'}
 #' @param clustering_algoritm (optional) either "kmeans" or "louvain"
 #' @param cluster_on (optional; default - fp) which matrix (\code{mat}/\code{fp}/\code{egc})to cluster on
-#' @param peak_set - (optional) a subset of peaks of \code{atac_mc@peaks} on which to cluster
 #'
 #' @inheritDotParams tglkmeans::TGL_kmeans
 #' @return a named numeric vector specifying the cluster for each peak
@@ -19,19 +18,17 @@
 #' }
 #'
 #' @export
-gen_atac_peak_clust <- function(atac_mc, k = NULL, clustering_algoritm = "kmeans", cluster_on = "fp", peak_set = NULL, ...) {
+gen_atac_peak_clust <- function(atac_mc, k = NULL, clustering_algoritm = "kmeans", cluster_on = "fp", ...) {
     louvain_k <- 5
     if (cluster_on %!in% c("fp", "mat", "egc")) {
         cli_abort("{.var cluster_on} must be either 'fp', 'mat' or 'egc'")
     }
     assert_atac_object(atac_mc)
-    if (!is.null(peak_set)) {
-        atac_mc <- subset_peaks(atac_mc, peak_set)
-    }
     if (clustering_algoritm == "kmeans" && is.null(k)) {
         cli_abort("Specify {.var k} when clustering with kmeans")
     }
     if (clustering_algoritm == "louvain") {
+        cli_li("Clustering using {.val louvain}")
         if (is.null(k)) {
             k <- louvain_k
         }
@@ -40,6 +37,7 @@ gen_atac_peak_clust <- function(atac_mc, k = NULL, clustering_algoritm = "kmeans
         louv_cl <- igraph::cluster_louvain(graph = gknn)
         atac_peak_cl <- setNames(louv_cl$membership, rownames(atac_mc@mat))
     } else {
+        cli_li("Clustering using {.val kmeans++}. k = {.val {k}}")
         atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(slot(atac_mc, cluster_on)), k, id_column = FALSE, ...)
         atac_peak_cl <- setNames(atac_peak_km$cluster, rownames(atac_mc@mat))
     }
@@ -51,7 +49,6 @@ gen_atac_peak_clust <- function(atac_mc, k = NULL, clustering_algoritm = "kmeans
 #' @param atac_mc - an McATAC object
 #' @param use_prior_annot (optional) when TRUE - use the metacell annotation to generate metacell clusters. Clusters would be generated based on a categorical field \code{annot} from the \code{metadata} slot in the McATAC object.
 #' @param k - (optional, when \code{use_prior_annot == F}) number of clusters to generate
-#' @param peak_set - a subset of peaks of \code{atac_mc@peaks} on which to cluster
 #' @param annot - name of the field to use when \code{use_prior_annot == T}.
 #'
 #' @inheritParams gen_atac_peak_clust
@@ -68,11 +65,9 @@ gen_atac_peak_clust <- function(atac_mc, k = NULL, clustering_algoritm = "kmeans
 #' mc_clusters <- gen_atac_mc_clust(my_atac_mc, k = 16, peak_set = peaks_of_interest, use_prior_annot = F)
 #' }
 #' @export
-gen_atac_mc_clust <- function(atac_mc, use_prior_annot = TRUE, k = NULL, peak_set = NULL, annot = "cell_type", ...) {
+gen_atac_mc_clust <- function(atac_mc, use_prior_annot = TRUE, k = NULL, annot = "cell_type", ...) {
     assert_atac_object(atac_mc)
-    if (!is.null(peak_set)) {
-        atac_mc <- subset_peaks(atac_mc, peak_set)
-    }
+
     if (!use_prior_annot) {
         if (!is.null(k)) {
             atac_mc_km <- tglkmeans::TGL_kmeans(t(as.matrix(atac_mc@mat)), k, ...)
