@@ -57,15 +57,18 @@ save_pheatmap <- function(x, filename, dev = png, width = 2000, height = 2000, r
 
 #' @noRd
 generate_pheatmap_annotation <- function(clust_vec, feature_type = NULL, feature_annotation = NULL) {
-    if (is.null(feature_type)) {feature_type <- "type"}
-    if (is.null(feature_annotation)) {feature_annotation <- "annotation"}
+    if (is.null(feature_type)) {
+        feature_type <- "type"
+    }
+    if (is.null(feature_annotation)) {
+        feature_annotation <- "annotation"
+    }
     cts <- unique(clust_vec)
-    color_key <- tibble(name = cts, color = chameleon::distinct_colors(length(cts)))
-    col_annot <- enframe(setNames(
-                unlist(color_key[match(as.character(clust_vec), unlist(color_key[,feature_annotation])), feature_annotation]),
-                names(clust_vec)), 
-        name = feature_type, value = feature_annotation)
-    col_annot <- tibble::column_to_rownames(col_annot, feature_type)
+    color_key <- tibble(name = cts, color = chameleon::distinct_colors(length(cts))$name) %>%
+        rename(!!feature_annotation := name)
+    col_annot <- clust_vec %>%
+        enframe(feature_type, feature_annotation) %>%
+        column_to_rownames(feature_type)
     ann_colors <- list(feature_annotation = deframe(color_key))
     return(list(col_annot, ann_colors))
 }

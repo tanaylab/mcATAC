@@ -4,12 +4,21 @@
 \alias{gen_atac_peak_clust}
 \title{Cluster atac peaks based on atac distributions}
 \usage{
-gen_atac_peak_clust(atac_mc, k, cluster_on = "fp", peak_set = NULL, ...)
+gen_atac_peak_clust(
+  atac_mc,
+  k = NULL,
+  clustering_algoritm = "kmeans",
+  cluster_on = "fp",
+  peak_set = NULL,
+  ...
+)
 }
 \arguments{
 \item{atac_mc}{a McATAC object}
 
-\item{k}{number of clusters}
+\item{k}{number of clusters; must be specified if \code{clustering_algoritm == 'kmeans'}}
+
+\item{clustering_algoritm}{(optional) either "kmeans" or "louvain"}
 
 \item{cluster_on}{(optional; default - fp) which matrix (\code{mat}/\code{fp}/\code{egc})to cluster on}
 

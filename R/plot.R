@@ -227,20 +227,19 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust = NULL, peak_clust = NULL,
                                ...) {
     if (is.null(mc_atac_clust)) {
         if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
-            mc_atac_clust <- deframe(mc_atac@metadata[,c("metacell", "cell_type")])
-        }
-        else {
+            mc_atac_clust <- deframe(mc_atac@metadata[, c("metacell", "cell_type")])
+        } else {
             hc <- hclust(tgs_dist(t(mc_atac@fp)))
             mc_atac_clust <- match(as.numeric(hc$labels), hc$order)
         }
     }
-    lmcoefs <- setNames(c(15.9252182670872,0.00089588822113778), c("(Intercept)", "x"))
+    lmcoefs <- setNames(c(15.9252182670872, 0.00089588822113778), c("(Intercept)", "x"))
     row_annot <- NULL
     if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
         col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")
         ann_colors <- list("cell_type" = setNames(unlist(mc_atac@metadata[, "color"]), unlist(mc_atac@metadata[, "cell_type"])))
     } else {
-        mc_annot <- generate_pheatmap_annotation(mc_atac_clust, feature_type = 'metacell', feature_annotation = 'cluster')
+        mc_annot <- generate_pheatmap_annotation(mc_atac_clust, feature_type = "metacell", feature_annotation = "cluster")
         col_annot <- mc_annot[[1]]
         ann_colors <- mc_annot[[2]]
     }
@@ -259,13 +258,12 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust = NULL, peak_clust = NULL,
         }
         row_annot <- peak_annotation[[2]]
         ann_colors[names(peak_annotation[[1]])] <- peak_annotation[[1]]
-    }
-    else {
+    } else {
         if (is.null(peak_clust)) {
-            cli_alert_info('No peak clustering specified. Generating peak clusters.')
-            peak_clust <- gen_atac_peak_clust(mc_atac, clustering_algoritm = 'louvain')
+            cli_alert_info("No peak clustering specified. Generating peak clusters.")
+            peak_clust <- gen_atac_peak_clust(mc_atac, clustering_algoritm = "louvain")
         }
-        peak_annot <- generate_pheatmap_annotation(peak_clust, feature_type = 'peak', feature_annotation = 'cluster')
+        peak_annot <- generate_pheatmap_annotation(peak_clust, feature_type = "peak", feature_annotation = "cluster")
         row_annot <- peak_annot[[1]]
         ann_colors[names(peak_annot[[1]])] <- peak_annot[[2]]
     }

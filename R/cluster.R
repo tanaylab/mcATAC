@@ -32,14 +32,14 @@ gen_atac_peak_clust <- function(atac_mc, k = NULL, clustering_algoritm = "kmeans
         cli_abort("Specify {.var k} when clustering with kmeans")
     }
     if (clustering_algoritm == "louvain") {
-        if (is.null(k)) {k <- louvain_k}
-        mca_knn = tgs_cor_knn(x = t(atac_mc@fp), y = t(atac_mc@fp), knn = k, spearman = T)
-        gknn <- igraph::graph_from_data_frame(mca_knn[,c('col1', 'col2')], directed = F)
+        if (is.null(k)) {
+            k <- louvain_k
+        }
+        mca_knn <- tgs_cor_knn(x = t(atac_mc@fp), y = t(atac_mc@fp), knn = k, spearman = T)
+        gknn <- igraph::graph_from_data_frame(mca_knn[, c("col1", "col2")], directed = F)
         louv_cl <- igraph::cluster_louvain(graph = gknn)
-        print('hello')
         atac_peak_cl <- setNames(louv_cl$membership, rownames(atac_mc@mat))
-    }
-    else {
+    } else {
         atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(slot(atac_mc, cluster_on)), k, id_column = FALSE, ...)
         atac_peak_cl <- setNames(atac_peak_km$cluster, rownames(atac_mc@mat))
     }
