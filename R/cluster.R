@@ -120,7 +120,8 @@ subset_peaks <- function(atac_mc, peak_set) {
 #' @return the atac_mc object only with the clusters (peaks) of interest (not saved in the "ignore_..." slots)
 #' @examples
 #' \dontrun{
-
+#'    peak_cl_km <- gen_atac_peak_clust(atac_mc, k = 15)
+#'    atac_mc_subset <- subset_peak_clusters(atac_mc, cluster_membership = peak_cl_km, clusters_to_keep = c(4,5,8))
 #' }
 #' @export
 subset_peak_clusters <- function(atac_mc, cluster_membership, clusters_to_keep, reverse = TRUE) {
