@@ -2,7 +2,8 @@
 #' Cluster atac peaks based on atac distributions
 #'
 #' @param atac_mc a McATAC object
-#' @param k number of clusters
+#' @param k number of clusters; must be specified if \code{clustering_algoritm == 'kmeans'}
+#' @param clustering_algoritm (optional) either "kmeans" or "louvain"
 #' @param cluster_on (optional; default - fp) which matrix (\code{mat}/\code{fp}/\code{egc})to cluster on
 #' @param peak_set - (optional) a subset of peaks of \code{atac_mc@peaks} on which to cluster
 #'
@@ -18,7 +19,8 @@
 #' }
 #'
 #' @export
-gen_atac_peak_clust <- function(atac_mc, k, cluster_on = "fp", peak_set = NULL, ...) {
+gen_atac_peak_clust <- function(atac_mc, k = NULL, clustering_algoritm = "kmeans", cluster_on = "fp", peak_set = NULL, ...) {
+    louvain_k <- 5
     if (cluster_on %!in% c("fp", "mat", "egc")) {
         cli_abort("{.var cluster_on} must be either 'fp', 'mat' or 'egc'")
     }
@@ -26,8 +28,21 @@ gen_atac_peak_clust <- function(atac_mc, k, cluster_on = "fp", peak_set = NULL, 
     if (!is.null(peak_set)) {
         atac_mc <- subset_peaks(atac_mc, peak_set)
     }
-    atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(slot(atac_mc, cluster_on)), k, id_column = FALSE, ...)
-    return(setNames(atac_peak_km$cluster, rownames(atac_mc@mat)))
+    if (clustering_algoritm == "kmeans" && is.null(k)) {
+        cli_abort("Specify {.var k} when clustering with kmeans")
+    }
+    if (clustering_algoritm == "louvain") {
+        if (is.null(k)) {k <- louvain_k}
+        mca_knn = tgs_cor_knn(x = t(atac_mc@fp), y = t(atac_mc@fp), knn = k, spearman = T)
+        gknn <- igraph::graph_from_data_frame(mca_knn[,c('col1', 'col2')], directed = F)
+        louv_cl <- igraph::cluster_louvain(graph = gknn)
+        atac_peak_cl <- setNames(louv_cl$membership, rownames(atac_mc@mat))
+    }
+    else {
+        atac_peak_km <- tglkmeans::TGL_kmeans(as.matrix(slot(atac_mc, cluster_on)), k, id_column = FALSE, ...)
+        atac_peak_cl <- setNames(atac_peak_km$cluster, rownames(atac_mc@mat))
+    }
+    return(atac_peak_cl)
 }
 
 #' Cluster metacells based on atac profiles using the k-means algorithm
@@ -94,4 +109,30 @@ subset_peaks <- function(atac_mc, peak_set) {
     atac_mc@peaks <- atac_mc@peaks[atac_mc@peaks$peak_name %in% pks_filt$peak_name, ]
     atac_mc@mat <- atac_mc@mat[rownames(atac_mc@mat) %in% pks_filt$peak_name, ]
     return(atac_mc)
+}
+
+#' Subset McATAC by certain clusters
+#'
+#' @param atac_mc - an McATAC object
+#' @param cluster_membership - which cluster each peak is a member of
+#' @param clusters_to_keep - a vector of clustering over peaks
+#' @param reverse (optional) - a logical/flag whether to keep (default - TRUE) or remove the clusters in \code{clusters_to_keep}
+#' @return the atac_mc object only with the clusters (peaks) of interest (not saved in the "ignore_..." slots)
+#' @examples
+#' \dontrun{
+
+#' }
+#' @export
+subset_peak_clusters <- function(atac_mc, cluster_membership, clusters_to_keep, reverse = TRUE) {
+    assert_that(any(clusters_to_keep %in% cluster_membership), msg = "None of {.var clusters_to_keep} are in {.var cluster_membership}")
+    if (!all(clusters_to_keep %in% cluster_membership)) {
+        cli_alert_warning('Not all peak clusters in {.var clusters_to_keep} are in {.var cluster_membership}')
+    }
+    if (!reverse) {
+        pks_filt <- atac_mc@peaks[cluster_membership %!in% clusters_to_keep,]
+    }
+    else {
+        pks_filt <- atac_mc@peaks[cluster_membership %in% clusters_to_keep,]
+    }
+    return(subset_peaks(atac_mc, pks_filt))
 }
