@@ -51,7 +51,7 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, m
 
     description <- description %||% atac@description
     id <- id %||% atac@id
-    mc_atac <- new("McATAC", mc_mat, atac@peaks[non_zero_peaks, ], atac@genome, metadata, mc_size_eps_q = mc_size_eps_q, id = id, description = description)
+    mc_atac <- new("McATAC", mat = mc_mat, peaks = atac@peaks[non_zero_peaks, ], genome = atac@genome, metadata = metadata, cell_to_metacell = enframe(cell_to_metacell, "cell_id", "metacell"), mc_size_eps_q = mc_size_eps_q, id = id, description = description)
     cli_alert_success("Created a new McATAC object with {.val {ncol(mc_atac@mat)}} metacells and {.val {nrow(mc_atac@mat)}} ATAC peaks.")
 
     return(mc_atac)
@@ -103,3 +103,5 @@ project_atac_on_mc_from_h5ad <- function(atac, h5ad_file, metadata = NULL, id = 
 
     return(project_atac_on_mc(atac, cell_to_metacell, metadata = metadata, id = id, description = description))
 }
+
+

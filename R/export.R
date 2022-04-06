@@ -31,7 +31,7 @@ export_to_h5ad <- function(object, out_file, ...) {
         mat <- cbind(mat, t(object@ignore_pmat))
     }
 
-    rownames(peaks) <- peak_names(peaks)
+    rownames(peaks) <- peak_names(peaks, object@promoters)
 
     if (!is.null(object@metadata)) {
         metadata <- data.frame(rowname = colnames(object@mat)) %>%
@@ -50,7 +50,9 @@ export_to_h5ad <- function(object, out_file, ...) {
         "ignore_peaks", "ignore_pmat", "rna_egc"
     )]
     for (s in slots) {
-        uns[[s]] <- slot(object, s)
+        if (!is.null(slot(object, s))) {
+            uns[[s]] <- slot(object, s)
+        }
     }
 
     if (uns$class == "McATAC" && has_rna(object)) {

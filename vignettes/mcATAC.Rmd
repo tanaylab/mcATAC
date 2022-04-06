@@ -119,7 +119,7 @@ peak_clust <- gen_atac_peak_clust(atac_mc, k = 30, peak_set = dyn_peaks)
 table(peak_clust)
 ```
 
-## Plot peks clustering 
+## Plot peaks clustering 
 
 ```{r plot-atac-peak-map}
 plot_atac_peak_map(atac_mc, order(atac_mc@metadata$cell_type), order(peak_clust))
