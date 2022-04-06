@@ -202,7 +202,7 @@ plot_atac_rna_cor <- function(mc_atac, rna_mat) {
 #' @param peak_annotation (optional) a list of a named vector and a dataframe conforming to the pheatmap \code{annotation_colors} and \code{annotation_row} conventions
 #' @param filename (optional) path and filename of where to save the figure; if unspecified, figure isn't saved
 #' @param dev (optional; default - png) graphical device to save figure with
-#' @param clrs (optional) colorRampPalette vector of colors for scaling colors in heatmap
+#' @param colors (optional) colorRampPalette vector of colors for scaling colors in heatmap
 #'
 #' @inheritDotParams save_pheatmap
 #'
@@ -223,7 +223,7 @@ plot_atac_rna_cor <- function(mc_atac, rna_mat) {
 plot_atac_peak_map <- function(mc_atac, mc_atac_clust = NULL, peak_clust = NULL,
                                peak_annotation = NULL, filename = NULL,
                                dev = png, main = mc_atac@id,
-                               clrs = colorRampPalette(c("blue4", "white", "red4"))(100),
+                               colors = colorRampPalette(c("blue4", "white", "red4"))(100),
                                ...) {
     if (is.null(mc_atac_clust)) {
         if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
@@ -277,7 +277,7 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust = NULL, peak_clust = NULL,
         annotation_legend = FALSE,
         annotation_colors = ann_colors,
         annotation_row = row_annot, main = main,
-        color = clrs, breaks = brks, cluster_cols = FALSE, cluster_rows = FALSE, show_colnames = FALSE, show_rownames = FALSE
+        color = colors, breaks = brks, cluster_cols = FALSE, cluster_rows = FALSE, show_colnames = FALSE, show_rownames = FALSE
     )
     if (!is.null(filename)) {
         save_pheatmap(pp, filename = filename, dev = dev, ...)
