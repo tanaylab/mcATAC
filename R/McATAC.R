@@ -119,8 +119,8 @@ validate_atac_object_params <- function(mat, peaks, genome, promoters = FALSE) {
 #'
 #' An ATAC object with data over metacells
 #'
-#' @slot egc normalized metacell accessibility (fraction of accessibility per metacell scaled to the \code{mc_size_eps_q} quantile of
-#' metacell size)
+#' @slot egc normalized metacell accessibility: fraction of accessibility per metacell scaled to the \code{mc_size_eps_q} quantile of
+#' metacell size. Accessibility is normalized by peak length.
 #' @slot fp a matrix showing for each peak (row) the relative enrichment of umis in log2 scale, i.e. \eqn{log2((1 + egc) / median(1 + egc))}
 #' @slot mc_size_eps_q quantile of MC size (in UMIs) to scale the number of UMIs per metacell. See \code{project_atac_on_mc}
 #' @slot rna_egc normalized gene expression per gene per metacell (optional). Can be created using \code{add_rna_egc}
@@ -176,9 +176,11 @@ setMethod(
 
 calc_mc_egc <- function(mcatac, mc_size_eps_q = 0.1) {
     mc_mat <- mcatac@mat
+    peak_len <- mcatac@peaks$end - mcatac@peaks$start
+    mc_mat <- mc_mat / peak_len
     mc_sum <- colSums(mc_mat, na.rm = TRUE)
     fractions <- t(t(mc_mat) / mc_sum)
-    quant_size <- quantile(mc_sum, mc_size_eps_q, na.rm = TRUE)
+    quant_size <- quantile(colSums(mcatac@mat, na.rm = TRUE), mc_size_eps_q, na.rm = TRUE)
     cli_li("Setting {.field egc} cell size to {.val {quant_size}} (the {.val {mc_size_eps_q}} quantile of metacell sizes)")
     egc <- fractions * quant_size
     return(egc)
