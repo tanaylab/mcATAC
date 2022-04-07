@@ -11,7 +11,7 @@ import_atac_marginal(
   genome,
   binsize = 200,
   overwrite = FALSE,
-  temp_dir = tempdir()
+  wig_temp_dir = tempdir()
 )
 }
 \arguments{
@@ -29,7 +29,7 @@ https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/pipelines
 
 \item{overwrite}{Overwrite the existing track if it exists.}
 
-\item{temp_dir}{Temporary directory to store the intermediate wig files.}
+\item{wig_temp_dir}{Temporary directory to store the intermediate wig files.}
 }
 \description{
 Import marginal of ATAC counts to a misha track

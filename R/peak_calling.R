@@ -6,7 +6,7 @@
 #' https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/pipelines/latest/output/
 #' @param genome Genome name, such as 'hg19' or 'mm10'.
 #' @param overwrite Overwrite the existing track if it exists.
-#' @param temp_dir Temporary directory to store the intermediate wig files.
+#' @param wig_temp_dir Temporary directory to store the intermediate wig files.
 #'
 #' @examples
 #' \dontrun{
@@ -15,7 +15,7 @@
 #'
 #' @inheritParams misha::gtrack.import
 #' @export
-import_atac_marginal <- function(file, track, description, genome, binsize = 200, overwrite = FALSE, temp_dir = tempdir()) {
+import_atac_marginal <- function(file, track, description, genome, binsize = 200, overwrite = FALSE, wig_temp_dir = tempdir()) {
     gset_genome(genome)
     if (gtrack.exists(track)) {
         if (overwrite) {
@@ -27,7 +27,7 @@ import_atac_marginal <- function(file, track, description, genome, binsize = 200
     }
     cli_li("Converting {.field bigwig} file to {.field wig}")
     wig_file <- paste0(tempfile(), ".wig")
-    bigwig_to_wig(file, wig_file, genome)
+    bigwig_to_wig(file, wig_file, genome, wig_temp_dir = wig_temp_dir)
 
     cli_li("Creating {.field misha} track")
     misha.ext::gtrack.create_dirs(track, showWarnings = FALSE)
@@ -43,15 +43,14 @@ import_atac_marginal <- function(file, track, description, genome, binsize = 200
 #' @param bigwig_file Name of the 'bigwig' file to convert, such as the 'atac_cut_sites.bigwig' from the 10x pipeline.
 #' @param wig_file Name of the 'wig' file to create.
 #' @param genome Genome name, such as 'hg19' or 'mm10'.
-#' @param temp_dir Temporary directory to store the intermediate wig files.
+#' @param wig_temp_dir Temporary directory to store the intermediate wig files.
 #'
 #' @return name of the wig_file (invisibly)
 #'
 #' @noRd
-bigwig_to_wig <- function(bigwig_file, wig_file, genome, temp_dir = tempdir()) {
+bigwig_to_wig <- function(bigwig_file, wig_file, genome, wig_temp_dir = tempdir()) {
     gset_genome(genome)
     bin <- system.file("exec/bigWigToWig", package = "misha")
-    wig_temp_dir <- tempdir()
     chroms <- gintervals.all()$chrom
     cli::cli_progress_bar("Converting", total = length(chroms) + 1)
     prefix <- gsub(".bigwig$", "", basename(bigwig_file))
