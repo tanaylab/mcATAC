@@ -74,13 +74,16 @@ validate_peaks <- function(peaks) {
 #' Return the names of PeakIntervals
 #'
 #' @param peaks a PeakIntervals object or misha intervals
+#' @param promoters are the peaks promoters? When true, the peak names (which are gene names) are returned.
 #'
 #' @return the field called 'peak_name' if exists in \code{peaks}, or the coordinates seperated by an underscore.
 #'
 #' @export
-peak_names <- function(peaks) {
+peak_names <- function(peaks, promoters = FALSE) {
     if (has_name(peaks, "peak_name")) {
         return(peaks$peak_name)
+    } else if (promoters) {
+        cli_abort("{.field peaks} does not have a 'peak_name' field. Please use {.code promoters = FALSE} to get the coordinates instead of the gene names.")
     }
 
     peak_names <- peaks %>%
@@ -130,18 +133,4 @@ get_promoter_peaks <- function(peaks, gene, max_dist_to_promoter_peak = 5e+2, ts
     peak <- unique(nei_peaks_tss$peak_name)
 
     return(peak)
-}
-
-#' Select peaks features by minimal coverage and threshold max-min fold
-#'
-#' @param atac a McATAC or ScATAC object
-#' @param min_fold minimal max-min fold change
-#' @param min_abs minimal total coverage per peak
-#' @param only_promoters when TRUE - summarise over features to get promoters
-#'
-#' @inheritParams misha.ext::get_promoters
-#'
-#' @export
-gen_peak_features <- function(atac, min_fold, min_abs, only_promoters = FALSE, upstream = 500, downstream = 50) {
-    assert_atac_object(atac)
 }

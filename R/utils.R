@@ -64,16 +64,12 @@ generate_pheatmap_annotation <- function(clust_vec, feature_type = NULL, feature
         feature_annotation <- "annotation"
     }
     cts <- unique(clust_vec)
-    color_key <- enframe(setNames(chameleon::distinct_colors(length(cts))$name, as.character(cts)),
-        name = feature_annotation, value = "color"
-    )
-    col_annot <- enframe(setNames(
-        unlist(color_key[match(as.character(clust_vec), unlist(color_key[, feature_annotation])), feature_annotation]),
-        names(clust_vec)
-    ),
-    name = feature_type, value = feature_annotation
-    )
-    col_annot <- tibble::column_to_rownames(col_annot, feature_type)
+
+    color_key <- tibble(name = cts, color = chameleon::distinct_colors(length(cts))$name) %>%
+        rename(!!feature_annotation := name)
+    col_annot <- clust_vec %>%
+        enframe(feature_type, feature_annotation) %>%
+        column_to_rownames(feature_type)
     ann_colors <- list(feature_annotation = deframe(color_key))
     return(list(col_annot, ann_colors))
 }
@@ -85,9 +81,9 @@ generate_pheatmap_annotation <- function(clust_vec, feature_type = NULL, feature
 #' @param mc_atac (optional) a McATAC object to annotate
 #' @param mc_clust (optional) a clustering of metacells, e.g. from gen_atac_mc_clust
 #' @param k (optional) parameter for k-means clustering
-
+#'
 #' @return 2-element list containing a pheatmap-compatible dataframe and a list containing a named vector
-
+#'
 #' @noRd
 generate_mc_annotation <- function(mc_atac, mc_clust = NULL, k = 10) {
     if (!is.null(mc_atac)) {

@@ -16,6 +16,7 @@ setOldClass("PeakIntervals")
 #' @slot genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
 #' @slot metadata data frame with a column called 'metacell' and additional metacell annotations for McATAC, or 'cell_id' and per-cell annotatoins for ScATAC. The constructor can also include or the name of a delimited file which contains such annotations.
 #' @slot path original path from which the object was loaded (optional)
+#' @slot promoters are the peaks promoters (optional). When peaks are promoters the peak name would be the gene name instead of coordinates.
 #'
 #' @exportClass ATAC
 ATAC <- setClass(
@@ -29,7 +30,8 @@ ATAC <- setClass(
         metadata = "data.frame_or_null",
         ignore_peaks = "PeakIntervals",
         ignore_pmat = "dgCMatrix",
-        path = "character"
+        path = "character",
+        promoters = "logical"
     ),
     contains = "VIRTUAL"
 )
@@ -68,6 +70,7 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, path, met
     obj@genome <- genome
     obj@ignore_peaks <- subset(peaks, subset = rep(FALSE, nrow(peaks)))
     obj@ignore_pmat <- methods::as(matrix(0, nrow = 0, ncol = ncol(obj@mat)), "dgCMatrix")
+    obj@promoters <- FALSE
     validate_atac_object(obj)
     return(obj)
 }
@@ -78,12 +81,12 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, path, met
 #'
 #' @noRd
 validate_atac_object <- function(obj) {
-    validate_atac_object_params(obj@mat, obj@peaks, obj@genome)
+    validate_atac_object_params(obj@mat, obj@peaks, obj@genome, obj@promoters)
 }
 
 
 
-validate_atac_object_params <- function(mat, peaks, genome) {
+validate_atac_object_params <- function(mat, peaks, genome, promoters = FALSE) {
     if (is.null(genome)) {
         cli_abort("{.field genome} is missing")
     }
@@ -105,7 +108,7 @@ validate_atac_object_params <- function(mat, peaks, genome) {
     }
 
     # make sure the matrix rownames are the peak names
-    if (any(rownames(mat) != peak_names(peaks))) {
+    if (any(rownames(mat) != peak_names(peaks, promoters))) {
         cli_abort("rownames of the matrix are not the same as the peak names.")
     }
 }
@@ -116,8 +119,8 @@ validate_atac_object_params <- function(mat, peaks, genome) {
 #'
 #' An ATAC object with data over metacells
 #'
-#' @slot egc normalized metacell accessibility (fraction of accessibility per metacell scaled to the \code{mc_size_eps_q} quantile of
-#' metacell size)
+#' @slot egc normalized metacell accessibility: fraction of accessibility per metacell scaled to the \code{mc_size_eps_q} quantile of
+#' metacell size. Accessibility is normalized by peak length.
 #' @slot fp a matrix showing for each peak (row) the relative enrichment of umis in log2 scale, i.e. \eqn{log2((1 + egc) / median(1 + egc))}
 #' @slot mc_size_eps_q quantile of MC size (in UMIs) to scale the number of UMIs per metacell. See \code{project_atac_on_mc}
 #' @slot rna_egc normalized gene expression per gene per metacell (optional). Can be created using \code{add_rna_egc}
@@ -130,6 +133,7 @@ McATAC <- setClass(
         egc = "any_matrix",
         fp = "any_matrix",
         mc_size_eps_q = "numeric",
+        cell_to_metacell = "data.frame_or_null",
         rna_egc = "any_matrix"
     ),
     contains = "ATAC"
@@ -144,6 +148,7 @@ McATAC <- setClass(
 #' @param id an identifier for the object, e.g. "pbmc".
 #' @param description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k),
 #' projection was done using RNA metacells"
+#' @param cell_to_metacell a data frame mapping 'cell_id' to 'metacell' (optional). See \code{project_atac_on_mc}
 #' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
 #' @param path path from which the object was loaded (optional)
 #'
@@ -156,7 +161,7 @@ McATAC <- setClass(
 setMethod(
     "initialize",
     signature = "McATAC",
-    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, mc_size_eps_q = 0.1, path = "") {
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, cell_to_metacell = NULL, mc_size_eps_q = 0.1, path = "") {
         .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description, path = path)
         validate_atac_object(.Object)
         .Object <- add_metadata(.Object, metadata, "metacell")
@@ -164,15 +169,18 @@ setMethod(
         .Object@fp <- calc_mc_fp(.Object)
         .Object@mc_size_eps_q <- mc_size_eps_q
         .Object@rna_egc <- matrix(0, nrow = 0, ncol = ncol(.Object@mat), dimnames = list(NULL, colnames(.Object@mat)))
+        .Object@cell_to_metacell <- cell_to_metacell
         return(.Object)
     }
 )
 
 calc_mc_egc <- function(mcatac, mc_size_eps_q = 0.1) {
     mc_mat <- mcatac@mat
+    peak_len <- mcatac@peaks$end - mcatac@peaks$start
+    mc_mat <- mc_mat / peak_len
     mc_sum <- colSums(mc_mat, na.rm = TRUE)
     fractions <- t(t(mc_mat) / mc_sum)
-    quant_size <- quantile(mc_sum, mc_size_eps_q, na.rm = TRUE)
+    quant_size <- quantile(colSums(mcatac@mat, na.rm = TRUE), mc_size_eps_q, na.rm = TRUE)
     cli_li("Setting {.field egc} cell size to {.val {quant_size}} (the {.val {mc_size_eps_q}} quantile of metacell sizes)")
     egc <- fractions * quant_size
     return(egc)
@@ -203,7 +211,10 @@ print_atac_object <- function(object, object_type, column_type, md_column) {
         cli::cli_text(c("description: {.val {object@description}}"))
     }
     if (object@path != "") {
-        cli::cli_text(c("loaded from: {.file {object@path}}"))
+        cli::cli_text(c("Loaded from: {.file {object@path}}"))
+    }
+    if (object@promoters) {
+        cli::cli_text(c("A promoter object (peaks are on promoters)"))
     }
     cli::cli_text("Slots include:")
     cli_ul(c("{.code @mat}: a numeric matrix where rows are peaks and columns are {column_type}s. Can be a sparse matrix."))
