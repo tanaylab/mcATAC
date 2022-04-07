@@ -21,12 +21,12 @@ annotate_peaks <- function(atac) {
 
 #' Annotate an intervals set
 #'
-#' @description ATAC peaks are classified into either 'promoter', 'intronic', 'exonic', 'ig_proximal' (intergenic-proximal), 'ig_distal' (intergenic-distal) or 'desert'.
-#' Promoter peaks are those less than \code{min_proximal} away from a TSS.
-#' Intronic peaks are within gene bodies, but not in an exon.
-#' Exonic peaks overlap exons.
-#' Intergenic-proximal peaks are less than \code{max_proximal} away from a TSS, but not within a gene body
-#' Intergenic-distal peaks are more than \code{min_distal} away from some TSS, and less than \code{max-distal} from any TSS, and not within a gene body.
+#' @description ATAC peaks are classified into either 'promoter', 'intronic', 'exonic', 'ig_proximal' (intergenic-proximal), 'ig_distal' (intergenic-distal) or 'desert'. \cr
+#' Promoter peaks are those less than \code{min_proximal} away from a TSS. \cr
+#' Intronic peaks are within gene bodies, but not in an exon. \cr
+#' Exonic peaks overlap exons. \cr
+#' Intergenic-proximal peaks are less than \code{max_proximal} away from a TSS, but not within a gene body. \cr
+#' Intergenic-distal peaks are more than \code{min_distal} away from some TSS, and less than \code{max-distal} from any TSS, and not within a gene body. \cr
 #' Desert peaks are at least \code{max_distal} from any known TSS (as defined by the \code{tss} interval set).
 #'
 #' @param intervals the intervals set to annotate
@@ -36,8 +36,10 @@ annotate_peaks <- function(atac) {
 #' @param min_distal the minimum distance from some TSS, only above which a peak is considered to be of a distal enhancer. Usually equal to \code{max_proximal}, unless there is good reason
 #' @param max_distal the maximum distance from any TSS, under which a peak is considered to be of a distal enhancer, and above which it is a 'desert' peak.
 #' @param exonic_peak_dist a parameter that allows proximity (without overlap) of peaks to exons that still classifies them as exonic peaks, as active transcription usually confers accessibility in the vicinity of exons, and this might confound a possible assignment of regulatory activity to an exon.
+#' @param tss the TSS interval set or the name of the TSS interval set to use.
+#' @param exons the exons interval set or the name of the exons interval set to use.
 #'
-#' @return intervals - the input intervals set with added fields {.code peak_type} and {.code closest_tss}
+#' @return intervals - the input intervals set with added fields {.code peak_type}, {.code closest_tss}, {.code closest_exon_gene} and {.code gene_body_gene}.
 #' @examples
 #' \dontrun{
 #' my_intervals <- annotate_intervals(my_intervals, "mm10", min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
@@ -46,11 +48,13 @@ annotate_peaks <- function(atac) {
 #' }
 #' @export
 annotate_intervals <- function(intervals, genome,
-                               min_proximal = 1e+03, max_proximal = 2e+04,
-                               min_distal = max_proximal, max_distal = 1e+06,
+                               min_proximal = 1e+03,
+                               max_proximal = 2e+04,
+                               min_distal = max_proximal,
+                               max_distal = 1e+06,
                                exonic_peak_dist = 0,
-                               tss = gintervals.load("intervs.global.tss"),
-                               exons = gintervals.load("intervs.global.exon")) {
+                               tss = "intervs.global.tss",
+                               exons = "intervs.global.exon") {
     if (missing(genome)) {
         cli_abort("Please Specify genome. Look for slot '@genome' in relevant McATAC/ScATAC object.")
     }
@@ -62,11 +66,14 @@ annotate_intervals <- function(intervals, genome,
 
     gene_body_df <- get_gene_body_df(tss, exons)
 
-    gvtrack.create("tss_d", tss, "distance")
-    gvtrack.create("exons_d", exons, "distance")
-    gvtrack.create("gene_body_d", gene_body_df, "distance")
-    df <- gextract(c("tss_d", "exons_d", "gene_body_d"), intervals = intervals, iterator = intervals) %>%
-        arrange(intervalID)
+    df <- as.data.frame(intervals) %>%
+        gintervals.neighbors1(tss, fields = "geneSymbol") %>%
+        rename(closest_tss = geneSymbol, tss_d = dist) %>%
+        gintervals.neighbors1(exons, fields = "geneSymbol") %>%
+        rename(closest_exon_gene = geneSymbol, exons_d = dist) %>%
+        gintervals.neighbors1(gene_body_df, fields = "geneSymbol") %>%
+        rename(gene_body_gene = geneSymbol, gene_body_d = dist)
+
     df$peak_type <- NA
 
     add_annotation <- function(df, column, mindist, maxdist, name) {
@@ -82,15 +89,10 @@ annotate_intervals <- function(intervals, genome,
         add_annotation("tss_d", "ig_distal", mindist = min_distal, maxdist = max_distal) %>%
         tidyr::replace_na(replace = list(peak_type = "desert"))
 
-    res <- res %>%
-        as.data.frame() %>%
-        misha.ext::gintervals.neighbors1(tss %>% select(chrom, start, end, geneSymbol)) %>%
-        rename(closest_tss = geneSymbol)
-
     class(intervals) <- orig_class
     intervals <- intervals %>%
         select(any_of(orig_fields)) %>%
-        left_join(res %>% select(chrom, start, end, peak_type, closest_tss), by = c("chrom", "start", "end"))
+        left_join(res %>% select(chrom, start, end, peak_type, closest_tss, closest_exon_gene, gene_body_gene), by = c("chrom", "start", "end"))
 
     return(intervals)
 }
@@ -104,6 +106,12 @@ annotate_intervals <- function(intervals, genome,
 #'
 #' @noRd
 get_gene_body_df <- function(tss, exons) {
+    if (is.character(tss)) {
+        tss <- gintervals.load(tss)
+    }
+    if (is.character(exons)) {
+        exons <- gintervals.load(exons)
+    }
     kgid_both <- intersect(unique(exons$kgID), unique(tss$kgID))
     exons_filt <- exons[exons$kgID %in% kgid_both, ]
     genes_start <- tapply(exons_filt$start, exons_filt$kgID, min)
