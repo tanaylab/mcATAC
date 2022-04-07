@@ -57,15 +57,22 @@ save_pheatmap <- function(x, filename, dev = png, width = 2000, height = 2000, r
 
 #' @noRd
 generate_pheatmap_annotation <- function(clust_vec, feature_type = NULL, feature_annotation = NULL) {
-    if (is.null(feature_type)) {feature_type <- "type"}
-    if (is.null(feature_annotation)) {feature_annotation <- "annotation"}
+    if (is.null(feature_type)) {
+        feature_type <- "type"
+    }
+    if (is.null(feature_annotation)) {
+        feature_annotation <- "annotation"
+    }
     cts <- unique(clust_vec)
-    color_key <- enframe(setNames(chameleon::distinct_colors(length(cts))$name, as.character(cts)), 
-                name = feature_annotation, value = "color")
+    color_key <- enframe(setNames(chameleon::distinct_colors(length(cts))$name, as.character(cts)),
+        name = feature_annotation, value = "color"
+    )
     col_annot <- enframe(setNames(
-                unlist(color_key[match(as.character(clust_vec), unlist(color_key[,feature_annotation])), feature_annotation]),
-                names(clust_vec)), 
-        name = feature_type, value = feature_annotation)
+        unlist(color_key[match(as.character(clust_vec), unlist(color_key[, feature_annotation])), feature_annotation]),
+        names(clust_vec)
+    ),
+    name = feature_type, value = feature_annotation
+    )
     col_annot <- tibble::column_to_rownames(col_annot, feature_type)
     ann_colors <- list(feature_annotation = deframe(color_key))
     return(list(col_annot, ann_colors))
@@ -88,18 +95,15 @@ generate_mc_annotation <- function(mc_atac, mc_clust = NULL, k = 10) {
             col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")
             ann_colors <- list("cell_type" = setNames(unlist(mc_atac@metadata[, "color"]), unlist(mc_atac@metadata[, "cell_type"])))
             mc_annot <- list(col_annot, ann_colors)
-        }
-        else {
+        } else {
             cli_alert_warning("McATAC object specified but no metacell annotation exists. Clustering metacells.")
             mc_clust <- gen_atac_mc_clust(atac_mc = mc_atac, use_prior_annot = F, k = k)
-            mc_annot <- generate_pheatmap_annotation(mc_clust, feature_type = 'metacell', feature_annotation = 'cluster')
+            mc_annot <- generate_pheatmap_annotation(mc_clust, feature_type = "metacell", feature_annotation = "cluster")
         }
-    }
-    else {
+    } else {
         if (!is.null(mc_clust)) {
-            mc_annot <- generate_pheatmap_annotation(mc_clust, feature_type = 'metacell', feature_annotation = 'cluster')
-        }
-        else{
+            mc_annot <- generate_pheatmap_annotation(mc_clust, feature_type = "metacell", feature_annotation = "cluster")
+        } else {
             cli_abort("Error: no McATAC object ({.var mc_atac}) and no metacell clustering ({.var mc_clust}) specified")
         }
     }
