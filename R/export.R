@@ -104,7 +104,7 @@ export_atac_clust_ucsc <- function(mc_atac, track_prefix, output_dir = getwd(), 
         return(fn)
     })
     cli_alert_success("Successfully exported to ucsc. Files generated:")
-    purrr::walk(fns, cli_ul)
+    purrr::walk(fns, cli_li)
 }
 
 
