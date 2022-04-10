@@ -15,12 +15,14 @@
 #'
 #' @inheritParams misha::gtrack.import
 #' @export
-import_atac_marginal <- function(file, track, description, genome, binsize = 200, overwrite = FALSE, wig_temp_dir = tempdir()) {
+import_atac_marginal <- function(file, track, description, genome, binsize = 20, overwrite = FALSE, wig_temp_dir = tempdir()) {
     gset_genome(genome)
     if (gtrack.exists(track)) {
         if (overwrite) {
             cli_alert_warning("Removing previous track {.val {track}}")
             gtrack.rm(track, force = TRUE)
+            gdb.reload()
+            assert_that(!gtrack.exists(track))
         } else {
             cli_abort("Track {.val {track}} already exists. Use {.code overwrite = TRUE} to overwrite it.")
         }
@@ -53,7 +55,7 @@ bigwig_to_wig <- function(bigwig_file, wig_file, genome, wig_temp_dir = tempdir(
     bin <- system.file("exec/bigWigToWig", package = "misha")
     chroms <- gintervals.all()$chrom
     cli::cli_progress_bar("Converting", total = length(chroms) + 1)
-    prefix <- gsub(".bigwig$", "", basename(bigwig_file))
+    prefix <- gsub(".bigwig$", "", basename(tempfile()))
     for (chrom in chroms) {
         out_file <- paste0(wig_temp_dir, "/", prefix, "_", chrom, ".wig")
         cmd <- paste0(bin, " -chrom=", chrom, " ", bigwig_file, " ", out_file)
@@ -88,23 +90,31 @@ bigwig_to_wig <- function(bigwig_file, wig_file, genome, wig_temp_dir = tempdir(
 #' }
 #'
 #' @export
-call_peaks <- function(marginal_track, quantile_thresh = 0.95, min_umis = 8, max_peak_size = 600, min_peak_size = 50, genome = NULL) {
+call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, max_peak_size = 600, min_peak_size = 50, genome = NULL) {
     if (!is.null(genome)) {
         gset_genome(genome)
     }
     thresh <- max(gquantiles(marginal_track, quantile_thresh), min_umis)
-    df <- gscreen(glue("{marginal_track} >= thresh"), gintervals.all())
+
+    cli::cli_alert_info("Coverage threshold: {.val {round(thresh, digits=3)}}")
+
+
+    df <- gscreen(glue("{marginal_track} >= thresh"), intervals = gintervals.all())
 
     # split peaks that are longer than max_peak_size
 
     return(df)
 }
 
-plot_marginal_coverage <- function(marginal_track, scope, peaks = NULL, quantile_thresh = 0.95, min_umis = 8, genome = NULL) {
+plot_marginal_coverage <- function(marginal_track, scope, peaks = NULL, show_thresh = TRUE, quantile_thresh = 0.9, min_umis = 8, genome = NULL, log_scale = TRUE) {
     if (!is.null(genome)) {
         gset_genome(genome)
     }
-    thresh <- max(gquantiles(marginal_track, quantile_thresh), min_umis)
+
+    thresh <- NULL
+    if (show_thresh) {
+        thresh <- max(gquantiles(marginal_track, quantile_thresh), min_umis)
+    }
 
     ggdata <- gextract(marginal_track, scope, colnames = "counts")
 
@@ -124,7 +134,14 @@ plot_marginal_coverage <- function(marginal_track, scope, peaks = NULL, quantile
         p <- p + geom_rect(data = peaks_f, inherit.aes = FALSE, aes(xmin = start, xmax = end), ymin = 0, ymax = max(ggdata$counts), alpha = 0.1)
     }
 
-    p <- p + geom_hline(yintercept = thresh, color = "blue", linetype = "dashed")
+    if (!is.null(thresh)) {
+        p <- p + geom_hline(yintercept = thresh, color = "blue", linetype = "dashed")
+    }
+
+    if (log_scale) {
+        p <- p +
+            scale_y_log10()
+    }
 
 
     return(p)

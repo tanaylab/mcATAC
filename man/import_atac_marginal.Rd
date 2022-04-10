@@ -9,7 +9,7 @@ import_atac_marginal(
   track,
   description,
   genome,
-  binsize = 200,
+  binsize = 20,
   overwrite = FALSE,
   wig_temp_dir = tempdir()
 )

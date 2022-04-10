@@ -6,7 +6,7 @@
 \usage{
 call_peaks(
   marginal_track,
-  quantile_thresh = 0.95,
+  quantile_thresh = 0.9,
   min_umis = 8,
   max_peak_size = 600,
   min_peak_size = 50,
