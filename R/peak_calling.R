@@ -3,7 +3,7 @@
 #'
 #' @param file Name of the 'bigwig' file to import, such as the 'atac_cut_sites.bigwig' from the 10x pipeline.
 #' For more details, see:
-#' https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/pipelines/latest/output/
+#' https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/pipelines/latest/output/bigwig
 #' @param genome Genome name, such as 'hg19' or 'mm10'.
 #' @param overwrite Overwrite the existing track if it exists.
 #' @param wig_temp_dir Temporary directory to store the intermediate wig files.
@@ -19,10 +19,10 @@ import_atac_marginal <- function(file, track, description, genome, binsize = 200
     gset_genome(genome)
     if (gtrack.exists(track)) {
         if (overwrite) {
-            cli_alert_warning("Removing previous track {.val track}")
+            cli_alert_warning("Removing previous track {.val {track}}")
             gtrack.rm(track, force = TRUE)
         } else {
-            cli_abort("Track '{.var {track}}' already exists. Use {.code overwrite = TRUE} to overwrite it.")
+            cli_abort("Track {.val {track}} already exists. Use {.code overwrite = TRUE} to overwrite it.")
         }
     }
     cli_li("Converting {.field bigwig} file to {.field wig}")
@@ -58,12 +58,74 @@ bigwig_to_wig <- function(bigwig_file, wig_file, genome, wig_temp_dir = tempdir(
         out_file <- paste0(wig_temp_dir, "/", prefix, "_", chrom, ".wig")
         cmd <- paste0(bin, " -chrom=", chrom, " ", bigwig_file, " ", out_file)
         system(cmd)
-        withr::defer(unlink(out_file))
         cli::cli_progress_update()
     }
-    cmd <- paste0("cat ", wig_temp_dir, "/*.wig > ", wig_file)
+    cmd <- paste0("cat ", wig_temp_dir, glue("/{prefix}*.wig > "), wig_file)
     system(cmd)
     cli::cli_progress_update()
     cli::cli_progress_done()
+    system(glue("rm -f {wig_temp_dir}/{prefix}*.wig"))
     invisible(wig_file)
+}
+
+#' Call peaks from ATAC marginals track
+#'
+#' @description Peaks are called by screening for genomic regions with a number of UMIs above a quantile of the marginal ATAC counts,
+#' and above \code{min_umis}. Peaks that are longer than \code{max_peak_size} would be splitted equally into smaller peaks.
+#'
+#' @param marginal_track Name of the 'misha' track to call peaks from. You can create it using {.code import_atac_marginal}.
+#' @param quantile_thresh Quantile of the marginal track above which peaks are called.
+#' @param min_umis Minimal number of UMIs to call a peak.
+#' @param max_peak_size Maximal size of a peak. Peaks above this size would be splitted equally into smaller peaks.
+#' @param min_peak_size Minimal size of a peak.
+#' @param genome Genome name, such as 'hg19' or 'mm10'. If NULL - the current misha database is used.
+#'
+#' @return an intervals set with the called peaks
+#'
+#' @examples
+#' \dontrun{
+#' peaks <- call_peaks("pbmc_atac.marginal", quantile_thresh = 0.95, min_umis = 8, max_peak_size = 600, genome = "hg38")
+#' }
+#'
+#' @export
+call_peaks <- function(marginal_track, quantile_thresh = 0.95, min_umis = 8, max_peak_size = 600, min_peak_size = 50, genome = NULL) {
+    if (!is.null(genome)) {
+        gset_genome(genome)
+    }
+    thresh <- max(gquantiles(marginal_track, quantile_thresh), min_umis)
+    df <- gscreen(glue("{marginal_track} >= thresh"), gintervals.all())
+
+    # split peaks that are longer than max_peak_size
+
+    return(df)
+}
+
+plot_marginal_coverage <- function(marginal_track, scope, peaks = NULL, quantile_thresh = 0.95, min_umis = 8, genome = NULL) {
+    if (!is.null(genome)) {
+        gset_genome(genome)
+    }
+    thresh <- max(gquantiles(marginal_track, quantile_thresh), min_umis)
+
+    ggdata <- gextract(marginal_track, scope, colnames = "counts")
+
+    if (!is.null(peaks)) {
+        peaks_f <- peaks %>%
+            gintervals.neighbors1(scope) %>%
+            filter(dist == 0) %>%
+            mutate(start = pmax(scope$start, start), end = pmin(scope$end, end))
+    }
+
+    p <- ggdata %>%
+        ggplot(aes(x = start, y = counts)) +
+        geom_col() +
+        xlim(c(scope$start, scope$end))
+
+    if (!is.null(peaks)) {
+        p <- p + geom_rect(data = peaks_f, inherit.aes = FALSE, aes(xmin = start, xmax = end), ymin = 0, ymax = max(ggdata$counts), alpha = 0.1)
+    }
+
+    p <- p + geom_hline(yintercept = thresh, color = "blue", linetype = "dashed")
+
+
+    return(p)
 }

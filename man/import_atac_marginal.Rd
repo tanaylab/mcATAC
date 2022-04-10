@@ -17,7 +17,7 @@ import_atac_marginal(
 \arguments{
 \item{file}{Name of the 'bigwig' file to import, such as the 'atac_cut_sites.bigwig' from the 10x pipeline.
 For more details, see:
-https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/pipelines/latest/output/}
+https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/pipelines/latest/output/bigwig}
 
 \item{track}{track name}
 
