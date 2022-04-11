@@ -27,7 +27,9 @@
 #' @export
 project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5, mc_size_eps_q = 0.1, id = NULL, description = NULL, rm_zero_peaks = TRUE) {
     assert_atac_object(atac)
+    print(head(cell_to_metacell))
     cell_to_metacell <- deframe(cell_to_metacell)
+    print(head(cell_to_metacell))
     assert_that(all(names(cell_to_metacell) %in% colnames(atac@mat)))
     sc_mat <- atac@mat[, colnames(atac@mat) %in% names(cell_to_metacell), drop = FALSE]
     n_removed_cells <- ncol(atac@mat) - ncol(sc_mat)
