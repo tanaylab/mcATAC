@@ -115,7 +115,7 @@ subset_peaks <- function(atac_mc, peak_set) {
 #'
 #' @param atac_mc - an McATAC object
 #' @param cluster_membership - which cluster each peak is a member of
-#' @param clusters_to_keep - a vector of clustering over peaks
+#' @param clusters_to_keep - a vector of clusters to keep (or exclude, if \code{reverse == TRUE})
 #' @param reverse (optional) - a logical/flag whether to keep (default - TRUE) or remove the clusters in \code{clusters_to_keep}
 #' @return the atac_mc object only with the clusters (peaks) of interest (not saved in the "ignore_..." slots)
 #' @examples
