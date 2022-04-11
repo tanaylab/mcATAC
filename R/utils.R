@@ -69,6 +69,7 @@ generate_pheatmap_annotation <- function(clust_vec, feature_type = NULL, feature
     col_annot <- clust_vec %>%
         enframe(feature_type, feature_annotation) %>%
         column_to_rownames(feature_type)
-    ann_colors <- list(feature_annotation = deframe(color_key))
+    ann_colors <- list(deframe(color_key))
+    names(ann_colors)[[1]] <- feature_annotation
     return(list(col_annot, ann_colors))
 }
