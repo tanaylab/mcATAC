@@ -8,7 +8,6 @@ gen_atac_mc_clust(
   atac_mc,
   use_prior_annot = TRUE,
   k = NULL,
-  peak_set = NULL,
   annot = "cell_type",
   ...
 )
@@ -22,10 +21,6 @@ gen_atac_mc_clust(
 
 \item{k}{\itemize{
 \item (optional, when \code{use_prior_annot == F}) number of clusters to generate
-}}
-
-\item{peak_set}{\itemize{
-\item a subset of peaks of \code{atac_mc@peaks} on which to cluster
 }}
 
 \item{annot}{\itemize{

@@ -6,13 +6,13 @@
 \usage{
 plot_atac_peak_map(
   mc_atac,
-  mc_atac_clust,
-  peak_clust,
+  mc_atac_clust = NULL,
+  peak_clust = NULL,
   peak_annotation = NULL,
   filename = NULL,
   dev = png,
   main = mc_atac@id,
-  clrs = colorRampPalette(c("blue4", "white", "red4"))(100),
+  colors = colorRampPalette(c("blue4", "white", "red4"))(100),
   ...
 )
 }
@@ -28,6 +28,8 @@ plot_atac_peak_map(
 \item{filename}{(optional) path and filename of where to save the figure; if unspecified, figure isn't saved}
 
 \item{dev}{(optional; default - png) graphical device to save figure with}
+
+\item{colors}{(optional) colorRampPalette vector of colors for scaling colors in heatmap}
 
 \item{...}{
   Arguments passed on to \code{\link[=save_pheatmap]{save_pheatmap}}

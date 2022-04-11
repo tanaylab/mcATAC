@@ -19,6 +19,7 @@ test_that("projection works", {
     expect_equal(colSums(atac_mc@egc), rep(quantile(colSums(atac_mc@mat), 0.1), ncol(atac_mc@egc)), ignore_attr = TRUE)
     expect_equal(atac_mc@id, "pbmc")
     expect_equal(atac_mc@description, "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
+    expect_equal(atac_mc@cell_to_metacell, cell_to_metacell_pbmc_example)
 })
 
 test_that("projection from a metacell1 object works", {
@@ -40,6 +41,7 @@ test_that("export works", {
     expect_equal(atac_mc@id, atac_mc1@id)
     expect_equal(atac_mc@description, atac_mc1@description)
     expect_equal(atac_mc1@path, fs::path(raw_dir, "atac_mc.h5ad"))
+    expect_equal(atac_mc1@cell_to_metacell, atac_mc@cell_to_metacell, ignore_attr = TRUE)
 })
 
 test_that("add_metadata works", {

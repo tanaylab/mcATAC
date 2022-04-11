@@ -12,6 +12,7 @@
   id = NULL,
   description = NULL,
   metadata = NULL,
+  cell_to_metacell = NULL,
   mc_size_eps_q = 0.1,
   path = ""
 )
@@ -29,6 +30,8 @@
 projection was done using RNA metacells"}
 
 \item{metadata}{data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.}
+
+\item{cell_to_metacell}{a data frame mapping 'cell_id' to 'metacell' (optional). See \code{project_atac_on_mc}}
 
 \item{mc_size_eps_q}{(optional) quantile of MC size (in UMIs) to scale the number of UMIs per metacell. \eqn{egc_ij} would then be
 the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quantile of metacell sizes.}
