@@ -18,7 +18,9 @@
 #' }
 #'
 #' @export
-gen_atac_peak_clust <- function(atac_mc, k = NULL, clustering_algoritm = "kmeans", cluster_on = "fp", ...) {
+
+gen_atac_peak_clust <- function(atac_mc, k = NULL, clustering_algoritm = "kmeans", cluster_on = "fp", peak_set = NULL, ...) {
+
     louvain_k <- 5
     if (cluster_on %!in% c("fp", "mat", "egc")) {
         cli_abort("{.var cluster_on} must be either 'fp', 'mat' or 'egc'")
@@ -108,4 +110,31 @@ subset_peaks <- function(atac_mc, peak_set) {
     atac_mc@fp <- atac_mc@fp[rownames(atac_mc@fp) %in% pks_filt$peak_name, ]
     atac_mc@egc <- atac_mc@egc[rownames(atac_mc@egc) %in% pks_filt$peak_name, ]
     return(atac_mc)
+}
+
+#' Subset McATAC by certain clusters
+#'
+#' @param atac_mc - an McATAC object
+#' @param cluster_membership - which cluster each peak is a member of
+#' @param clusters_to_keep - a vector of clusters to keep (or exclude, if \code{reverse == TRUE})
+#' @param reverse (optional) - a logical/flag whether to keep (default - TRUE) or remove the clusters in \code{clusters_to_keep}
+#' @return the atac_mc object only with the clusters (peaks) of interest (not saved in the "ignore_..." slots)
+#' @examples
+#' \dontrun{
+#'    peak_cl_km <- gen_atac_peak_clust(atac_mc, k = 15)
+#'    atac_mc_subset <- subset_peak_clusters(atac_mc, cluster_membership = peak_cl_km, clusters_to_keep = c(4,5,8))
+#' }
+#' @export
+subset_peak_clusters <- function(atac_mc, cluster_membership, clusters_to_keep, reverse = TRUE) {
+    assert_that(any(clusters_to_keep %in% cluster_membership), msg = "None of {.var clusters_to_keep} are in {.var cluster_membership}")
+    if (!all(clusters_to_keep %in% cluster_membership)) {
+        cli_alert_warning('Not all peak clusters in {.var clusters_to_keep} are in {.var cluster_membership}')
+    }
+    if (!reverse) {
+        pks_filt <- atac_mc@peaks[cluster_membership %!in% clusters_to_keep,]
+    }
+    else {
+        pks_filt <- atac_mc@peaks[cluster_membership %in% clusters_to_keep,]
+    }
+    return(subset_peaks(atac_mc, pks_filt))
 }

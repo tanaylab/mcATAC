@@ -9,13 +9,17 @@ gen_atac_peak_clust(
   k = NULL,
   clustering_algoritm = "kmeans",
   cluster_on = "fp",
+
+  peak_set = NULL,
   ...
 )
 }
 \arguments{
 \item{atac_mc}{a McATAC object}
 
-\item{k}{number of clusters; must be specified if \code{clustering_algoritm = 'kmeans'}}
+\item{k}{number of clusters; must be specified if \code{clustering_algoritm == 'kmeans'}}
+\item{clustering_algoritm}{(optional) either "kmeans" or "louvain"}
+
 
 \item{clustering_algoritm}{(optional) either "kmeans" or "louvain"}
 
