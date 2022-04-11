@@ -25,7 +25,7 @@
 #' @export
 import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, description = NULL) {
     check_files_exist(file)
-    cli_ul("Reading {.file {file}}")
+    cli_li("Reading {.file {file}}")
     adata <- anndata::read_h5ad(file)
 
     mat <- t(adata$X)
@@ -77,7 +77,12 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
             mc_size_eps_q <- 0.1
             cli_alert_warning("h5ad file doesn't have the {.field mc_size_eps_q} at the {.file uns} section. Using the default: {.val {mc_size_eps_q}")
         }
-        res <- new("McATAC", mat, peaks, genome, id, description, metadata, mc_size_eps_q = mc_size_eps_q, path = file)
+        if (!is.null(adata$uns[["cell_to_metacell"]])) {
+            cell_to_metacell <- adata$uns[["cell_to_metacell"]]
+        } else {
+            cell_to_metacell <- NULL
+        }
+        res <- new("McATAC", mat = mat, peaks = peaks, genome = genome, id = id, description = description, metadata = metadata, cell_to_metacell = cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = file)
         if (!is.null(adata$uns[["rna_egc"]]) && !is.null(adata$uns[["rna_mcs"]]) && !is.null(adata$uns[["rna_gene_names"]])) {
             rna_egc <- adata$uns[["rna_egc"]]
             colnames(rna_egc) <- adata$uns[["rna_mcs"]]
@@ -138,11 +143,11 @@ import_from_10x <- function(dir, genome, id = NULL, description = NULL, metadata
     }
     check_files_exist(c(matrix_fn, cells_fn, features_fn))
 
-    cli_ul("Importing matrix")
+    cli_li("Importing matrix")
     mat <- tgutil::fread_mm(matrix_fn, row.names = features_fn, col.names = cells_fn)
     cli_alert_info("Imported a matrix of {.val {ncol(mat)}} cells and {.val {nrow(mat)}} features")
 
-    cli_ul("Importing features")
+    cli_li("Importing features")
     features <- tgutil::fread(features_fn, col.names = c("name", "name2", "type", "chrom", "start", "end")) %>%
         as_tibble()
     stopifnot(all(features$name == rownames(mat)))

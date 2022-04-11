@@ -14,6 +14,7 @@
 #'  the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quantile of metacell sizes.
 #' @param id an identifier for the object, e.g. "pbmc". If NULL - the id would be taken from the scATAC object \code{atac}.
 #' @param description an identifier for the object, e.g. "pbmc". If NULL - the description would be taken from the scATAC object \code{atac}
+#' @param rm_zero_peaks remove peaks without any reads (all-zero peaks). Default: TRUE
 #'
 #' @return an McATAC object
 #'
@@ -24,7 +25,7 @@
 #' }
 #'
 #' @export
-project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5, mc_size_eps_q = 0.1, id = NULL, description = NULL) {
+project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5, mc_size_eps_q = 0.1, id = NULL, description = NULL, rm_zero_peaks = TRUE) {
     assert_atac_object(atac)
     cell_to_metacell <- deframe(cell_to_metacell)
     assert_that(all(names(cell_to_metacell) %in% colnames(atac@mat)))
@@ -37,10 +38,16 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, m
         }
     }
 
-    non_zero_peaks <- Matrix::rowSums(sc_mat) > 0
-    if (sum(!non_zero_peaks) > 0) {
-        cli_alert_info("Removed {.val {sum(!non_zero_peaks)}} all-zero peaks")
+
+    if (rm_zero_peaks) {
+        non_zero_peaks <- Matrix::rowSums(sc_mat) > 0
+        if (sum(!non_zero_peaks) > 0) {
+            cli_alert_info("Removed {.val {sum(!non_zero_peaks)}} all-zero peaks")
+        }
+    } else {
+        non_zero_peaks <- rep(TRUE, nrow(sc_mat))
     }
+
     mc_mat <- t(tgs_matrix_tapply(sc_mat[non_zero_peaks, ], cell_to_metacell, sum))
 
     assert_that(are_equal(atac@peaks$peak_name[non_zero_peaks], rownames(mc_mat)))
@@ -51,7 +58,7 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, m
 
     description <- description %||% atac@description
     id <- id %||% atac@id
-    mc_atac <- new("McATAC", mc_mat, atac@peaks[non_zero_peaks, ], atac@genome, metadata, mc_size_eps_q = mc_size_eps_q, id = id, description = description)
+    mc_atac <- new("McATAC", mat = mc_mat, peaks = atac@peaks[non_zero_peaks, ], genome = atac@genome, metadata = metadata, cell_to_metacell = enframe(cell_to_metacell, "cell_id", "metacell"), mc_size_eps_q = mc_size_eps_q, id = id, description = description)
     cli_alert_success("Created a new McATAC object with {.val {ncol(mc_atac@mat)}} metacells and {.val {nrow(mc_atac@mat)}} ATAC peaks.")
 
     return(mc_atac)

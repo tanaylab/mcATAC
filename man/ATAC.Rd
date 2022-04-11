@@ -15,8 +15,8 @@ An ATAC object with data over cells
 \section{Slots}{
 
 \describe{
-\item{\code{egc}}{normalized metacell accessibility (fraction of accessibility per metacell scaled to the \code{mc_size_eps_q} quantile of
-metacell size)}
+\item{\code{egc}}{normalized metacell accessibility: fraction of accessibility per metacell scaled to the \code{mc_size_eps_q} quantile of
+metacell size. Accessibility is normalized by peak length.}
 
 \item{\code{fp}}{a matrix showing for each peak (row) the relative enrichment of umis in log2 scale, i.e. \eqn{log2((1 + egc) / median(1 + egc))}}
 

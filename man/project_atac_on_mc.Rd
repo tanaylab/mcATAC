@@ -13,7 +13,8 @@ project_atac_on_mc(
   min_int_frac = 0.5,
   mc_size_eps_q = 0.1,
   id = NULL,
-  description = NULL
+  description = NULL,
+  rm_zero_peaks = TRUE
 )
 
 project_atac_on_mc_from_metacell1(
@@ -49,6 +50,8 @@ the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quan
 \item{id}{an identifier for the object, e.g. "pbmc". If NULL - the id would be taken from the scATAC object \code{atac}.}
 
 \item{description}{an identifier for the object, e.g. "pbmc". If NULL - the description would be taken from the scATAC object \code{atac}}
+
+\item{rm_zero_peaks}{remove peaks without any reads (all-zero peaks). Default: TRUE}
 
 \item{scdb}{a metacell1 \code{scdb} path}
 

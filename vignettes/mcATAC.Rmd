@@ -115,14 +115,14 @@ dyn_peaks <- identify_dynamic_peaks(mcatac = atac_mc, mean_thresh_q = 0.05)
 
 ## Cluster a peak set
 ```{r cluster-peaks}
-peak_clust <- gen_atac_peak_clust(atac_mc, k = 30, peak_set = dyn_peaks)
+peak_clust <- gen_atac_peak_clust(atac_mc, k = 30)
 table(peak_clust)
 ```
 
-## Plot peks clustering 
+## Plot peaks clustering 
 
 ```{r plot-atac-peak-map}
-plot_atac_peak_map(atac_mc, order(atac_mc@metadata$cell_type), order(peak_clust))
+plot_atac_peak_map(atac_mc, atac_mc@metadata$cell_type, peak_clust)
 ```
 
 ## Export dynamic peaks to UCSC tracks
