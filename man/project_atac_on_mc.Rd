@@ -29,6 +29,7 @@ project_atac_on_mc_from_metacell1(
 project_atac_on_mc_from_h5ad(
   atac,
   h5ad_file,
+  min_int_frac = 0.5,
   metadata = NULL,
   id = NULL,
   description = NULL
