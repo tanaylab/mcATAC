@@ -8,8 +8,11 @@ call_peaks(
   marginal_track,
   quantile_thresh = 0.9,
   min_umis = 8,
-  max_peak_size = 600,
-  min_peak_size = 50,
+  split_peaks = TRUE,
+  target_size = 500,
+  max_peak_size = 1000,
+  very_long = 5000,
+  min_peak_size = NULL,
   genome = NULL
 )
 }
@@ -20,9 +23,15 @@ call_peaks(
 
 \item{min_umis}{Minimal number of UMIs to call a peak.}
 
-\item{max_peak_size}{Maximal size of a peak. Peaks above this size would be splitted equally into smaller peaks.}
+\item{split_peaks}{Split peaks that are longer than \code{max_peak_size} into smaller peaks using \code{split_long_peaks}.}
 
-\item{min_peak_size}{Minimal size of a peak.}
+\item{target_size}{The target size of peaks.}
+
+\item{max_peak_size}{Peaks above this size would be splitted into smaller peaks.}
+
+\item{very_long}{Peaks above this size would be splitted arbitrarily into smaller peaks before fitting the best offset.}
+
+\item{min_peak_size}{Peaks below this size would be discarded.}
 
 \item{genome}{Genome name, such as 'hg19' or 'mm10'. If NULL - the current misha database is used.}
 }
@@ -35,7 +44,7 @@ and above \code{min_umis}. Peaks that are longer than \code{max_peak_size} would
 }
 \examples{
 \dontrun{
-peaks <- call_peaks("pbmc_atac.marginal", quantile_thresh = 0.95, min_umis = 8, max_peak_size = 600, genome = "hg38")
+peaks <- call_peaks("pbmc_atac.marginal", quantile_thresh = 0.9, min_umis = 8, max_peak_size = 600, genome = "hg38")
 }
 
 }
