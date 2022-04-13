@@ -13,7 +13,8 @@ call_peaks(
   max_peak_size = 1000,
   very_long = 5000,
   min_peak_size = NULL,
-  genome = NULL
+  genome = NULL,
+  seed = 60427
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ call_peaks(
 \item{min_peak_size}{Peaks below this size would be discarded.}
 
 \item{genome}{Genome name, such as 'hg19' or 'mm10'. If NULL - the current misha database is used.}
+
+\item{seed}{random seed for reproducibility (\code{misha::gquantiles} sometimes samples the data)}
 }
 \value{
 an intervals set with the called peaks

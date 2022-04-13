@@ -19,7 +19,7 @@ import_atac_marginal(
 For more details, see:
 https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/pipelines/latest/output/bigwig}
 
-\item{track}{track name}
+\item{track}{Name of the track to create.}
 
 \item{description}{a character string description}
 
