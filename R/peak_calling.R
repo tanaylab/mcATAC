@@ -4,6 +4,7 @@
 #' @param file Name of the 'bigwig' file to import, such as the 'atac_cut_sites.bigwig' from the 10x pipeline.
 #' For more details, see:
 #' https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/pipelines/latest/output/bigwig
+#' @param track Name of the track to create.
 #' @param genome Genome name, such as 'hg19' or 'mm10'.
 #' @param overwrite Overwrite the existing track if it exists.
 #' @param wig_temp_dir Temporary directory to store the intermediate wig files.
@@ -80,6 +81,7 @@ bigwig_to_wig <- function(bigwig_file, wig_file, genome, wig_temp_dir = tempdir(
 #' @param min_umis Minimal number of UMIs to call a peak.
 #' @param genome Genome name, such as 'hg19' or 'mm10'. If NULL - the current misha database is used.
 #' @param split_peaks Split peaks that are longer than \code{max_peak_size} into smaller peaks using \code{split_long_peaks}.
+#' @param seed random seed for reproducibility (\code{misha::gquantiles} sometimes samples the data)
 #' @inheritParams split_long_peaks
 #'
 #' @return an intervals set with the called peaks
@@ -90,11 +92,12 @@ bigwig_to_wig <- function(bigwig_file, wig_file, genome, wig_temp_dir = tempdir(
 #' }
 #'
 #' @export
-call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, split_peaks = TRUE, target_size = 500, max_peak_size = 1e3, very_long = 5e3, min_peak_size = NULL, genome = NULL) {
+call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, split_peaks = TRUE, target_size = 500, max_peak_size = 1e3, very_long = 5e3, min_peak_size = NULL, genome = NULL, seed = 60427) {
     if (!is.null(genome)) {
         gset_genome(genome)
     }
-    thresh <- max(gquantiles(marginal_track, quantile_thresh), min_umis)
+    withr::with_seed(seed, thresh <- max(gquantiles(marginal_track, quantile_thresh), min_umis))
+
 
     cli::cli_alert_info("Coverage threshold: {.val {round(thresh, digits=3)}}")
 
