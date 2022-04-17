@@ -14,7 +14,10 @@
 #' @return a matrix of peaks (rows) vs. aggregated motif energies (columns)
 #' @examples
 #' \dontrun{
-#'
+#'      peak_motif_mat <- generate_motif_pssm_matrix(peak_set=head(scatac@peaks), 
+#'                                motif_regex = c("Bcl", "Atf"), 
+#'                                datasets_of_interest = c("homer", "jaspar", "jolma"),
+#'                                parallel = F)
 #' }
 #' @export
 generate_motif_pssm_matrix <- function(atac = NULL, 
@@ -74,11 +77,13 @@ generate_motif_pssm_matrix <- function(atac = NULL,
                                                         pssmid = .x, 
                                                         prior = 0.01, 
                                                         iterator = peaks)
-                                    return(track_name)
+                                    
                                 }
                             }
+                            return(track_name)
                         })
-                    })
+                    }) %>% unlist
+    print(head(res))
     if (parallel) {
         error_log <- gcluster.run(res)
         print(error_log)
