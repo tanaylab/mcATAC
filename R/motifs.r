@@ -77,13 +77,11 @@ generate_motif_pssm_matrix <- function(atac = NULL,
                                                         pssmid = .x, 
                                                         prior = 0.01, 
                                                         iterator = peaks)
-                                    
                                 }
                             }
                             return(track_name)
                         })
                     }) %>% unlist
-    print(head(res))
     if (parallel) {
         error_log <- gcluster.run(res)
         print(error_log)
@@ -96,12 +94,17 @@ generate_motif_pssm_matrix <- function(atac = NULL,
                             rep(i, floor(length(trks_motifs)/4)))
                                     )
                     ))
-        df_list <- lapply(sort(unique(trk_inds)), function(u) gextract(res[trk_inds == u], intervals=peaks, iterator=peaks))
+        df_list <- lapply(sort(unique(trk_inds)), function(u) gextract(res[trk_inds == u], 
+                                                                        intervals=peaks, 
+                                                                        iterator=peaks, 
+                                                                        colnames = gsub(paste0("_", suffix), "", trks_motifs[trk_inds == u])))
         peak_motif_matrix <- plyr::join_all(aa_lst, by=c('chrom', 'start', 'end'), type='left')
     }
     else {
-        peak_motif_matrix <- gextract(res, intervals=peaks, iterator=peaks)
+        peak_motif_matrix <- gextract(res, intervals=peaks, iterator=peaks, colnames = gsub(paste0("_", suffix), "", trks_motifs))
     }
+    dummy <- sapply(trks_motifs, gtrack.rm, force=TRUE)
+    peak_motif_matrix <- filter(peak_motif_matrix, end - start >= peak_width)
     return(peak_motif_matrix)
 }
 
