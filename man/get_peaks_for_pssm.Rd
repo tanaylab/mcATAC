@@ -11,6 +11,9 @@ get_peaks_for_pssm(atac, peak_set)
 
 \item{peak_set}{(optional) - a PeakIntervals object}
 }
+\value{
+the relevant peak set (from ATAC object if specified, else \code{peak_set})
+}
 \description{
 Utility function for validating parameter combinations for PSSM extraction
 }
