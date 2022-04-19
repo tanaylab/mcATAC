@@ -18,5 +18,7 @@
 #' @importFrom rlang has_name %||%
 #' @importFrom mclust mclustBIC
 ## usethis namespace: start
+system.file("sh", "split_bam_to_metacells.sh", package = "mcATAC")
+system.file("sh", "run_gnu_parallel.sh", package = "mcATAC")
 ## usethis namespace: end
 NULL

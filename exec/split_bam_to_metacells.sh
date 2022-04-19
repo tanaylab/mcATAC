@@ -5,6 +5,7 @@ samtools_path="/home/feshap/src/samtools-1.15.1/samtools"
 bamfile=$1
 cell_names_folder=$2
 base_output=$3
+gnu_parallel_path=$4
 cell_name_files=$(ls $cell_names_folder)
 outfold=${base_output}
 cwd=$(pwd)
@@ -28,7 +29,7 @@ for cnf in $cell_name_files; do
     fi
 done
 
-bash ./scripts/run_gnu_parallel.sh bam_chroms.txt \
+bash $gnu_parallel_path bam_chroms.txt \
                                     cell_name_files.txt \
                                     $outfold \
                                     $base_output \
@@ -48,5 +49,4 @@ for cnf in $cell_name_files; do
     cnf_fold=$outfold/$cnf
     rm -rf $cnf_fold
 done
-wait
 rm -f bam_chroms.txt cell_name_files.txt
