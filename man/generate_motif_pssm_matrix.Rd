@@ -30,7 +30,7 @@ generate_motif_pssm_matrix(
 
 \item{motif_regex}{(optional) - a vector of regular expressions for which to match motif track names and extract motif PSSMs}
 
-\item{parallel}{(optional) - whether to use parallelize computations}
+\item{parallel}{(optional) - whether to use parallel computations}
 }
 \value{
 a matrix of peaks (rows) vs. aggregated motif energies (columns)
@@ -41,6 +41,9 @@ This function calculates aggregated log-PSSM energies (as derived by the misha p
 }
 \examples{
 \dontrun{
-
+     peak_motif_mat <- generate_motif_pssm_matrix(peak_set=head(scatac@peaks), 
+                               motif_regex = c("Bcl", "Atf"), 
+                               datasets_of_interest = c("homer", "jaspar", "jolma"),
+                               parallel = F)
 }
 }

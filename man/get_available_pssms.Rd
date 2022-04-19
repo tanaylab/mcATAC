@@ -2,10 +2,32 @@
 % Please edit documentation in R/motifs.r
 \name{get_available_pssms}
 \alias{get_available_pssms}
-\title{Utility function for validating \code{pssm_path} and getting all PSSM tracks from path/gdb}
+\title{Function for validating \code{pssm_path} and getting all/selected PSSM datasets and tracks from path/gdb}
 \usage{
-get_available_pssms(pssm_path = NULL, datasets_of_interest = NULL)
+get_available_pssms(
+  pssm_path = NULL,
+  datasets_of_interest = NULL,
+  return_datasets_only = FALSE
+)
+}
+\arguments{
+\item{pssm_path}{(optional) - path to misha pssm datasets (\emph{.key-}.data file combinations), no need to specify if misha gdb is set up correctly}
+
+\item{datasets_of_interest}{(optional) - pssm datasets to get available pssms from. Available datasets can be obtained by calling this function with \code{return_datasets_only = TRUE}}
+
+\item{return_datasets_only}{(optional) - whether to return only available pssm datasets}
+}
+\value{
+a matrix of peaks (rows) vs. aggregated motif energies (columns)
 }
 \description{
-Utility function for validating \code{pssm_path} and getting all PSSM tracks from path/gdb
+Function for validating \code{pssm_path} and getting all/selected PSSM datasets and tracks from path/gdb
+}
+\examples{
+\dontrun{
+     pssm_datasets <- get_available_pssms(return_datasets_only = TRUE)
+     all_pssms <- get_available_pssms()
+     all_pssms <- get_available_pssms(datasets_of_interest = pssm_datasets)
+     all_pssms_jaspar_homer <- get_available_pssms(datasets_of_interest = c('jaspar', 'homer'))
+}
 }
