@@ -40,3 +40,24 @@ write_metacell_cell_names <- function(mcatac, c2mc_path = NULL) {
         write(nmc,file=file.path(c2mc_path, paste0("mc", mci, ".txt")),sep='\n')
     })
 }
+
+#' Merge BAMs by metacells
+#' 
+#' @param bam_path path to the per-metacell BAM tracks
+#' @param output_filename what to call the output BAM file
+#' @param mcs vector of mcs to merge BAMs of
+merge_metacell_bams <- function(bam_path, output_filename, mcs) {
+    file_list <- paste(paste0(bam_path,'/mc',mcs, ".bam"))
+    if (!grepl(".bam$", output_filename)) {
+        output_filename <- paste0(output_filename, ".bam")
+    }
+    if (all(file.exists(file_list))) {
+        command <- glue::glue("samtools merge -f")
+        command <-paste(command, output_filename, paste0(file_list, collapse = ' '))
+        system(command)
+    }
+    else {
+        bad_mcs <- mcs[!file.exists(file_list)]
+        cli_abort("BAM files for MCs {.val {bad_mcs}} were not found in {.val {bam_path}}")
+    }
+}
