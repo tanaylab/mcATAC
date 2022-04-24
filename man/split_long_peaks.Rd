@@ -14,7 +14,7 @@ split_long_peaks(
 )
 }
 \arguments{
-\item{marginal_track}{Name of the 'misha' track with the marginal coverage. You can create it using {.code import_atac_marginal}.}
+\item{marginal_track}{Name of the 'misha' track with the marginal coverage. You can create it using \code{import_atac_marginal}.}
 
 \item{peaks}{An intervals set with the peaks to split.}
 

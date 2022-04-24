@@ -12,13 +12,13 @@ call_peaks(
   target_size = 500,
   max_peak_size = 1000,
   very_long = 5000,
-  min_peak_size = NULL,
+  min_peak_size = 200,
   genome = NULL,
   seed = 60427
 )
 }
 \arguments{
-\item{marginal_track}{Name of the 'misha' track to call peaks from. You can create it using {.code import_atac_marginal}.}
+\item{marginal_track}{Name of the 'misha' track to call peaks from. You can create it using \code{import_atac_marginal}.}
 
 \item{quantile_thresh}{Quantile of the marginal track above which peaks are called.}
 

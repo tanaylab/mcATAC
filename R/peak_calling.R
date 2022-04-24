@@ -71,12 +71,39 @@ bigwig_to_wig <- function(bigwig_file, wig_file, genome, wig_temp_dir = tempdir(
     invisible(wig_file)
 }
 
+
+#' Calculate the threshold for calling peaks
+#'
+#' @description Threshold is calculated by taking the maximum between the \code{quantile_thresh} quantile of the ATAC marginal and \code{min_umis}.
+#'
+#' @param marginal_track Name of the 'misha' track to call peaks from. You can create it using \code{import_atac_marginal}.
+#' @param quantile_thresh Quantile threshold to use.
+#' @param min_umis Minimum number of UMIs to use.
+#' @param genome Genome name, such as 'hg19' or 'mm10'. If NULL - the current genome is used.
+#' @param seed random seed for reproducibility (\code{misha::gquantiles} sometimes samples the data.
+#'
+#' @return The number of UMIs to use for calling peaks.
+#'
+#' @examples
+#' \dontrun{
+#' get_quantile_cov_thresh("pbmc_atac.marginal", quantile_thresh = 0.9, min_umis = 8, genome = "hg38")
+#' }
+#'
+#' @export
+get_quantile_cov_thresh <- function(marginal_track, quantile_thresh, min_umis, genome = NULL, seed = 60427) {
+    if (!is.null(genome)) {
+        gset_genome(genome)
+    }
+    withr::with_seed(seed, thresh <- max(gquantiles(marginal_track, quantile_thresh), min_umis))
+    return(thresh)
+}
+
 #' Call peaks from ATAC marginals track
 #'
 #' @description Peaks are called by screening for genomic regions with a number of UMIs above a quantile of the marginal ATAC counts,
 #' and above \code{min_umis}. Peaks that are longer than \code{max_peak_size} would be splitted equally into smaller peaks.
 #'
-#' @param marginal_track Name of the 'misha' track to call peaks from. You can create it using {.code import_atac_marginal}.
+#' @param marginal_track Name of the 'misha' track to call peaks from. You can create it using \code{import_atac_marginal}.
 #' @param quantile_thresh Quantile of the marginal track above which peaks are called.
 #' @param min_umis Minimal number of UMIs to call a peak.
 #' @param genome Genome name, such as 'hg19' or 'mm10'. If NULL - the current misha database is used.
@@ -92,13 +119,11 @@ bigwig_to_wig <- function(bigwig_file, wig_file, genome, wig_temp_dir = tempdir(
 #' }
 #'
 #' @export
-call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, split_peaks = TRUE, target_size = 500, max_peak_size = 1e3, very_long = 5e3, min_peak_size = NULL, genome = NULL, seed = 60427) {
+call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, split_peaks = TRUE, target_size = 500, max_peak_size = 1e3, very_long = 5e3, min_peak_size = 200, genome = NULL, seed = 60427) {
     if (!is.null(genome)) {
         gset_genome(genome)
     }
-    withr::with_seed(seed, thresh <- max(gquantiles(marginal_track, quantile_thresh), min_umis))
-
-
+    thresh <- get_quantile_cov_thresh(marginal_track, quantile_thresh, min_umis, genome = genome, seed = seed)
     cli::cli_alert_info("Coverage threshold: {.val {round(thresh, digits=3)}}")
 
 
@@ -116,23 +141,30 @@ call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, spli
 #'
 #' @description Plot the marginal coverage of an interval, with the peaks marked (optionally).
 #'
-#' @param marginal_track Name of the 'misha' track to plot. You can create it using {.code import_atac_marginal}.
+#' @param marginal_track Name of the 'misha' track to plot. You can create it using \code{import_atac_marginal}.
 #' @param interval An interval to plot.
+#' @param peaks An intervals set with the peaks to mark, e.g. output of \code{call_peaks}.
 #' @param expand Expand the plotting area by this number of bp.
 #' @param show_threshold Show the coverage threshold as a dashed line.
-#' @param quantile_thresh,min_umis paramters needed to calculate the threshold. See {.code call_peaks}.
+#' @param quantile_thresh,min_umis paramters needed to calculate the threshold. See \code{call_peaks}.
 #' @param genome Genome name, such as 'hg19' or 'mm10'. If NULL - the current misha database is used.
+#' @param thresh Threshold to use. If NULL - the threshold is calculated using \code{get_quantile_cov_thresh}.
 #' @param log_scale Use log scale for the y axis.
 #'
 #' @examples
 #' \dontrun{
 #' peaks_raw <- call_peaks("pbmc_atac.marginal", split_peaks = FALSE, quantile_thresh = 0.9, min_umis = 8, max_peak_size = 600, genome = "hg38")
-#' peaks_split <- call_peaks("pbmc_atac.marginal", split_peaks = TRUE, quantile_thresh = 0.9, min_umis = 8, max_peak_size = 600, genome = "hg38")
+#' peaks_split <- call_peaks("pbmc_atac.marginal", split_peaks = TRUE, target_size = 500, quantile_thresh = 0.9, min_umis = 8, max_peak_size = 600, genome = "hg38")
 #' plot_marginal_coverage("pbmc_atac.marginal", interval = peaks_raw[967, ], peaks = peaks_split, expand = 1000, show_thresh = TRUE, quantile_thresh = 0.9, min_umis = 8, genome = "hg38")
+#'
+#' # cache the threshold in order to plot multiple intervals
+#' thresh <- get_quantile_cov_thresh("pbmc_atac.marginal", 0.9, 8, genome = "hg38", seed = 60427)
+#' plot_marginal_coverage("pbmc_atac.marginal", interval = peaks_raw[967, ], peaks = peaks_split, expand = 1000, show_thresh = TRUE, thresh = thresh, genome = "hg38")
+#' plot_marginal_coverage("pbmc_atac.marginal", interval = peaks_raw[900, ], peaks = peaks_split, expand = 1000, show_thresh = TRUE, thresh = thresh, genome = "hg38")
 #' }
 #'
 #' @export
-plot_marginal_coverage <- function(marginal_track, interval, peaks = NULL, expand = 1e3, show_thresh = TRUE, quantile_thresh = 0.9, min_umis = 8, genome = NULL, log_scale = TRUE) {
+plot_marginal_coverage <- function(marginal_track, interval, peaks = NULL, expand = 1e3, show_thresh = TRUE, quantile_thresh = 0.9, min_umis = 8, genome = NULL, seed = 60427, thresh = get_quantile_cov_thresh(marginal_track, quantile_thresh, min_umis, genome = genome, seed = seed), log_scale = TRUE) {
     if (!is.null(genome)) {
         gset_genome(genome)
     }
@@ -142,6 +174,10 @@ plot_marginal_coverage <- function(marginal_track, interval, peaks = NULL, expan
         as.data.frame() %>%
         gintervals.force_range()
 
+    if (nrow(scope) > 1) {
+        cli_alert_warning("More than one interval in the scope, taking the first one")
+        scope <- scope %>% slice(1)
+    }
 
     ggdata <- gextract(marginal_track, scope, colnames = "counts")
     if (!is.null(peaks)) {
@@ -163,7 +199,6 @@ plot_marginal_coverage <- function(marginal_track, interval, peaks = NULL, expan
     }
 
     if (show_thresh) {
-        thresh <- max(gquantiles(marginal_track, quantile_thresh), min_umis)
         p <- p + geom_hline(yintercept = thresh, color = "blue", linetype = "dashed")
     }
 
@@ -171,6 +206,8 @@ plot_marginal_coverage <- function(marginal_track, interval, peaks = NULL, expan
         p <- p +
             scale_y_log10()
     }
+
+    p <- p + ggtitle(glue("{scope$chrom}: {scope$start}-{scope$end}"))
 
     return(p)
 }
@@ -197,7 +234,7 @@ split_peaks_arbitrarily <- function(peaks, max_peak_size) {
 #' zero, and then correlating thr marginal coverage with simulated 'triangle' peaks starting at different offsets.
 #'
 #'
-#' @param marginal_track Name of the 'misha' track with the marginal coverage. You can create it using {.code import_atac_marginal}.
+#' @param marginal_track Name of the 'misha' track with the marginal coverage. You can create it using \code{import_atac_marginal}.
 #' @param peaks An intervals set with the peaks to split.
 #' @param target_size The target size of peaks.
 #' @param max_peak_size Peaks above this size would be splitted into smaller peaks.
