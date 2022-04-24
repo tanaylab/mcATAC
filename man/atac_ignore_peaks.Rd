@@ -21,6 +21,9 @@ Given a list of peaks to ignore, this will remove the given peaks from the {.cod
 }
 \examples{
 \dontrun{
-
+     max_peak_length <= 1000
+     peak_stats <- get_peak_coverage_stats(scatac, scale = 100)
+     too_long_peaks <- peak_stats$peak_name[peak_stats$len > max_peak_length]
+     scatac_filtered <- atac_ignore_peaks(scatac, too_long_peaks)
 }
 }
