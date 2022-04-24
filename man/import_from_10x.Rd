@@ -17,7 +17,8 @@ import_from_10x(
 }
 \arguments{
 \item{dir}{10x directory. Should have the following files: 'matrix.mtx', 'barcodes.tsv' and 'features.tsv'.
-See 'Cell Ranger Arc' for more details: https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/overview/welcome}
+If you used 'Cell Ranger ARC', this should be the 'outs/filtered_feature_bc_matrix' directory. \cr
+For more details see: https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/overview/welcome}
 
 \item{genome}{genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"}
 
