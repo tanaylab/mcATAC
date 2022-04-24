@@ -297,10 +297,10 @@ setMethod(
 #' @return
 #' @examples
 #' \dontrun{
-#'      max_peak_length <= 1000
-#'      peak_stats <- get_peak_coverage_stats(scatac, scale = 100)
-#'      too_long_peaks <- peak_stats$peak_name[peak_stats$len > max_peak_length]
-#'      scatac_filtered <- atac_ignore_peaks(scatac, too_long_peaks)
+#' max_peak_length <= 1000
+#' peak_stats <- get_peak_coverage_stats(scatac, scale = 100)
+#' too_long_peaks <- peak_stats$peak_name[peak_stats$len > max_peak_length]
+#' scatac_filtered <- atac_ignore_peaks(scatac, too_long_peaks)
 #' }
 #' @export
 atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
@@ -367,9 +367,9 @@ atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
 #' @return
 #' @examples
 #' \dontrun{
-#'      cs <- Matrix::colSums(scatac@mat)
-#'      big_cells <- names(cs)[which(cs >= quantile(cs, 0.98))]
-#'      scatac_filtered <- atac_ignore_cells(scatac, big_cells)
+#' cs <- Matrix::colSums(scatac@mat)
+#' big_cells <- names(cs)[which(cs >= quantile(cs, 0.98))]
+#' scatac_filtered <- atac_ignore_cells(scatac, big_cells)
 #' }
 #' @export
 atac_ignore_cells <- function(atac, ig_cells) {
@@ -379,11 +379,10 @@ atac_ignore_cells <- function(atac, ig_cells) {
         cli_alert_warning("Cells to ignore should be specified (they are either NULL or length 0), returning original object.")
         return(atac)
     }
-    atac@mat <- atac@mat[,cells_in]
+    atac@mat <- atac@mat[, cells_in]
     if (nrow(atac@ignore_pmat) > 0) {
-        atac@ignore_pmat <- atac@ignore_pmat[,cells_in]
-    }
-    else {
+        atac@ignore_pmat <- atac@ignore_pmat[, cells_in]
+    } else {
         atac@ignore_pmat <- methods::as(matrix(0, nrow = 0, ncol = ncol(atac@mat)), "dgCMatrix")
     }
     return(atac)
