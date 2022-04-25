@@ -25,9 +25,9 @@ Function for validating \code{pssm_path} and getting all/selected PSSM datasets 
 }
 \examples{
 \dontrun{
-     pssm_datasets <- get_available_pssms(return_datasets_only = TRUE)
-     all_pssms <- get_available_pssms()
-     all_pssms <- get_available_pssms(datasets_of_interest = pssm_datasets)
-     all_pssms_jaspar_homer <- get_available_pssms(datasets_of_interest = c('jaspar', 'homer'))
+pssm_datasets <- get_available_pssms(return_datasets_only = TRUE)
+all_pssms <- get_available_pssms()
+all_pssms <- get_available_pssms(datasets_of_interest = pssm_datasets)
+all_pssms_jaspar_homer <- get_available_pssms(datasets_of_interest = c("jaspar", "homer"))
 }
 }

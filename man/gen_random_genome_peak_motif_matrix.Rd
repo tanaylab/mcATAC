@@ -5,9 +5,9 @@
 \title{Generate random genome motif PSSM matrix}
 \usage{
 gen_random_genome_peak_motif_matrix(
-  num_peaks = 1e+05,
+  num_peaks = 100000,
   peak_width = 200,
-  bp_from_chrom_edge_to_avoid = 3e+06,
+  bp_from_chrom_edge_to_avoid = 3000000,
   datasets_of_interest = NULL,
   motif_regex = NULL,
   motif_tracks = NULL,
@@ -37,7 +37,9 @@ Generate random genome motif PSSM matrix
 }
 \examples{
 \dontrun{
-     d_vs_rg <- calculate_d_stats(pssm_fg = my_peak_motif_mat, pssm_bg <- random_genome_motif_mat,
-                               parallel = F)
+d_vs_rg <- calculate_d_stats(
+    pssm_fg = my_peak_motif_mat, pssm_bg <- random_genome_motif_mat,
+    parallel = F
+)
 }
 }

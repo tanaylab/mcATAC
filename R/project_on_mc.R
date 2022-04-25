@@ -28,7 +28,7 @@
 project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5, mc_size_eps_q = 0.1, id = NULL, description = NULL, rm_zero_peaks = TRUE) {
     assert_atac_object(atac)
     cell_to_metacell <- deframe(cell_to_metacell)
-    cell_to_metacell <- cell_to_metacell[cell_to_metacell %!in% c(-2,-1,0)] # make sure you don't have any outlier metacells
+    cell_to_metacell <- cell_to_metacell[cell_to_metacell %!in% c(-2, -1, 0)] # make sure you don't have any outlier metacells
     assert_that(all(names(cell_to_metacell) %in% colnames(atac@mat)))
     sc_mat <- atac@mat[, colnames(atac@mat) %in% names(cell_to_metacell), drop = FALSE]
     n_removed_cells <- ncol(atac@mat) - ncol(sc_mat)
@@ -107,7 +107,7 @@ project_atac_on_mc_from_h5ad <- function(atac, h5ad_file, min_int_frac = 0.5, me
         select(cell_id, metacell) %>%
         as_tibble()
     cell_to_metacell$metacell <- 1 + as.numeric(cell_to_metacell$metacell)
-    cell_to_metacell <- filter(cell_to_metacell, metacell %!in% c(-2,-1, 0))
+    cell_to_metacell <- filter(cell_to_metacell, metacell %!in% c(-2, -1, 0))
     # TODO: deal with cell metadata
     # TODO: test
 
