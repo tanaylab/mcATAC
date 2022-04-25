@@ -23,6 +23,6 @@ missing chromosomes/contigs
 }
 \examples{
 \dontrun{
-     peaks_fix <- fix_missing_chroms_in_peaks(sc_atac@peaks)
+peaks_fix <- fix_missing_chroms_in_peaks(sc_atac@peaks)
 }
 }

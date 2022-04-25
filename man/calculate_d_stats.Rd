@@ -23,7 +23,9 @@ Calculate Kolmogorov-Smirnov D statistics between two interval sets with motif e
 }
 \examples{
 \dontrun{
-     d_vs_rg <- calculate_d_stats(pssm_fg = my_peak_motif_mat, pssm_bg <- random_genome_motif_mat,
-                               parallel = F)
+d_vs_rg <- calculate_d_stats(
+    pssm_fg = my_peak_motif_mat, pssm_bg <- random_genome_motif_mat,
+    parallel = F
+)
 }
 }

@@ -34,7 +34,7 @@ Subset McATAC by certain clusters
 }
 \examples{
 \dontrun{
-   peak_cl_km <- gen_atac_peak_clust(atac_mc, k = 15)
-   atac_mc_subset <- subset_peak_clusters(atac_mc, cluster_membership = peak_cl_km, clusters_to_keep = c(4,5,8))
+peak_cl_km <- gen_atac_peak_clust(atac_mc, k = 15)
+atac_mc_subset <- subset_peak_clusters(atac_mc, cluster_membership = peak_cl_km, clusters_to_keep = c(4, 5, 8))
 }
 }

@@ -41,9 +41,11 @@ This function calculates aggregated log-PSSM energies (as derived by the misha p
 }
 \examples{
 \dontrun{
-     peak_motif_mat <- generate_motif_pssm_matrix(peak_set=head(scatac@peaks), 
-                               motif_regex = c("Bcl", "Atf"), 
-                               datasets_of_interest = c("homer", "jaspar", "jolma"),
-                               parallel = F)
+peak_motif_mat <- generate_motif_pssm_matrix(
+    peak_set = head(scatac@peaks),
+    motif_regex = c("Bcl", "Atf"),
+    datasets_of_interest = c("homer", "jaspar", "jolma"),
+    parallel = F
+)
 }
 }
