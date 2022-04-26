@@ -12,7 +12,7 @@ plot_atac_rna(
   peak = NULL,
   max_dist_to_promoter_peak = 500,
   normalize_atac = TRUE,
-  eps_rna = 0.00001,
+  eps_rna = 1e-05,
   tss_intervals = "intervs.global.tss",
   plot_object_id = TRUE
 )
