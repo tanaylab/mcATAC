@@ -172,12 +172,15 @@ name_enhancers <- function(atac) {
         cli_abort("Class of {.var atac} is not recognized (should be either ScATAC, McATAC or PeakIntervals object).")
     }
     tad_names <- gintervals.load("intervs.global.tad_names")
-    nei_peaks_tads <- gintervals.neighbors(tad_names, as.data.frame(peaks[,1:3]), mindist = 0, maxdist = 0, maxneighbors = 1e+3)
+    nei_peaks_tads <- gintervals.neighbors(tad_names, as.data.frame(peaks), mindist = 0, maxdist = 0, maxneighbors = 1e+3)
     start_cols <- grep('start', colnames(nei_peaks_tads))
+    print(head(nei_peaks_tads))
     dist_diff <- nei_peaks_tads[,start_cols[[2]]] - nei_peaks_tads[,start_cols[[1]]]
     enh_name <- setNames(stringr::str_c(nei_peaks_tads$tad_name, as.character(round(dist_diff, -3)/1e+3), sep = "_"), nei_peaks_tads$peak_name)
     enh_name[peaks$peak_name[peaks$peak_name %!in% names(enh_name)]] <- NA
+    print(head(enh_name))
     peaks$enh_name <- enh_name[match(peaks$peak_name, names(enh_name))]
+    print(head(peaks))
     if (cl[[1]] %in% c('ScATAC', 'McATAC')) {
         atac@peaks <- peaks
     }
