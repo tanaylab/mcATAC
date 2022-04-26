@@ -153,7 +153,6 @@ get_gene_body_df <- function(tss, exons) {
 #' Name ATAC peaks from TAD names
 #'
 #' @param atac a McATAC or ScATAC or PeakIntervals object
-#'
 #' @return the original \code{atac} object, with an added field \code{enh_name} to the relevant PeakIntervals dataframe
 #' @examples
 #' \dontrun{
@@ -162,10 +161,25 @@ get_gene_body_df <- function(tss, exons) {
 #' }
 #' @export
 name_enhancers <- function(atac) {
-    if (!methods::is(atac, "ATAC")) {
-        cli_abort("{.field atac} is not an ScATAC or McATAC object. You can annotate intervals directly using the {.code annotate_intervals} function.")
+    cl <- class(atac)
+    if (cl[[1]] %in% c('ScATAC', 'McATAC')) {
+        peaks <- atac@peaks
     }
-    
-    atac@peaks <- annotate_intervals(atac@peaks, atac@genome)
+    else {
+        cli_abort("Class of {.var atac} is not recognized (should be either ScATAC, McATAC or PeakIntervals object).")
+    }
+    tad_names <- gintervals.load("intervs.global.tad_names")
+    nei_peaks_tads <- gintervals.neighbors(tad_names, as.data.frame(peaks[,1:3]), mindist = 0, maxdist = 0, maxneighbors = 1e+3)
+    start_cols <- grep('start', colnames(nei_peaks_tads))
+    dist_diff <- nei_peaks_tads[,start_cols[[2]]] - nei_peaks_tads[,start_cols[[1]]]
+    enh_name <- setNames(stringr::str_c(nei_peaks_tads$tad_name, as.character(round(dist_diff, -3)/1e+3), sep = "_"), nei_peaks_tads$peak_name)
+    enh_name[peaks$peak_name[peaks$peak_name %!in% names(enh_name)]] <- NA
+    peaks$enh_name <- enh_name[match(peaks$peak_name, names(enh_name))]
+    if (cl[[1]] %in% c('ScATAC', 'McATAC')) {
+        atac@peaks <- peaks
+    }
+    else if (cl[[1]] == "PeakIntervals") {
+        atac <- peaks
+    }
     return(atac)
 }
