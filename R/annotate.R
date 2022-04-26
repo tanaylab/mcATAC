@@ -165,6 +165,9 @@ name_enhancers <- function(atac) {
     if (cl[[1]] %in% c('ScATAC', 'McATAC')) {
         peaks <- atac@peaks
     }
+    else if (cl[[1]] == "PeakIntervals") {
+        peaks <- atac
+    }
     else {
         cli_abort("Class of {.var atac} is not recognized (should be either ScATAC, McATAC or PeakIntervals object).")
     }
