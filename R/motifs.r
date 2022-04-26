@@ -1,6 +1,6 @@
 #' Generate peak-motif matrix
 #'
-#' This function calculates aggregated log-PSSM energies (as derived by the misha package's \code{create_pssm_energy} module) for a set of peaks 
+#' This function calculates aggregated log-PSSM energies (as derived by the misha package's \code{create_pssm_energy} module) for a set of peaks
 #' (default - all peaks in the dataset) and for a set of motifs (default - all available)
 #' 
 #' @param atac - an ScATAC/McATAC or PeakIntervals object
@@ -14,10 +14,12 @@
 #' @return a matrix of peaks (rows) vs. aggregated motif energies (columns)
 #' @examples
 #' \dontrun{
-#'      peak_motif_mat <- generate_motif_pssm_matrix(peak_set=head(scatac@peaks), 
-#'                                motif_regex = c("Bcl", "Atf"), 
-#'                                datasets_of_interest = c("homer", "jaspar", "jolma"),
-#'                                parallel = F)
+#' peak_motif_mat <- generate_motif_pssm_matrix(
+#'     peak_set = head(scatac@peaks),
+#'     motif_regex = c("Bcl", "Atf"),
+#'     datasets_of_interest = c("homer", "jaspar", "jolma"),
+#'     parallel = F
+#' )
 #' }
 #' @export
 generate_motif_pssm_matrix <- function(atac = NULL, 
@@ -53,24 +55,23 @@ generate_motif_pssm_matrix <- function(atac = NULL,
         pssm_filt_inds <- lapply(all_pssms[["keys"]], function(kdf) {
             sapply(motif_regex, function(mre) {
                 kdf$key[grep(mre, kdf$track, ignore.case = TRUE)]
-            }) %>% unlist
+            }) %>% unlist()
         })
-        keys_filt <- lapply(seq_along(all_pssms[["keys"]]), function (i) {
+        keys_filt <- lapply(seq_along(all_pssms[["keys"]]), function(i) {
             filter(all_pssms[["keys"]][[i]], key %in% pssm_filt_inds[[i]])
         })
-        datasets_filt <- lapply(seq_along(all_pssms[["datasets"]]), function (i) {
+        datasets_filt <- lapply(seq_along(all_pssms[["datasets"]]), function(i) {
             filter(all_pssms[["datasets"]][[i]], key %in% pssm_filt_inds[[i]])
         })
         names(keys_filt) <- names(all_pssms[["keys"]])
         names(datasets_filt) <- names(all_pssms[["datasets"]])
         pssms <- list("keys" = keys_filt, "datasets" = datasets_filt)
-    }
-    else {
+    } else {
         cli_alert_info("No motif tracks or regular expressions were specified. Extracting PSSMs for all available motifs.")
         pssms <- get_available_pssms(pssm_path, datasets_of_interest)
     }
-    peak_mids <- round((peaks$end + peaks$start)/2)
-    peaks <- mutate(peaks, start = round(peak_mids-peak_width/2), end = round(peak_mids+peak_width/2))
+    peak_mids <- round((peaks$end + peaks$start) / 2)
+    peaks <- mutate(peaks, start = round(peak_mids - peak_width / 2), end = round(peak_mids + peak_width / 2))
     peaks <- fix_missing_chroms_in_peaks(peaks)
     if (!parallel) {nc <- 2}
     res <- mapply(FUN = function(kdf, n) {
@@ -92,20 +93,22 @@ generate_motif_pssm_matrix <- function(atac = NULL,
     trks_motifs <- res
     if (length(trks_motifs) >= 1e+2) {
         divs <- 1:4
-        trk_inds <- unlist(do.call('c', lapply(divs, function(i) {
-                ifelse(as.numeric(i) != max(divs), 
-                        return(rep.int(x = i, times = ceiling(length(trks_motifs)/length(divs)))), 
-                        return(rep.int(x = i, times = floor(length(trks_motifs)/length(divs))))
-                               )})
-                    ))
-        df_list <- lapply(sort(unique(trk_inds)), function(u) gextract(trks_motifs[trk_inds == u], 
-                                                                        intervals=peaks, 
-                                                                        iterator=peaks, 
-                                                                        colnames = gsub(paste0("_", suffix), "", trks_motifs[trk_inds == u])))
-        peak_motif_matrix <- plyr::join_all(df_list, by=c('chrom', 'start', 'end'), type='left')
-    }
-    else {
-        peak_motif_matrix <- gextract(res, intervals=peaks, iterator=peaks, colnames = gsub(paste0("_", suffix), "", trks_motifs))
+        trk_inds <- unlist(do.call("c", lapply(divs, function(i) {
+            ifelse(as.numeric(i) != max(divs),
+                return(rep.int(x = i, times = ceiling(length(trks_motifs) / length(divs)))),
+                return(rep.int(x = i, times = floor(length(trks_motifs) / length(divs))))
+            )
+        })))
+        df_list <- lapply(sort(unique(trk_inds)), function(u) {
+            gextract(trks_motifs[trk_inds == u],
+                intervals = peaks,
+                iterator = peaks,
+                colnames = gsub(paste0("_", suffix), "", trks_motifs[trk_inds == u])
+            )
+        })
+        peak_motif_matrix <- plyr::join_all(df_list, by = c("chrom", "start", "end"), type = "left")
+    } else {
+        peak_motif_matrix <- gextract(res, intervals = peaks, iterator = peaks, colnames = gsub(paste0("_", suffix), "", trks_motifs))
     }
     withr::defer(purrr::walk(traks_motifs, gtrack.rm, force=TRUE))
     peak_motif_matrix <- peak_motif_matrix[peak_motif_matrix$end - peak_motif_matrix$start >= peak_width,]
@@ -123,31 +126,35 @@ generate_motif_pssm_matrix <- function(atac = NULL,
 #'      random_genome_motifs <- gen_random_genome_peak_motif_matrix(num_peaks = 5e+4, datasets_of_interest = get_available_pssms(return_datasets_only=TRUE))
 #' }
 #' @export
-gen_random_genome_peak_motif_matrix <- function(num_peaks = 1e+5, 
-                                                peak_width = 2e+2, 
-                                                bp_from_chrom_edge_to_avoid = 3e+6, 
+gen_random_genome_peak_motif_matrix <- function(num_peaks = 1e+5,
+                                                peak_width = 2e+2,
+                                                bp_from_chrom_edge_to_avoid = 3e+6,
                                                 datasets_of_interest = NULL,
                                                 motif_regex = NULL,
                                                 motif_tracks = NULL,
                                                 parallel = TRUE) {
-    chrom_lens = apply(ALLGENOME[[1]][,2:3], 1, diff)
-    chrom_fracs = setNames(chrom_lens/sum(chrom_lens), ALLGENOME[[1]][,1])
-    sample_seqs = mapply(chrom_fracs, names(chrom_fracs), chrom_lens, FUN = function(x, y, z) {
-        chrom = rep(y, round(x*num_peaks)); start = sample.int(n = z, size =length(chrom)); end = start + peak_width;
+    chrom_lens <- apply(ALLGENOME[[1]][, 2:3], 1, diff)
+    chrom_fracs <- setNames(chrom_lens / sum(chrom_lens), ALLGENOME[[1]][, 1])
+    sample_seqs <- mapply(chrom_fracs, names(chrom_fracs), chrom_lens, FUN = function(x, y, z) {
+        chrom <- rep(y, round(x * num_peaks))
+        start <- sample.int(n = z, size = length(chrom))
+        end <- start + peak_width
         return(as.data.frame(rbind(chrom, start, end)))
     })
-    sample_seqs = as.data.frame(do.call('rbind', lapply(sample_seqs, t)))
-    sample_seqs[,2:3] = apply(sample_seqs[,2:3], 2, as.numeric)
-    sample_seqs = sample_seqs[with(sample_seqs, order(chrom, start, end)),]
-    end_shift <- ALLGENOME[[1]][match(sample_seqs$chrom, ALLGENOME[[1]][,1]),3] - bp_from_chrom_edge_to_avoid
-    sample_seqs = sample_seqs[sample_seqs$start >= bp_from_chrom_edge_to_avoid & sample_seqs$end <= end_shift,]
+    sample_seqs <- as.data.frame(do.call("rbind", lapply(sample_seqs, t)))
+    sample_seqs[, 2:3] <- apply(sample_seqs[, 2:3], 2, as.numeric)
+    sample_seqs <- sample_seqs[with(sample_seqs, order(chrom, start, end)), ]
+    end_shift <- ALLGENOME[[1]][match(sample_seqs$chrom, ALLGENOME[[1]][, 1]), 3] - bp_from_chrom_edge_to_avoid
+    sample_seqs <- sample_seqs[sample_seqs$start >= bp_from_chrom_edge_to_avoid & sample_seqs$end <= end_shift, ]
     sample_seqs <- fix_missing_chroms_in_peaks(sample_seqs)
-    rg_peak_motif_mat <- generate_motif_pssm_matrix(peak_set = sample_seqs, 
-                                peak_width = peak_width, 
-                                motif_tracks = motif_tracks,
-                                datasets_of_interest = datasets_of_interest, 
-                                motif_regex = motif_regex,
-                                parallel = parallel)
+    rg_peak_motif_mat <- generate_motif_pssm_matrix(
+        peak_set = sample_seqs,
+        peak_width = peak_width,
+        motif_tracks = motif_tracks,
+        datasets_of_interest = datasets_of_interest,
+        motif_regex = motif_regex,
+        parallel = parallel
+    )
     return(rg_peak_motif_mat)
 }
 
@@ -163,7 +170,7 @@ gen_random_genome_peak_motif_matrix <- function(num_peaks = 1e+5,
 #' @param fg_clustering a vector of cluster assignments for the foreground peaks (e.g. from \code{gen_atac_peak_clust})
 #' @param parallel (optional) - whether to use parallelize computations
 #' @param nc (optional) - number of cores for parallel computations
-#' @inheritParams ks.test
+#' @inheritParams stats::ks.test
 #' @return if \code{fg_clustering == TRUE}, returns a matrix of clusters x motifs (rows x columns) with the D-statistic for each combination
 #' @examples
 #' \dontrun{      
@@ -179,7 +186,7 @@ calculate_d_stats <- function(pssm_fg, pssm_bg, fg_clustering = NULL, parallel =
     cols_bg = grep('chrom|start|end$|interval', colnames(pssm_bg), ignore.case = T, invert = T, value = T)
     cols_both <- intersect(cols_fg, cols_bg)
     if (!parallel) {
-        nc <- pmax(2, round(0.1*nc))
+        nc <- pmax(2, round(0.1 * nc))
     }
     if (!is.null(fg_clustering)) {
         ks_test_results <- parallel::mclapply(cols_both, FUN = function(x,i) {
@@ -224,10 +231,10 @@ get_peaks_for_pssm <- function(atac) {
 #' @return either: 1) (default) a list containing a list of the names and a list of corresponding dataframes of the motif datasets available, OR 2) if \code{return_datasets_only == TRUE}, just the names of the available motif datasets
 #' @examples
 #' \dontrun{
-#'      pssm_datasets <- get_available_pssms(return_datasets_only = TRUE)
-#'      all_pssms <- get_available_pssms()
-#'      all_pssms <- get_available_pssms(datasets_of_interest = pssm_datasets)
-#'      all_pssms_jaspar_homer <- get_available_pssms(datasets_of_interest = c('jaspar', 'homer'))
+#' pssm_datasets <- get_available_pssms(return_datasets_only = TRUE)
+#' all_pssms <- get_available_pssms()
+#' all_pssms <- get_available_pssms(datasets_of_interest = pssm_datasets)
+#' all_pssms_jaspar_homer <- get_available_pssms(datasets_of_interest = c("jaspar", "homer"))
 #' }
 #' @export
 get_available_pssms <- function(pssm_path = NULL, datasets_of_interest = NULL, return_datasets_only = FALSE) {
@@ -244,8 +251,8 @@ get_available_pssms <- function(pssm_path = NULL, datasets_of_interest = NULL, r
         cli_abort("The specified {.var pssm_path} directory ({.val pssm_path}) does not exist.")
     }
     pssm_file_list <- list.files(pssm_path)
-    motif_keys <- grep(".key", pssm_file_list, value=TRUE)
-    motif_datasets <- grep(".data", pssm_file_list, value=TRUE)
+    motif_keys <- grep(".key", pssm_file_list, value = TRUE)
+    motif_datasets <- grep(".data", pssm_file_list, value = TRUE)
     unique_keys <- sort(unique(gsub(".key", "", motif_keys)))
     unique_datasets <- sort(unique(gsub(".data", "", motif_datasets)))
     good_keys <- unique_keys[!is.na(match(unique_keys, unique_datasets))]
@@ -258,8 +265,7 @@ get_available_pssms <- function(pssm_path = NULL, datasets_of_interest = NULL, r
     if (!is.null(datasets_of_interest)) {
         pssm_datasets_in <- good_keys[good_keys %in% datasets_of_interest]
         pssm_datasets_out <- good_keys[good_keys %!in% datasets_of_interest]
-    }
-    else {
+    } else {
         pssm_datasets_in <- good_keys
         pssm_datasets_out <- c()
     }
@@ -281,10 +287,10 @@ get_available_pssms <- function(pssm_path = NULL, datasets_of_interest = NULL, r
 #' @return the same object with fake peaks for missing chromosomes
 #' @examples
 #' \dontrun{
-#'      peaks_fix <- fix_missing_chroms_in_peaks(sc_atac@peaks)
+#' peaks_fix <- fix_missing_chroms_in_peaks(sc_atac@peaks)
 #' }
 fix_missing_chroms_in_peaks <- function(peaks) {
-    chroms_missing = ALLGENOME[[1]]$chrom[ALLGENOME[[1]]$chrom %!in% unique(peaks$chrom)]
+    chroms_missing <- ALLGENOME[[1]]$chrom[ALLGENOME[[1]]$chrom %!in% unique(peaks$chrom)]
     if (length(chroms_missing) > 0) {
         fake_seqs <- gintervals.all() %>%
                filter(chrom %!in% peaks$chrom) %>%

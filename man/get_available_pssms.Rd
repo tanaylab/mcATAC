@@ -18,16 +18,16 @@ get_available_pssms(
 \item{return_datasets_only}{(optional) - whether to return only available pssm datasets}
 }
 \value{
-a matrix of peaks (rows) vs. aggregated motif energies (columns)
+either: 1) (default) a list containing a list of the names and a list of corresponding dataframes of the motif datasets available, OR 2) if \code{return_datasets_only == TRUE}, just the names of the available motif datasets
 }
 \description{
 Function for validating \code{pssm_path} and getting all/selected PSSM datasets and tracks from path/gdb
 }
 \examples{
 \dontrun{
-     pssm_datasets <- get_available_pssms(return_datasets_only = TRUE)
-     all_pssms <- get_available_pssms()
-     all_pssms <- get_available_pssms(datasets_of_interest = pssm_datasets)
-     all_pssms_jaspar_homer <- get_available_pssms(datasets_of_interest = c('jaspar', 'homer'))
+pssm_datasets <- get_available_pssms(return_datasets_only = TRUE)
+all_pssms <- get_available_pssms()
+all_pssms <- get_available_pssms(datasets_of_interest = pssm_datasets)
+all_pssms_jaspar_homer <- get_available_pssms(datasets_of_interest = c("jaspar", "homer"))
 }
 }

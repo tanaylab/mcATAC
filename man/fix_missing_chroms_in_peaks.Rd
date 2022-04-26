@@ -2,10 +2,7 @@
 % Please edit documentation in R/motifs.r
 \name{fix_missing_chroms_in_peaks}
 \alias{fix_missing_chroms_in_peaks}
-\title{Utility function that makes fake intervals for chromosome/contig not present in an interval set
-Explanation: as a validation step, gextract requires that every chromosome/contig in the ALLGENOME
-variable also be present in the track directory, so we add fake sequences in all
-missing chromosomes/contigs}
+\title{Utility function that makes fake intervals for chromosome/contig not present in an interval set}
 \usage{
 fix_missing_chroms_in_peaks(peaks)
 }
@@ -16,13 +13,10 @@ fix_missing_chroms_in_peaks(peaks)
 the same object with fake peaks for missing chromosomes
 }
 \description{
-Utility function that makes fake intervals for chromosome/contig not present in an interval set
-Explanation: as a validation step, gextract requires that every chromosome/contig in the ALLGENOME
-variable also be present in the track directory, so we add fake sequences in all
-missing chromosomes/contigs
+Explanation: as a validation step, gextract requires that every chromosome/contig in the ALLGENOME variable also be present in the track directory, so we add fake sequences in all missing chromosomes/contigs
 }
 \examples{
 \dontrun{
-     peaks_fix <- fix_missing_chroms_in_peaks(sc_atac@peaks)
+peaks_fix <- fix_missing_chroms_in_peaks(sc_atac@peaks)
 }
 }
