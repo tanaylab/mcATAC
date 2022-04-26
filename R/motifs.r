@@ -117,7 +117,7 @@ generate_motif_pssm_matrix <- function(atac = NULL,
 
 #' Generate random genome motif PSSM matrix
 #'
-#' @param num_peaks total number of intervals (will be divided proportionately between chromosomes) in background
+#' @param num_peaks total number of intervals (will be divided proportionately between chromosomes) to use as background
 #' @param bp_from_chrom_edge_to_avoid regions (in bp) from edges of chromosomes to avoid sampling from (e.g. avoid acrocentric centromeres)
 #' @inheritParams generate_motif_pssm_matrix
 #' @return a matrix of peaks (rows) vs. aggregated motif energies (columns)
