@@ -130,7 +130,7 @@ call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, spli
     df <- gscreen(glue("{marginal_track} >= thresh"), intervals = gintervals.all())
 
     if (split_peaks) {
-        df <- split_long_peaks("pbmc_atac.marginal", peaks = df, target_size = target_size, max_peak_size = max_peak_size, very_long = very_long, min_peak_size = min_peak_size)
+        df <- split_long_peaks(marginal_track, peaks = df, target_size = target_size, max_peak_size = max_peak_size, very_long = very_long, min_peak_size = min_peak_size)
     }
 
     return(df)
