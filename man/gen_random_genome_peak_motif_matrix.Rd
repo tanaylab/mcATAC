@@ -15,7 +15,7 @@ gen_random_genome_peak_motif_matrix(
 )
 }
 \arguments{
-\item{num_peaks}{total number of intervals (will be divided proportionately between chromosomes) in background}
+\item{num_peaks}{total number of intervals (will be divided proportionately between chromosomes) to use as background}
 
 \item{peak_width}{(optional) - size of region around peak centers to extract motif energies for}
 
