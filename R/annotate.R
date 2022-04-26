@@ -148,3 +148,24 @@ get_gene_body_df <- function(tss, exons) {
     gene_body_df <- gene_body_df[with(gene_body_df, order(chrom, start)), ]
     return(gene_body_df)
 }
+
+
+#' Name ATAC peaks from TAD names
+#'
+#' @param atac a McATAC or ScATAC or PeakIntervals object
+#'
+#' @return the original \code{atac} object, with an added field \code{enh_name} to the relevant PeakIntervals dataframe
+#' @examples
+#' \dontrun{
+#'      atac_mc <- name_enhancers(atac_mc)
+#'      my_peaks <- name_enhancers(my_peaks)
+#' }
+#' @export
+name_enhancers <- function(atac) {
+    if (!methods::is(atac, "ATAC")) {
+        cli_abort("{.field atac} is not an ScATAC or McATAC object. You can annotate intervals directly using the {.code annotate_intervals} function.")
+    }
+    
+    atac@peaks <- annotate_intervals(atac@peaks, atac@genome)
+    return(atac)
+}
