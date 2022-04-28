@@ -40,11 +40,11 @@ background distribution (applicable when looking for motif enrichment; for anti-
 see ks.test documentation for further details)
 }
 \examples{
-\dontrun{      
-   pssm_fg <- generate_motif_pssm_matrix(my_atac_mc, datasets_of_interest = "jaspar")
-   pssm_bg <- gen_random_genome_peak_motif_matrix(num_peaks = nrow(my_atac_mc@peaks), datasets_of_interest = "jaspar")
-   d_vs_rg <- calculate_d_stats(pssm_fg, pssm_bg)
-   peak_clust <- gen_atac_peak_clust(my_atac_mc, k = 12)
-   d_vs_rg_cl <- calculate_d_stats(pssm_fg, pssm_bg, fg_clustering = peak_clust)
+\dontrun{
+pssm_fg <- generate_motif_pssm_matrix(my_atac_mc, datasets_of_interest = "jaspar")
+pssm_bg <- gen_random_genome_peak_motif_matrix(num_peaks = nrow(my_atac_mc@peaks), datasets_of_interest = "jaspar")
+d_vs_rg <- calculate_d_stats(pssm_fg, pssm_bg)
+peak_clust <- gen_atac_peak_clust(my_atac_mc, k = 12)
+d_vs_rg_cl <- calculate_d_stats(pssm_fg, pssm_bg, fg_clustering = peak_clust)
 }
 }

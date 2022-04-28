@@ -2,7 +2,7 @@
 #'
 #' This function calculates aggregated log-PSSM energies (as derived by the misha package's \code{create_pssm_energy} module) for a set of peaks
 #' (default - all peaks in the dataset) and for a set of motifs (default - all available)
-#' 
+#'
 #' @param atac - an ScATAC/McATAC or PeakIntervals object
 #' @param peak_width (optional) - size of region around peak centers to extract motif energies for
 #' @param pssm_path (optional) - path to directory containing misha-formatted pssm files (e.g. \code{motifs.key} and \code{motifs.data})
@@ -22,18 +22,18 @@
 #' )
 #' }
 #' @export
-generate_motif_pssm_matrix <- function(atac = NULL, 
-                                        peak_set = NULL, 
-                                        peak_width = 200, 
-                                        pssm_path = NULL, 
-                                        datasets_of_interest = NULL, 
-                                        motif_tracks = NULL, 
-                                        motif_regex = NULL, 
-                                        parallel = FALSE,
-                                        nc = parallel::detectCores()) {
+generate_motif_pssm_matrix <- function(atac = NULL,
+                                       peak_set = NULL,
+                                       peak_width = 200,
+                                       pssm_path = NULL,
+                                       datasets_of_interest = NULL,
+                                       motif_tracks = NULL,
+                                       motif_regex = NULL,
+                                       parallel = FALSE,
+                                       nc = parallel::detectCores()) {
     cli_alert_warning("The runtime of this function call may take several minutes, depending on the numbers of peaks and motifs evaluated, and the number of processors available. Consider running it in a separate terminal and saving the output.")
     withr::local_options(list(gmax.data.size = 1e8))
-    suffix <- stringi::stri_rand_strings(1,5)
+    suffix <- stringi::stri_rand_strings(1, 5)
     peaks <- get_peaks_for_pssm(atac)
     if (!is.null(motif_tracks)) {
         tracks_exist <- sapply(motif_tracks, gtrack.exists)
@@ -44,13 +44,11 @@ generate_motif_pssm_matrix <- function(atac = NULL,
         }
         if (length(tracks) == 0) {
             cli_abort("No tracks matching {.var motif_tracks} were found")
-        }
-        else {
+        } else {
             peak_motif_matrix <- gextract(tracks, intervals = peaks, iterator = peaks, colnames = tracks)
             return(peak_motif_matrix)
         }
-    }
-    else if (!is.null(motif_regex)) {
+    } else if (!is.null(motif_regex)) {
         all_pssms <- get_available_pssms(pssm_path, datasets_of_interest)
         pssm_filt_inds <- lapply(all_pssms[["keys"]], function(kdf) {
             sapply(motif_regex, function(mre) {
@@ -73,22 +71,28 @@ generate_motif_pssm_matrix <- function(atac = NULL,
     peak_mids <- round((peaks$end + peaks$start) / 2)
     peaks <- mutate(peaks, start = round(peak_mids - peak_width / 2), end = round(peak_mids + peak_width / 2))
     peaks <- fix_missing_chroms_in_peaks(peaks)
-    if (!parallel) {nc <- 2}
+    if (!parallel) {
+        nc <- 2
+    }
     res <- mapply(FUN = function(kdf, n) {
-                parallel::mcmapply(FUN = function(.x, .y) {
-                    if (!dir.exists(file.path(GWD, n))) {dir.create(file.path(GWD, n))}
-                    track_name <- paste0(n, ".", gsub("-|\\||\\.", "_", .y), "_", suffix)
-                    if (!gtrack.exists(track_name)) {
-                            gtrack.create_pwm_energy(track = track_name, 
-                                                description = glue::glue("Temporary track created for {track_name}"), 
-                                                pssmset = n, 
-                                                pssmid = .x, 
-                                                prior = 0.01, 
-                                                iterator = peaks)
-                    }
-                    return(track_name)
-                }, kdf$key, kdf$track, mc.cores = max(1, nc-1))
-            }, pssms[["keys"]], names(pssms[["keys"]])) %>% unlist
+        parallel::mcmapply(FUN = function(.x, .y) {
+            if (!dir.exists(file.path(GWD, n))) {
+                dir.create(file.path(GWD, n))
+            }
+            track_name <- paste0(n, ".", gsub("-|\\||\\.", "_", .y), "_", suffix)
+            if (!gtrack.exists(track_name)) {
+                gtrack.create_pwm_energy(
+                    track = track_name,
+                    description = glue::glue("Temporary track created for {track_name}"),
+                    pssmset = n,
+                    pssmid = .x,
+                    prior = 0.01,
+                    iterator = peaks
+                )
+            }
+            return(track_name)
+        }, kdf$key, kdf$track, mc.cores = max(1, nc - 1))
+    }, pssms[["keys"]], names(pssms[["keys"]])) %>% unlist()
     gdb.reload()
     trks_motifs <- res
     if (length(trks_motifs) >= 1e+2) {
@@ -110,8 +114,8 @@ generate_motif_pssm_matrix <- function(atac = NULL,
     } else {
         peak_motif_matrix <- gextract(res, intervals = peaks, iterator = peaks, colnames = gsub(paste0("_", suffix), "", trks_motifs))
     }
-    withr::defer(purrr::walk(traks_motifs, gtrack.rm, force=TRUE))
-    peak_motif_matrix <- peak_motif_matrix[peak_motif_matrix$end - peak_motif_matrix$start >= peak_width,]
+    withr::defer(purrr::walk(traks_motifs, gtrack.rm, force = TRUE))
+    peak_motif_matrix <- peak_motif_matrix[peak_motif_matrix$end - peak_motif_matrix$start >= peak_width, ]
     return(peak_motif_matrix)
 }
 
@@ -123,7 +127,7 @@ generate_motif_pssm_matrix <- function(atac = NULL,
 #' @return a matrix of peaks (rows) vs. aggregated motif energies (columns)
 #' @examples
 #' \dontrun{
-#'      random_genome_motifs <- gen_random_genome_peak_motif_matrix(num_peaks = 5e+4, datasets_of_interest = get_available_pssms(return_datasets_only=TRUE))
+#' random_genome_motifs <- gen_random_genome_peak_motif_matrix(num_peaks = 5e+4, datasets_of_interest = get_available_pssms(return_datasets_only = TRUE))
 #' }
 #' @export
 gen_random_genome_peak_motif_matrix <- function(num_peaks = 1e+5,
@@ -161,9 +165,9 @@ gen_random_genome_peak_motif_matrix <- function(num_peaks = 1e+5,
 
 #' Calculate Kolmogorov-Smirnov D statistics between two interval sets with motif energies
 #'
-#' This function does a one-sided KS test between a foreground set of peaks (\code{pssm_fg}) and a background set \code{pssm_bg}. 
-#' The option \code{alternative == "less"}, checks the null hypothesis that the foreground distribution is not less than the 
-#' background distribution (applicable when looking for motif enrichment; for anti-enrichment, \code{alternative == 'greater'}, 
+#' This function does a one-sided KS test between a foreground set of peaks (\code{pssm_fg}) and a background set \code{pssm_bg}.
+#' The option \code{alternative == "less"}, checks the null hypothesis that the foreground distribution is not less than the
+#' background distribution (applicable when looking for motif enrichment; for anti-enrichment, \code{alternative == 'greater'},
 #' see ks.test documentation for further details)
 #' @param pssm_fg motif energies calculated for a certain set of motifs on a PeakIntervals/ScATAC/McATAC object
 #' @param pssm_bg a background set of intervals (e.g. random genome, all ENCODE enhancers etc.) that include all/subset of the motifs (columns) in pssm_fg
@@ -173,32 +177,33 @@ gen_random_genome_peak_motif_matrix <- function(num_peaks = 1e+5,
 #' @inheritParams stats::ks.test
 #' @return if \code{fg_clustering == TRUE}, returns a matrix of clusters x motifs (rows x columns) with the D-statistic for each combination
 #' @examples
-#' \dontrun{      
-#'    pssm_fg <- generate_motif_pssm_matrix(my_atac_mc, datasets_of_interest = "jaspar")
-#'    pssm_bg <- gen_random_genome_peak_motif_matrix(num_peaks = nrow(my_atac_mc@peaks), datasets_of_interest = "jaspar")
-#'    d_vs_rg <- calculate_d_stats(pssm_fg, pssm_bg)
-#'    peak_clust <- gen_atac_peak_clust(my_atac_mc, k = 12)
-#'    d_vs_rg_cl <- calculate_d_stats(pssm_fg, pssm_bg, fg_clustering = peak_clust)
+#' \dontrun{
+#' pssm_fg <- generate_motif_pssm_matrix(my_atac_mc, datasets_of_interest = "jaspar")
+#' pssm_bg <- gen_random_genome_peak_motif_matrix(num_peaks = nrow(my_atac_mc@peaks), datasets_of_interest = "jaspar")
+#' d_vs_rg <- calculate_d_stats(pssm_fg, pssm_bg)
+#' peak_clust <- gen_atac_peak_clust(my_atac_mc, k = 12)
+#' d_vs_rg_cl <- calculate_d_stats(pssm_fg, pssm_bg, fg_clustering = peak_clust)
 #' }
 #' @export
 calculate_d_stats <- function(pssm_fg, pssm_bg, fg_clustering = NULL, parallel = TRUE, alternative = "less", nc = parallel::detectCores()) {
-    cols_fg = grep('chrom|start|end$|interval', colnames(pssm_fg), ignore.case = T, invert = T, value = T)
-    cols_bg = grep('chrom|start|end$|interval', colnames(pssm_bg), ignore.case = T, invert = T, value = T)
+    cols_fg <- grep("chrom|start|end$|interval", colnames(pssm_fg), ignore.case = T, invert = T, value = T)
+    cols_bg <- grep("chrom|start|end$|interval", colnames(pssm_bg), ignore.case = T, invert = T, value = T)
     cols_both <- intersect(cols_fg, cols_bg)
     if (!parallel) {
         nc <- pmax(2, round(0.1 * nc))
     }
     if (!is.null(fg_clustering)) {
-        ks_test_results <- parallel::mclapply(cols_both, FUN = function(x,i) {
-            return(tapply(x[,i], fg_clustering, function(y) suppressWarnings(ks.test(y, pssm_bg[,i], alternative = alternative))))
+        ks_test_results <- parallel::mclapply(cols_both, FUN = function(x, i) {
+            return(tapply(x[, i], fg_clustering, function(y) suppressWarnings(ks.test(y, pssm_bg[, i], alternative = alternative))))
         }, mc.cores = nc, x = pssm_fg)
         ks_d <- sapply(ks_test_results, function(x) sapply(x, function(y) y$statistic))
         colnames(ks_d) <- cols_both
-    }
-    else {
-        ks_test_results <- parallel::mclapply(cols_both, function(x) 
-                                {ks.test(x = pssm_fg[,x], y = pssm_bg[,x], alternative = alternative)}, 
-                                mc.cores = nc)
+    } else {
+        ks_test_results <- parallel::mclapply(cols_both, function(x) {
+            ks.test(x = pssm_fg[, x], y = pssm_bg[, x], alternative = alternative)
+        },
+        mc.cores = nc
+        )
         ks_d <- setNames(sapply(ks_test_results, function(x) x$statistic), cols_both)
     }
     return(ks_d)
@@ -211,13 +216,11 @@ calculate_d_stats <- function(pssm_fg, pssm_bg, fg_clustering = NULL, parallel =
 #' @noRd
 get_peaks_for_pssm <- function(atac) {
     cl <- class(atac)
-    if (cl[[1]] %in% c('ScATAC', 'McATAC')) {
+    if (cl[[1]] %in% c("ScATAC", "McATAC")) {
         peaks <- atac@peaks
-    }
-    else if (cl[[1]] == "PeakIntervals") {
+    } else if (cl[[1]] == "PeakIntervals") {
         peaks <- atac
-    }
-    else {
+    } else {
         cli_abort("Class of {.var atac} is not recognized (should be either ScATAC, McATAC or PeakIntervals object).")
     }
     return(peaks)
@@ -269,11 +272,15 @@ get_available_pssms <- function(pssm_path = NULL, datasets_of_interest = NULL, r
         pssm_datasets_in <- good_keys
         pssm_datasets_out <- c()
     }
-    if (length(pssm_datasets_out) > 0) {cli_alert_info("Ignoring available pssm datasets {.val {pssm_datasets_out}}")}
-    key_df_list <- lapply(pssm_datasets_in, function(k) read.delim(file.path(pssm_path, paste0(k, ".key")), header = F, col.names = c('key', 'track', 'bid')))
-    data_df_list <- lapply(pssm_datasets_in, function(k) read.delim(file.path(pssm_path, paste0(k, ".data")), header = F, col.names = c('key', 'pos', 'A', 'C', 'G', 'T')))
-    is_non_negative <- sapply(data_df_list, function(ddf) all(apply(ddf[,c("A","C","G","T")], 2, function(x) all(x >= 0))))
-    if (length(which(!is_non_negative)) > 0) {cli_alert_warning("Dataset(s) {.val {pssm_datasets_in[!is_non_negative]}} had negative probabilities in pssms and were discarded from the analysis")}
+    if (length(pssm_datasets_out) > 0) {
+        cli_alert_info("Ignoring available pssm datasets {.val {pssm_datasets_out}}")
+    }
+    key_df_list <- lapply(pssm_datasets_in, function(k) read.delim(file.path(pssm_path, paste0(k, ".key")), header = F, col.names = c("key", "track", "bid")))
+    data_df_list <- lapply(pssm_datasets_in, function(k) read.delim(file.path(pssm_path, paste0(k, ".data")), header = F, col.names = c("key", "pos", "A", "C", "G", "T")))
+    is_non_negative <- sapply(data_df_list, function(ddf) all(apply(ddf[, c("A", "C", "G", "T")], 2, function(x) all(x >= 0))))
+    if (length(which(!is_non_negative)) > 0) {
+        cli_alert_warning("Dataset(s) {.val {pssm_datasets_in[!is_non_negative]}} had negative probabilities in pssms and were discarded from the analysis")
+    }
     data_df_list <- data_df_list[is_non_negative]
     key_df_list <- key_df_list[is_non_negative]
     names(key_df_list) <- pssm_datasets_in[is_non_negative]
@@ -289,14 +296,15 @@ get_available_pssms <- function(pssm_path = NULL, datasets_of_interest = NULL, r
 #' \dontrun{
 #' peaks_fix <- fix_missing_chroms_in_peaks(sc_atac@peaks)
 #' }
+#' @noRd
 fix_missing_chroms_in_peaks <- function(peaks) {
     chroms_missing <- ALLGENOME[[1]]$chrom[ALLGENOME[[1]]$chrom %!in% unique(peaks$chrom)]
     if (length(chroms_missing) > 0) {
         fake_seqs <- gintervals.all() %>%
-               filter(chrom %!in% peaks$chrom) %>%
-               gintervals.centers() %>%
-               mutate(start = start - 33, end = end + 34) %>% 
-               mutate(peak_name = peak_names(.))
+            filter(chrom %!in% peaks$chrom) %>%
+            gintervals.centers() %>%
+            mutate(start = start - 33, end = end + 34) %>%
+            mutate(peak_name = peak_names(.))
         peaks <- bind_rows(peaks, fake_seqs) %>% arrange(chrom, start)
     }
     return(peaks)
