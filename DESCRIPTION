@@ -26,6 +26,7 @@ Imports:
     randomNames,
     rlang,
     sparseMatrixStats,
+    stringi,
     tgstat,
     tgutil,
     tibble,
