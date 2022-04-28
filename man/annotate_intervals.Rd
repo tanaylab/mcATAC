@@ -9,7 +9,7 @@ annotate_intervals(
   genome,
   min_proximal = 1000,
   max_proximal = 20000,
-  min_distal = 20000,
+  min_distal = max_proximal,
   max_distal = 1000000,
   exonic_peak_dist = 0,
   tss = "intervs.global.tss",
