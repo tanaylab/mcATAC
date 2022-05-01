@@ -6,7 +6,7 @@
 \usage{
 get_rna_markers(
   atac_mc,
-  n_genes = 200,
+  n_genes = 100,
   genes = NULL,
   rm_zeros = TRUE,
   epsilon = 0.00001,

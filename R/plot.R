@@ -188,7 +188,6 @@ plot_atac_atac_cor <- function(mc_atac, sp_f = TRUE) {
 #' transformed to promoter peaks and the gene names would be taken from the promoter gene names.
 #' @param tss_dist (optional) maximal absolute distance to a TSS to be considered a promoter peak
 #'
-
 #' @examples
 #' \dontrun{
 #' # Plot correlation of ATAC promoter peaks vs. log2 gene expression fraction (regularized)

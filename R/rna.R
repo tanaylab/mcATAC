@@ -58,6 +58,7 @@ has_rna <- function(mc_atac) {
     return(!is.null(nrow(mc_atac@rna_egc)) && nrow(mc_atac@rna_egc) > 0)
 }
 
+
 #' Get the RNA expression matrix from a McATAC object
 #'
 #' @param atac_mc a McATAC object with RNA expression (using \code{add_mc_rna})
@@ -182,7 +183,7 @@ get_rna_fp <- function(atac_mc, genes = NULL, rm_zeros = TRUE, epsilon = 1e-5) {
 #' }
 #'
 #' @export
-get_rna_markers <- function(atac_mc, n_genes = 200, genes = NULL, rm_zeros = TRUE, epsilon = 1e-5, minimal_max_log_fraction = -13, minimal_relative_log_fraction = 2, fold_change_reg = 0.1) {
+get_rna_markers <- function(atac_mc, n_genes = 100, genes = NULL, rm_zeros = TRUE, epsilon = 1e-5, minimal_max_log_fraction = -13, minimal_relative_log_fraction = 2, fold_change_reg = 0.1) {
     mc_egc <- log2(get_rna_egc(atac_mc, genes = genes, rm_zeros = rm_zeros, epsilon = epsilon))
 
     max_log_fractions_of_genes <- sparseMatrixStats::rowMaxs(mc_egc, na.rm = TRUE)
@@ -191,7 +192,7 @@ get_rna_markers <- function(atac_mc, n_genes = 200, genes = NULL, rm_zeros = TRU
 
     mc_egc <- mc_egc[interesting_genes_mask, , drop = FALSE]
     fold_matrix <- sweep(mc_egc, 1, sparseMatrixStats::rowMedians(mc_egc, na.rm = TRUE))
-    fold_matrix <- abs(fold_matrix + fold_change_reg)
+    fold_matrix <- fold_matrix + fold_change_reg
     max_relative_log_fractions_of_genes <- sparseMatrixStats::rowMaxs(fold_matrix, na.rm = TRUE)
     interesting_genes_mask <- max_relative_log_fractions_of_genes >= minimal_relative_log_fraction
     cli_alert("removing {.val {sum(!interesting_genes_mask)}} genes with no fold change (log2) of above {.field {minimal_relative_log_fraction}} in any metacell.")
@@ -223,8 +224,16 @@ get_rna_markers <- function(atac_mc, n_genes = 200, genes = NULL, rm_zeros = TRU
 #' @param atac_mc a McATAC object with RNA expression (using \code{add_mc_rna})
 #' @param markers a list of marker genes. If NULL - the function uses \code{get_rna_markers} with default parameters which can be overridden
 #' using the ellipsis \code{...}.
+#' @param force_cell_type do not split cell types when ordering the metacells. Default: TRUE
 #' @inheritParams get_rna_fp
 #' @inheritDotParams get_rna_markers
+#'
+#' @return A matrix with log2 normalized counts of gene expression for each marker gene (rows) and metacell (columns). \cr
+#' The columns are columns are clustered using \code{hclust} with "ward" linkage, on the euclidean distance
+#' of the pearson correlation matrix between the columns. Then, the gene with the highest number of metacells with fold change (abs) above 1 (gene1) is selected together with the gene most anti-correlated to it (gene2), and the \code{hclust} is ordered using the difference (gene1 - gene2). \cr
+#' If \code{force_cell_type} is TRUE and \code{atac_mc@metadata} has a field named "cell_type", the columns are only ordered only within each
+#' cell type.
+#'
 #'
 #' @examples
 #' \dontrun{
@@ -233,12 +242,91 @@ get_rna_markers <- function(atac_mc, n_genes = 200, genes = NULL, rm_zeros = TRU
 #' }
 #'
 #' @export
-get_rna_marker_matrix <- function(atac_mc, markers = NULL, rm_zeros = TRUE, epsilon = 1e-5, ...) {
+get_rna_marker_matrix <- function(atac_mc, markers = NULL, force_cell_type = TRUE, rm_zeros = TRUE, epsilon = 1e-5, ...) {
     if (is.null(markers)) {
         markers <- get_rna_markers(atac_mc, ...)
     }
     rna_fp <- get_rna_fp(atac_mc, genes = markers, rm_zeros = rm_zeros, epsilon = epsilon)
-    return(rna_fp)
+
+    if (force_cell_type && has_cell_type(atac_mc)) {
+        metacell_types <- atac_mc@metadata %>% select(metacell, cell_type)
+    } else {
+        metacell_types <- NULL
+    }
+
+    rna_fp <- order_marker_matrix(rna_fp, metacell_types = metacell_types)
+
+    cli_alert_success("marker matrix of {.val {nrow(rna_fp)}} genes x {.val {ncol(rna_fp)}} metacells created.")
+    return(log2(rna_fp))
+}
+
+order_marker_matrix <- function(mat, metacell_types = NULL) {
+    g_ncover <- rowSums(abs(mat) > 1, na.rm = TRUE)
+    main_mark <- names(g_ncover)[which.max(g_ncover)]
+    f <- mat[main_mark, , drop = FALSE] < 0.25
+    if (sum(f) > 0.2 * ncol(mat)) {
+        g_score <- apply(mat[, f, drop = FALSE] > 1, 1, sum)
+    } else {
+        g_score <- -tgs_cor(t(mat), t(mat[main_mark, , drop = FALSE]))[, 1]
+    }
+    second_mark <- names(g_score)[which.max(g_score)]
+    cli_alert_info("Ordering metacells based on {.file {main_mark}} vs {.file {second_mark}}")
+
+    zero_mcs <- colSums(abs(mat) > 0) < 2
+    if (any(zero_mcs)) {
+        mat_all <- mat
+        mat <- mat_all[, !zero_mcs, drop = FALSE]
+        mat_zero <- mat_all[, zero_mcs, drop = FALSE]
+    }
+
+    if (ncol(mat) == 0) { # all the metacells do not have enough non-zero values
+        return(1:ncol(mat_all))
+    }
+
+    hc <- stats::hclust(tgs_dist(tgs_cor(mat, pairwise.complete.obs = TRUE)), method = "ward.D2")
+
+    d <- stats::reorder(
+        stats::as.dendrogram(hc),
+        mat[main_mark, ] - mat[second_mark, ],
+        agglo.FUN = mean
+    )
+    ord <- as.hclust(d)$order
+
+    if (any(zero_mcs)) {
+        mc_order <- c(colnames(mat)[ord], colnames(mat_zero))
+        mat <- mat_all
+    } else {
+        mc_order <- colnames(mat)[ord]
+    }
+
+    if (!is.null(metacell_types)) {
+        cli_alert_info("Maintaining metacell order within cell types")
+        metacell_types <- metacell_types %>% mutate(metacell = as.character(metacell))
+        ord_df <- tibble(metacell = colnames(mat)) %>%
+            mutate(orig_ord = 1:n()) %>%
+            left_join(
+                tibble(metacell = as.character(mc_order)) %>% mutate(glob_ord = 1:n()),
+                by = "metacell"
+            ) %>%
+            left_join(
+                metacell_types %>% select(metacell, cell_type),
+                by = "metacell"
+            )
+
+        ord <- ord_df %>%
+            mutate(orig_ord = 1:n()) %>%
+            group_by(cell_type) %>%
+            mutate(ct_ord = mean(glob_ord)) %>%
+            ungroup() %>%
+            arrange(ct_ord, glob_ord) %>%
+            pull(orig_ord)
+    }
+
+    mat <- mat[, ord, drop = FALSE]
+
+    gene_ord <- order(apply(mat, 1, which.max))
+    mat <- mat[gene_ord, , drop = FALSE]
+    return(mat)
 }
 
 #' Match every gene with the k ATAC peaks most correlated to it
@@ -275,4 +363,36 @@ rna_atac_cor_knn <- function(atac_mc, k = 1, genes = NULL, rm_zeros = TRUE, spea
         as_tibble()
 
     return(knn_df)
+}
+
+#' Return a relative fold change matrix of ATAC peaks for a list of genes
+#'
+#' @description
+#' This function returns a relative fold change matrix of ATAC peaks for a list of genes matched using \code{rna_atac_cor_knn}.
+#'
+#' @param atac_mc a McATAC object
+#' @param genes a list of genes.
+#' @param metacell select only a subset of the metacells.
+#'
+#' @inheritParams rna_atac_cor_knn
+#'
+#' @examples
+#' \dontrun{
+#' marker_genes <- get_rna_markers(atac_mc)
+#' atac_fp <- get_genes_atac_fp(atac_mc, genes = marker_genes)
+#' rna_fp <- get_rna_marker_matrix(atac_mc, genes = marker_genes)
+#' }
+#'
+#' @export
+get_genes_atac_fp <- function(atac_mc, genes = NULL, metacells = NULL, rm_zeros = TRUE, spearman = TRUE, pairwise.complete.obs = TRUE) {
+    assert_atac_object(atac_mc, "McATAC")
+    knn_df <- rna_atac_cor_knn(atac_mc, genes = genes, rm_zeros = rm_zeros, spearman = spearman, pairwise.complete.obs = pairwise.complete.obs)
+
+    atac_fp <- atac_mc@fp[knn_df$peak, ]
+
+    if (!is.null(metacells)) {
+        atac_fp <- atac_fp[, metacells, drop = FALSE]
+    }
+
+    return(atac_fp)
 }

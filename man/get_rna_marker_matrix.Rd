@@ -7,6 +7,7 @@
 get_rna_marker_matrix(
   atac_mc,
   markers = NULL,
+  force_cell_type = TRUE,
   rm_zeros = TRUE,
   epsilon = 0.00001,
   ...
@@ -17,6 +18,8 @@ get_rna_marker_matrix(
 
 \item{markers}{a list of marker genes. If NULL - the function uses \code{get_rna_markers} with default parameters which can be overridden
 using the ellipsis \code{...}.}
+
+\item{force_cell_type}{do not split cell types when ordering the metacells. Default: TRUE}
 
 \item{rm_zeros}{remove genes with no RNA expression in any metacell. Default: TRUE}
 
@@ -35,12 +38,20 @@ log fraction (mc_fp) above this this value}
     \item{\code{genes}}{list of genes to match. Default (NULL): all genes}
   }}
 }
+\value{
+A matrix with log2 normalized counts of gene expression for each marker gene (rows) and metacell (columns). \cr
+The columns are columns are clustered using \code{hclust} with "ward" linkage, on the euclidean distance
+of the pearson correlation matrix between the columns. Then, the gene with the highest number of metacells with fold change (abs) above 1 (gene1) is selected together with the gene most anti-correlated to it (gene2), and the \code{hclust} is ordered using the difference (gene1 - gene2). \cr
+If \code{force_cell_type} is TRUE and \code{atac_mc@metadata} has a field named "cell_type", the columns are only ordered only within each
+cell type.
+}
 \description{
 Get enrichment matrix for marker genes
 }
 \examples{
 \dontrun{
-get_rna_marker_matrix(atac_mc)
+marker_mat <- get_rna_marker_matrix(atac_mc)
+marker_mat <- get_rna_marker_matrix(atac_mc, n_genes = 100)
 }
 
 }

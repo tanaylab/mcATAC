@@ -35,7 +35,8 @@ Imports:
     magrittr,
     ggtext,
     scattermore,
-    grDevices
+    grDevices,
+    cowplot
 Suggests: 
     testthat (>= 3.0.0),
     metacell,
