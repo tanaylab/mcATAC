@@ -57,3 +57,84 @@ add_mc_rna <- function(mcatac, mc_rna) {
 has_rna <- function(mc_atac) {
     return(!is.null(nrow(mc_atac@rna_egc)) && nrow(mc_atac@rna_egc) > 0)
 }
+
+#' Get the RNA expression matrix from a McATAC object
+#'
+#' @param atac_mc a McATAC object with RNA expression (using \code{add_mc_rna})
+#' @param genes list of genes to match. Default (NULL): all genes
+#' @param rm_zeros remove genes with no RNA expression in any metacell. Default: TRUE
+#'
+#' @return a matrix with RNA expression values for each gene (rows) and metacell (columns)
+#'
+#' @examples
+#' \dontrun{
+#' rna_mat <- get_rna_matrix(atac_mc)
+#' rna_mat <- get_rna_matrix(atac_mc, genes = c("MESP1", "MESP2", "PF4"))
+#' rna_mat <- get_rna_matrix(atac_mc, rm_zeros = FALSE)
+#' }
+#'
+#' @export
+get_rna_matrix <- function(atac_mc, genes = NULL, rm_zeros = TRUE) {
+    if (!has_rna(atac_mc)) {
+        cli_abort("{.val {atac_mc}} does not contain RNA.")
+    }
+    rna_mat <- atac_mc@rna_egc
+    if (!is.null(genes)) {
+        if (any(genes %!in% rownames(rna_mat))) {
+            missing_genes <- genes[genes %!in% rownames(rna_mat)]
+            cli_abort("Genes {.val {missing_genes}} are not a subset of {.field atac_mc@rna_egc}.")
+        }
+        rna_mat <- rna_mat[genes, ]
+    }
+
+    if (rm_zeros) {
+        rna_mat <- rm_zero_expr_genes(rna_mat)
+    }
+    return(rna_mat)
+}
+
+rm_zero_expr_genes <- function(rna_mat) {
+    f <- rowSums(rna_mat, na.rm = TRUE) == 0
+    if (sum(f) > 0) {
+        cli_alert("removing {.field {sum(f)}} genes with no RNA expression in any metacell.")
+        rna_mat <- rna_mat[!f, ]
+    }
+    return(rna_mat)
+}
+
+
+#' Match every gene with the k ATAC peaks most correlated to it
+#'
+#' @param atac_mc a McATAC object with RNA expression (using \code{add_mc_rna})
+#' @param k number of peaks to match for each gene. Default: 1
+#'
+#' @return a tibble with the following columns:
+#' \itemize{
+#'  \item{gene: }{Gene name}
+#'  \item{peak: }{ATAC peak name}
+#'  \item{cor: }{Correlation between ATAC and RNA}
+#'  \item{rank: }{Rank of the correlation (for the gene)}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' rna_atac_cor_knn(atac_mc, k = 1)
+#' rna_atac_cor_knn(atac_mc, k = 1, genes = c("MESP1", "MESP2", "PF4"))
+#' }
+#'
+#' @inheritParams get_rna_matrix
+#' @inheritParams tgstat::tgs_cor_knn
+#' @export
+rna_atac_cor_knn <- function(atac_mc, k = 1, genes = NULL, rm_zeros = TRUE, spearman = TRUE, pairwise.complete.obs = TRUE) {
+    assert_atac_object(atac_mc, "McATAC")
+
+    rna_mat <- get_rna_matrix(atac_mc, genes = genes, rm_zeros = rm_zeros)
+
+    knn_df <- tgs_cor_knn(t(rna_mat), t(atac_mc@mat), knn = k, spearman = spearman, pairwise.complete.obs = pairwise.complete.obs)
+
+    knn_df <- knn_df %>%
+        rename(gene = col1, peak = col2) %>%
+        as_tibble()
+
+    return(knn_df)
+}

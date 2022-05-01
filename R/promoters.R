@@ -59,32 +59,21 @@ gen_promoter_features <- function(atac, upstream = 500, downstream = 50, tss_int
 #' Calculate the cross-correlation between promoter accessibility and RNA expression
 #'
 #' @param atac_mc a McATAC object with promoters (using \code{gen_promoter_features}) and RNA expression (using \code{add_mc_rna})
-#' @param rm_zeros remove genes with no RNA expression in any metacell. Default: TRUE
 #' @param match_genes calculate correlation only between genes and promoters which have both accesability and RNA expression.
 #' Matching is done based on name. Default: FALSE
 #'
 #' @inheritParams tgstat::tgs_cor
+#' @inheritParams get_rna_matrix
 #'
 #' @return a correlation matrix where rows are promoters and columns are genes
 #'
 #' @export
-calc_prom_rna_cor <- function(atac_mc, rm_zeros = TRUE, match_genes = FALSE, spearman = FALSE, pairwise.complete.obs = TRUE) {
+calc_prom_rna_cor <- function(atac_mc, genes = NULL, rm_zeros = TRUE, match_genes = FALSE, spearman = FALSE, pairwise.complete.obs = TRUE) {
     assert_atac_object(atac_mc, "McATAC")
     if (!atac_mc@promoters) {
         cli_abort("{.val {atac_mc}} does not contain promoters.")
     }
-    if (!has_rna(atac_mc)) {
-        cli_abort("{.val {atac_mc}} does not contain RNA.")
-    }
-
-    rna_mat <- atac_mc@rna_egc
-    if (rm_zeros) {
-        f <- rowSums(rna_mat, na.rm = TRUE) == 0
-        if (sum(f) > 0) {
-            cli_alert("removing {.field {sum(f)}} genes with no RNA expression in any metacell.")
-            rna_mat <- rna_mat[!f, ]
-        }
-    }
+    rna_mat <- get_rna_mat(atac_mc, genes = genes, rm_zeros = rm_zeros)
 
     atac_mat <- atac_mc@mat
     if (match_genes) {
