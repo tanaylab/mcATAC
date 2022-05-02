@@ -9,11 +9,11 @@ annotate_intervals(
   genome,
   min_proximal = 1000,
   max_proximal = 20000,
-  min_distal = 20000,
+  min_distal = max_proximal,
   max_distal = 1000000,
   exonic_peak_dist = 0,
-  tss = gintervals.load("intervs.global.tss"),
-  exons = gintervals.load("intervs.global.exon")
+  tss = "intervs.global.tss",
+  exons = "intervs.global.exon"
 )
 }
 \arguments{
@@ -30,17 +30,21 @@ annotate_intervals(
 \item{max_distal}{the maximum distance from any TSS, under which a peak is considered to be of a distal enhancer, and above which it is a 'desert' peak.}
 
 \item{exonic_peak_dist}{a parameter that allows proximity (without overlap) of peaks to exons that still classifies them as exonic peaks, as active transcription usually confers accessibility in the vicinity of exons, and this might confound a possible assignment of regulatory activity to an exon.}
+
+\item{tss}{the TSS interval set or the name of the TSS interval set to use.}
+
+\item{exons}{the exons interval set or the name of the exons interval set to use.}
 }
 \value{
-intervals - the input intervals set with added fields {.code peak_type} and {.code closest_tss}
+intervals - the input intervals set with added fields {.code peak_type}, {.code closest_tss}, {.code closest_exon_gene} and {.code gene_body_gene}.
 }
 \description{
-ATAC peaks are classified into either 'promoter', 'intronic', 'exonic', 'ig_proximal' (intergenic-proximal), 'ig_distal' (intergenic-distal) or 'desert'.
-Promoter peaks are those less than \code{min_proximal} away from a TSS.
-Intronic peaks are within gene bodies, but not in an exon.
-Exonic peaks overlap exons.
-Intergenic-proximal peaks are less than \code{max_proximal} away from a TSS, but not within a gene body
-Intergenic-distal peaks are more than \code{min_distal} away from some TSS, and less than \code{max-distal} from any TSS, and not within a gene body.
+ATAC peaks are classified into either 'promoter', 'intronic', 'exonic', 'ig_proximal' (intergenic-proximal), 'ig_distal' (intergenic-distal) or 'desert'. \cr
+Promoter peaks are those less than \code{min_proximal} away from a TSS. \cr
+Intronic peaks are within gene bodies, but not in an exon. \cr
+Exonic peaks overlap exons. \cr
+Intergenic-proximal peaks are less than \code{max_proximal} away from a TSS, but not within a gene body. \cr
+Intergenic-distal peaks are more than \code{min_distal} away from some TSS, and less than \code{max-distal} from any TSS, and not within a gene body. \cr
 Desert peaks are at least \code{max_distal} from any known TSS (as defined by the \code{tss} interval set).
 }
 \examples{
