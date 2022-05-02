@@ -51,6 +51,8 @@ genes / peaks with longer names.}
 \value{
 a \code{ggplot} object with the heatmap of RNA markers (right) and the heatmap of ATAC peaks (left).
 The ATAC matrix is ordered by the RNA matrix.
+
+a ggplot object with the heatmaps
 }
 \description{
 plot an rna marker heatmap (right) together with an heatmap of fold change of ATAC peaks that

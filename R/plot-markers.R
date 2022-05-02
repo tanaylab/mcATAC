@@ -45,6 +45,8 @@ plot_rna_markers <- function(atac_mc, n_genes = 100, force_cell_type = TRUE, ...
 #' @param row_names show the row names of the heatmaps. Note that the space each plot takes might become uneven due to
 #' genes / peaks with longer names.
 #'
+#' @return a ggplot object with the heatmaps
+#'
 #' @inheritParams get_rna_markers
 #' @inheritParams get_rna_marker_matrix
 #' @inheritParams plot_rna_markers_mat
