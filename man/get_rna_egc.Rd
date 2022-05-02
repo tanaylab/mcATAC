@@ -2,7 +2,7 @@
 % Please edit documentation in R/rna.R
 \name{get_rna_egc}
 \alias{get_rna_egc}
-\title{Get normalized counts of gene expression}
+\title{Get the normalized RNA expression matrix (egc) from a McATAC object}
 \usage{
 get_rna_egc(atac_mc, genes = NULL, rm_zeros = TRUE, epsilon = 0.00001)
 }
@@ -16,16 +16,16 @@ get_rna_egc(atac_mc, genes = NULL, rm_zeros = TRUE, epsilon = 0.00001)
 \item{epsilon}{regularization factor added to the log normalized expression}
 }
 \value{
-a matrix with normalized counts of gene expression for each gene (rows) and metacell (columns)
+a matrix with normalized RNA expression values for each gene (rows) and metacell (columns)
 }
 \description{
-Get counts of a gene expression normalized by sum of counts per metacell.
+Get RNA expression data, normalized by the total RNA expression in each metacell.
 }
 \examples{
 \dontrun{
-get_rna_egc(atac_mc)
-get_rna_egc(atac_mc, "GNLY")
-get_rna_egc(atac_mc, "GNLY", epsilon = NULL)
+rna_mat <- get_rna_egc(atac_mc)
+rna_mat <- get_rna_egc(atac_mc, genes = c("MESP1", "MESP2", "PF4"))
+rna_mat <- get_rna_egc(atac_mc, rm_zeros = FALSE)
 }
 
 }

@@ -63,7 +63,7 @@ gen_promoter_features <- function(atac, upstream = 500, downstream = 50, tss_int
 #' Matching is done based on name. Default: FALSE
 #'
 #' @inheritParams tgstat::tgs_cor
-#' @inheritParams get_rna_matrix
+#' @inheritParams get_rna_egc
 #'
 #' @return a correlation matrix where rows are promoters and columns are genes
 #'
@@ -73,7 +73,7 @@ calc_prom_rna_cor <- function(atac_mc, genes = NULL, rm_zeros = TRUE, match_gene
     if (!atac_mc@promoters) {
         cli_abort("{.val {atac_mc}} does not contain promoters.")
     }
-    rna_mat <- get_rna_mat(atac_mc, genes = genes, rm_zeros = rm_zeros)
+    rna_mat <- get_rna_egc(atac_mc, genes = genes, rm_zeros = rm_zeros)
 
     atac_mat <- atac_mc@mat
     if (match_genes) {

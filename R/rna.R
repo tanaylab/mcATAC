@@ -59,23 +59,26 @@ has_rna <- function(mc_atac) {
 }
 
 
-#' Get the RNA expression matrix from a McATAC object
+#' Get the normalized RNA expression matrix (egc) from a McATAC object
+#'
+#' @description Get RNA expression data, normalized by the total RNA expression in each metacell.
 #'
 #' @param atac_mc a McATAC object with RNA expression (using \code{add_mc_rna})
 #' @param genes list of genes to match. Default (NULL): all genes
 #' @param rm_zeros remove genes with no RNA expression in any metacell. Default: TRUE
+#' @param epsilon regularization factor added to the log normalized expression
 #'
-#' @return a matrix with RNA expression values for each gene (rows) and metacell (columns)
+#' @return a matrix with normalized RNA expression values for each gene (rows) and metacell (columns)
 #'
 #' @examples
 #' \dontrun{
-#' rna_mat <- get_rna_matrix(atac_mc)
-#' rna_mat <- get_rna_matrix(atac_mc, genes = c("MESP1", "MESP2", "PF4"))
-#' rna_mat <- get_rna_matrix(atac_mc, rm_zeros = FALSE)
+#' rna_mat <- get_rna_egc(atac_mc)
+#' rna_mat <- get_rna_egc(atac_mc, genes = c("MESP1", "MESP2", "PF4"))
+#' rna_mat <- get_rna_egc(atac_mc, rm_zeros = FALSE)
 #' }
 #'
 #' @export
-get_rna_matrix <- function(atac_mc, genes = NULL, rm_zeros = TRUE) {
+get_rna_egc <- function(atac_mc, genes = NULL, rm_zeros = TRUE, epsilon = 1e-5) {
     validate_atac_object(atac_mc)
     if (!has_rna(atac_mc)) {
         cli_abort("{.val {atac_mc}} does not contain RNA.")
@@ -92,6 +95,11 @@ get_rna_matrix <- function(atac_mc, genes = NULL, rm_zeros = TRUE) {
     if (rm_zeros) {
         rna_mat <- rm_zero_expr_genes(rna_mat)
     }
+
+    if (!is.null(epsilon)) {
+        rna_mat <- rna_mat + epsilon
+    }
+
     return(rna_mat)
 }
 
@@ -104,37 +112,6 @@ rm_zero_expr_genes <- function(rna_mat) {
     return(rna_mat)
 }
 
-
-#' Get normalized counts of gene expression
-#'
-#' Get counts of a gene expression normalized by sum of counts per metacell.
-#'
-#' @param epsilon regularization factor added to the log normalized expression
-#' @inheritParams get_rna_matrix
-#'
-#' @return a matrix with normalized counts of gene expression for each gene (rows) and metacell (columns)
-#'
-#'
-#' @examples
-#' \dontrun{
-#' get_rna_egc(atac_mc)
-#' get_rna_egc(atac_mc, "GNLY")
-#' get_rna_egc(atac_mc, "GNLY", epsilon = NULL)
-#' }
-#'
-#' @export
-get_rna_egc <- function(atac_mc, genes = NULL, rm_zeros = TRUE, epsilon = 1e-5) {
-    full_rna_mat <- get_rna_matrix(atac_mc, genes = NULL, rm_zeros = FALSE)
-    rna_mat <- get_rna_matrix(atac_mc, genes = genes, rm_zeros = rm_zeros)
-
-    res <- rna_mat / colSums(full_rna_mat)
-
-    if (!is.null(epsilon)) {
-        res <- res + epsilon
-    }
-
-    return(res)
-}
 
 #' Get enrichment of normalized counts of gene expression over the median
 #'
@@ -183,7 +160,7 @@ get_rna_fp <- function(atac_mc, genes = NULL, rm_zeros = TRUE, epsilon = 1e-5) {
 #' }
 #'
 #' @export
-get_rna_markers <- function(atac_mc, n_genes = 100, genes = NULL, rm_zeros = TRUE, epsilon = 1e-5, minimal_max_log_fraction = -13, minimal_relative_log_fraction = 2, fold_change_reg = 0.1) {
+get_rna_markers <- function(atac_mc, n_genes = 100, minimal_max_log_fraction = -13, minimal_relative_log_fraction = 2, fold_change_reg = 0.1, genes = NULL, rm_zeros = TRUE, epsilon = 1e-5) {
     mc_egc <- log2(get_rna_egc(atac_mc, genes = genes, rm_zeros = rm_zeros, epsilon = epsilon))
 
     max_log_fractions_of_genes <- sparseMatrixStats::rowMaxs(mc_egc, na.rm = TRUE)
@@ -348,13 +325,13 @@ order_marker_matrix <- function(mat, metacell_types = NULL) {
 #' rna_atac_cor_knn(atac_mc, k = 1, genes = c("MESP1", "MESP2", "PF4"))
 #' }
 #'
-#' @inheritParams get_rna_matrix
+#' @inheritParams get_rna_egc
 #' @inheritParams tgstat::tgs_cor_knn
 #' @export
 rna_atac_cor_knn <- function(atac_mc, k = 1, genes = NULL, rm_zeros = TRUE, spearman = TRUE, pairwise.complete.obs = TRUE) {
     assert_atac_object(atac_mc, "McATAC")
 
-    rna_mat <- get_rna_matrix(atac_mc, genes = genes, rm_zeros = rm_zeros)
+    rna_mat <- get_rna_egc(atac_mc, genes = genes, rm_zeros = rm_zeros)
 
     knn_df <- tgs_cor_knn(t(rna_mat), t(atac_mc@mat), knn = k, spearman = spearman, pairwise.complete.obs = pairwise.complete.obs)
 

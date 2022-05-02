@@ -7,24 +7,18 @@
 get_rna_markers(
   atac_mc,
   n_genes = 100,
-  genes = NULL,
-  rm_zeros = TRUE,
-  epsilon = 0.00001,
   minimal_max_log_fraction = -13,
   minimal_relative_log_fraction = 2,
-  fold_change_reg = 0.1
+  fold_change_reg = 0.1,
+  genes = NULL,
+  rm_zeros = TRUE,
+  epsilon = 0.00001
 )
 }
 \arguments{
 \item{atac_mc}{a McATAC object with RNA expression (using \code{add_mc_rna})}
 
 \item{n_genes}{maximal number of genes to return. Default: 1000}
-
-\item{genes}{list of genes to match. Default (NULL): all genes}
-
-\item{rm_zeros}{remove genes with no RNA expression in any metacell. Default: TRUE}
-
-\item{epsilon}{regularization factor added to the log normalized expression}
 
 \item{minimal_max_log_fraction}{take only genes with at least one value
 (in log fraction units - normalized egc) above this threshold}
@@ -34,6 +28,12 @@ log fraction (mc_fp) above this this value}
 
 \item{fold_change_reg}{regularization factor for the fold change calculation (fold_change would be changed to
 \code{fold_change = fold_change + fold_change_reg})}
+
+\item{genes}{list of genes to match. Default (NULL): all genes}
+
+\item{rm_zeros}{remove genes with no RNA expression in any metacell. Default: TRUE}
+
+\item{epsilon}{regularization factor added to the log normalized expression}
 }
 \description{
 The function first removes genes without sufficient expression in any metacell \code{minimal_max_log_fraction}, or without sufficient fold
