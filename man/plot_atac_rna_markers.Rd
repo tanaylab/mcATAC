@@ -41,7 +41,11 @@ genes / peaks with longer names.}
     \item{\code{gene_colors}}{a named list with a color for each marker gene (optional)}
     \item{\code{col_names}}{show column names (metacells)}
     \item{\code{interleave}}{show the gene names (rows) interleaved}
+    \item{\code{annotation_title}}{title for cell type annotation. Default: "Cell type"}
+    \item{\code{top_annotation_title}}{title for top cell type annotation. Default: "Cell type"}
     \item{\code{title}}{title for the plot}
+    \item{\code{col_names_orient}}{Orientation of the X-axis label}
+    \item{\code{plot_right}}{Whether to put the Y-axis labels at the right side of the heatmap (as well as at the left hand side)}
   }}
 }
 \value{

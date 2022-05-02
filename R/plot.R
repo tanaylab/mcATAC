@@ -188,16 +188,18 @@ plot_atac_atac_cor <- function(mc_atac, sp_f = TRUE) {
 #' transformed to promoter peaks and the gene names would be taken from the promoter gene names.
 #' @param tss_dist (optional) maximal absolute distance to a TSS to be considered a promoter peak
 #'
+#' @return a pheatmap object
+#'
 #' @examples
 #' \dontrun{
 #' # Plot correlation of ATAC promoter peaks vs. log2 gene expression fraction (regularized)
-#' arc_prom <- plot_atac_rna_cor(mc_atac = mc_atac, rna_mat = log2(mc@e_gc + 1e-05))
+#' arc_prom <- plot_atac_rna_cor(mc_atac = mc_atac, rna_mat = log2(atac_mc@rna_egc + 1e-05))
 #'
 #' # Plot correlation of all available ATAC peaks (whose nearest TSS is of an expressed gene) vs. log2 gene expression fraction (regularized) of that gene
-#' arc_tss <- plot_atac_rna_cor(mc_atac = mc_atac, rna_mat = log2(mc@e_gc + 1e-05), gene_field = "closest_tss")
+#' arc_tss <- plot_atac_rna_cor(mc_atac = mc_atac, rna_mat = log2(atac_mc@rna_egc + 1e-05), gene_field = "closest_tss")
 #'
 #' # Plot correlation of all available ATAC peaks (whose nearest exon is of an expressed gene) vs. log2 gene expression fraction (regularized) of that gene
-#' arc_exon <- plot_atac_rna_cor(mc_atac = mc_atac, rna_mat = log2(mc@e_gc + 1e-05), gene_field = "closest_exon_gene")
+#' arc_exon <- plot_atac_rna_cor(mc_atac = mc_atac, rna_mat = log2(atac_mc@rna_egc + 1e-05), gene_field = "closest_exon_gene")
 #' }
 #' @export
 plot_atac_rna_cor <- function(mc_atac, rna_mat, gene_field = NULL, tss_dist = 5e+2) {
@@ -224,11 +226,11 @@ plot_atac_rna_cor <- function(mc_atac, rna_mat, gene_field = NULL, tss_dist = 5e
         genes_of_peaks <- genes_of_peaks[gp_in]
     }
     atac_mat_ord <- atac_mat
-    print(head(atac_mat_ord[, 1:6]))
+
     rownames(atac_mat_ord) <- genes_of_peaks
     rna_match <- match(genes_of_peaks, rownames(rna_mat))
     rna_mat_ord <- rna_mat[rna_match, ]
-    print(head(rna_mat_ord[, 1:6]))
+
     atac_rna_cor <- tgs_cor(atac_mat_ord, rna_mat_ord, spearman = T)
     if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
         col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")

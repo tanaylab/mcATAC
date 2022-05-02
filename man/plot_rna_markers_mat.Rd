@@ -19,8 +19,12 @@ plot_rna_markers_mat(
   gene_colors = NULL,
   col_names = FALSE,
   row_names = TRUE,
+  col_names_orient = "slanted",
+  plot_right = TRUE,
   interleave = TRUE,
   vertial_gridlines = FALSE,
+  annotation_title = "Cell type",
+  top_annotation_title = "Cell type",
   title = NULL
 )
 }
@@ -51,7 +55,19 @@ plot_rna_markers_mat(
 
 \item{col_names}{show column names (metacells)}
 
+\item{row_names}{The names that will be used as the Y-axis labels.
+A NULL (the defualt) indicates that the original matrix rownames are used.
+A FALSE indicates that no Y-axis labels should be displayed.}
+
+\item{col_names_orient}{Orientation of the X-axis label}
+
+\item{plot_right}{Whether to put the Y-axis labels at the right side of the heatmap (as well as at the left hand side)}
+
 \item{interleave}{show the gene names (rows) interleaved}
+
+\item{annotation_title}{title for cell type annotation. Default: "Cell type"}
+
+\item{top_annotation_title}{title for top cell type annotation. Default: "Cell type"}
 
 \item{title}{title for the plot}
 

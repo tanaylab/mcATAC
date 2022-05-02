@@ -82,6 +82,7 @@ plot_atac_rna_markers <- function(atac_mc, n_genes = 100, force_cell_type = TRUE
         plot_legend = FALSE,
         row_names = row_names,
         title = "RNA",
+        top_annotation_title = "",
         ...
     )
 
@@ -92,6 +93,7 @@ plot_atac_rna_markers <- function(atac_mc, n_genes = 100, force_cell_type = TRUE
         plot_legend = FALSE,
         row_names = row_names,
         title = "ATAC",
+        annotation_title = "",
         ...
     )
 
@@ -128,10 +130,13 @@ plot_atac_rna_markers <- function(atac_mc, n_genes = 100, force_cell_type = TRUE
 #' @param col_names show column names (metacells)
 #' @param interleave show the gene names (rows) interleaved
 #' @param vertical_gridlines show vertical gridlines
+#' @param annotation_title title for cell type annotation. Default: "Cell type"
+#' @param top_annotation_title title for top cell type annotation. Default: "Cell type"
 #' @param title title for the plot
 #'
 #' @return a ggplot object with the heatmap (and legend if \code{plot_legend} is TRUE)
 #'
+#' @inheritParams tgutil::tgplot_heatmap
 #' @examples
 #' \dontrun{
 #' m_rna <- get_rna_marker_matrix(atac_mc)
@@ -152,8 +157,12 @@ plot_rna_markers_mat <- function(mat,
                                  gene_colors = NULL,
                                  col_names = FALSE,
                                  row_names = TRUE,
+                                 col_names_orient = "slanted",
+                                 plot_right = TRUE,
                                  interleave = TRUE,
                                  vertial_gridlines = FALSE,
+                                 annotation_title = "Cell type",
+                                 top_annotation_title = "Cell type",
                                  title = NULL) {
     gene_colors <- gene_colors %||% rep("black", nrow(mat))
 
@@ -164,7 +173,8 @@ plot_rna_markers_mat <- function(mat,
     p_mat <- tgutil::tgplot_heatmap(
         tgutil::clip_vals(mat, min_lfp, max_lfp),
         col_names = col_names,
-        col_names_orient = "slanted",
+        col_names_orient = col_names_orient,
+        plot_right = plot_right,
         interleave = interleave
     ) +
         scale_fill_gradient2(name = "", low = low_color, high = high_color, mid = mid_color, midpoint = midpoint, limits = c(min_lfp, max_lfp))
@@ -210,9 +220,9 @@ plot_rna_markers_mat <- function(mat,
         left_join(metacell_types %>% mutate(metacell = as.character(metacell)) %>% select(metacell, cell_type), by = "metacell") %>%
         left_join(cell_type_colors, by = "cell_type")
 
-    p_mat <- p_mat %>% tgutil::tgplot_add_axis_annotation(mc_types$color, label = "Cell type", plot_left = FALSE)
+    p_mat <- p_mat %>% tgutil::tgplot_add_axis_annotation(mc_types$color, label = annotation_title, plot_left = FALSE)
     if (top_cell_type_bar) {
-        p_mat <- p_mat %>% tgutil::tgplot_add_axis_annotation(mc_types$color, position = "top", label = "Cell type", plot_right = FALSE)
+        p_mat <- p_mat %>% tgutil::tgplot_add_axis_annotation(mc_types$color, position = "top", label = top_annotation_title, plot_right = FALSE)
     }
 
     if (plot_legend) {
