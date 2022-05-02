@@ -55,7 +55,6 @@
   <span class="va">atac_mc</span>,
   use_prior_annot <span class="op">=</span> <span class="cn">TRUE</span>,
   k <span class="op">=</span> <span class="cn">NULL</span>,
-  peak_set <span class="op">=</span> <span class="cn">NULL</span>,
   annot <span class="op">=</span> <span class="st">"cell_type"</span>,
   <span class="va">...</span>
 <span class="op">)</span></code></pre></div>
@@ -70,9 +69,6 @@
 <dd><p>(optional) when TRUE - use the metacell annotation to generate metacell clusters. Clusters would be generated based on a categorical field <code>annot</code> from the <code>metadata</code> slot in the McATAC object.</p></dd>
 <dt>k</dt>
 <dd><ul><li><p>(optional, when <code>use_prior_annot == F</code>) number of clusters to generate</p></li>
-</ul></dd>
-<dt>peak_set</dt>
-<dd><ul><li><p>a subset of peaks of <code>atac_mc@peaks</code> on which to cluster</p></li>
 </ul></dd>
 <dt>annot</dt>
 <dd><ul><li><p>name of the field to use when <code>use_prior_annot == T</code>.</p></li>

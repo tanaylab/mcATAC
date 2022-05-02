@@ -64,7 +64,8 @@ uses the output of the 'metacells' python package (metacell2).</p>
   min_int_frac <span class="op">=</span> <span class="fl">0.5</span>,
   mc_size_eps_q <span class="op">=</span> <span class="fl">0.1</span>,
   id <span class="op">=</span> <span class="cn">NULL</span>,
-  description <span class="op">=</span> <span class="cn">NULL</span>
+  description <span class="op">=</span> <span class="cn">NULL</span>,
+  rm_zero_peaks <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span>
 
 <span class="fu">project_atac_on_mc_from_metacell1</span><span class="op">(</span>
@@ -79,6 +80,7 @@ uses the output of the 'metacells' python package (metacell2).</p>
 <span class="fu">project_atac_on_mc_from_h5ad</span><span class="op">(</span>
   <span class="va">atac</span>,
   <span class="va">h5ad_file</span>,
+  min_int_frac <span class="op">=</span> <span class="fl">0.5</span>,
   metadata <span class="op">=</span> <span class="cn">NULL</span>,
   id <span class="op">=</span> <span class="cn">NULL</span>,
   description <span class="op">=</span> <span class="cn">NULL</span>
@@ -103,6 +105,8 @@ the fraction of peak i in metacell j multiplied by the <code>mc_size_eps_q</code
 <dd><p>an identifier for the object, e.g. "pbmc". If NULL - the id would be taken from the scATAC object <code>atac</code>.</p></dd>
 <dt>description</dt>
 <dd><p>an identifier for the object, e.g. "pbmc". If NULL - the description would be taken from the scATAC object <code>atac</code></p></dd>
+<dt>rm_zero_peaks</dt>
+<dd><p>remove peaks without any reads (all-zero peaks). Default: TRUE</p></dd>
 <dt>scdb</dt>
 <dd><p>a metacell1 <code>scdb</code> path</p></dd>
 <dt>mc_id</dt>

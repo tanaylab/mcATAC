@@ -43,7 +43,19 @@
     <loc>/reference/annotate_peaks.html</loc>
   </url>
   <url>
+    <loc>/reference/atac_ignore_cells.html</loc>
+  </url>
+  <url>
     <loc>/reference/atac_ignore_peaks.html</loc>
+  </url>
+  <url>
+    <loc>/reference/calc_prom_rna_cor.html</loc>
+  </url>
+  <url>
+    <loc>/reference/calculate_d_stats.html</loc>
+  </url>
+  <url>
+    <loc>/reference/call_peaks.html</loc>
   </url>
   <url>
     <loc>/reference/download_pbmc_example_data.html</loc>
@@ -70,7 +82,19 @@
     <loc>/reference/gen_atac_peak_clust.html</loc>
   </url>
   <url>
-    <loc>/reference/gen_peak_features.html</loc>
+    <loc>/reference/gen_promoter_features.html</loc>
+  </url>
+  <url>
+    <loc>/reference/gen_random_genome_peak_motif_matrix.html</loc>
+  </url>
+  <url>
+    <loc>/reference/generate_motif_pssm_matrix.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_available_pssms.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_genes_atac_fp.html</loc>
   </url>
   <url>
     <loc>/reference/get_peak_coverage_stats.html</loc>
@@ -79,10 +103,34 @@
     <loc>/reference/get_promoter_peaks.html</loc>
   </url>
   <url>
+    <loc>/reference/get_quantile_cov_thresh.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_rna_egc.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_rna_fp.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_rna_marker_matrix.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_rna_markers.html</loc>
+  </url>
+  <url>
+    <loc>/reference/has_cell_type.html</loc>
+  </url>
+  <url>
+    <loc>/reference/has_cell_type_colors.html</loc>
+  </url>
+  <url>
     <loc>/reference/has_rna.html</loc>
   </url>
   <url>
     <loc>/reference/identify_dynamic_peaks.html</loc>
+  </url>
+  <url>
+    <loc>/reference/import_atac_marginal.html</loc>
   </url>
   <url>
     <loc>/reference/import_from_10x.html</loc>
@@ -121,6 +169,12 @@
     <loc>/reference/plot_atac_rna_cor.html</loc>
   </url>
   <url>
+    <loc>/reference/plot_atac_rna_markers.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_marginal_coverage.html</loc>
+  </url>
+  <url>
     <loc>/reference/plot_peak_coverage_density.html</loc>
   </url>
   <url>
@@ -133,13 +187,28 @@
     <loc>/reference/plot_peak_max_cov_distribution.html</loc>
   </url>
   <url>
+    <loc>/reference/plot_rna_markers.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_rna_markers_mat.html</loc>
+  </url>
+  <url>
     <loc>/reference/prepare_clusters.html</loc>
   </url>
   <url>
     <loc>/reference/project_atac_on_mc.html</loc>
   </url>
   <url>
+    <loc>/reference/rna_atac_cor_knn.html</loc>
+  </url>
+  <url>
     <loc>/reference/save_pheatmap.html</loc>
+  </url>
+  <url>
+    <loc>/reference/split_long_peaks.html</loc>
+  </url>
+  <url>
+    <loc>/reference/subset_peak_clusters.html</loc>
   </url>
   <url>
     <loc>/reference/subset_peaks.html</loc>

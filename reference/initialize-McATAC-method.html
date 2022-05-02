@@ -66,6 +66,7 @@ of the peaks.</p>
   id <span class="op">=</span> <span class="cn">NULL</span>,
   description <span class="op">=</span> <span class="cn">NULL</span>,
   metadata <span class="op">=</span> <span class="cn">NULL</span>,
+  cell_to_metacell <span class="op">=</span> <span class="cn">NULL</span>,
   mc_size_eps_q <span class="op">=</span> <span class="fl">0.1</span>,
   path <span class="op">=</span> <span class="st">""</span>
 <span class="op">)</span></code></pre></div>
@@ -86,6 +87,8 @@ of the peaks.</p>
 projection was done using RNA metacells"</p></dd>
 <dt>metadata</dt>
 <dd><p>data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.</p></dd>
+<dt>cell_to_metacell</dt>
+<dd><p>a data frame mapping 'cell_id' to 'metacell' (optional). See <code>project_atac_on_mc</code></p></dd>
 <dt>mc_size_eps_q</dt>
 <dd><p>(optional) quantile of MC size (in UMIs) to scale the number of UMIs per metacell. \(egc_ij\) would then be
 the fraction of peak i in metacell j multiplied by the <code>mc_size_eps_q</code> quantile of metacell sizes.</p></dd>
