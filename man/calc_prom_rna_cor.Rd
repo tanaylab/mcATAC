@@ -23,7 +23,8 @@ calc_prom_rna_cor(
 \item{match_genes}{calculate correlation only between genes and promoters which have both accesability and RNA expression.
 Matching is done based on name. Default: FALSE}
 
-\item{spearman}{if 'TRUE' Spearman correlation is computed, otherwise Pearson}
+\item{spearman}{if 'TRUE' Spearman correlation is computed, otherwise
+Pearson}
 
 \item{pairwise.complete.obs}{see below}
 }
