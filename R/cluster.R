@@ -18,7 +18,6 @@
 #' }
 #'
 #' @export
-
 gen_atac_peak_clust <- function(atac_mc, k = NULL, clustering_algoritm = "kmeans", cluster_on = "fp", peak_set = NULL, ...) {
     louvain_k <- 5
     if (cluster_on %!in% c("fp", "mat", "egc")) {
