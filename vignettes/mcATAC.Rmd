@@ -161,6 +161,12 @@ Between a gene and an arbitrary peak:
 plot_atac_rna(atac_mc, "CD4", peak = atac_mc@peaks$peak_name[1])
 ```
 
+## Plot RNA markers 
+
+```{r rna-markers}
+plot_atac_rna_markers(atac_mc)
+```
+
 ## Export to an h5ad file
 
 ```{r export-to-h5ad}

@@ -51,3 +51,37 @@ get_cell_type_colors <- function(metadata) {
         distinct(cell_type, color) %>%
         deframe()
 }
+
+#' Does the McATAC object contain per-metacell cell type annotation
+#'
+#' @param mc_atac an McATAC object
+#'
+#' @return TRUE if the McATAC object contains per-metacell cell type annotation, FALSE otherwise
+#'
+#' @examples
+#' \dontrun{
+#' has_cell_type(atac_mc)
+#' }
+#'
+#' @export
+has_cell_type <- function(mc_atac) {
+    assert_atac_object(mc_atac)
+    return(!is.null(mc_atac@metadata) && !is.null(mc_atac@metadata$cell_type))
+}
+
+#' Does the McATAC object contain cell type color annotation
+#'
+#' @param mc_atac an McATAC object
+#'
+#' @return TRUE if the McATAC object contains cell type color annotation, FALSE otherwise
+#'
+#' @examples
+#' \dontrun{
+#' has_cell_type_color(atac_mc)
+#' }
+#'
+#' @export
+has_cell_type_colors <- function(mc_atac) {
+    assert_atac_object(mc_atac)
+    return(has_cell_type(mc_atac) && !is.null(mc_atac@metadata$color))
+}

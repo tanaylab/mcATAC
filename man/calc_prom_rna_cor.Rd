@@ -6,6 +6,7 @@
 \usage{
 calc_prom_rna_cor(
   atac_mc,
+  genes = NULL,
   rm_zeros = TRUE,
   match_genes = FALSE,
   spearman = FALSE,
@@ -14,6 +15,8 @@ calc_prom_rna_cor(
 }
 \arguments{
 \item{atac_mc}{a McATAC object with promoters (using \code{gen_promoter_features}) and RNA expression (using \code{add_mc_rna})}
+
+\item{genes}{list of genes to match. Default (NULL): all genes}
 
 \item{rm_zeros}{remove genes with no RNA expression in any metacell. Default: TRUE}
 
