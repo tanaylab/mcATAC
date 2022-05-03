@@ -1,6 +1,7 @@
 #' Subset 10X atac_possorted.bam file into per-metacell BAM files
 #' 
 #' @param bam_path path to the 10X atac_possorted.bam file
+#' @param mcatac McATAC object
 #' @param out_dir (output) directory to output per-metacell bam files
 #' @inheritParams write_metacell_cell_names
 generate_per_metacell_bams <- function(bam_path, mcatac, out_dir = NULL, c2mc_path = NULL) {
@@ -13,7 +14,7 @@ generate_per_metacell_bams <- function(bam_path, mcatac, out_dir = NULL, c2mc_pa
     write_metacell_cell_names(mcatac, c2mc_path)
     fp_sb2mc <- system.file("exec", "split_bam_to_metacells.sh", package = "mcATAC")
     fp_rgp <- system.file("exec", "run_gnu_parallel.sh", package = "mcATAC")
-    error_log <- withr::with_path(new = "/home/feshap/src/parallel-20220322/src/parallel", 
+    error_log <- withr::with_path(new = "/usr/wisdom/parallel", 
                                     code = system2(command = fp_sb2mc,
                                                     args = c(bam_path, 
                                                              c2mc_path, 
