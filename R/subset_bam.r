@@ -2,7 +2,8 @@
 #' 
 #' @param bam_path path to the 10X atac_possorted.bam file
 #' @param mcatac McATAC object
-#' @param out_dir (output) directory to output per-metacell bam files
+#' @param out_dir (optional) directory to output per-metacell bam files
+#' @param c2mc_path (optional) directory to output cell-to-metacell mappings
 #' @inheritParams write_metacell_cell_names
 generate_per_metacell_bams <- function(bam_path, mcatac, out_dir = NULL, c2mc_path = NULL) {
     if (is.null(out_dir)) {
@@ -24,6 +25,29 @@ generate_per_metacell_bams <- function(bam_path, mcatac, out_dir = NULL, c2mc_pa
     return(error_log)
 }
 
+#' Write tracks from BAMs
+#' 
+#' @param bam_folder_path path to perBAMs
+#' @param out_dir (optional) directory to output per-metacell bam files
+generate_tracks_from_bams <- function(bam_folder_path, out_dir = NULL) {
+    if (is.null(out_dir)) {
+        out_dir <- file.path(bam_path, paste0(mcatac@id, "_mc_bams"))
+    }
+    if (is.null(c2mc_path)) {
+        c2mc_path <- file.path(dirname(bam_path), paste0(mcatac@id, "_c2mc"))
+    }
+    write_metacell_cell_names(mcatac, c2mc_path)
+    fp_sb2mc <- system.file("exec", "split_bam_to_metacells.sh", package = "mcATAC")
+    fp_rgp <- system.file("exec", "run_gnu_parallel.sh", package = "mcATAC")
+    error_log <- withr::with_path(new = "/usr/wisdom/parallel", 
+                                    code = system2(command = fp_sb2mc,
+                                                    args = c(bam_path, 
+                                                             c2mc_path, 
+                                                             out_dir,
+                                                             fp_rgp))
+                                )
+    return(error_log)
+}
 
 
 #' Utility function to write metacell names to files
@@ -62,3 +86,4 @@ merge_metacell_bams <- function(bam_path, output_filename, mcs) {
         cli_abort("BAM files for MCs {.val {bad_mcs}} were not found in {.val {bam_path}}")
     }
 }
+
