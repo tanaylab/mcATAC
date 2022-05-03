@@ -114,7 +114,7 @@ generate_motif_pssm_matrix <- function(atac = NULL,
     } else {
         peak_motif_matrix <- gextract(res, intervals = peaks, iterator = peaks, colnames = gsub(paste0("_", suffix), "", trks_motifs))
     }
-    withr::defer(purrr::walk(traks_motifs, gtrack.rm, force = TRUE))
+    withr::defer(purrr::walk(trks_motifs, gtrack.rm, force = TRUE))
     peak_motif_matrix <- peak_motif_matrix[peak_motif_matrix$end - peak_motif_matrix$start >= peak_width, ]
     return(peak_motif_matrix)
 }
