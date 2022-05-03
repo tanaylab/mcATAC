@@ -177,7 +177,7 @@ name_enhancers <- function(atac) {
     dist_diff <- nei_peaks_tads[,start_cols[[2]]] - nei_peaks_tads[,start_cols[[1]]]
     enh_name <- setNames(make.unique(stringr::str_c(nei_peaks_tads$tad_name, as.character(round(dist_diff, -3)/1e+3), sep = "_")), nei_peaks_tads$peak_name)
     enh_name[peaks$peak_name[peaks$peak_name %!in% names(enh_name)]] <- NA
-    peaks$enh_name <- enh_name[match(peaks$peak_name, names(enh_name))]
+    peaks$peak_name <- enh_name[match(peaks$peak_name, names(enh_name))]
     if (cl[[1]] %in% c('ScATAC', 'McATAC')) {
         atac@peaks <- peaks
     }
