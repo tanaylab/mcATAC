@@ -4,17 +4,34 @@
 \alias{plot_atac_rna_cor}
 \title{Plot a cross-correlation matrix between RNA metacells and ATAC metacell scores}
 \usage{
-plot_atac_rna_cor(mc_atac, rna_mat)
+plot_atac_rna_cor(mc_atac, rna_mat, gene_field = NULL, tss_dist = 500)
 }
 \arguments{
 \item{mc_atac}{McATAC object}
 
 \item{rna_mat}{an RNA metacell count matrix, where metacells are in columns and genes are in rows}
 
-\item{gene_field}{name of a field in \code{mc_atac@peaks} which contains the gene names. If NULL - the peaks would be
+\item{gene_field}{(optional) either \code{closest_tss} or \code{closest_exon_gene} -- field names in \code{mc_atac@peaks} which contain gene names. If NULL - the peaks would be
 transformed to promoter peaks and the gene names would be taken from the promoter gene names.}
+
+\item{tss_dist}{(optional) maximal absolute distance to a TSS to be considered a promoter peak}
+}
+\value{
+a pheatmap object
 }
 \description{
 use peak gene annotations to match between RNA metacells and ATAC metacells and plot
 a cross-correlation matrix.
+}
+\examples{
+\dontrun{
+# Plot correlation of ATAC promoter peaks vs. log2 gene expression fraction (regularized)
+arc_prom <- plot_atac_rna_cor(mc_atac = mc_atac, rna_mat = log2(atac_mc@rna_egc + 1e-05))
+
+# Plot correlation of all available ATAC peaks (whose nearest TSS is of an expressed gene) vs. log2 gene expression fraction (regularized) of that gene
+arc_tss <- plot_atac_rna_cor(mc_atac = mc_atac, rna_mat = log2(atac_mc@rna_egc + 1e-05), gene_field = "closest_tss")
+
+# Plot correlation of all available ATAC peaks (whose nearest exon is of an expressed gene) vs. log2 gene expression fraction (regularized) of that gene
+arc_exon <- plot_atac_rna_cor(mc_atac = mc_atac, rna_mat = log2(atac_mc@rna_egc + 1e-05), gene_field = "closest_exon_gene")
+}
 }

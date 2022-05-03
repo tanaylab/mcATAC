@@ -1,4 +1,5 @@
 
+
 #' Annotate ATAC peaks
 #'
 #' @param atac a McATAC or ScATAC object
@@ -20,12 +21,12 @@ annotate_peaks <- function(atac) {
 
 #' Annotate an intervals set
 #'
-#' @description ATAC peaks are classified into either 'promoter', 'intronic', 'exonic', 'ig_proximal' (intergenic-proximal), 'ig_distal' (intergenic-distal) or 'desert'.
-#' Promoter peaks are those less than \code{min_proximal} away from a TSS.
-#' Intronic peaks are within gene bodies, but not in an exon.
-#' Exonic peaks overlap exons.
-#' Intergenic-proximal peaks are less than \code{max_proximal} away from a TSS, but not within a gene body
-#' Intergenic-distal peaks are more than \code{min_distal} away from some TSS, and less than \code{max-distal} from any TSS, and not within a gene body.
+#' @description ATAC peaks are classified into either 'promoter', 'intronic', 'exonic', 'ig_proximal' (intergenic-proximal), 'ig_distal' (intergenic-distal) or 'desert'. \cr
+#' Promoter peaks are those less than \code{min_proximal} away from a TSS. \cr
+#' Intronic peaks are within gene bodies, but not in an exon. \cr
+#' Exonic peaks overlap exons. \cr
+#' Intergenic-proximal peaks are less than \code{max_proximal} away from a TSS, but not within a gene body. \cr
+#' Intergenic-distal peaks are more than \code{min_distal} away from some TSS, and less than \code{max-distal} from any TSS, and not within a gene body. \cr
 #' Desert peaks are at least \code{max_distal} from any known TSS (as defined by the \code{tss} interval set).
 #'
 #' @param intervals the intervals set to annotate
@@ -35,8 +36,10 @@ annotate_peaks <- function(atac) {
 #' @param min_distal the minimum distance from some TSS, only above which a peak is considered to be of a distal enhancer. Usually equal to \code{max_proximal}, unless there is good reason
 #' @param max_distal the maximum distance from any TSS, under which a peak is considered to be of a distal enhancer, and above which it is a 'desert' peak.
 #' @param exonic_peak_dist a parameter that allows proximity (without overlap) of peaks to exons that still classifies them as exonic peaks, as active transcription usually confers accessibility in the vicinity of exons, and this might confound a possible assignment of regulatory activity to an exon.
+#' @param tss the TSS interval set or the name of the TSS interval set to use.
+#' @param exons the exons interval set or the name of the exons interval set to use.
 #'
-#' @return intervals - the input intervals set with added fields {.code peak_type} and {.code closest_tss}
+#' @return intervals - the input intervals set with added fields {.code peak_type}, {.code closest_tss}, {.code closest_exon_gene} and {.code gene_body_gene}.
 #' @examples
 #' \dontrun{
 #' my_intervals <- annotate_intervals(my_intervals, "mm10", min_proximal = 1e+03, max_proximal = 2e+04, max_distal = 1e+06, exonic_peak_dist = 5e+2)
@@ -45,80 +48,54 @@ annotate_peaks <- function(atac) {
 #' }
 #' @export
 annotate_intervals <- function(intervals, genome,
-                               min_proximal = 1e+03, max_proximal = 2e+04,
-                               min_distal = 2e+04, max_distal = 1e+06,
+                               min_proximal = 1e+03,
+                               max_proximal = 2e+04,
+                               min_distal = max_proximal,
+                               max_distal = 1e+06,
                                exonic_peak_dist = 0,
-                               tss = gintervals.load("intervs.global.tss"),
-                               exons = gintervals.load("intervs.global.exon")) {
+                               tss = "intervs.global.tss",
+                               exons = "intervs.global.exon") {
     if (missing(genome)) {
         cli_abort("Please Specify genome. Look for slot '@genome' in relevant McATAC/ScATAC object.")
     }
     misha.ext::gset_genome(genome)
+
     cn <- c("chrom", "start", "end", "peak_name")
     orig_class <- class(intervals)
     orig_fields <- colnames(intervals)
-    intervals <- as.data.frame(intervals)
 
-    if (!has_name(intervals, "intervalID")) {
-        intervals <- intervals %>% mutate(intervalID = 1:n())
-    }
-    cli_alert_info("Finding peaks in promoters...")
-    nei_peak_prom <- gintervals.neighbors(intervals, tss, mindist = -min_proximal, maxdist = min_proximal)
-    cli_alert_info("Finding peaks in exons...")
-    nei_peak_exon <- gintervals.neighbors(intervals, exons, mindist = -exonic_peak_dist, maxdist = exonic_peak_dist)
-    cli_alert_info("Finding peaks in introns...")
     gene_body_df <- get_gene_body_df(tss, exons)
-    nei_peak_gb <- gintervals.neighbors(intervals, gene_body_df, maxdist = 0, mindist = 0)
 
-    nei_peak_prom_all <- gintervals.neighbors(intervals, tss, mindist = -max_distal, maxdist = max_distal)
-    closest_tss <- deframe(nei_peak_prom_all[, c("peak_name", "geneSymbol")])
-    closest_tss[!(intervals$peak_name %in% names(closest_tss))] <- NA
-    closest_tss <- closest_tss[order(match(names(closest_tss), intervals$peak_name))]
+    df <- as.data.frame(intervals) %>%
+        gintervals.neighbors1(tss, fields = "geneSymbol") %>%
+        rename(closest_tss = geneSymbol, tss_d = dist) %>%
+        gintervals.neighbors1(exons, fields = "geneSymbol") %>%
+        rename(closest_exon_gene = geneSymbol, exons_d = dist) %>%
+        gintervals.neighbors1(gene_body_df, fields = "geneSymbol") %>%
+        rename(gene_body_gene = geneSymbol, gene_body_d = dist)
 
-    prom_peaks <- nei_peak_prom$peak_name
-    exon_peaks <- nei_peak_exon$peak_name[!(nei_peak_exon$peak_name %in% prom_peaks)]
-    intron_peaks <- nei_peak_gb$peak_name[!(nei_peak_gb$peak_name %in% union(exon_peaks, prom_peaks))]
-    intID_left <- intervals$peak_name[!(intervals$peak_name %in% union(prom_peaks, union(exon_peaks, intron_peaks)))]
+    df$peak_type <- NA
 
-    cli_alert_info("Finding proximal intergenic peaks...")
-    nei_peak_tss_prox <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, mindist = min_proximal, maxdist = max_proximal)
-    nei_peak_tss_prox_neg <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, maxdist = -min_proximal, mindist = -max_proximal)
-    nei_peak_prox_all <- anti_join(unique(rbind(nei_peak_tss_prox[, cn], nei_peak_tss_prox_neg[, cn])),
-        intervals[union(prom_peaks, union(exon_peaks, intron_peaks)), cn],
-        by = c("chrom", "start", "end")
-    )
-    ig_prox_peaks <- nei_peak_prox_all$peak_name
-    intID_left <- intervals$peak_name[!(intervals$peak_name %in% unique(c(prom_peaks, exon_peaks, intron_peaks, ig_prox_peaks)))]
-    cli_alert_info("Finding distal intergenic peaks...")
-    nei_peak_dist <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, mindist = min_distal, maxdist = max_distal)
-    nei_peak_dist_neg <- gintervals.neighbors(intervals[intervals$peak_name %in% intID_left, ], tss, maxdist = -min_distal, mindist = -max_distal)
-    nei_peak_dist_all <- anti_join(unique(rbind(nei_peak_dist[, cn], nei_peak_dist_neg[, cn])),
-        intervals[union(ig_prox_peaks, union(prom_peaks, union(exon_peaks, intron_peaks))), cn],
-        by = c("chrom", "start", "end")
-    )
-    ig_dist_peaks <- nei_peak_dist_all$peak_name
-    desert_peaks <- intervals$peak_name[!(intervals$peak_name %in%
-        unique(c(prom_peaks, exon_peaks, intron_peaks, ig_prox_peaks, ig_dist_peaks)))]
+    add_annotation <- function(df, column, mindist, maxdist, name) {
+        df <- df %>%
+            mutate(peak_type = ifelse(is.na(peak_type) & abs(!!sym(column)) <= maxdist & abs(!!sym(column)) >= mindist, name, peak_type))
+    }
 
-    res <- c(
-        setNames(rep("promoter", length(prom_peaks)), prom_peaks),
-        setNames(rep("exonic", length(exon_peaks)), exon_peaks),
-        setNames(rep("intronic", length(intron_peaks)), intron_peaks),
-        setNames(rep("ig_proximal", length(ig_prox_peaks)), ig_prox_peaks),
-        setNames(rep("ig_distal", length(ig_dist_peaks)), ig_dist_peaks),
-        setNames(rep("desert", length(desert_peaks)), desert_peaks)
-    )
+    res <- df %>%
+        add_annotation("tss_d", "promoter", mindist = 0, maxdist = min_proximal) %>%
+        add_annotation("exons_d", "exonic", mindist = exonic_peak_dist, maxdist = exonic_peak_dist) %>%
+        add_annotation("gene_body_d", "intronic", mindist = 0, maxdist = 0) %>%
+        add_annotation("tss_d", "ig_proximal", mindist = min_proximal, maxdist = max_proximal) %>%
+        add_annotation("tss_d", "ig_distal", mindist = min_distal, maxdist = max_distal) %>%
+        tidyr::replace_na(replace = list(peak_type = "desert"))
 
     class(intervals) <- orig_class
     intervals <- intervals %>%
         select(any_of(orig_fields)) %>%
-        mutate(
-            peak_annot = res[order(match(names(res), intervals$peak_name))],
-            closest_tss = closest_tss
-        )
+        left_join(res %>% select(chrom, start, end, peak_type, closest_tss, closest_exon_gene, gene_body_gene), by = c("chrom", "start", "end"))
+
     return(intervals)
 }
-
 
 #' Generate dataframe of approximate gene bodies (edges of first and last exons) - backend function
 #'
@@ -129,26 +106,29 @@ annotate_intervals <- function(intervals, genome,
 #'
 #' @noRd
 get_gene_body_df <- function(tss, exons) {
+    if (is.character(tss)) {
+        tss <- gintervals.load(tss)
+    }
+    if (is.character(exons)) {
+        exons <- gintervals.load(exons)
+    }
     kgid_both <- intersect(unique(exons$kgID), unique(tss$kgID))
     exons_filt <- exons[exons$kgID %in% kgid_both, ]
     genes_start <- tapply(exons_filt$start, exons_filt$kgID, min)
     genes_end <- tapply(exons_filt$end, exons_filt$kgID, max)
-    gene_body_df <- as.data.frame(do.call(
-        "cbind",
-        list(
-            "chrom" = as.character(exons_filt$chrom)[match(names(genes_start), exons_filt$kgID)],
-            "start" = genes_start,
-            "end" = genes_end,
-            "strand" = exons_filt$strand[match(names(genes_start), exons_filt$kgID)],
-            "mRNA" = exons_filt$mRNA[match(names(genes_start), exons_filt$kgID)],
-            "geneSymbol" = exons_filt$geneSymbol[match(names(genes_start), exons_filt$kgID)]
-        )
-    ))
-    gene_body_df[, 2:4] <- apply(gene_body_df[, 2:4], 2, as.numeric)
-    gene_body_df <- gene_body_df[with(gene_body_df, order(chrom, start)), ]
+    gene_body_df <- data.frame(
+        "chrom" = as.character(exons_filt$chrom)[match(names(genes_start), exons_filt$kgID)],
+        "start" = genes_start,
+        "end" = genes_end,
+        "strand" = exons_filt$strand[match(names(genes_start), exons_filt$kgID)],
+        "mRNA" = exons_filt$mRNA[match(names(genes_start), exons_filt$kgID)],
+        "geneSymbol" = exons_filt$geneSymbol[match(names(genes_start), exons_filt$kgID)]
+    )
+    gene_body_df <- gene_body_df %>%
+        mutate_at(vars(start, end, strand), as.numeric) %>%
+        arrange(chrom, start)
     return(gene_body_df)
 }
-
 
 #' Name ATAC peaks from TAD names
 #'
@@ -185,4 +165,21 @@ name_enhancers <- function(atac) {
         atac <- peaks
     }
     return(atac)
+}
+
+#' Generate dataframe of approximate gene bodies (edges of first and last exons) - backend function
+#'
+#' @param intervals query interval set
+#' @param feature_set reference feature set to query
+#' @param maxdist (optional) maximal absolute distance to search for feature
+#'
+#' @return gene_body_df a misha intervals set approximating starts and ends of genes
+#'
+#' @noRd
+get_nearest_feature_instance <- function(intervals, feature_set, maxdist = 1e+6) {
+    nei_peak_feat <- gintervals.neighbors(intervals, feature_set, mindist = -maxdist, maxdist = maxdist)
+    closest_feat <- deframe(nei_peak_feat[, c("peak_name", "geneSymbol")])
+    closest_feat[intervals$peak_name[!(intervals$peak_name %in% names(closest_feat))]] <- NA
+    closest_feat <- closest_feat[order(match(names(closest_feat), intervals$peak_name))]
+    return(closest_feat)
 }

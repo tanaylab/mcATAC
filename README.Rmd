@@ -108,5 +108,9 @@ atac_mc <- add_mc_rna(atac_mc, rna_mc_mat)
 plot_atac_rna(atac_mc, "GZMK")
 ```
 
+```{r atac-rna-marker-heatmap}
+plot_atac_rna_markers(atac_mc)
+```
+
 
 See more at the [vignette](https://tanaylab.github.io/mcATAC/articles/mcATAC.html)

@@ -1,5 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
 # mcATAC
 
 ## Installation
@@ -35,12 +36,14 @@ atac_sc <- import_from_10x("pbmc_data", genome = "hg38", id = "PBMC", descriptio
 atac_sc
 #> <ScATAC> object with 11909 cells and 107829 ATAC peaks from hg38.
 #> id: "PBMC"
-#> description: "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
-#> loaded from: 'pbmc_data/matrix.mtx'
+#> description: "PBMC from a healthy donor - granulocytes removed through cell
+#> sorting (10k)"
+#> Loaded from: 'pbmc_data/matrix.mtx'
 #> Slots include:
-#> • `@mat`: a numeric matrix where rows are peaks and columns are cells. Can be a sparse matrix.
-#> • `@peaks`: a misha intervals set with the peak definitions.
-#> • `@genome`: genome assembly of the peaks
+#>   • `@mat`: a numeric matrix where rows are peaks and columns are cells. Can be
+#>   a sparse matrix.
+#>   • `@peaks`: a misha intervals set with the peak definitions.
+#>   • `@genome`: genome assembly of the peaks
 ```
 
 ### Filter peaks by coverage and/or length
@@ -91,8 +94,9 @@ atac_sc <- filter_features(atac_sc, max_peak_density = 250)
 ``` r
 data(cell_to_metacell_pbmc_example)
 head(cell_to_metacell_pbmc_example)
-#> # A tibble: 6 x 2
-#>              cell_id metacell
+#> # A tibble: 6 × 2
+#>   cell_id            metacell
+#>   <chr>                 <int>
 #> 1 AAACAGCCAATCCCTT-1       44
 #> 2 AAACAGCCAATGCGCT-1       22
 #> 3 AAACAGCCACCAACCG-1        7
@@ -109,26 +113,32 @@ atac_mc <- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example)
 atac_mc
 #> <McATAC> object with 97 metacells and 61342 ATAC peaks from hg38.
 #> id: "PBMC"
-#> description: "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
+#> description: "PBMC from a healthy donor - granulocytes removed through cell
+#> sorting (10k)"
 #> Slots include:
-#>   • `@mat`: a numeric matrix where rows are peaks and columns are metacells. Can be a sparse matrix.
+#>   • `@mat`: a numeric matrix where rows are peaks and columns are metacells.
+#>   Can be a sparse matrix.
 #>   • `@peaks`: a misha intervals set with the peak definitions.
 #>   • `@genome`: genome assembly of the peaks
 #>   • `@egc`: a numeric matrix which contains normalized metacell accessibility.
-#>   • `@fp`: a matrix showing for each peak (row) the relative enrichment of umis in log2 scale.
+#>   • `@fp`: a matrix showing for each peak (row) the relative enrichment of umis
+#>   in log2 scale.
 ```
 
 ``` r
 atac_mc
 #> <McATAC> object with 97 metacells and 61342 ATAC peaks from hg38.
 #> id: "PBMC"
-#> description: "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
+#> description: "PBMC from a healthy donor - granulocytes removed through cell
+#> sorting (10k)"
 #> Slots include:
-#>   • `@mat`: a numeric matrix where rows are peaks and columns are metacells. Can be a sparse matrix.
+#>   • `@mat`: a numeric matrix where rows are peaks and columns are metacells.
+#>   Can be a sparse matrix.
 #>   • `@peaks`: a misha intervals set with the peak definitions.
 #>   • `@genome`: genome assembly of the peaks
 #>   • `@egc`: a numeric matrix which contains normalized metacell accessibility.
-#>   • `@fp`: a matrix showing for each peak (row) the relative enrichment of umis in log2 scale.
+#>   • `@fp`: a matrix showing for each peak (row) the relative enrichment of umis
+#>   in log2 scale.
 ```
 
 ### Add metadata
@@ -152,4 +162,20 @@ plot_atac_rna(atac_mc, "GZMK")
 
 <img src="man/figures/README-atac-rna-scatter-1-1.png" width="100%" />
 
-See more at the [vignette](https://tanaylab.github.io/mcATAC/articles/mcATAC.html)
+``` r
+plot_atac_rna_markers(atac_mc)
+#> → removing 7543 genes with no RNA expression in any metacell.
+#> → removing 23451 genes with no RNA expression (log2) of above -13 in any metacell.
+#> → removing 3534 genes with no fold change (log2) of above 2 in any metacell.
+#> ℹ 5191 genes left for consideration.
+#> ✔ 100 marker genes selected.
+#> ℹ Ordering metacells based on 'CA6' vs 'LYN'
+#> ℹ Maintaining metacell order within cell types
+#> ✔ marker matrix of 100 genes x 97 metacells created.
+#> → Creating ATAC matrix by finding for each marker gene the ATAC peak that is most correlated to it.
+```
+
+<img src="man/figures/README-atac-rna-marker-heatmap-1.png" width="100%" />
+
+See more at the
+[vignette](https://tanaylab.github.io/mcATAC/articles/mcATAC.html)
