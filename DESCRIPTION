@@ -20,12 +20,13 @@ Imports:
     mclust,
     methods,
     misha,
-    misha.ext (>= 0.0.4),
+    misha.ext (>= 0.0.5),
     pheatmap,
     purrr,
     randomNames,
     rlang,
     sparseMatrixStats,
+    stringi,
     tgstat,
     tgutil,
     tibble,
@@ -34,7 +35,8 @@ Imports:
     magrittr,
     ggtext,
     scattermore,
-    grDevices
+    grDevices,
+    cowplot
 Suggests: 
     testthat (>= 3.0.0),
     metacell,
