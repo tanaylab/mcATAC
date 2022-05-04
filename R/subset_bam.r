@@ -27,26 +27,23 @@ generate_per_metacell_bams <- function(bam_path, mcatac, out_dir = NULL, c2mc_pa
 
 #' Write tracks from BAMs
 #' 
-#' @param bam_folder_path path to perBAMs
-#' @param out_dir (optional) directory to output per-metacell bam files
-generate_tracks_from_bams <- function(bam_folder_path, out_dir = NULL) {
-    if (is.null(out_dir)) {
-        out_dir <- file.path(bam_path, paste0(mcatac@id, "_mc_bams"))
-    }
-    if (is.null(c2mc_path)) {
-        c2mc_path <- file.path(dirname(bam_path), paste0(mcatac@id, "_c2mc"))
-    }
-    write_metacell_cell_names(mcatac, c2mc_path)
-    fp_sb2mc <- system.file("exec", "split_bam_to_metacells.sh", package = "mcATAC")
-    fp_rgp <- system.file("exec", "run_gnu_parallel.sh", package = "mcATAC")
-    error_log <- withr::with_path(new = "/usr/wisdom/parallel", 
-                                    code = system2(command = fp_sb2mc,
-                                                    args = c(bam_path, 
-                                                             c2mc_path, 
-                                                             out_dir,
-                                                             fp_rgp))
-                                )
-    return(error_log)
+#' @param bam_folder_path path to BAMs
+#' @param track_name_prefix general name for tracks (output format: "{track_name_prefix} - {bam_file_name}")
+generate_tracks_from_bams <- function(bam_folder_path, track_name_prefix) {
+    
+    header_line <- 'track type=wiggle_0 name="{track_name_prefix} - {}"'
+    command_format <- paste0(c("samtools mpileup -BQ0 {fl}", 
+                            "perl -pe '($c, $start, undef, $depth) = split;if ($c ne $lastC || $start != $lastStart+1)
+                                     {print \"fixedStep chrom=$c start=$start step=1 span=1\n\";}$_ = $depth.\"\n\";($lastC, $lastStart) = ($c, $start);'",
+                            "gzip -c > run.wig.gz"),
+                            collapse = " | ")
+    bams <- list.files(bam_folder_path)
+    dummy <- sapply(bams, function(fl) {
+        base_name <- gsub('.bam$', '', file.path(bam_folder_path, fl))
+        create_file_command <- glue::glue("echo ${header_line} > ")
+        system2()
+        system2()
+    })
 }
 
 
