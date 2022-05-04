@@ -4,7 +4,7 @@
 \alias{merge_metacell_bams}
 \title{Merge BAMs by metacells}
 \usage{
-merge_metacell_bams(bam_path, output_filename, mcs)
+merge_metacell_bams(bam_path, output_filename, mcs, parallel = TRUE)
 }
 \arguments{
 \item{bam_path}{path to the per-metacell BAM tracks}
@@ -12,6 +12,8 @@ merge_metacell_bams(bam_path, output_filename, mcs)
 \item{output_filename}{what to call the output BAM file}
 
 \item{mcs}{vector of mcs to merge BAMs of}
+
+\item{parallel}{(optional) whether to do parallel computations}
 }
 \description{
 Merge BAMs by metacells
