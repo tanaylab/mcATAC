@@ -80,17 +80,21 @@ validate_peaks <- function(peaks) {
 #'
 #' @export
 peak_names <- function(peaks, promoters = FALSE) {
-    if (has_name(peaks, "peak_name")) {
-        return(peaks$peak_name)
-    } else if (promoters) {
-        cli_abort("{.field peaks} does not have a 'peak_name' field. Please use {.code promoters = FALSE} to get the coordinates instead of the gene names.")
+    if (gintervals.exists("intervs.global.tad_names")) {
+        peaks = name_enhancers(peaks)
+        peak_names = peaks$peak_name
     }
-
-    peak_names <- peaks %>%
-        tidyr::unite("coord", start, end, sep = "-") %>%
-        tidyr::unite("peak_name", chrom, coord, sep = ":") %>%
-        pull(peak_name)
-
+    else {
+        if (has_name(peaks, "peak_name")) {
+            return(peaks$peak_name)
+        } else if (promoters) {
+            cli_abort("{.field peaks} does not have a 'peak_name' field. Please use {.code promoters = FALSE} to get the coordinates instead of the gene names.")
+        }
+        peak_names <- peaks %>%
+            tidyr::unite("coord", start, end, sep = "-") %>%
+            tidyr::unite("peak_name", chrom, coord, sep = ":") %>%
+            pull(peak_name)
+    }
     return(peak_names)
 }
 
