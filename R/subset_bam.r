@@ -28,9 +28,9 @@ generate_per_metacell_bams <- function(bam_path, mcatac, out_dir = NULL, c2mc_pa
 #' Write WIGs from BAMs
 #' 
 #' @param bam_folder_path path to BAMs
-#' @param track_name_prefix general name for tracks (output format: "{track_name_prefix} - {bam_file_name}")
-#' @param output_path (optional) where you want the WIG output
+#' @param output_path (optional) where to put WIGs
 #' @param parallel (optional) whether to do parallel computations
+#' @inheritParams bam_to_wig
 generate_wigs_from_bams <- function(bam_folder_path, track_name_prefix, output_path = NULL, parallel = TRUE) {
     bam_folder_path = normalizePath(bam_folder_path)
     if (is.null(output_path)) {
@@ -38,37 +38,16 @@ generate_wigs_from_bams <- function(bam_folder_path, track_name_prefix, output_p
     }
     output_path = normalizePath(output_path)
     if (!dir.exists(output_path)) {dir.create(output_path)}
-    header_line <- "track type=wiggle_0 name='{track_name_prefix} - {base_name}'"
-
-    # bam2wig_command <- paste0(paste0(c("samtools mpileup -BQ0 {fl}", 
-    #                         paste0("perl -pe '($c, $start, undef, $depth) = split;if ($c ne $lastC || $start != $lastStart+1) {print ", 
-    #                                 '"fixedStep chrom=$c start=$start step=1 span=1\n"',
-    #                                 ";\}$_ = $depth.\"\n\";($lastC, $lastStart) = ($c, $start);'"),
-    #                         collapse = " | "), 
-    #                         " >> {paste0(base_name, '.wig')}")
-    #                         )
     bams <- grep('\\.bam$', list.files(bam_folder_path), v=T)
-    process_one_file = function(fl) {
-        print(fl)
-        base_name <- gsub('.bam$', '', fl)
-        full_path = file.path(output_path, paste0(base_name, '.wig'))
-        hli = glue::glue(header_line)
-        create_file_command <- glue::glue('echo "{hli}" > {full_path}')
-        system(command = create_file_command)
-        smt_cmd = glue::glue("samtools mpileup -BQ0 {file.path(bam_folder_path, fl)}")
-        perl_cmd = paste0("perl -pe '($c, $start, undef, $depth) = split;if ($c ne $lastC || $start != $lastStart+1) {print ", 
-                                    '"fixedStep chrom=$c start=$start step=1 span=1\n"',
-                                    ";}$_ = $depth.\"\n\";($lastC, $lastStart) = ($c, $start);'")
-        out_cmd = glue::glue(" >> {full_path}")
-        bam2wig_command = paste0(paste0(c(smt_cmd, perl_cmd), collapse = " | "), out_cmd)
-        system(command = bam2wig_command)
-    }
     if (parallel) {
         p = parallel::detectCores()
-        error_log <- parallel::mclapply(bams, function(fl) FUN = process_one_file(fl), mc.cores = p)
+        error_log <- parallel::mclapply(bams, FUN = function(fl) {
+                        output_filename = file.path(output_path, gsub('\\.bam$', '.wig', basename(fl)));
+                        bam_to_wig(file.path(bam_folder_path, fl), output_filename)
+        }, mc.cores = p)
     }
     else {
-        error_log <- sapply(bams, function(fl) process_one_file(fl))
+        error_log <- sapply(bams, function(fl) bam_to_wig(fl))
     }
     return(error_log)
 }
@@ -116,3 +95,36 @@ merge_metacell_bams <- function(bam_path, output_filename, mcs, parallel = TRUE)
     }
 }
 
+#' Convert BAM file to WIG file
+#' 
+#' @param bam_path path to the BAM file
+#' @param output_filename what to call the output WIG file
+#' @param track_name_prefix (optional) name to prepend to track (e.g. for display in UCSC genome browser)
+bam_to_wig = function(bam_path, output_filename, track_name_prefix = NULL, header_line = NULL) {
+    # base_name <- gsub('.bam$', '', fl)
+    base_name = basename(bam_path)
+    dir_name = dirname(normalizePath(bam_path))
+    if (is.null(output_filename)) {
+        output_filename = file.path(dir_name, gsub('\\.bam', '.wig', base_name))
+        print(glue::glue("Converting {base_name} to wig. Saving at {output_filename}."))
+    }
+    # full_path = file.path(output_path, paste0(base_name, '.wig'))
+    if (is.null(header_line)) {
+        if (is.null(track_name_prefix)) {
+            header_line <- "track type=wiggle_0 name='{base_name}'"
+        }
+        else {
+            header_line <- "track type=wiggle_0 name='{track_name_prefix} - {base_name}'"
+        }
+    }
+    hli = glue::glue(header_line)
+    create_file_command <- glue::glue('echo "{hli}" > {output_filename}')
+    system(command = create_file_command)
+    smt_cmd = glue::glue("samtools mpileup -BQ0 {bam_path}")
+    perl_cmd = paste0("perl -pe '($c, $start, undef, $depth) = split;if ($c ne $lastC || $start != $lastStart+1) {print ", 
+                                '"fixedStep chrom=$c start=$start step=1 span=1\n"',
+                                ";}$_ = $depth.\"\n\";($lastC, $lastStart) = ($c, $start);'")
+    out_cmd = glue::glue(" >> {output_filename}")
+    bam2wig_command = paste0(paste0(c(smt_cmd, perl_cmd), collapse = " | "), out_cmd)
+    system(command = bam2wig_command)
+}
