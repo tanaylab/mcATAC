@@ -29,5 +29,5 @@ download_pbmc_example_data <- function(dir = "pbmc_data") {
     }
     file.rename("filtered_feature_bc_matrix", dir)
 
-    cli_alert_success("successfully downloaded data to {.dir {dir}}")
+    cli_alert_success("successfully downloaded data to {.file {dir}}")
 }
