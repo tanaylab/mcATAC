@@ -47,7 +47,7 @@ generate_wigs_from_bams <- function(bam_folder_path, track_name_prefix, output_p
         }, mc.cores = p)
     }
     else {
-        error_log <- sapply(bams, function(fl) bam_to_wig(fl))
+        error_log <- sapply(bams, function(fl) bam_to_wig(file.path(bam_folder_path, fl), output_filename))
     }
     return(error_log)
 }
