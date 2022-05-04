@@ -1,9 +1,7 @@
 #' Subset 10X atac_possorted.bam file into per-metacell BAM files
 #' 
 #' @param bam_path path to the 10X atac_possorted.bam file
-#' @param mcatac McATAC object
 #' @param out_dir (optional) directory to output per-metacell bam files
-#' @param c2mc_path (optional) directory to output cell-to-metacell mappings
 #' @inheritParams write_metacell_cell_names
 generate_per_metacell_bams <- function(bam_path, mcatac, out_dir = NULL, c2mc_path = NULL) {
     if (is.null(out_dir)) {

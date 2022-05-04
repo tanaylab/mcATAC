@@ -11,7 +11,7 @@ generate_per_metacell_bams(bam_path, mcatac, out_dir = NULL, c2mc_path = NULL)
 
 \item{mcatac}{an McATAC object (from which to get metacell assignments)}
 
-\item{out_dir}{(output) directory to output per-metacell bam files}
+\item{out_dir}{(optional) directory to output per-metacell bam files}
 
 \item{c2mc_path}{(optional) path to write out metacell assignments to}
 }
