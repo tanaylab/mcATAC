@@ -21,7 +21,8 @@ project_counts_on_mc(
 A McCounts object
 }
 \description{
-Given metacells (usually from RNA data), project ATAC counts to get a McCounts object
+Given cell to metacell association, summarise atac read counts to generate a McCounts object. This can
+take a while - around 5 minutes using 24 cores on the PBMC dataset.
 }
 \examples{
 \dontrun{

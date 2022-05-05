@@ -6,7 +6,7 @@
 \alias{ScCounts}
 \title{ScCounts object}
 \description{
-ScCounts is a data structure that contains the counts of reads for a set of cells in a set of chromosomes.
+ScCounts is a data structure that contains the counts of reads for a set of cells in a set of genomic bins.
 }
 \section{Slots}{
 
@@ -20,5 +20,7 @@ ScCounts is a data structure that contains the counts of reads for a set of cell
 \item{\code{data}}{a named list with sparse matrices for each chromosome.}
 
 \item{\code{path}}{original path from which the object was loaded (optional)}
+
+\item{\code{genomic_bins}}{an intervals set with the genomic bins. Should have columns named "chrom", "start", "end" and "name" with the chromosome, start and end positions and name of the bin.}
 }}
 

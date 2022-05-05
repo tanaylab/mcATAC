@@ -9,6 +9,7 @@ write_sc_counts_from_bam(
   out_dir,
   cell_names,
   genome = NULL,
+  bin_size = 50000000,
   id = "",
   description = "",
   min_mapq = NULL,
@@ -28,6 +29,9 @@ write_sc_counts_from_bam(
 
 \item{genome}{genome name (e.g. hg19). Will be inferred from the ScATAC object if provided}
 
+\item{bin_size}{Size of the genomic bins to use (in bp). Each chromsome will be chunked into bins with size which is
+smaller than this value. Default is 50Mb.}
+
 \item{id}{an identifier for the object, e.g. "pbmc".}
 
 \item{description}{description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"}
@@ -38,7 +42,7 @@ write_sc_counts_from_bam(
 
 \item{samtools_opts}{additional options for samtools (e.g. "--subsample 0.1")}
 
-\item{num_reads}{number of reads to process (optional)}
+\item{num_reads}{number of reads (within the \code{region}) to process (optional).}
 
 \item{verbose}{verbose output (optional)}
 

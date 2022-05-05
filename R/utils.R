@@ -106,3 +106,56 @@ generate_mc_annotation <- function(mc_atac, mc_clust = NULL, k = 10) {
     }
     return(mc_annot)
 }
+
+#' For each sparse matrix row compute the sum over a ragged array
+#'
+#' @param x a dgCMatrix sparse matrix
+#' @param index a factor of the same length as the columns of x (would be coerced to a factor by \code{as.factor})
+#'
+#' @return A sparse dgCMatrix matrix of length(index) X nrow(x) size. Each ‘[i,j]’ element
+#'    represents the ‘sum(x[i,which(index==levels(index)[j])])’.
+#'
+#'
+#'
+#' @noRd
+sparse_matrix_tapply_sum <- function(x, index) {
+    if (!is.factor(index)) {
+        index <- factor(index)
+    }
+    groups <- levels(index)
+    if (!is.null(colnames(x)) && !is.null(names(index))) {
+        if (!all(colnames(x) == names(index))) {
+            cli_warn("The column names of the input matrix do not match the index names. The index names would be ignored.")
+        }
+    }
+
+    vectors <- lapply(1:length(groups), function(j) {
+        Matrix::rowSums(x[, which(index == groups[j])], sparseResult = TRUE)
+    })
+
+    res <- sparse_vectors_to_matrix(vectors)
+    colnames(res) <- levels(index)
+    if (!is.null(rownames(x))) {
+        rownames(res) <- rownames(x)
+    }
+
+    return(res)
+}
+
+#' cbind sparse vectors into a sparse matrix
+#'
+#' @param vectors a list of sparse vectors
+#' @return a dgCMatrix sparse matrix
+#' @noRd
+sparse_vectors_to_matrix <- function(input) {
+    l <- unique(sapply(input, length))
+    stopifnot(length(l) == 1)
+    return(Matrix::sparseMatrix(
+        x = unlist(lapply(input, slot, "x")),
+        i = unlist(lapply(input, slot, "i")),
+        p = c(0, cumsum(sapply(input, function(x) {
+            length(x@x)
+        }))),
+        dims = c(l, length(input))
+    ))
+}

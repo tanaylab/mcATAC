@@ -20,11 +20,10 @@ setMethod(
     signature = "McCounts",
     definition = function(.Object, cell_to_metacell, ...) {
         .Object@cell_to_metacell <- cell_to_metacell
-        callNextMethod(.Object, ...)
-        return(.Object)
+        return(callNextMethod(.Object, ...))
     }
 )
-#
+
 
 #' @export
 #' @noRd
@@ -37,8 +36,8 @@ setMethod(
 )
 
 #' Given metacells (usually from RNA data), project ATAC counts to get a McCounts object
-#' 
-#' @description Given cell to metacell association, summarise atac read counts to generate a McCounts object. This can 
+#'
+#' @description Given cell to metacell association, summarise atac read counts to generate a McCounts object. This can
 #' take a while - around 5 minutes using 24 cores on the PBMC dataset.
 #'
 #' @param sc_counts A ScCounts object
@@ -70,11 +69,11 @@ project_counts_on_mc <- function(sc_counts, cell_to_metacell, num_cores = parall
     doMC::registerDoMC(num_cores)
     new_data <- plyr::llply(sc_counts@data, function(sc_mat) {
         cells <- intersect(colnames(sc_mat), names(cell_to_metacell))
-        mc_mat <- t(tgs_matrix_tapply(sc_mat[, cells], cell_to_metacell[cells], sum))
+        mc_mat <- sparse_matrix_tapply_sum(sc_mat[, cells], cell_to_metacell[cells])
         return(mc_mat)
     }, .parallel = TRUE)
 
-    res <- new("McCounts", data = new_data, cell_names = sort(unique(cell_to_metacell)), genome = sc_counts@genome, chromosomes = sc_counts@chromosomes, id = sc_counts@id, description = sc_counts@description, path = sc_counts@path, cell_to_metacell = enframe(cell_to_metacell, "cell_id", "metacell"))
+    res <- new("McCounts", data = new_data, cell_names = as.character(sort(unique(cell_to_metacell))), genome = sc_counts@genome, genomic_bins = sc_counts@genomic_bins, id = sc_counts@id, description = sc_counts@description, path = sc_counts@path, cell_to_metacell = enframe(cell_to_metacell, "cell_id", "metacell"))
 
     return(res)
 }
