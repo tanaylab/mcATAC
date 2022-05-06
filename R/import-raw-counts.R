@@ -121,7 +121,7 @@ write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region,
 #' }
 #'
 #' @export
-write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools", samtools_opts = NULL, num_reads = NULL, verbose = TRUE, num_cores = parallel::detectCores()) {
+write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE, num_cores = parallel::detectCores()) {
     withr::with_options(list(scipen = 1e5), {
         data_dir <- file.path(out_dir, "data")
         if (!dir.exists(data_dir)) {
@@ -156,7 +156,7 @@ write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NUL
             id = id,
             description = description,
             data_dir = "data",
-            genomic_bins = genomic_bins
+            genomic_bins = genomic_bins$name
         )
 
         yaml::write_yaml(counts_md, file = file.path(out_dir, "metadata.yaml"))

@@ -22,6 +22,7 @@ Write a counts object to a file.
 \examples{
 \dontrun{
 scc_write(sc_counts, "sc_counts")
+mcc_write(mc_counts, "mc_counts")
 }
 
 }

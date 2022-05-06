@@ -98,7 +98,7 @@ scc_write <- function(object, out_dir, num_cores = parallel::detectCores()) {
     }
 
     doMC::registerDoMC(num_cores)
-    plyr::l_ply(names(object@data), function(region) {        
+    plyr::l_ply(names(object@data), function(region) {
         out_file <- file.path(data_dir, glue("{region}.mtx"))
         tgutil::fwrite_mm(object@data[[region]], out_file)
         system(glue("gzip {out_file} && rm -f {out_file}"))
@@ -158,7 +158,10 @@ scc_read <- function(path, id = NULL, description = NULL) {
         }
     })
 
-    genomic_bins <- as_tibble(md$genomic_bins)
+    genomic_bins <- tibble(name = md$genomic_bins) %>%
+        tidyr::separate(name, c("chrom", "start", "end"), sep = "_", remove = FALSE) %>%
+        mutate(start = as.numeric(start), end = as.numeric(end)) %>%
+        select(chrom, start, end, name)
     data <- read_sc_counts_data(data_dir, genomic_bins, md$cell_names, md$genome)
 
     counts <- new("ScCounts", data = data, cell_names = md$cell_names, genome = md$genome, genomic_bins = genomic_bins, id = id %||% md$id, description = description %||% md$description, path = path)
