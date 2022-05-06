@@ -2,9 +2,12 @@
 % Please edit documentation in R/ScCounts.R
 \name{scc_write}
 \alias{scc_write}
+\alias{mcc_write}
 \title{Write a counts object to a file.}
 \usage{
 scc_write(object, out_dir, num_cores = parallel::detectCores())
+
+mcc_write(object, out_dir, num_cores = parallel::detectCores())
 }
 \arguments{
 \item{object}{a counts object (ScCounts or McCounts)}

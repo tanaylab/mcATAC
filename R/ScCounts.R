@@ -86,6 +86,7 @@ print_counts_object <- function(object, object_type, column_type) {
 #' @examples
 #' \dontrun{
 #' scc_write(sc_counts, "sc_counts")
+#' mcc_write(mc_counts, "mc_counts")
 #' }
 #'
 #' @export
@@ -97,8 +98,7 @@ scc_write <- function(object, out_dir, num_cores = parallel::detectCores()) {
     }
 
     doMC::registerDoMC(num_cores)
-    plyr::l_ply(names(object@data), function(region) {
-        print(region)
+    plyr::l_ply(names(object@data), function(region) {        
         out_file <- file.path(data_dir, glue("{region}.mtx"))
         tgutil::fwrite_mm(object@data[[region]], out_file)
         system(glue("gzip {out_file} && rm -f {out_file}"))
@@ -122,6 +122,12 @@ scc_write <- function(object, out_dir, num_cores = parallel::detectCores()) {
     yaml::write_yaml(counts_md, file = file.path(out_dir, "metadata.yaml"))
 
     cli_alert_success("Written object to {.file {out_dir}}")
+}
+
+#' @rdname scc_write
+#' @export
+mcc_write <- function(object, out_dir, num_cores = parallel::detectCores()) {
+    scc_write(object, out_dir, num_cores)
 }
 
 #' Read an ScCounts object from a directory
@@ -159,44 +165,20 @@ scc_read <- function(path, id = NULL, description = NULL) {
     return(counts)
 }
 
-#' Read an McCounts object from a directory
-#'
-#' @param path path to the directory containing the object (which was created by \code{write_sc_counts_from_bam})
-#'
-#' @examples
-#' \dontrun{
-#' mc_counts <- mcc_read("pbmc_reads_mc")
-#' }
-#'
-#' @inheritParams scc_read
-#' @export
-mcc_read <- function(path, id = NULL, description = NULL) {
-    sc_counts <- scc_read(path, id, description)
-    md_file <- file.path(path, "metadata.yaml")
-    md <- yaml::read_yaml(md_file)
-
-    if (is.null(md$cell_to_metacell)) {
-        cli_abort("Directory {.file {path}} does not contain a valid McCounts object (the metadata file {.file {md_file}} is missing the {.field cell_to_metacell} field.)")
-    }
-
-    mc_counts <- new("McCounts", data = sc_counts@data, cell_names = sc_counts@cell_names, genome = sc_counts@genome, genomic_bins = sc_counts@genomic_bins, id = sc_counts@id, description = sc_counts@description, path = sc_counts@path, cell_to_metacell = as_tibble(md$cell_to_metacell))
-    return(mc_counts)
-}
-
 read_sc_counts_data <- function(data_dir, genomic_bins, cell_names, genome, num_cores = parallel::detectCores()) {
     gset_genome(genome)
     intervals <- gintervals.all()
 
-    # make sure the scope is OK
+    # TODO: make sure the scope is OK
 
     if (any(setdiff(unique(genomic_bins$chrom), intervals$chrom))) {
         missing_chroms <- setdiff(unique(genomic_bins$chrom), intervals$chrom)
         cli_abort("The following chromosomes are not present in the genome: {.val {missing_chroms}}")
     }
 
-    # chromosomes <- intersect(chromosomes, intervals$chrom)
+    # TODO: chromosomes <- intersect(chromosomes, intervals$chrom)
 
-    # again: make sure the scope is OK
+    # TODO: again: make sure the scope is OK
 
     doMC::registerDoMC(num_cores)
     data <- plyr::llply(genomic_bins$name, function(region) {

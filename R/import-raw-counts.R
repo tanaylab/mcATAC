@@ -145,9 +145,9 @@ write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NUL
 
         doMC::registerDoMC(num_cores)
         plyr::a_ply(genomic_bins, 1, function(region) {
-            cli_alert("Processing {.val {region}}")
+            cli_alert("Processing {.val {region$name}}")
             write_sparse_matrix_from_bam(bam_file, glue("{data_dir}/{region$chrom}_{region$start}_{region$end}.mtx"), cell_names, region, genome, min_mapq, samtools_bin, samtools_opts, num_reads, verbose)
-            cli_alert_success("Finished processing {.val {region}}")
+            cli_alert_success("Finished processing {.val {region$name}}")
         }, .parallel = TRUE)
 
         counts_md <- list(

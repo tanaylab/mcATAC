@@ -78,6 +78,30 @@ project_counts_on_mc <- function(sc_counts, cell_to_metacell, num_cores = parall
     return(res)
 }
 
+#' Read an McCounts object from a directory
+#'
+#' @param path path to the directory containing the object (which was created by \code{write_sc_counts_from_bam})
+#'
+#' @examples
+#' \dontrun{
+#' mc_counts <- mcc_read("pbmc_reads_mc")
+#' }
+#'
+#' @inheritParams scc_read
+#' @export
+mcc_read <- function(path, id = NULL, description = NULL) {
+    sc_counts <- scc_read(path, id, description)
+    md_file <- file.path(path, "metadata.yaml")
+    md <- yaml::read_yaml(md_file)
+
+    if (is.null(md$cell_to_metacell)) {
+        cli_abort("Directory {.file {path}} does not contain a valid McCounts object (the metadata file {.file {md_file}} is missing the {.field cell_to_metacell} field.)")
+    }
+
+    mc_counts <- new("McCounts", data = sc_counts@data, cell_names = sc_counts@cell_names, genome = sc_counts@genome, genomic_bins = sc_counts@genomic_bins, id = sc_counts@id, description = sc_counts@description, path = sc_counts@path, cell_to_metacell = as_tibble(md$cell_to_metacell))
+    return(mc_counts)
+}
+
 #' Extract McCounts to a tidy data frame
 #'
 #' @param mc_counts A McCounts object
@@ -145,7 +169,7 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, num_cores =
     cli_alert("Extracting metacell data")
     d <- mcc_extract_to_df(mc_counts, metacells, num_cores)
 
-    misha.ext::gtrack.create_dirs(track_prefix)
+    misha.ext::gtrack.create_dirs(track_prefix, showWarnings = FALSE)
 
     doMC::registerDoMC(num_cores)
     plyr::l_ply(mc_counts@cell_names, function(metacell) {
