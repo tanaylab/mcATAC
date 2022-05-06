@@ -339,3 +339,96 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust = NULL, peak_clust = NULL,
     }
     return(pp)
 }
+
+
+#' Plot metacell tracks around locus
+#'
+#' @param tracks (optional) all tracks to plot
+#' @param gene (optional) which gene to plot around
+#' @param atac (optional) ScATAC, McATAC or PeakIntervals object from which to extract peaks in locus
+#' @param track_regex (optional) regular expression for matching tracks to plot
+#' @param intervals (optional) what genomic interval to plot
+#' @param iterator (optional) misha iterator
+#' @param extend (optional) how much to extend \code{intervals} by on each side
+#' @param colors (optional) colorRampPalette vector of colors for scaling colors in heatmap
+#'
+#' @inheritParams pheatmap::pheatmap
+#' @inheritDotParams save_pheatmap
+#'
+#' @return a pheatmap figure.
+#' @examples
+#' \dontrun{
+#'
+#' }
+#' @export
+plot_tracks_at_locus <- function(tracks = NULL, 
+                                gene = NULL, 
+                                atac = NULL,
+                                gene_feature = "exon",
+                                track_regex = NULL, 
+                                intervals = NULL, 
+                                iterator = 100,
+                                extend = 0, 
+                                order_rows = FALSE,
+                                annotation_row = NULL,
+                                annotation_col = NULL,
+                                annotation_colors = NULL,
+                                colors = colorRampPalette(c("white", "darkblue","red"))(100),
+                               ...) {
+    if (is.null(tracks)) {
+        if (is.null(track_regex)) {
+            cli_abort("Must specify either {.var tracks} or {.var track_regex")
+        }
+        else {
+            tracks <- gtrack.ls(track_regex)
+            if (length(tracks) == 0) {
+                cli_abort("No tracks matching {.var track_regex} were found.")
+            }
+        }
+    }
+    if (!is.null(gene)) {
+        if (gene_feature %!in% c('tss', 'exon')) {
+            cli_abort("{.var gene_feature} should be either 'tss' or 'exon'")
+        }
+        feature_df <- gintervals.load(glue::glue("intervs.global.{gene_feature}"))
+        feature_df <- dplyr::filter(feature_df, !grepl("_", feature_df$chrom))
+        gene_features <- dplyr::filter(feature_df, geneSymbol == gene)
+        if (nrow(gene_features) == 0) {
+            cli_abort("No {.val gene_feature}s matching {.val gene} were found. Maybe check \\
+                    that this feature exists in the field {.field geneSymbol} of gintervals.load('intervs.global.{gene_feature}')")
+        }
+        intervals <- gintervals(unique(gene_features$chrom), min(gene_features$start) - shift, max(gene_features$end) + shift)
+    }
+    else {
+        intervals <- dplyr::mutate(intervals, start = start - shift, end = end + shift)
+    }
+    mc_gene_vals <- gextract(pbmc_tracks, intervals = gene_intervs, iterator = iterator)
+    mat <- t(subset(mc_gene_vals, select = -c(chrom, start, end, intervalID)))
+    rownames(mat) <- 1:nrow(mat)
+    mat_n <- apply(mat, 2, function(x) {x[is.na(x)] <- 0; return(x)})
+    if (!is.null(atac)) {
+        cl <- class(atac)
+        if (cl[[1]] %in% c("ScATAC", "McATAC")) {
+            peaks <- atac@peaks
+        }
+        else if (cl[[1]] == "PeakIntervals") {
+            peaks <- atac
+        }
+        peaks_in <- gintervals.neighbors1(peaks, intervals, mindist = 0, maxdist = 0)
+        peaks_coords <- dplyr::mutate(peaks_in, 
+                                        start = round((start - intervals$start)/iterator),
+                                        end = round((intervals$end - end)/iterator)
+        )
+        peak_plot <- plot(1:ncol(mat_n), col = 'white')
+        rect(xleft = peaks_coords$start, xright = peaks_coords$end, ybottom = -0.5, ytop = 0.5, col = "red")
+    }
+    atac_plot <- pheatmap(mat_s, 
+                    cluster_cols = F, 
+                    color = colors, 
+                    cluster_rows = F, 
+                    show_rownames = F, 
+                    show_colnames = F, 
+                    annotation_row = annotation_row, 
+                    annotation_col = annotation_col,
+                    annotation_colors = annotation_colors)
+}
