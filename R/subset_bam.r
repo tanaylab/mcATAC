@@ -2,7 +2,9 @@
 #' 
 #' @param bam_path path to the 10X atac_possorted.bam file
 #' @param out_dir (optional) directory to output per-metacell bam files
+#' @return error log 
 #' @inheritParams write_metacell_cell_names
+#' @export
 generate_per_metacell_bams <- function(bam_path, mcatac, out_dir = NULL, c2mc_path = NULL) {
     if (is.null(out_dir)) {
         out_dir <- file.path(bam_path, paste0(mcatac@id, "_mc_bams"))
@@ -28,7 +30,9 @@ generate_per_metacell_bams <- function(bam_path, mcatac, out_dir = NULL, c2mc_pa
 #' @param bam_folder_path path to BAMs
 #' @param output_path (optional) where to put WIGs
 #' @param parallel (optional) whether to do parallel computations
+#' @return error log 
 #' @inheritParams bam_to_wig
+#' @export
 generate_wigs_from_bams <- function(bam_folder_path, track_name_prefix, output_path = NULL, parallel = TRUE) {
     bam_folder_path = normalizePath(bam_folder_path)
     if (is.null(output_path)) {
@@ -73,6 +77,7 @@ write_metacell_cell_names <- function(mcatac, c2mc_path = NULL) {
 #' @param output_filename what to call the output BAM file
 #' @param mcs vector of mcs to merge BAMs of
 #' @param parallel (optional) whether to do parallel computations
+#' @export
 merge_metacell_bams <- function(bam_path, output_filename, mcs, parallel = TRUE) {
     file_list <- paste(paste0(bam_path,'/mc',mcs, ".bam"))
     if (!grepl(".bam$", output_filename)) {
@@ -98,6 +103,7 @@ merge_metacell_bams <- function(bam_path, output_filename, mcs, parallel = TRUE)
 #' @param bam_path path to the BAM file
 #' @param output_filename what to call the output WIG file
 #' @param track_name_prefix (optional) name to prepend to track (e.g. for display in UCSC genome browser)
+#' @export
 bam_to_wig = function(bam_path, output_filename, track_name_prefix = NULL, header_line = NULL) {
     # base_name <- gsub('.bam$', '', fl)
     base_name = basename(bam_path)
@@ -125,4 +131,48 @@ bam_to_wig = function(bam_path, output_filename, track_name_prefix = NULL, heade
     out_cmd = glue::glue(" >> {output_filename}")
     bam2wig_command = paste0(paste0(c(smt_cmd, perl_cmd), collapse = " | "), out_cmd)
     system(command = bam2wig_command)
+}
+
+#' Convert WIG files to misha tracks
+#' 
+#' @param wig_fold path to folder containing WIG files
+#' @param track_name_prefix (optional) name to prepend to track
+#' @param description (optional) description for misha tracks
+#' @param parallel (optional) whether to use parallel computation
+#' @param force (optional) whether to force rewrite of existing misha tracks
+#' @return error log 
+#' @export
+convert_wigs_to_tracks = function(wig_fold, track_name_prefix = NULL, description = NULL, parallel = TRUE, force = FALSE) {
+    wig_file_paths = file.path(wig_fold, grep("\\.wig$", list.files(wig_fold), v=T))
+    if (is.null(track_name_prefix)) {
+        track_name_prefix = basename(wig_fold)
+    }
+    if (is.null(track_name_prefix)) {
+        description = "ATAC fragment track for {track_name_prefix} - {bn}"
+    }
+    make_one_track = function(fp) {
+        bn = gsub('.wig$', '', basename(fp))
+        track_name = glue::glue("{track_name_prefix}_{bn}")
+        track_exists = gtrack.exists(track_name)
+        if (track_exists) {
+            if (force) {
+                gtrack.rm(track_name, force = force)
+            }
+            else {
+                cli_alert_info("Track {.val track_name} exists and {.var force} is {.val force}. Skipping import of track.")
+                next
+            }
+        }
+        gtrack.import(track = track_name, 
+                        description = glue::glue(description), 
+                        file = fp,
+                        binsize = 0)
+    }
+    if (parallel) {
+        error_log <- parallel::mclapply(wig_file_paths, FUN = make_one_track, mc.cores = parallel::detectCores())
+    }
+    else {
+        error_log <- sapply(wig_file_paths, make_one_track)
+    }
+    return(error_log)
 }
