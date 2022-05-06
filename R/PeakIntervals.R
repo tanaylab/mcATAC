@@ -81,10 +81,9 @@ validate_peaks <- function(peaks) {
 #' @export
 peak_names <- function(peaks, promoters = FALSE) {
     if (gintervals.exists("intervs.global.tad_names")) {
-        peaks = name_enhancers(peaks)
-        peak_names = peaks$peak_name
-    }
-    else {
+        peaks <- name_enhancers(peaks)
+        peak_names <- peaks$peak_name
+    } else {
         if (has_name(peaks, "peak_name")) {
             return(peaks$peak_name)
         } else if (promoters) {

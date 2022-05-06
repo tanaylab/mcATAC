@@ -131,45 +131,42 @@ get_gene_body_df <- function(tss, exons) {
 }
 
 #' Name ATAC peaks from TAD names
-#' The peaks are named in the following pattern "{TAD_name}_{distance_from_TAD_start_in_kbp}". 
+#' The peaks are named in the following pattern "{TAD_name}_{distance_from_TAD_start_in_kbp}".
 #' For the TAD naming scheme see: https://github.com/tanaylab/tadbris.
 #' @param atac a McATAC or ScATAC or PeakIntervals object
 #' @return the original \code{atac} object, with the field \code{peak_name} replaced by the new TAD-referenced name
 #' @examples
 #' \dontrun{
-#'      atac_mc <- name_enhancers(atac_mc)
-#'      my_peaks <- name_enhancers(my_peaks)
+#' atac_mc <- name_enhancers(atac_mc)
+#' my_peaks <- name_enhancers(my_peaks)
 #' }
 #' @export
 name_enhancers <- function(atac, tad_names = gintervals.load("intervs.global.tad_names")) {
     cl <- class(atac)
-    if (cl[[1]] %in% c('ScATAC', 'McATAC')) {
+    if (cl[[1]] %in% c("ScATAC", "McATAC")) {
         peaks <- atac@peaks
-    }
-    else if (cl[[1]] == "PeakIntervals") {
+    } else if (cl[[1]] == "PeakIntervals") {
         peaks <- atac
-    }
-    else {
+    } else {
         cli_abort("Class of {.var atac} is not recognized (should be either ScATAC, McATAC or PeakIntervals object).")
     }
     peaks <- as.data.frame(peaks) %>%
-               misha.ext::gintervals.neighbors1(tad_names) %>%
-               mutate(
-                   dist_diff = start - start1,
-                   peak_name = make.unique(glue("{tad_name}_{kb}", kb = round(dist_diff, -3)/1e+3))
-               ) %>%
-               select(-(chrom1:dist_diff)) %>% 
-              PeakIntervals()
+        misha.ext::gintervals.neighbors1(tad_names) %>%
+        mutate(
+            dist_diff = start - start1,
+            peak_name = make.unique(glue("{tad_name}_{kb}", kb = round(dist_diff, -3) / 1e+3))
+        ) %>%
+        select(-(chrom1:dist_diff)) %>%
+        PeakIntervals()
     # nei_peaks_tads <- gintervals.neighbors(tad_names, as.data.frame(peaks), mindist = 0, maxdist = 0, maxneighbors = 1e+3)
     # start_cols <- grep('start', colnames(nei_peaks_tads))
     # dist_diff <- nei_peaks_tads[,start_cols[[2]]] - nei_peaks_tads[,start_cols[[1]]]
     # enh_name <- setNames(make.unique(stringr::str_c(nei_peaks_tads$tad_name, as.character(round(dist_diff, -3)/1e+3), sep = "_")), nei_peaks_tads$peak_name)
     # enh_name[peaks$peak_name[peaks$peak_name %!in% names(enh_name)]] <- NA
     # peaks$peak_name <- enh_name[match(peaks$peak_name, names(enh_name))]
-    if (cl[[1]] %in% c('ScATAC', 'McATAC')) {
+    if (cl[[1]] %in% c("ScATAC", "McATAC")) {
         atac@peaks <- peaks
-    }
-    else if (cl[[1]] == "PeakIntervals") {
+    } else if (cl[[1]] == "PeakIntervals") {
         atac <- peaks
     }
     return(atac)
