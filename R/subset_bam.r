@@ -163,7 +163,7 @@ convert_wigs_to_tracks = function(wig_fold, track_name_prefix = NULL, descriptio
                 next
             }
         }
-        gtrack.import(track = track_name, 
+        dummy <- gtrack.import(track = track_name, 
                         description = glue::glue(description), 
                         file = fp,
                         binsize = 0)
