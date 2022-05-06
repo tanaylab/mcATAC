@@ -55,7 +55,7 @@ setMethod(
 #' @export
 project_counts_on_mc <- function(sc_counts, cell_to_metacell, num_cores = parallel::detectCores()) {
     cell_to_metacell <- deframe(cell_to_metacell)
-    cell_to_metacell <- cell_to_metacell[cell_to_metacell %!in% c(-2, -1, 0)] # make sure you don't have any outlier metacells
+    cell_to_metacell <- cell_to_metacell[cell_to_metacell %!in% c(-2, -1, 0)] # make sure we don't have any outlier metacells
     assert_that(all(names(cell_to_metacell) %in% sc_counts@cell_names))
 
 
@@ -76,4 +76,91 @@ project_counts_on_mc <- function(sc_counts, cell_to_metacell, num_cores = parall
     res <- new("McCounts", data = new_data, cell_names = as.character(sort(unique(cell_to_metacell))), genome = sc_counts@genome, genomic_bins = sc_counts@genomic_bins, id = sc_counts@id, description = sc_counts@description, path = sc_counts@path, cell_to_metacell = enframe(cell_to_metacell, "cell_id", "metacell"))
 
     return(res)
+}
+
+#' Extract McCounts to a tidy data frame
+#'
+#' @param mc_counts A McCounts object
+#' @param metacells metacells to extract.
+#' @param num_cores The number of cores to use.
+#'
+#' @return an intervals set (tibble) with additional "metacell" and "value" columns
+#'
+#' @examples
+#' \dontrun{
+#' df <- mcc_extract_to_df(mc_counts, c("1", "2"))
+#' }
+#'
+#' @export
+mcc_extract_to_df <- function(mc_counts, metacells = NULL, num_cores = parallel::detectCores()) {
+    metacells <- metacells %||% mc_counts@cell_names
+    metacells <- as.character(metacells)
+    extract_bin <- function(mat, bin, metacells) {
+        Matrix::summary(mat[, metacells, drop = FALSE]) %>%
+            mutate(
+                start = i + bin$start,
+                end = start + 1,
+                chrom = bin$chrom,
+                metacell = mc_counts@cell_names[j]
+            ) %>%
+            select(chrom, start, end, metacell, value = x) %>%
+            as_tibble()
+    }
+
+    doMC::registerDoMC(num_cores)
+    mc_data <- plyr::adply(mc_counts@genomic_bins, 1, function(bin) {
+        return(
+            extract_bin(mc_counts@data[[bin$name]], bin, metacells)
+        )
+    }, .parallel = TRUE)
+
+    mc_data <- mc_data %>%
+        select(chrom, start, end, metacell, value) %>%
+        as_tibble()
+
+    return(mc_data)
+}
+
+#' Create a misha track for each metacell in a McCounts object
+#'
+#' @description This would create a sparse track of the form "{track_prefix}.mc{metacell}" for each metacell in the McCounts object.
+#'
+#' @param mc_counts A McCounts object
+#' @param track_prefix The prefix of the tracks to create. Track names will be of the form "{track_prefix}.mc{metacell}"
+#' @param metacells metacells for which to create tracks. If NULL, all metacells will be used.
+#' @param num_cores The number of cores to use.
+#'
+#' @return None.
+#'
+#' @examples
+#' \dontrun{
+#' mcc_to_tracks(mc_counts, "pbmc_mc")
+#' }
+#'
+#' @export
+mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, num_cores = parallel::detectCores()) {
+    metacells <- metacells %||% mc_counts@cell_names
+    metacells <- as.character(metacells)
+
+    cli_alert("Extracting metacell data")
+    d <- mcc_extract_to_df(mc_counts, metacells, num_cores)
+
+    misha.ext::gtrack.create_dirs(track_prefix)
+
+    doMC::registerDoMC(num_cores)
+    plyr::l_ply(mc_counts@cell_names, function(metacell) {
+        track <- glue("{track_prefix}.mc{metacell}")
+        cli_alert("Creating {track} track")
+        x <- d %>% filter(metacell == !!metacell)
+        gtrack.create_sparse(
+            track = track,
+            description = "",
+            intervals = x %>% select(chrom, start, end),
+            values = x$value
+        )
+    }, .parallel = TRUE)
+
+    gdb.reload()
+
+    cli_alert_success("Created {length(metacells)} tracks at {track_prefix}")
 }

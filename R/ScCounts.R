@@ -85,11 +85,11 @@ print_counts_object <- function(object, object_type, column_type) {
 #'
 #' @examples
 #' \dontrun{
-#' write_sc_counts(sc_counts, "sc_counts")
+#' scc_write(sc_counts, "sc_counts")
 #' }
 #'
 #' @export
-write_sc_counts <- function(object, out_dir, num_cores = parallel::detectCores()) {
+scc_write <- function(object, out_dir, num_cores = parallel::detectCores()) {
     data_dir <- file.path(out_dir, "data")
     if (!dir.exists(data_dir)) {
         dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
@@ -134,11 +134,11 @@ write_sc_counts <- function(object, out_dir, num_cores = parallel::detectCores()
 #'
 #' @examples
 #' \dontrun{
-#' counts <- read_sc_counts("pbmc_reads")
+#' counts <- scc_read("pbmc_reads")
 #' }
 #'
 #' @export
-read_sc_counts <- function(path, id = NULL, description = NULL) {
+scc_read <- function(path, id = NULL, description = NULL) {
     md_file <- file.path(path, "metadata.yaml")
     if (!file.exists(md_file)) {
         cli_abort("Directory {.file {path}} does not contain a valid ScCounts object")
@@ -152,9 +152,10 @@ read_sc_counts <- function(path, id = NULL, description = NULL) {
         }
     })
 
+    genomic_bins <- as_tibble(md$genomic_bins)
     data <- read_sc_counts_data(data_dir, genomic_bins, md$cell_names, md$genome)
 
-    counts <- new("ScCounts", data = data, cell_names = md$cell_names, genome = md$genome, genomic_bins = as_tibble(md$genomic_bins), id = id %||% md$id, description = description %||% md$description, path = path)
+    counts <- new("ScCounts", data = data, cell_names = md$cell_names, genome = md$genome, genomic_bins = genomic_bins, id = id %||% md$id, description = description %||% md$description, path = path)
     return(counts)
 }
 
@@ -164,13 +165,13 @@ read_sc_counts <- function(path, id = NULL, description = NULL) {
 #'
 #' @examples
 #' \dontrun{
-#' mc_counts <- read_sc_counts("pbmc_reads_mc")
+#' mc_counts <- mcc_read("pbmc_reads_mc")
 #' }
 #'
-#' @inheritParams read_sc_counts
+#' @inheritParams scc_read
 #' @export
-read_mc_counts <- function(path, id = NULL, description = NULL) {
-    sc_counts <- read_sc_counts(path, id, description)
+mcc_read <- function(path, id = NULL, description = NULL) {
+    sc_counts <- scc_read(path, id, description)
     md_file <- file.path(path, "metadata.yaml")
     md <- yaml::read_yaml(md_file)
 
