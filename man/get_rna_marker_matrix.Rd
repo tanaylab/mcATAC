@@ -9,7 +9,7 @@ get_rna_marker_matrix(
   markers = NULL,
   force_cell_type = TRUE,
   rm_zeros = TRUE,
-  epsilon = 0.00001,
+  epsilon = 1e-05,
   ...
 )
 }
