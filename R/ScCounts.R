@@ -112,7 +112,7 @@ scc_write <- function(object, out_dir, num_cores = parallel::detectCores()) {
         id = object@id,
         description = object@description,
         data_dir = "data",
-        genomic_bins = object@genomic_bins
+        genomic_bins = object@genomic_bins$name
     )
 
     if (class(object) == "McCounts") {

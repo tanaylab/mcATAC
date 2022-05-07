@@ -183,11 +183,11 @@ calc_mc_egc <- function(mcatac, mc_size_eps_q = 0.1) {
     quant_size <- quantile(colSums(mcatac@mat, na.rm = TRUE), mc_size_eps_q, na.rm = TRUE)
     cli_li("Setting {.field egc} cell size to {.val {quant_size}} (the {.val {mc_size_eps_q}} quantile of metacell sizes)")
     egc <- fractions * quant_size
-    return(egc)
+    return(as.matrix(egc))
 }
 
 calc_mc_fp <- function(mcatac) {
-    log_egc <- log2(1 + mcatac@egc)
+    log_egc <- as.matrix(log2(1 + mcatac@egc))
     mc_fp <- log_egc - sparseMatrixStats::rowMedians(log_egc, na.rm = TRUE)
     return(mc_fp)
 }

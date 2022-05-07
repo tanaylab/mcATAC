@@ -102,6 +102,105 @@ mcc_read <- function(path, id = NULL, description = NULL) {
     return(mc_counts)
 }
 
+#' Given a sparse matrix of genomic counts and intervals, return a sparse matrix of peaks
+#'
+#' @param mat A sparse matrix of genomic counts (rows are 1bp, columns are metacells)
+#' @param bin a single row data frame with the bin intervals (chrom, start, end)
+#' @param intervs an intervals set with another column called "peak_name"
+#' @param metacells names of metacells to include. Default: all metacells.
+#'
+#' @return a sparse matrix where rows are the peaks, columns are the metacells, and values are the counts summed
+#' over each peak.
+#'
+#' @noRd
+summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
+    if (is.null(metacells)) {
+        metacells <- colnames(mat)
+    }
+    intervs <- as.data.frame(intervs)
+
+    # find the coordinates that overlap with the intervals
+    mat_intervs <- tibble(chrom = bin$chrom, start = mat@i + bin$start, end = start + 1) %>%
+        gintervals.intersect(intervs)
+
+    # no overlap, return empty matrix
+    if (is.null(mat_intervs)) {
+        msum <- Matrix::Matrix(
+            nrow = length(intervs$peak_name), ncol = length(metacells), data = 0,
+            sparse = TRUE
+        )
+        msum <- as(msum, "dgCMatrix")
+        rownames(msum) <- intervs$peak_name
+        colnames(msum) <- metacells
+        return(msum)
+    }
+
+    mat_intervs <- mat_intervs %>%
+        misha.ext::gintervals.neighbors1(intervs) %>%
+        mutate(ind = start - bin$start)
+
+    group <- factor(mat_intervs$peak_name, levels = intervs$peak_name)
+    mat_f <- mat[mat_intervs$ind, metacells]
+
+    group_mat <- t(Matrix::sparse.model.matrix(~ 0 + group))
+    rownames(group_mat) <- gsub("group", "", rownames(group_mat))
+
+    msum <- group_mat %*% mat_f
+    return(msum)
+}
+
+#' Create an McATAC object from an McCounts object
+#'
+#' @description given an McCounts object and peaks, summarise the counts over the peaks and return a McATAC object
+#'
+#' @param mc_counts a McCounts object
+#' @param peaks a data frame with the peak intervals (chrom, start, end) and a column called "peak_name"
+#' @param metacells names of metacells to include. Default: all metacells.
+#' @param num_cores number of cores to use.
+#'
+#' @inheritParams project_atac_on_mc
+#'
+#' @examples
+#' \dontrun{
+#' atac_sc <- import_from_10x("pbmc_data", genome = "hg38")
+#' mc_counts <- mcc_read("pbmc_reads_mc")
+#' atac_mc <- mcc_to_peaks(mc_counts, atac_sc@peaks)
+#' }
+#'
+#' @export
+mcc_to_peaks <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, mc_size_eps_q = 0.1, num_cores = parallel::detectCores()) {
+    metacells <- metacells %||% mc_counts@cell_names
+    metacells <- as.character(metacells)
+
+    doMC::registerDoMC(num_cores)
+    matrices <- plyr::alply(mc_counts@genomic_bins, 1, function(bin) {
+        return(
+            summarise_bin(mc_counts@data[[bin$name]], bin, peaks, metacells)
+        )
+    }, .parallel = TRUE)
+
+    mat <- Reduce("+", matrices)
+    # mat <- as.matrix(mat)
+
+    mc_atac <- new("McATAC", mat = mat, peaks = peaks, genome = mc_counts@genome, id = mc_counts@id, description = mc_counts@description, metadata = metadata, cell_to_metacell = mc_counts@cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = mc_counts@path)
+
+    cli_alert_success("Created a new McATAC object with {.val {ncol(mc_atac@mat)}} metacells and {.val {nrow(mc_atac@mat)}} ATAC peaks.")
+
+    return(mc_atac)
+}
+
+extract_bin <- function(mat, bin, metacells) {
+    Matrix::summary(mat[, metacells, drop = FALSE]) %>%
+        mutate(
+            start = i + bin$start,
+            end = start + 1,
+            chrom = bin$chrom,
+            metacell = mc_counts@cell_names[j]
+        ) %>%
+        select(chrom, start, end, metacell, value = x) %>%
+        as_tibble()
+}
+
 #' Extract McCounts to a tidy data frame
 #'
 #' @param mc_counts A McCounts object
@@ -119,17 +218,6 @@ mcc_read <- function(path, id = NULL, description = NULL) {
 mcc_extract_to_df <- function(mc_counts, metacells = NULL, num_cores = parallel::detectCores()) {
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
-    extract_bin <- function(mat, bin, metacells) {
-        Matrix::summary(mat[, metacells, drop = FALSE]) %>%
-            mutate(
-                start = i + bin$start,
-                end = start + 1,
-                chrom = bin$chrom,
-                metacell = mc_counts@cell_names[j]
-            ) %>%
-            select(chrom, start, end, metacell, value = x) %>%
-            as_tibble()
-    }
 
     doMC::registerDoMC(num_cores)
     mc_data <- plyr::adply(mc_counts@genomic_bins, 1, function(bin) {
