@@ -168,3 +168,27 @@ export_to_h5ad(atac_mc, "pbmc_data/atac_mc.h5ad", compression = "gzip")
 # Load using: atac_mc <- import_from_h5ad("pbmc_data/atac_mc.h5ad")
 ```
 
+## Make per-metacell BAMs, WIGs and tracks
+
+```{r bams-wigs-tracks}
+bam_path <- "path/to/filtered_feature_barcode_matrix" ## if using 10X data
+bam_output_folder <- "./my_mc_bams/"
+c2mc_folder <- "./c2mc/"
+wig_folder <- "./wig_output"
+track_name_prefix = "My_scATAC_project"
+generate_per_metacell_bams(bam_path = bam_path, mcatac = atac_mc, out_dir = bam_output_folder, c2mc_path = c2mc_folder)
+generate_wigs_from_bams(bam_folder_path = bam_output_folder, track_name_prefix = track_name_prefix, output_path = wig_folder, parallel = TRUE)
+convert_wigs_to_tracks(wig_folder, track_name_prefix = track_name_prefix, description = NULL, parallel = TRUE, force = FALSE)
+```
+
+## Make pseudo-bulk ATAC tracks from per-metacell tracks
+
+```{r merge-bams}
+bam_output_folder <- "./my_mc_bams/"
+track_name_prefix = "My_scATAC_project"
+cell_type = "Neuron"
+mcmd = readr::read_csv("./data/mcmd.csv") ## metacell metadata
+merge_metacell_bams(bam_path = bam_output_folder, output_filename="./pseudo_bulk.bam", mcs = which(mcmd$cell_type == cell_type), parallel = T)
+bam_to_wig(bam_path = "./pseudo_bulk.bam", output_filename = "./pseudo_bulk.wig", track_name_prefix = track_name_prefix)
+make_one_track(fp = "./pseudo_bulk.wig", track_name_prefix = track_name_prefix, description = glue::glue("Pseudo-bulk track of ATAC signal from {cell_type} cells"))
+```
