@@ -129,33 +129,24 @@ sparse_matrix_tapply_sum <- function(x, index) {
         }
     }
 
-    vectors <- lapply(1:length(groups), function(j) {
-        Matrix::rowSums(x[, which(index == groups[j])], sparseResult = TRUE)
-    })
+    index_mat <- t(Matrix::sparse.model.matrix(~ 0 + index))
+    rownames(index_mat) <- gsub("group", "", rownames(index_mat))
 
-    res <- sparse_vectors_to_matrix(vectors)
+    res <- t(index_mat %*% t(x))
+
     colnames(res) <- levels(index)
     if (!is.null(rownames(x))) {
         rownames(res) <- rownames(x)
     }
-
     return(res)
 }
 
-#' cbind sparse vectors into a sparse matrix
-#'
-#' @param vectors a list of sparse vectors
-#' @return a dgCMatrix sparse matrix
-#' @noRd
-sparse_vectors_to_matrix <- function(input) {
-    l <- unique(sapply(input, length))
-    stopifnot(length(l) == 1)
-    return(Matrix::sparseMatrix(
-        x = unlist(lapply(input, slot, "x")),
-        i = unlist(lapply(input, slot, "i")),
-        p = c(0, cumsum(sapply(input, function(x) {
-            length(x@x)
-        }))),
-        dims = c(l, length(input))
-    ))
+overwrite_file <- function(file, overwrite) {
+    if (file.exists(file)) {
+        if (!overwrite) {
+            cli_abort("File {.file {file}} already exists. Use 'overwrite = TRUE' to overwrite.")
+        } else {
+            unlink(file, recursive = TRUE)
+        }
+    }
 }

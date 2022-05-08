@@ -8,6 +8,7 @@ mcc_to_tracks(
   mc_counts,
   track_prefix,
   metacells = NULL,
+  overwrite = FALSE,
   num_cores = parallel::detectCores()
 )
 }
@@ -17,6 +18,8 @@ mcc_to_tracks(
 \item{track_prefix}{The prefix of the tracks to create. Track names will be of the form "{track_prefix}.mc{metacell}"}
 
 \item{metacells}{metacells for which to create tracks. If NULL, all metacells will be used.}
+
+\item{overwrite}{Whether to overwrite existing tracks.}
 
 \item{num_cores}{The number of cores to use.}
 }

@@ -14,7 +14,7 @@ scc_read(path, id = NULL, description = NULL)
 \item{description}{description of the object (optional)}
 }
 \value{
-an ScCounts object
+a ScCounts object
 }
 \description{
 Read an ScCounts object from a directory

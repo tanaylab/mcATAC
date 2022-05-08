@@ -25,6 +25,7 @@
 #' @param samtools_opts additional options for samtools (e.g. "--subsample 0.1")
 #' @param num_reads number of reads (within the \code{region}) to process (optional).
 #' @param verbose verbose output (optional)
+#' @param overwrite overwrite existing files (optional)
 #'
 #' @return None
 #'
@@ -34,7 +35,7 @@
 #' }
 #'
 #' @export
-write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region, genome = NULL, min_mapq = NULL, samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools", samtools_opts = NULL, num_reads = NULL, verbose = TRUE) {
+write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region, genome = NULL, min_mapq = NULL, samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools", samtools_opts = NULL, num_reads = NULL, verbose = TRUE, overwrite = FALSE) {
     withr::with_options(list(scipen = 1e5), {
         if (class(cell_names) == "ScATAC") {
             genome <- genome %||% cell_names@genome
@@ -45,6 +46,9 @@ write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region,
         if (!file.exists(paste0(bam_file, ".bai"))) {
             cli_abort("Index file not found for {.file {bam_file}}. Please run 'samtools index {bam_file}'.")
         }
+
+        overwrite_file(out_file, overwrite)
+        overwrite_file(paste0(out_file, "gz"), overwrite)
 
         cell_names_file <- paste0(out_file, ".colnames")
         write.table(cell_names, cell_names_file, row.names = FALSE, col.names = FALSE, quote = FALSE)
@@ -93,7 +97,9 @@ write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region,
         num_rows <- as.numeric(system(glue("wc -l {out_file} | cut -d ' ' -f 1"), intern = TRUE)) - 2
         system(glue("sed -i '2 s/^.*$/{header}/' {out_file}", header = paste(dims[1], dims[2], as.integer(num_rows), sep = " ")))
 
-        cli_alert("zipping {out_file} to {out_file}.gz")
+        if (verbose) {
+            cli_alert("zipping {out_file} to {out_file}.gz")
+        }
         system(glue("gzip {out_file} && rm -f {out_file}"))
 
         if (verbose) {
@@ -110,6 +116,7 @@ write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region,
 #' @param bin_size Size of the genomic bins to use (in bp). Each chromsome will be chunked into bins with size which is
 #' smaller than this value. Default is 50Mb.
 #' @param num_cores number of cores to use (optional)
+#' @param overwrite overwrite existing directory (optional)
 #'
 #' @return None
 #'
@@ -121,13 +128,20 @@ write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region,
 #' }
 #'
 #' @export
-write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE, num_cores = parallel::detectCores()) {
+write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE, num_cores = parallel::detectCores(), overwrite = FALSE) {
     withr::with_options(list(scipen = 1e5), {
         data_dir <- file.path(out_dir, "data")
-        if (!dir.exists(data_dir)) {
-            dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
-            cli_alert("Created directory {.file {out_dir}}")
+        if (dir.exists(out_dir)) {
+            if (!overwrite) {
+                cli_abort("Output directory {.file {out_dir}} already exists. Use 'overwrite = TRUE' to overwrite.")
+            } else {
+                cli_warn("Output directory {.file {out_dir}} already exists. Overwriting.")
+                unlink(out_dir, recursive = TRUE)
+            }
         }
+
+        dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
+        cli_alert("Writing to {.file {out_dir}}")
 
         if (class(cell_names) == "ScATAC") {
             genome <- genome %||% cell_names@genome
@@ -146,7 +160,7 @@ write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NUL
         doMC::registerDoMC(num_cores)
         plyr::a_ply(genomic_bins, 1, function(region) {
             cli_alert("Processing {.val {region$name}}")
-            write_sparse_matrix_from_bam(bam_file, glue("{data_dir}/{region$chrom}_{region$start}_{region$end}.mtx"), cell_names, region, genome, min_mapq, samtools_bin, samtools_opts, num_reads, verbose)
+            write_sparse_matrix_from_bam(bam_file, glue("{data_dir}/{region$chrom}_{region$start}_{region$end}.mtx"), cell_names, region, genome, min_mapq, samtools_bin, samtools_opts, num_reads, verbose, overwrite = overwrite)
             cli_alert_success("Finished processing {.val {region$name}}")
         }, .parallel = TRUE)
 

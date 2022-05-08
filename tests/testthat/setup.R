@@ -29,7 +29,7 @@ lockBinding("atac_mc", globalenv())
 
 withr::defer(
     {
-        unlink(raw_dir)
+        unlink(raw_dir, recursive = TRUE)
         unlockBinding("atac_sc", globalenv())
         unlockBinding("atac_mc", globalenv())
     },

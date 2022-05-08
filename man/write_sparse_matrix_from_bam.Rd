@@ -14,7 +14,8 @@ write_sparse_matrix_from_bam(
   samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools",
   samtools_opts = NULL,
   num_reads = NULL,
-  verbose = TRUE
+  verbose = TRUE,
+  overwrite = FALSE
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ write_sparse_matrix_from_bam(
 \item{num_reads}{number of reads (within the \code{region}) to process (optional).}
 
 \item{verbose}{verbose output (optional)}
+
+\item{overwrite}{overwrite existing files (optional)}
 }
 \value{
 None

@@ -13,6 +13,9 @@ mcc_read(path, id = NULL, description = NULL)
 
 \item{description}{description of the object (optional)}
 }
+\value{
+A McCounts object
+}
 \description{
 Read an McCounts object from a directory
 }

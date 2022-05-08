@@ -54,6 +54,7 @@ setMethod(
 #'
 #' @export
 project_counts_on_mc <- function(sc_counts, cell_to_metacell, num_cores = parallel::detectCores()) {
+    assert_atac_object(sc_counts, class = "ScCounts")
     cell_to_metacell <- deframe(cell_to_metacell)
     cell_to_metacell <- cell_to_metacell[cell_to_metacell %!in% c(-2, -1, 0)] # make sure we don't have any outlier metacells
     assert_that(all(names(cell_to_metacell) %in% sc_counts@cell_names))
@@ -82,6 +83,8 @@ project_counts_on_mc <- function(sc_counts, cell_to_metacell, num_cores = parall
 #'
 #' @param path path to the directory containing the object (which was created by \code{write_sc_counts_from_bam})
 #'
+#' @return A McCounts object
+#'
 #' @examples
 #' \dontrun{
 #' mc_counts <- mcc_read("pbmc_reads_mc")
@@ -99,6 +102,8 @@ mcc_read <- function(path, id = NULL, description = NULL) {
     }
 
     mc_counts <- new("McCounts", data = sc_counts@data, cell_names = sc_counts@cell_names, genome = sc_counts@genome, genomic_bins = sc_counts@genomic_bins, id = sc_counts@id, description = sc_counts@description, path = sc_counts@path, cell_to_metacell = as_tibble(md$cell_to_metacell))
+
+    cli_alert_success("Succesfully read a McCounts object from {.file {path}}")
     return(mc_counts)
 }
 
@@ -114,9 +119,7 @@ mcc_read <- function(path, id = NULL, description = NULL) {
 #'
 #' @noRd
 summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
-    if (is.null(metacells)) {
-        metacells <- colnames(mat)
-    }
+    metacells <- metacells %||% colnames(mat)
     intervs <- as.data.frame(intervs)
 
     # find the coordinates that overlap with the intervals
@@ -142,11 +145,9 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
     group <- factor(mat_intervs$peak_name, levels = intervs$peak_name)
     mat_f <- mat[mat_intervs$ind, metacells]
 
-    group_mat <- t(Matrix::sparse.model.matrix(~ 0 + group))
-    rownames(group_mat) <- gsub("group", "", rownames(group_mat))
+    res <- t(sparse_matrix_tapply_sum(t(mat_f), group))
 
-    msum <- group_mat %*% mat_f
-    return(msum)
+    return(res)
 }
 
 #' Create an McATAC object from an McCounts object
@@ -169,6 +170,7 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
 #'
 #' @export
 mcc_to_peaks <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, mc_size_eps_q = 0.1, num_cores = parallel::detectCores()) {
+    assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
 
@@ -180,7 +182,6 @@ mcc_to_peaks <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, mc
     }, .parallel = TRUE)
 
     mat <- Reduce("+", matrices)
-    # mat <- as.matrix(mat)
 
     mc_atac <- new("McATAC", mat = mat, peaks = peaks, genome = mc_counts@genome, id = mc_counts@id, description = mc_counts@description, metadata = metadata, cell_to_metacell = mc_counts@cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = mc_counts@path)
 
@@ -189,13 +190,13 @@ mcc_to_peaks <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, mc
     return(mc_atac)
 }
 
-extract_bin <- function(mat, bin, metacells) {
+extract_bin <- function(mat, bin, metacells, all_metacells) {
     Matrix::summary(mat[, metacells, drop = FALSE]) %>%
         mutate(
             start = i + bin$start,
             end = start + 1,
             chrom = bin$chrom,
-            metacell = mc_counts@cell_names[j]
+            metacell = all_metacells[j]
         ) %>%
         select(chrom, start, end, metacell, value = x) %>%
         as_tibble()
@@ -216,13 +217,14 @@ extract_bin <- function(mat, bin, metacells) {
 #'
 #' @export
 mcc_extract_to_df <- function(mc_counts, metacells = NULL, num_cores = parallel::detectCores()) {
+    assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
 
     doMC::registerDoMC(num_cores)
     mc_data <- plyr::adply(mc_counts@genomic_bins, 1, function(bin) {
         return(
-            extract_bin(mc_counts@data[[bin$name]], bin, metacells)
+            extract_bin(mc_counts@data[[bin$name]], bin, metacells, mc_counts@cell_names)
         )
     }, .parallel = TRUE)
 
@@ -241,6 +243,7 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL, num_cores = parallel:
 #' @param track_prefix The prefix of the tracks to create. Track names will be of the form "{track_prefix}.mc{metacell}"
 #' @param metacells metacells for which to create tracks. If NULL, all metacells will be used.
 #' @param num_cores The number of cores to use.
+#' @param overwrite Whether to overwrite existing tracks.
 #'
 #' @return None.
 #'
@@ -250,20 +253,30 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL, num_cores = parallel:
 #' }
 #'
 #' @export
-mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, num_cores = parallel::detectCores()) {
+mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite = FALSE, num_cores = parallel::detectCores()) {
+    assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
+    gset_genome(mc_counts@genome)
 
     cli_alert("Extracting metacell data")
     d <- mcc_extract_to_df(mc_counts, metacells, num_cores)
 
-    misha.ext::gtrack.create_dirs(track_prefix, showWarnings = FALSE)
+    misha.ext::gtrack.create_dirs(paste0(track_prefix, ".mc"), showWarnings = FALSE)
 
     doMC::registerDoMC(num_cores)
     plyr::l_ply(mc_counts@cell_names, function(metacell) {
         track <- glue("{track_prefix}.mc{metacell}")
         cli_alert("Creating {track} track")
         x <- d %>% filter(metacell == !!metacell)
+        if (gtrack.exists(track)) {
+            if (overwrite) {
+                cli_alert_warning("Removing previous track {.val {track}}")
+                gtrack.rm(track, force = TRUE)
+            } else {
+                cli_abort("{track} already exists. Use 'overwrite = TRUE' to overwrite.")
+            }
+        }
         gtrack.create_sparse(
             track = track,
             description = "",

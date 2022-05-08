@@ -82,6 +82,7 @@ print_counts_object <- function(object, object_type, column_type) {
 #' @param object a counts object (ScCounts or McCounts)
 #' @param out_dir the output directory
 #' @param num_cores the number of cores to use
+#' @param overwrite whether to overwrite existing directory
 #'
 #' @examples
 #' \dontrun{
@@ -90,12 +91,19 @@ print_counts_object <- function(object, object_type, column_type) {
 #' }
 #'
 #' @export
-scc_write <- function(object, out_dir, num_cores = parallel::detectCores()) {
+scc_write <- function(object, out_dir, num_cores = parallel::detectCores(), overwrite = FALSE) {
     data_dir <- file.path(out_dir, "data")
-    if (!dir.exists(data_dir)) {
-        dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
-        cli_alert("Created directory {.file {out_dir}}")
+
+    if (dir.exists(out_dir)) {
+        if (!overwrite) {
+            cli_abort("Output directory {.file {out_dir}} already exists. Use 'overwrite = TRUE' to overwrite.")
+        } else {
+            cli_warn("Output directory {.file {out_dir}} already exists. Overwriting.")
+            unlink(out_dir, recursive = TRUE)
+        }
     }
+    dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
+    cli_alert("Writing to {.file {out_dir}}")
 
     doMC::registerDoMC(num_cores)
     plyr::l_ply(names(object@data), function(region) {
@@ -126,8 +134,8 @@ scc_write <- function(object, out_dir, num_cores = parallel::detectCores()) {
 
 #' @rdname scc_write
 #' @export
-mcc_write <- function(object, out_dir, num_cores = parallel::detectCores()) {
-    scc_write(object, out_dir, num_cores)
+mcc_write <- function(object, out_dir, overwrite = FALSE, num_cores = parallel::detectCores()) {
+    scc_write(object, out_dir, num_cores = num_cores, overwrite = overwrite)
 }
 
 #' Read an ScCounts object from a directory
@@ -136,7 +144,7 @@ mcc_write <- function(object, out_dir, num_cores = parallel::detectCores()) {
 #' @param id an identifier for the object (optional)
 #' @param description description of the object (optional)
 #'
-#' @return an ScCounts object
+#' @return a ScCounts object
 #'
 #' @examples
 #' \dontrun{
@@ -165,6 +173,8 @@ scc_read <- function(path, id = NULL, description = NULL) {
     data <- read_sc_counts_data(data_dir, genomic_bins, md$cell_names, md$genome)
 
     counts <- new("ScCounts", data = data, cell_names = md$cell_names, genome = md$genome, genomic_bins = genomic_bins, id = id %||% md$id, description = description %||% md$description, path = path)
+
+    cli_alert_success("Succesfully read a ScCounts object from {.file {path}}")
     return(counts)
 }
 
