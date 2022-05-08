@@ -20,6 +20,9 @@ generate_wigs_from_bams(
 
 \item{parallel}{(optional) whether to do parallel computations}
 }
+\value{
+error log
+}
 \description{
 Write WIGs from BAMs
 }
