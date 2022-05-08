@@ -15,6 +15,9 @@ generate_per_metacell_bams(bam_path, mcatac, out_dir = NULL, c2mc_path = NULL)
 
 \item{c2mc_path}{(optional) path to write out metacell assignments to}
 }
+\value{
+error log
+}
 \description{
 Subset 10X atac_possorted.bam file into per-metacell BAM files
 }

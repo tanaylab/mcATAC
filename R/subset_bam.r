@@ -147,32 +147,41 @@ convert_wigs_to_tracks = function(wig_fold, track_name_prefix = NULL, descriptio
     if (is.null(track_name_prefix)) {
         track_name_prefix = basename(wig_fold)
     }
-    if (is.null(track_name_prefix)) {
+    if (is.null(description)) {
         description = "ATAC fragment track for {track_name_prefix} - {bn}"
     }
-    make_one_track = function(fp) {
-        bn = gsub('.wig$', '', basename(fp))
-        track_name = glue::glue("{track_name_prefix}_{bn}")
-        track_exists = gtrack.exists(track_name)
-        if (track_exists) {
-            if (force) {
-                gtrack.rm(track_name, force = force)
-            }
-            else {
-                cli_alert_info("Track {.val track_name} exists and {.var force} is {.val force}. Skipping import of track.")
-                next
-            }
-        }
-        dummy <- gtrack.import(track = track_name, 
-                        description = glue::glue(description), 
-                        file = fp,
-                        binsize = 0)
-    }
     if (parallel) {
-        error_log <- parallel::mclapply(wig_file_paths, FUN = make_one_track, mc.cores = parallel::detectCores())
+        error_log <- parallel::mclapply(wig_file_paths,
+                                        FUN = function(x) make_one_track(x, track_name_prefix = track_name_prefix, description = description, force = force), 
+                                        mc.cores = parallel::detectCores())
     }
     else {
         error_log <- sapply(wig_file_paths, make_one_track)
     }
     return(error_log)
+}
+
+
+# Convert one WIG file to misha track
+#' @param fp path to WIG file
+#' @inheritParams convert_wigs_to_tracks
+#' @noRd
+make_one_track = function(fp, track_name_prefix = NULL, description = NULL, force = FALSE) {
+    bn = gsub('.wig$', '', basename(fp))
+    track_name = glue::glue("{track_name_prefix}_{bn}")
+    track_exists = gtrack.exists(track_name)
+    if (track_exists) {
+        if (force) {
+            gtrack.rm(track_name, force = force)
+            gdb.reload()
+        }
+        else {
+            cli_alert_info("Track {.val track_name} exists and {.var force} is {.val force}. Skipping import of track.")
+        }
+    }
+    dummy <- gtrack.import(track = track_name, 
+                    description = glue::glue(description), 
+                    file = fp,
+                    binsize = 0)
+    return(dummy)
 }
