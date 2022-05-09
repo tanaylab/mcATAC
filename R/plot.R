@@ -352,7 +352,7 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust = NULL, peak_clust = NULL,
 #' @param extend (optional) how much to extend \code{intervals} by on each side
 #' @param colors (optional) colorRampPalette vector of colors for scaling colors in heatmap
 #'
-#' @inheritParams pheatmap::pheatmap
+#' @inheritParams pheatmap
 #' @inheritDotParams save_pheatmap
 #'
 #' @return a pheatmap figure.
@@ -397,38 +397,48 @@ plot_tracks_at_locus <- function(tracks = NULL,
             cli_abort("No {.val gene_feature}s matching {.val gene} were found. Maybe check \\
                     that this feature exists in the field {.field geneSymbol} of gintervals.load('intervs.global.{gene_feature}')")
         }
-        intervals <- gintervals(unique(gene_features$chrom), min(gene_features$start) - shift, max(gene_features$end) + shift)
+        intervals <- gintervals(unique(gene_features$chrom), min(gene_features$start) - extend, max(gene_features$end) + extend)
     }
     else {
-        intervals <- dplyr::mutate(intervals, start = start - shift, end = end + shift)
+        intervals <- dplyr::mutate(intervals, start = start - extend, end = end + extend)
     }
-    mc_gene_vals <- gextract(pbmc_tracks, intervals = gene_intervs, iterator = iterator)
+    mc_gene_vals <- gextract(pbmc_tracks, intervals = intervals, iterator = iterator)
     mat <- t(subset(mc_gene_vals, select = -c(chrom, start, end, intervalID)))
     rownames(mat) <- 1:nrow(mat)
     mat_n <- apply(mat, 2, function(x) {x[is.na(x)] <- 0; return(x)})
-    if (!is.null(atac)) {
-        cl <- class(atac)
-        if (cl[[1]] %in% c("ScATAC", "McATAC")) {
-            peaks <- atac@peaks
+    # if (!is.null(atac)) {
+    #     cl <- class(atac)
+    #     if (cl[[1]] %in% c("ScATAC", "McATAC")) {
+    #         peaks <- atac@peaks
+    #     }
+    #     else if (cl[[1]] == "PeakIntervals") {
+    #         peaks <- atac
+    #     }
+    #     peaks_in <- gintervals.neighbors1(peaks, intervals, mindist = 0, maxdist = 0)
+    #     peaks_coords <- dplyr::mutate(peaks_in, 
+    #                                     start = round((start - intervals$start)/iterator),
+    #                                     end = round((intervals$end - end)/iterator)
+    #     )
+    #     peak_plot <- plot(1:ncol(mat_n), col = 'white')
+    #     rect(xleft = peaks_coords$start, xright = peaks_coords$end, ybottom = -0.5, ytop = 0.5, col = "red")
+    # }
+    if (order_rows) {
+        if (!is.null(annotation_row) && has_name(annotation_row, "cell_type")) {
+            ord <- order(annotation_row[,"cell_type"])
         }
-        else if (cl[[1]] == "PeakIntervals") {
-            peaks <- atac
+        else {
+            cli_alert_info("No appropriate metacell annotation provided for ordering tracks.")
         }
-        peaks_in <- gintervals.neighbors1(peaks, intervals, mindist = 0, maxdist = 0)
-        peaks_coords <- dplyr::mutate(peaks_in, 
-                                        start = round((start - intervals$start)/iterator),
-                                        end = round((intervals$end - end)/iterator)
-        )
-        peak_plot <- plot(1:ncol(mat_n), col = 'white')
-        rect(xleft = peaks_coords$start, xright = peaks_coords$end, ybottom = -0.5, ytop = 0.5, col = "red")
     }
-    atac_plot <- pheatmap(mat_s, 
-                    cluster_cols = F, 
+    atac_plot <- pheatmap::pheatmap(mat_n, 
+                    cluster_cols = FALSE, 
                     color = colors, 
-                    cluster_rows = F, 
-                    show_rownames = F, 
-                    show_colnames = F, 
+                    cluster_rows = FALSE, 
+                    show_rownames = FALSE, 
+                    show_colnames = FALSE, 
                     annotation_row = annotation_row, 
                     annotation_col = annotation_col,
-                    annotation_colors = annotation_colors)
+                    annotation_colors = annotation_colors,
+                    silent = TRUE)
+    return(atac_plot)
 }
