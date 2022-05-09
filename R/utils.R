@@ -79,29 +79,29 @@ generate_pheatmap_annotation <- function(clust_vec, feature_type = NULL, feature
 #'
 #' @description Generate a generic pheatmap-compatible annotation for metacells
 #'
-#' @param mc_atac (optional) a McATAC object to annotate
+#' @param atac_mc (optional) a McATAC object to annotate
 #' @param mc_clust (optional) a clustering of metacells, e.g. from gen_atac_mc_clust
 #' @param k (optional) parameter for k-means clustering
 #'
 #' @return 2-element list containing a pheatmap-compatible dataframe and a list containing a named vector
 #'
 #' @noRd
-generate_mc_annotation <- function(mc_atac, mc_clust = NULL, k = 10) {
-    if (!is.null(mc_atac)) {
-        if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
-            col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")
-            ann_colors <- list("cell_type" = setNames(unlist(mc_atac@metadata[, "color"]), unlist(mc_atac@metadata[, "cell_type"])))
+generate_mc_annotation <- function(atac_mc, mc_clust = NULL, k = 10) {
+    if (!is.null(atac_mc)) {
+        if (all(has_name(atac_mc@metadata, c("metacell", "cell_type")))) {
+            col_annot <- tibble::column_to_rownames(atac_mc@metadata[, c("metacell", "cell_type")], "metacell")
+            ann_colors <- list("cell_type" = setNames(unlist(atac_mc@metadata[, "color"]), unlist(atac_mc@metadata[, "cell_type"])))
             mc_annot <- list(col_annot, ann_colors)
         } else {
             cli_alert_warning("McATAC object specified but no metacell annotation exists. Clustering metacells.")
-            mc_clust <- gen_atac_mc_clust(atac_mc = mc_atac, use_prior_annot = F, k = k)
+            mc_clust <- gen_atac_mc_clust(atac_mc = atac_mc, use_prior_annot = F, k = k)
             mc_annot <- generate_pheatmap_annotation(mc_clust, feature_type = "metacell", feature_annotation = "cluster")
         }
     } else {
         if (!is.null(mc_clust)) {
             mc_annot <- generate_pheatmap_annotation(mc_clust, feature_type = "metacell", feature_annotation = "cluster")
         } else {
-            cli_abort("Error: no McATAC object ({.var mc_atac}) and no metacell clustering ({.var mc_clust}) specified")
+            cli_abort("Error: no McATAC object ({.var atac_mc}) and no metacell clustering ({.var mc_clust}) specified")
         }
     }
     return(mc_annot)

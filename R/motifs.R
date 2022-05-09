@@ -15,7 +15,7 @@
 #' @examples
 #' \dontrun{
 #' peak_motif_mat <- generate_motif_pssm_matrix(
-#'     peak_set = head(scatac@peaks),
+#'     peak_set = head(atac_sc@peaks),
 #'     motif_regex = c("Bcl", "Atf"),
 #'     datasets_of_interest = c("homer", "jaspar", "jolma"),
 #'     parallel = F
@@ -294,7 +294,7 @@ get_available_pssms <- function(pssm_path = NULL, datasets_of_interest = NULL, r
 #' @return the same object with fake peaks for missing chromosomes
 #' @examples
 #' \dontrun{
-#' peaks_fix <- fix_missing_chroms_in_peaks(sc_atac@peaks)
+#' peaks_fix <- fix_missing_chroms_in_peaks(atac_sc@peaks)
 #' }
 #' @noRd
 fix_missing_chroms_in_peaks <- function(peaks) {

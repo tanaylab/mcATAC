@@ -17,7 +17,7 @@ export_atac_clust_misha(
 \arguments{
 \item{atac_mc}{a McATAC object}
 
-\item{track_prefix}{prefix for generated misha tracks.}
+\item{track_prefix}{prefix for generated misha tracks. The clusters would be of the form: "{track_prefix}.clust"}
 
 \item{description}{(optional) description for tracks (can be a \code{glue}-formatted expression)}
 

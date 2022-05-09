@@ -36,26 +36,26 @@ get_peak_coverage_stats <- function(atac, scale = 100) {
 #' Filter features by summary statistics
 #'
 #' @description Remove ATAC peaks with low coverage, or that are too long etc.
-#' @param scatac the ScATAC object to analyze
+#' @param atac_sc the ScATAC object to analyze
 #' @param minimal_max_umi (optional) threshold on minimum maximal coverage - i.e. remove all peaks that DON'T have a cell with at least \code{abs_cov_thresh} UMIs
 #' @param min_peak_length (optional) remove all peaks that are less than \code{min_cov_thresh} base-pairs long
 #' @param max_peak_length (optional) remove all peaks that are more than \code{min_cov_thresh} base-pairs long
 #' @param max_peak_density (optional) remove all peaks that have more than \code{max_peak_density} UMIs per 100bp
 #'
-#' @return scatac - the filtered ScATAC object
+#' @return atac_sc - the filtered ScATAC object
 #' @examples
 #' \dontrun{
 #' ## quantiles of peak lengths before filtering
-#' quantile(my_scatac@peaks$end - my_scatac@peaks$start, (0:10) / 10)
-#' my_scatac <- filter_features(scatac = my_scatac, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
+#' quantile(my_atac_sc@peaks$end - my_atac_sc@peaks$start, (0:10) / 10)
+#' my_atac_sc <- filter_features(atac_sc = my_atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
 #'
 #' ## quantiles of peak lengths after filtering
-#' quantile(my_scatac@peaks$end - my_scatac@peaks$start, (0:10) / 10)
+#' quantile(my_atac_sc@peaks$end - my_atac_sc@peaks$start, (0:10) / 10)
 #' }
 #' @export
-filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NULL, max_peak_length = NULL, max_peak_density = NULL) {
-    assert_atac_object(scatac)
-    peak_stats <- get_peak_coverage_stats(scatac, scale = 100)
+filter_features <- function(atac_sc, minimal_max_umi = NULL, min_peak_length = NULL, max_peak_length = NULL, max_peak_density = NULL) {
+    assert_atac_object(atac_sc)
+    peak_stats <- get_peak_coverage_stats(atac_sc, scale = 100)
 
     if (!is.null(min_peak_length)) {
         too_short_peaks <- peak_stats$peak_name[peak_stats$len < min_peak_length]
@@ -93,13 +93,13 @@ filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NU
         }
     }
 
-    peaks_to_remove <- setdiff(scatac@peaks$peak_name, peak_stats$peak_name)
+    peaks_to_remove <- setdiff(atac_sc@peaks$peak_name, peak_stats$peak_name)
     if (length(peaks_to_remove) > 0) {
-        scatac <- atac_ignore_peaks(scatac, peaks_to_remove)
+        atac_sc <- atac_ignore_peaks(atac_sc, peaks_to_remove)
     } else {
         cli_alert_warning("No peaks that violate the criteria were found. Returning original object")
     }
-    return(scatac)
+    return(atac_sc)
 }
 
 
@@ -111,7 +111,7 @@ filter_features <- function(scatac, minimal_max_umi = NULL, min_peak_length = NU
 #'
 #' @examples
 #' \dontrun{
-#' plot_peak_length_distribution(scatac)
+#' plot_peak_length_distribution(atac_sc)
 #' }
 #'
 #' @export
@@ -140,7 +140,7 @@ plot_peak_length_distribution <- function(atac) {
 #'
 #' @examples
 #' \dontrun{
-#' plot_peak_coverage_distribution(scatac)
+#' plot_peak_coverage_distribution(atac_sc)
 #' }
 #' @export
 plot_peak_coverage_distribution <- function(atac) {
@@ -168,7 +168,7 @@ plot_peak_coverage_distribution <- function(atac) {
 #'
 #' @examples
 #' \dontrun{
-#' plot_peak_max_cov_distribution(scatac)
+#' plot_peak_max_cov_distribution(atac_sc)
 #' }
 #'
 #' @export
@@ -228,7 +228,7 @@ plot_peak_coverage_density <- function(atac, scale = 100, pointsize = 1.5, ...) 
 #' Find dynamic peaks in McATAC matrix
 #'
 #' @description This function identifies "dynamic" peaks, i.e. those that have high expression only in a subset of the cells. They are identified by overdispersion in the coefficient of variation (std.dev./mean) per quantiles.
-#' @param mcatac the McATAC object to analyze
+#' @param atac_mc the McATAC object to analyze
 #' @param method (optional) either 'bmq' (default) or 'gmm'; 'bmq' (binned-mean quantiles) bins the log-mean of all peaks (averaged across metacells) and
 #'   selects all peaks with a coefficient of variation above some quantile in each bin. More controlled
 #'  'gmm' fits a Gaussian mixture model to the log10(COV) vs. log10(mean) distribution,
@@ -243,14 +243,14 @@ plot_peak_coverage_density <- function(atac, scale = 100, pointsize = 1.5, ...) 
 #' @return a PeakIntervals object with peaks identified as dynamic. If \code{plot = TRUE} the selected points would plotted.
 #' @examples
 #' \dontrun{
-#' dynamic_peaks_by_bmq <- identify_dynamic_peaks(mcatac, method = "bmq", mean_thresh_q = 0.1, cov_q_thresh = 0.6, num_bins = 100)
-#' dynamic_peaks_by_gmm <- identify_dynamic_peaks(mcatac, method = "gmm", gmm_g = 3)
+#' dynamic_peaks_by_bmq <- identify_dynamic_peaks(atac_mc, method = "bmq", mean_thresh_q = 0.1, cov_q_thresh = 0.6, num_bins = 100)
+#' dynamic_peaks_by_gmm <- identify_dynamic_peaks(atac_mc, method = "gmm", gmm_g = 3)
 #' }
 #' @export
-identify_dynamic_peaks <- function(mcatac, method = "bmq", plot = TRUE, mean_thresh_q = 0.1, cov_q_thresh = 0.75, num_bins = 200, gmm_g = 4) {
-    assert_atac_object(mcatac)
-    mns <- Matrix::rowMeans(mcatac@mat, na.rm = TRUE)
-    sds <- sparseMatrixStats::rowSds(mcatac@mat, na.rm = TRUE)
+identify_dynamic_peaks <- function(atac_mc, method = "bmq", plot = TRUE, mean_thresh_q = 0.1, cov_q_thresh = 0.75, num_bins = 200, gmm_g = 4) {
+    assert_atac_object(atac_mc)
+    mns <- Matrix::rowMeans(atac_mc@mat, na.rm = TRUE)
+    sds <- sparseMatrixStats::rowSds(atac_mc@mat, na.rm = TRUE)
     covs <- sds / mns
     lpm <- log10(mns)
     data <- tibble(mn = log10(mns), cov = log10(covs))
@@ -258,7 +258,7 @@ identify_dynamic_peaks <- function(mcatac, method = "bmq", plot = TRUE, mean_thr
     pred_df <- tibble(
         pred = lmi$coefficients[[1]] + lmi$coefficients[[2]] * log10(mns),
         cov = log10(covs),
-        peak_name = mcatac@peaks$peak_name
+        peak_name = atac_mc@peaks$peak_name
     ) %>%
         mutate(diff = cov - pred)
     if (method == "bmq") {
@@ -266,7 +266,7 @@ identify_dynamic_peaks <- function(mcatac, method = "bmq", plot = TRUE, mean_thr
         mn_thresh <- quantile(mns, mean_thresh_q)
         feat_select <- unlist(sapply(
             sort(unique(qcut[which(lpm >= log10(mn_thresh))])),
-            function(nm) rownames(mcatac@mat)[which(covs >= quantile(covs[qcut == nm], cov_q_thresh, na.rm = T) & qcut == nm)]
+            function(nm) rownames(atac_mc@mat)[which(covs >= quantile(covs[qcut == nm], cov_q_thresh, na.rm = T) & qcut == nm)]
         ))
         pred_df$is_bmq <- pred_df$peak_name %in% feat_select
         if (plot) {
@@ -294,8 +294,8 @@ identify_dynamic_peaks <- function(mcatac, method = "bmq", plot = TRUE, mean_thr
     } else {
         cli_abort("Method should be {.code NULL}, {.code bmq} or {.code gmm}")
     }
-    res <- mcatac@peaks %>% filter(peak_name %in% feat_select)
-    cli_alert_success("Identified {.val {nrow(res)}} dynamic peaks (out of {.val {nrow(mcatac@peaks)}}) using the {.field '{method}'} method.")
+    res <- atac_mc@peaks %>% filter(peak_name %in% feat_select)
+    cli_alert_success("Identified {.val {nrow(res)}} dynamic peaks (out of {.val {nrow(atac_mc@peaks)}}) using the {.field '{method}'} method.")
     return(res)
 }
 
@@ -312,7 +312,7 @@ identify_dynamic_peaks <- function(mcatac, method = "bmq", plot = TRUE, mean_thr
 #' @return blacklist_overlaps - a PeakIntervals object with peaks identified as overlapping blacklisted regions
 #' @examples
 #' \dontrun{
-#' blacklist_overlaps <- find_blacklist_overlaps(atac = my_mcatac, max_dist_to_blacklist_region = 100)
+#' blacklist_overlaps <- find_blacklist_overlaps(atac = my_atac_mc, max_dist_to_blacklist_region = 100)
 #' blacklist_overlaps <- find_blacklist_overlaps(peaks = my_peak_set, genome = "mm10")
 #' }
 #' @export
@@ -326,7 +326,7 @@ find_blacklist_overlaps <- function(atac = NULL, peaks = NULL, genome = NULL, ma
         peaks <- atac@peaks
         genome <- atac@genome
     } else if (is.null(peaks)) {
-        cli_abort("Must specify either scatac, mcatac or peaks")
+        cli_abort("Must specify either ScATAC, McATAC or peaks")
     } else if (!is.null(peaks) && is.null(genome)) {
         cli_abort("Must specify genome if analyzing peaks directly")
     }

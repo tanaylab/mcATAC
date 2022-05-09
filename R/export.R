@@ -172,7 +172,7 @@ write_cluster_misha_track <- function(cl, atac_mc_mat_clust, track_prefix, peaks
     } else {
         description <- cl
     }
-    
+
     if (!gtrack.exists(trknm)) {
         gtrack.create_sparse(track = trknm, description = glue::glue(description), intervals = peaks, values = atac_vec)
     } else {

@@ -17,6 +17,6 @@ Plot the coverage distribution of the peaks
 }
 \examples{
 \dontrun{
-plot_peak_coverage_distribution(scatac)
+plot_peak_coverage_distribution(atac_sc)
 }
 }

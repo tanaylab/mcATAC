@@ -298,9 +298,9 @@ setMethod(
 #' @examples
 #' \dontrun{
 #' max_peak_length <= 1000
-#' peak_stats <- get_peak_coverage_stats(scatac, scale = 100)
+#' peak_stats <- get_peak_coverage_stats(atac_sc, scale = 100)
 #' too_long_peaks <- peak_stats$peak_name[peak_stats$len > max_peak_length]
-#' scatac_filtered <- atac_ignore_peaks(scatac, too_long_peaks)
+#' atac_sc_filtered <- atac_ignore_peaks(atac_sc, too_long_peaks)
 #' }
 #' @export
 atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
@@ -367,9 +367,9 @@ atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
 #' @return
 #' @examples
 #' \dontrun{
-#' cs <- Matrix::colSums(scatac@mat)
+#' cs <- Matrix::colSums(atac_sc@mat)
 #' big_cells <- names(cs)[which(cs >= quantile(cs, 0.98))]
-#' scatac_filtered <- atac_ignore_cells(scatac, big_cells)
+#' atac_sc_filtered <- atac_ignore_cells(atac_sc, big_cells)
 #' }
 #' @export
 atac_ignore_cells <- function(atac, ig_cells) {

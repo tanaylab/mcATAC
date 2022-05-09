@@ -110,7 +110,7 @@ atac_mc <- add_mc_metadata(atac_mc, mcmd)
 ```
 ## Identify dynamic peaks
 ```{r dynamic-peaks, dpi=300, fig.width=7, fig.height=7}
-dyn_peaks <- identify_dynamic_peaks(mcatac = atac_mc, mean_thresh_q = 0.05)
+dyn_peaks <- identify_dynamic_peaks(atac_mc, mean_thresh_q = 0.05)
 ```
 
 ## Cluster a peak set
