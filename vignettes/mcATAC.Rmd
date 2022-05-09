@@ -174,3 +174,34 @@ export_to_h5ad(atac_mc, "pbmc_data/atac_mc.h5ad", compression = "gzip")
 # Load using: atac_mc <- import_from_h5ad("pbmc_data/atac_mc.h5ad")
 ```
 
+## Get available motif PSSM datasets and extract motif energies
+
+```{r motifs}
+gset_genome("hg38")
+available_datasets <- get_available_pssms(return_datasets_only = TRUE)
+available_datasets
+sample_inds <- sample(nrow())
+motif_mat = generate_motif_pssm_matrix(peak_set = mc_atac@peaks, datasets_of_interest = "jaspar", parallel = T)
+head(motif_mat)
+```
+
+## Extract motif energies from random genomic background
+
+```{r random_genome}
+gset_genome("hg38")
+rg = gen_random_genome_peak_motif_matrix(num_peaks = 1e+3,
+                                          bp_from_chrom_edge_to_avoid = 1e+6, 
+                                          motif_regex = c("Bcl", "Atf"),
+                                          datasets_of_interest = "jaspar", 
+                                          parallel = T)
+head(rg)
+```
+
+## Compare Kolmogorov-Smirnov statistics on distribution of motif energies between peaks of interest and genomic background
+
+```{r random_genome}
+gset_genome("hg38")
+
+ks_all = calculate_d_stats(motif_mat, pssm_bg, fg_clustering = NULL, parallel = TRUE, alternative = "less", nc = parallel::detectCores()) {
+head(rg)
+```
