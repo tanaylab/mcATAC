@@ -8,4 +8,6 @@
 ^pkgdown$
 ^raw/.*
 ^pbmc_data/.*
+^pbmc_data/*
+pbmc_data/
 ^data-raw$

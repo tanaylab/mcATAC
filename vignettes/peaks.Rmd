@@ -1,0 +1,109 @@
+---
+title: "peaks"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{peaks}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+# library(mcATAC)
+devtools::load_all("/home/aviezerl/src/mcATAC/", export_all = FALSE)
+library(ggplot2)
+ggplot2::theme_set(ggplot2::theme_classic())
+```
+
+## Download raw reads data
+
+We will start by downloading the raw 'bam' file (and it's index) from 10x:
+
+```{r download-bam}
+if (!dir.exists("pbmc_data")){
+  download_pbmc_example_data()
+}
+if (!file.exists("pbmc_data/possorted_bam.bam") || !file.exists("pbmc_data/possorted_bam.bam.bai")){
+  download_pbmc_example_data(raw = TRUE)
+}
+```
+
+This would download the 'bam' and 'bam.bai' files from: 
+
+[PBMC from a healthy donor - granulocytes removed through cell sorting (10k)](https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k?)
+
+Note that the 'bam' file is large - ~44GB, so this step might take some time. 
+
+## Import raw reads into a ScCounts format
+
+`mcATAC` allows you to load the raw counts data into an `ScCounts` object. A `ScCounts` holds the raw reads as a set of sparse matrices where the rows are genomic coordinates and the columns are cell barcodes. The number of sparse matrices ("genomic bins") is controlled by the `bin_size` parameter. The matrices are stored in a 'gzip' compressed form under a directory called 'data', together with a 'yaml' file containing the some metadata such as the genomic bins coordinates and the cell barcodes.
+
+In order to parse the 'bam' file, we need to know the names of the cell barcodes. We can get this from the atac matrix provided by 10x: 
+
+```{r atac-sc}
+atac_sc <- import_from_10x("pbmc_data", genome = "hg38", id = "pbmc", description = "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
+```
+
+We can now import the raw reads into a `ScCounts` object that we are going to store at "pbmc_data/reads". Note that this might take ~10 minutes on a machine with 96 cores. 
+  
+```{r import-scounts, eval = FALSE}
+write_sc_counts_from_bam("pbmc_data/possorted_bam.bam", "pbmc_data/reads", cell_names = atac_sc, overwrite = TRUE)
+```
+
+## Load ScCounts object
+
+```{r load-scounts}
+sc_counts <- scc_read("pbmc_data/reads")
+sc_counts
+```
+
+## Project RNA metacells
+
+We can now project metacells derived from the RNA data (or any other way) into an `McCounts` object which would hold the counts per metacell: 
+
+```{r project-mc}
+data(cell_to_metacell_pbmc_example)
+mc_counts <- scc_project_on_mc(sc_counts, cell_to_metacell_pbmc_example)
+mc_counts
+```
+
+## Save McCounts object
+
+```{r save-mc-counts}
+mcc_write(mc_counts, "pbmc_data/mc_counts", overwrite = TRUE)
+```
+
+## Create 'misha' tracks for each metacell 
+
+We can now create a 'misha' track for each metacell:
+
+```{r misha-tracks}
+mcc_to_tracks(mc_counts, "temp.pbmc_mc", overwrite = TRUE)
+```
+
+## Identify peaks
+
+We can then use the tracks we created to indetify peaks on the metacell level. We think it is more robust than looking only at the marginal of all the data (as the cell ranger does), or than trying to identify peaks on the single cell level which is very sparse. 
+
+```{r identify-peaks}
+# identify peaks on the metacell level in the meantime - a placeholder using the ScATAC peaks
+peaks <- atac_sc@peaks
+```
+
+## Create a McATAC object from McCounts object 
+
+After we have indentified the peaks, we can create a `McATAC` object from the `McCounts` object that we have created.
+
+```{r mc-atac}
+atac_mc <- mcc_to_mcatac(mc_counts, peaks)
+atac_mc
+```
+
+
+

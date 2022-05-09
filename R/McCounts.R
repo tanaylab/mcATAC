@@ -1,6 +1,6 @@
 #' McCounts object
 #'
-#' @description a McCounts object is a collection of sparse matrices where rows are genomic coordinates and columns are metacells. It is derived from ScCounts using \code{project_counts_on_mc}. The metacell names are store in the \code{cell_names} slot, and the only additional slot is \code{cell_to_metacell} which contains the mapping from single cell names to metacell names.
+#' @description a McCounts object is a collection of sparse matrices where rows are genomic coordinates and columns are metacells. It is derived from ScCounts using \code{scc_project_on_mc}. The metacell names are store in the \code{cell_names} slot, and the only additional slot is \code{cell_to_metacell} which contains the mapping from single cell names to metacell names.
 #'
 #' @slot cell_to_metacell
 #'
@@ -49,11 +49,11 @@ setMethod(
 #' @examples
 #' \dontrun{
 #' data(cell_to_metacell_pbmc_example)
-#' project_counts_on_mc(sc_counts, cell_to_metacell_pbmc_example)
+#' scc_project_on_mc(sc_counts, cell_to_metacell_pbmc_example)
 #' }
 #'
 #' @export
-project_counts_on_mc <- function(sc_counts, cell_to_metacell, num_cores = parallel::detectCores()) {
+scc_project_on_mc <- function(sc_counts, cell_to_metacell, num_cores = parallel::detectCores()) {
     assert_atac_object(sc_counts, class = "ScCounts")
     cell_to_metacell <- deframe(cell_to_metacell)
     cell_to_metacell <- cell_to_metacell[cell_to_metacell %!in% c(-2, -1, 0)] # make sure we don't have any outlier metacells
@@ -161,15 +161,17 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
 #'
 #' @inheritParams project_atac_on_mc
 #'
+#' @return a McATAC object
+#'
 #' @examples
 #' \dontrun{
 #' atac_sc <- import_from_10x("pbmc_data", genome = "hg38")
 #' mc_counts <- mcc_read("pbmc_reads_mc")
-#' atac_mc <- mcc_to_peaks(mc_counts, atac_sc@peaks)
+#' atac_mc <- mcc_to_mcatac(mc_counts, atac_sc@peaks)
 #' }
 #'
 #' @export
-mcc_to_peaks <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, mc_size_eps_q = 0.1, num_cores = parallel::detectCores()) {
+mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, mc_size_eps_q = 0.1, num_cores = parallel::detectCores()) {
     assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)

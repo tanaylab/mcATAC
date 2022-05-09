@@ -2,9 +2,12 @@
 % Please edit documentation in R/example_data.R
 \name{download_pbmc_example_data}
 \alias{download_pbmc_example_data}
+\alias{download_pbmc_example_data_raw}
 \title{Download example data from 10x}
 \usage{
 download_pbmc_example_data(dir = "pbmc_data")
+
+download_pbmc_example_data_raw(dir = "pbmc_data")
 }
 \arguments{
 \item{dir}{directory to download the data to}
@@ -13,12 +16,15 @@ download_pbmc_example_data(dir = "pbmc_data")
 Download the following dataset from 10x site:
 PBMC from a healthy donor - granulocytes removed through cell
 sorting (10k)
-Link: https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k
-File: Filtered feature barcode matrix MEX (DIR)
+\code{download_pbmc_example_data} downloads the processed data, while \code{download_pbmc_example_data_raw} downloads the raw data. \cr
+Link: https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k \cr
+Processed data: Filtered feature barcode matrix MEX (DIR) \cr
+Raw data: ATAC Position-sorted alignments (BAM), ATAC Position-sorted alignments (BAM index) \cr
 }
 \examples{
 \dontrun{
 download_pbmc_example_data()
+download_pbmc_example_data_raw()
 }
 
 }
