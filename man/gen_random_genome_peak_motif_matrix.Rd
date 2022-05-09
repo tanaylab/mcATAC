@@ -15,7 +15,7 @@ gen_random_genome_peak_motif_matrix(
 )
 }
 \arguments{
-\item{num_peaks}{total number of intervals (will be divided proportionately between chromosomes) in background}
+\item{num_peaks}{total number of intervals (will be divided proportionately between chromosomes) to use as background}
 
 \item{peak_width}{(optional) - size of region around peak centers to extract motif energies for}
 
@@ -37,7 +37,6 @@ Generate random genome motif PSSM matrix
 }
 \examples{
 \dontrun{
-     d_vs_rg <- calculate_d_stats(pssm_fg = my_peak_motif_mat, pssm_bg <- random_genome_motif_mat,
-                               parallel = F)
+random_genome_motifs <- gen_random_genome_peak_motif_matrix(num_peaks = 5e+4, datasets_of_interest = get_available_pssms(return_datasets_only = TRUE))
 }
 }
