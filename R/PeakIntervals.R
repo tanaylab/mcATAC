@@ -74,7 +74,7 @@ validate_peaks <- function(peaks) {
 #' Return the names of PeakIntervals
 #'
 #' @param peaks a PeakIntervals object or misha intervals
-#' @param tad_based wether to name peaks based on TADs
+#' @param tad_based whether to name peaks based on TADs
 #' @param promoters are the peaks promoters? When true, the peak names (which are gene names) are returned.
 #'
 #' @return the field called 'peak_name' if exists in \code{peaks}, or the coordinates seperated by an underscore.
