@@ -23,7 +23,6 @@
 #' }
 #' @export
 generate_motif_pssm_matrix <- function(atac = NULL,
-                                       peak_set = NULL,
                                        peak_width = 200,
                                        pssm_path = NULL,
                                        datasets_of_interest = NULL,
@@ -137,6 +136,7 @@ gen_random_genome_peak_motif_matrix <- function(num_peaks = 1e+5,
                                                 motif_regex = NULL,
                                                 motif_tracks = NULL,
                                                 parallel = TRUE) {
+    ALLGENOME[[1]] <- ALLGENOME[[1]][!grepl("_", ALLGENOME[[1]]$chrom), ]
     chrom_lens <- apply(ALLGENOME[[1]][, 2:3], 1, diff)
     chrom_fracs <- setNames(chrom_lens / sum(chrom_lens), ALLGENOME[[1]][, 1])
     sample_seqs <- mapply(chrom_fracs, names(chrom_fracs), chrom_lens, FUN = function(x, y, z) {
@@ -150,9 +150,9 @@ gen_random_genome_peak_motif_matrix <- function(num_peaks = 1e+5,
     sample_seqs <- sample_seqs[with(sample_seqs, order(chrom, start, end)), ]
     end_shift <- ALLGENOME[[1]][match(sample_seqs$chrom, ALLGENOME[[1]][, 1]), 3] - bp_from_chrom_edge_to_avoid
     sample_seqs <- sample_seqs[sample_seqs$start >= bp_from_chrom_edge_to_avoid & sample_seqs$end <= end_shift, ]
-    sample_seqs <- fix_missing_chroms_in_peaks(sample_seqs)
+    sample_seqs <- PeakIntervals(sample_seqs)
     rg_peak_motif_mat <- generate_motif_pssm_matrix(
-        peak_set = sample_seqs,
+        atac = sample_seqs,
         peak_width = peak_width,
         motif_tracks = motif_tracks,
         datasets_of_interest = datasets_of_interest,
@@ -216,9 +216,9 @@ calculate_d_stats <- function(pssm_fg, pssm_bg, fg_clustering = NULL, parallel =
 #' @noRd
 get_peaks_for_pssm <- function(atac) {
     cl <- class(atac)
-    if (cl[[1]] %in% c("ScATAC", "McATAC")) {
+    if (any(c("ScATAC", "McATAC") %in% cl[[1]])) {
         peaks <- atac@peaks
-    } else if (cl[[1]] == "PeakIntervals") {
+    } else if ("PeakIntervals" %in% cl[[1]]) {
         peaks <- atac
     } else {
         cli_abort("Class of {.var atac} is not recognized (should be either ScATAC, McATAC or PeakIntervals object).")
@@ -304,8 +304,11 @@ fix_missing_chroms_in_peaks <- function(peaks) {
             filter(chrom %!in% peaks$chrom) %>%
             gintervals.centers() %>%
             mutate(start = start - 33, end = end + 34) %>%
+            PeakIntervals() %>%
             mutate(peak_name = peak_names(.))
         peaks <- bind_rows(peaks, fake_seqs) %>% arrange(chrom, start)
+        peaks$peak_name <- make.unique(peaks$peak_name)
+        peaks <- PeakIntervals(peaks)
     }
     return(peaks)
 }
