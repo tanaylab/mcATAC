@@ -17,7 +17,7 @@ ScCounts is a data structure that contains the counts of reads for a set of cell
 
 \item{\code{genome}}{genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"}
 
-\item{\code{data}}{a named list with sparse matrices for each chromosome.}
+\item{\code{data}}{a named list with sparse matrices for each chromosome. Each sparse matrix at position i,j contains the number of reads that map to the cell j in the genomic coordinate i (\strong{in 1 based format}).}
 
 \item{\code{path}}{original path from which the object was loaded (optional)}
 

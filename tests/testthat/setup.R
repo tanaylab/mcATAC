@@ -27,6 +27,8 @@ lockBinding("atac_sc", globalenv())
 lockBinding("atac_mc", globalenv())
 
 
+samtools_bin <- "/home/feshap/src/samtools-1.15.1/samtools"
+
 withr::defer(
     {
         unlink(raw_dir, recursive = TRUE)
