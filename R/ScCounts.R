@@ -6,7 +6,7 @@
 #' @slot id an identifier for the object, e.g. "pbmc".
 #' @slot description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
 #' @slot genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
-#' @slot data a named list with sparse matrices for each chromosome.
+#' @slot data a named list with sparse matrices for each chromosome. Each sparse matrix at position i,j contains the number of reads that map to the cell j in the genomic coordinate i (**in 1 based format**).
 #' @slot path original path from which the object was loaded (optional)
 #' @slot genomic_bins an intervals set with the genomic bins. Should have columns named "chrom", "start", "end" and "name" with the chromosome, start and end positions and name of the bin.
 #'

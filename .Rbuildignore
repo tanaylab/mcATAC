@@ -11,3 +11,4 @@
 ^pbmc_data/*
 pbmc_data/
 ^data-raw$
+pbmc_data/reads/

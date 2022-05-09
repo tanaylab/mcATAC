@@ -122,8 +122,8 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
     metacells <- metacells %||% colnames(mat)
     intervs <- as.data.frame(intervs)
 
-    # find the coordinates that overlap with the intervals
-    mat_intervs <- tibble(chrom = bin$chrom, start = mat@i + bin$start, end = start + 1) %>%
+    # find the coordinates that overlap with the intervals (note that we transform the coordinates to be 0-based)
+    mat_intervs <- tibble(chrom = bin$chrom, start = mat@i + bin$start - 1, end = start + 1) %>%
         gintervals.intersect(intervs)
 
     # no overlap, return empty matrix
@@ -195,7 +195,7 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
 extract_bin <- function(mat, bin, metacells, all_metacells) {
     Matrix::summary(mat[, metacells, drop = FALSE]) %>%
         mutate(
-            start = i + bin$start,
+            start = i + bin$start - 1, # we remove 1 in order to transform to 0 based coordinates
             end = start + 1,
             chrom = bin$chrom,
             metacell = all_metacells[j]
