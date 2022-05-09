@@ -112,7 +112,8 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
 #' Create an ScATAC object from 10x directory
 #'
 #' @param dir 10x directory. Should have the following files: 'matrix.mtx', 'barcodes.tsv' and 'features.tsv'.
-#' See 'Cell Ranger Arc' for more details: https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/overview/welcome
+#' If you used 'Cell Ranger ARC', this should be the 'outs/filtered_feature_bc_matrix' directory. \cr
+#' For more details see: https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/overview/welcome
 #' @param matrix_fn if \code{dir} is missing, the filename of the matrix to import ("matrix.mtx" or "matrix.mtx.gz")
 #' @param cells_fn if \code{dir} is missing, the filename of the cells to import ("barcodes.tsv" or "barcodes.tsv.gz")
 #' @param features_fn if \code{dir} is missing, the filename of the features to import ("features.tsv" or "features.tsv.gz")
