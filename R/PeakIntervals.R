@@ -74,15 +74,20 @@ validate_peaks <- function(peaks) {
 #' Return the names of PeakIntervals
 #'
 #' @param peaks a PeakIntervals object or misha intervals
+#' @param tad_based whether to name peaks based on TADs
 #' @param promoters are the peaks promoters? When true, the peak names (which are gene names) are returned.
 #'
 #' @return the field called 'peak_name' if exists in \code{peaks}, or the coordinates seperated by an underscore.
 #'
 #' @export
-peak_names <- function(peaks, promoters = FALSE) {
-    if (gintervals.exists("intervs.global.tad_names")) {
-        peaks <- name_enhancers(peaks)
-        peak_names <- peaks$peak_name
+peak_names <- function(peaks, tad_based = TRUE, promoters = FALSE) {
+    if (tad_based) {
+        if (gintervals.exists("intervs.global.tad_names")) {
+            peaks <- name_enhancers(peaks)
+            peak_names <- peaks$peak_name
+        } else {
+            cli_abort("There are no TAD names for this assembly (check gintervals.exists('intervs.global.tad_names')).")
+        }
     } else {
         if (has_name(peaks, "peak_name")) {
             return(peaks$peak_name)
