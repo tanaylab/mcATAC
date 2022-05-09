@@ -50,11 +50,11 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, path, met
     if (nrow(mat) != nrow(peaks)) {
         cli_abort("Number of peaks is not equal to the matrix rows.")
     }
-    rownames(mat) <- peak_names(peaks)
-
+    rownames(mat) <- peak_names(peaks, tad_based = FALSE)
     peaks <- PeakIntervals(peaks, genome)
-    mat <- mat[peak_names(peaks), ] # remove from matrix peaks that were filtered
-
+    mat <- mat[peak_names(peaks, tad_based = FALSE), ] # remove from matrix peaks that were filtered
+    peaks$peak_name <- peak_names(peaks, tad_based = TRUE)
+    rownames(mat) <- peak_names(peaks, tad_based = TRUE)
     if (is.null(id)) {
         id <- gsub(" ", "_", randomNames::randomNames(n = 1, name.order = "first.last", name.sep = "_"))
         cli_alert("No id was given, setting id to {.field {id}}")
