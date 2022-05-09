@@ -81,20 +81,20 @@ export_to_h5ad <- function(object, out_file, ...) {
 
 #' Generate a ucsc genome browser file for each metacell cluster
 #'
-#' @param mc_atac McATAC object
+#' @param atac_mc McATAC object
 #' @param track_prefix prefix for generated misha tracks.
 #' @param output_dir (optional) name of the directory to write files to
 #' @param clust_vec (optional) a vector of length #metacells representing an annotation/clustering (can be output of \code{gen_atac_mc_clust})
 #' @param normalization (optional) normalization method, either 'none', 'lfcom' (log2 fold-change over median), 'zs' (Z-scores)
 #'
 #' @export
-export_atac_clust_ucsc <- function(mc_atac, track_prefix, output_dir = getwd(), clust_vec = NULL, normalization = "none") {
-    res_lst <- prepare_clusters(mc_atac, clust_vec, normalization)
+export_atac_clust_ucsc <- function(atac_mc, track_prefix, output_dir = getwd(), clust_vec = NULL, normalization = "none") {
+    res_lst <- prepare_clusters(atac_mc, clust_vec, normalization)
     fns <- purrr::map_chr(res_lst$clusts, function(cl) {
         atac_vec <- res_lst$atac_mc_mat_clust[, cl]
         fn <- file.path(output_dir, paste0(track_prefix, "_", gsub("\\/", "_", cl), ".ucsc"))
         misha.ext::fwrite_ucsc(
-            intervals = mutate(mc_atac@peaks, "score" = atac_vec),
+            intervals = mutate(atac_mc@peaks, "score" = atac_vec),
             file = fn,
             name = paste0(track_prefix, "_", cl),
             color = res_lst$col_key[[as.character(cl)]],
@@ -114,17 +114,17 @@ export_atac_clust_ucsc <- function(mc_atac, track_prefix, output_dir = getwd(), 
 #' @description generate a track for each metacell cluster, of the form \code{track_prefix.name}, where names
 #' are given at \code{clust_names}
 #'
-#' @param mc_atac_mat metacell ATAC matrix (like mc_atac@mat)
+#' @param atac_mc a McATAC object
 #' @param clust_vec (optional) a vector of length #metacells representing an annotation/clustering (can be output of \code{gen_atac_mc_clust})
-#' @param track_prefix prefix for generated misha tracks.
-#' @param description (optional) description for tracks (can be a glue-formatted expression)
+#' @param track_prefix prefix for generated misha tracks. The clusters would be of the form: "{track_prefix}.clust"
+#' @param description (optional) description for tracks (can be a \code{glue}-formatted expression)
 #' @param parallel (optional) run function with parallel processing
 #' @param num_cores (required if parallel == TRUE) number of cores to use for parallel processing
 
 #' @return track_names names of generated misha tracks
 #' @export
-export_atac_clust_misha <- function(mc_atac, track_prefix, description = NULL, clust_vec = NULL, normalization = "none", parallel = FALSE, num_cores = NULL) {
-    res_lst <- prepare_clusters(mc_atac, clust_vec, normalization)
+export_atac_clust_misha <- function(atac_mc, track_prefix, description = NULL, clust_vec = NULL, normalization = "none", parallel = FALSE, num_cores = NULL) {
+    res_lst <- prepare_clusters(atac_mc, clust_vec, normalization)
     if (!is.null(description)) {
         if (!is.null(clust_vec) && length(description) == 1) {
             description <- rep(description, length(unique(clust_vec)))
@@ -136,46 +136,50 @@ export_atac_clust_misha <- function(mc_atac, track_prefix, description = NULL, c
     }
     if (parallel) {
         track_names <- parallel::mclapply(seq_along(res_lst$clusts), function(cl, i) {
-            write_cluster_misha_track(cl[[i]], res_lst$atac_mc_mat_clust, track_prefix, description = description[[i]])
+            write_cluster_misha_track(cl[[i]], res_lst$atac_mc_mat_clust, track_prefix, atac_mc@peaks, description = description[[i]])
         }, cl = res_lst$clusts, mc.cores = num_cores)
     } else {
         track_names <- sapply(seq_along(res_lst$clusts), function(cl, i) {
-            write_cluster_misha_track(cl[[i]], res_lst$atac_mc_mat_clust, track_prefix, description = description[[i]])
+            write_cluster_misha_track(cl[[i]], res_lst$atac_mc_mat_clust, track_prefix, atac_mc@peaks, description = description[[i]])
         }, cl = res_lst$clusts)
     }
     gdb.reload()
     return(track_names)
 }
 
-#' Generate a misha track for a metacell cluster (backend function)
+#' Generate a misha track for a metacell cluster
 #'
 #' @description generates a track for a metacell cluster
 #'
 #' @param cl ATAC metacell cluster
 #' @param atac_mc_mat_clust a matrix with ATAC signal averaged across metacells in each cluster
 #' @param track_prefix prefix for track name
+#' @param peaks a PeakIntervals object
 #' @param description (optional) description for track (can be a glue-formatted expression)
 #' @param override (optional) whether to override an existing track; warning: may slow runtime substantially (due to reloading misha db)
 #' @return trknm - the name of the generated track in the misha database
-#' @export
-write_cluster_misha_track <- function(cl, atac_mc_mat_clust, track_prefix, description = NULL, override = FALSE) {
+#'
+#' @noRd
+write_cluster_misha_track <- function(cl, atac_mc_mat_clust, track_prefix, peaks, description = NULL, override = FALSE) {
     atac_vec <- atac_mc_mat_clust[, cl]
     cl <- gsub("[\\/\\.-]", "_", cl)
     if (!is.null(track_prefix)) {
-        trknm <- paste0(track_prefix, "_", cl)
+        misha.ext::gtrack.create_dirs(paste0(track_prefix, ".clust"), showWarnings = FALSE)
+        trknm <- paste0(track_prefix, ".", cl)
     }
     if (is.null(description)) {
         description <- trknm
     } else {
-        trknm <- cl
+        description <- cl
     }
+    
     if (!gtrack.exists(trknm)) {
-        gtrack.create_sparse(track = trknm, description = glue::glue(description), intervals = mc_atac@peaks, values = atac_vec)
+        gtrack.create_sparse(track = trknm, description = glue::glue(description), intervals = peaks, values = atac_vec)
     } else {
         if (override) {
             gtrack.rm(trknm, force = TRUE)
             gdb.reload()
-            gtrack.create_sparse(track = trknm, description = glue::glue(description), intervals = mc_atac@peaks, values = atac_vec)
+            gtrack.create_sparse(track = trknm, description = glue::glue(description), intervals = peaks, values = atac_vec)
         } else {
             cli_alert_warning("Track exists and {.code override = FALSE}, no track written")
         }
@@ -183,9 +187,9 @@ write_cluster_misha_track <- function(cl, atac_mc_mat_clust, track_prefix, descr
     return(trknm)
 }
 
-#' Prepare peak clusters for export (backend function)
+#' Prepare peak clusters for export
 #'
-#' @param mc_atac McATAC object
+#' @param atac_mc McATAC object
 #' @param clust_vec (optional) a vector of length #metacells representing an annotation/clustering (can be output of \code{gen_atac_mc_clust})
 #' @param normalization (optional) normalization method, either 'none', 'lfcom' (log2 fold-change over median), 'zs' (Z-scores)
 #' @param eps_q if \code{normalization == 'lfcom'}, use quantile \code{eps_q} (default = 0.05) for regularizing log expression
@@ -196,35 +200,35 @@ write_cluster_misha_track <- function(cl, atac_mc_mat_clust, track_prefix, descr
 #' \item{col_key: }{mapping of cluster names to colors}
 #' }
 #'
-#' @export
-prepare_clusters <- function(mc_atac, clust_vec = NULL, normalization = "none", eps_q = 0.05) {
+#' @noRd
+prepare_clusters <- function(atac_mc, clust_vec = NULL, normalization = "none", eps_q = 0.05) {
     if (is.null(clust_vec)) {
-        if (!any(has_name(mc_atac@metadata, c("cell_type", "cluster")))) {
+        if (!any(has_name(atac_mc@metadata, c("cell_type", "cluster")))) {
             cli_abort('There is no "cell_type" or "cluster" field in metadata and no clustering vector was supplied')
-        } else if (has_name(mc_atac@metadata, "cell_type")) {
-            clust_vec <- unlist(mc_atac@metadata$cell_type)
-        } else if (has_name(mc_atac@metadata, "cluster_")) {
-            clust_vec <- unlist(mc_atac@metadata[, grep("cluster_", colnames(mc_atac@metadata))[[1]]])
+        } else if (has_name(atac_mc@metadata, "cell_type")) {
+            clust_vec <- unlist(atac_mc@metadata$cell_type)
+        } else if (has_name(atac_mc@metadata, "cluster_")) {
+            clust_vec <- unlist(atac_mc@metadata[, grep("cluster_", colnames(atac_mc@metadata))[[1]]])
         } else {
-            print(round(ncol(mc_atac@mat) / 10))
-            cli_warn(glue::glue("No clustering vector identified. Clustering with k == {round(ncol(mc_atac@mat)/10)}"))
-            clust_vec <- gen_atac_mc_clust(mc_atac, k = round(ncol(mc_atac@mat) / 10))
+            print(round(ncol(atac_mc@mat) / 10))
+            cli_warn(glue::glue("No clustering vector identified. Clustering with k == {round(ncol(atac_mc@mat)/10)}"))
+            clust_vec <- gen_atac_mc_clust(atac_mc, k = round(ncol(atac_mc@mat) / 10))
         }
     }
-    if (!has_name(mc_atac@metadata, "color")) {
+    if (!has_name(atac_mc@metadata, "color")) {
         num_clrs <- length(unique(clust_vec))
         col_key <- setNames(chameleon::distinct_colors(num_clrs)$name, sort(unique(clust_vec)))
     } else {
-        col_key <- tibble::deframe(unique(mc_atac@metadata[, c("cell_type", "color")]))
+        col_key <- tibble::deframe(unique(atac_mc@metadata[, c("cell_type", "color")]))
     }
-    eps <- quantile(Matrix::rowMeans(mc_atac@mat), eps_q)
+    eps <- quantile(Matrix::rowMeans(atac_mc@mat), eps_q)
     if (normalization == "lfcom") {
-        atac_mc_mat <- t(apply(mc_atac@mat, 1, function(x) log2((x + eps) / median(x + eps))))
+        atac_mc_mat <- t(apply(atac_mc@mat, 1, function(x) log2((x + eps) / median(x + eps))))
         cli_alert_info("Using eps_q={eps_q} and eps = {eps} for regularization")
     } else if (normalization == "zs") {
-        atac_mc_mat <- t(apply(mc_atac@mat, 1, function(x) (x - mean(x)) / sd(x)))
+        atac_mc_mat <- t(apply(atac_mc@mat, 1, function(x) (x - mean(x)) / sd(x)))
     } else {
-        atac_mc_mat <- mc_atac@mat
+        atac_mc_mat <- atac_mc@mat
     }
     atac_mc_mat_clust <- t(tgs_matrix_tapply(atac_mc_mat, clust_vec, mean))
     clusts <- sort(unique(clust_vec))
