@@ -4,7 +4,7 @@
 \alias{get_rna_egc}
 \title{Get the normalized RNA expression matrix (egc) from a McATAC object}
 \usage{
-get_rna_egc(atac_mc, genes = NULL, rm_zeros = TRUE, epsilon = 1e-05)
+get_rna_egc(atac_mc, genes = NULL, rm_zeros = TRUE, epsilon = 0.00001)
 }
 \arguments{
 \item{atac_mc}{a McATAC object with RNA expression (using \code{add_mc_rna})}
