@@ -312,7 +312,7 @@ atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
     }
 
     if (is.null(dim(ig_peaks)) && length(ig_peaks) > 0 && is.character(ig_peaks)) {
-        ig_peaks <- misha.ext::convert_10x_peak_names_to_misha_intervals(ig_peaks)
+        ig_peaks$peak_name <- peak_names(ig_peaks)
     }
 
     ig_peaks <- ig_peaks %>% distinct(chrom, start, end, peak_name)
