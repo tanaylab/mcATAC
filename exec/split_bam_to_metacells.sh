@@ -8,7 +8,6 @@ gparallel_path=$5
 samtools_path=$6
 cell_name_files=$(ls $cell_names_folder)
 outfold=${base_output}
-cwd=$(pwd)
 bam_chroms=$($samtools_path view -H $bamfile | \
                 egrep @SQ | \
                 cut -f2 | \
@@ -42,8 +41,8 @@ for cnf in $cell_name_files; do
     cnf_fold=$outfold/$cnf
     cd $cnf_fold
     rm -f ${cnf%.txt}.bam
-    $samtools_path merge -f $cwd/$outfold/${cnf%.txt}.bam ./*.bam &
-    cd $cwd
+    $samtools_path merge -f $outfold/${cnf%.txt}.bam ./*.bam &
+    cd $outfold
 done
 wait
 for cnf in $cell_name_files; do
