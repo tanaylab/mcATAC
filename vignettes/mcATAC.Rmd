@@ -174,6 +174,7 @@ export_to_h5ad(atac_mc, "pbmc_data/atac_mc.h5ad", compression = "gzip")
 # Load using: atac_mc <- import_from_h5ad("pbmc_data/atac_mc.h5ad")
 ```
 
+<<<<<<< HEAD
 ## Make per-metacell BAMs, WIGs and tracks
 
 ```{r bams-wigs-tracks}
@@ -197,4 +198,41 @@ mcmd = readr::read_csv("./data/mcmd.csv") ## metacell metadata
 merge_metacell_bams(bam_path = bam_output_folder, output_filename="./pseudo_bulk.bam", mcs = which(mcmd$cell_type == cell_type), parallel = T)
 bam_to_wig(bam_path = "./pseudo_bulk.bam", output_filename = "./pseudo_bulk.wig", track_name_prefix = track_name_prefix)
 make_one_track(fp = "./pseudo_bulk.wig", track_name_prefix = track_name_prefix, description = glue::glue("Pseudo-bulk track of ATAC signal from {cell_type} cells"))
+=======
+## Get available motif PSSM datasets and extract motif energies
+
+```{r motifs}
+gset_genome("hg38")
+available_datasets <- get_available_pssms(return_datasets_only = TRUE)
+available_datasets
+sample_peaks <- sample_n(mc_atac@peaks, 1e+4)
+motif_mat = generate_motif_pssm_matrix(peak_set = sample_peaks, motif_regex = c("Bcl", "Atf"), datasets_of_interest = "jaspar", parallel = T)
+head(motif_mat)
+```
+
+## Extract motif energies from random genomic background
+
+```{r random_genome}
+gset_genome("hg38")
+rg = gen_random_genome_peak_motif_matrix(num_peaks = 1e+4,
+                                          bp_from_chrom_edge_to_avoid = 1e+6, 
+                                          motif_regex = c("Bcl", "Atf"),
+                                          datasets_of_interest = "jaspar", 
+                                          parallel = T)
+head(rg)
+```
+
+## Compare Kolmogorov-Smirnov statistics on distribution of motif energies between peaks of interest and genomic background
+
+```{r ks_d}
+gset_genome("hg38")
+## all peaks
+ks_all <- calculate_d_stats(motif_mat, rg, parallel = TRUE, alternative = "less", nc = parallel::detectCores())  
+
+## by peak cluster
+sample_mc <- subset_peaks(atac_mc = atac_mc, sample_peaks)  
+sample_peak_clustering <- gen_atac_peak_clust(atac_mc = sample_mc, k = 10)  
+ks_mat <- calculate_d_stats(motif_mat, rg, parallel = TRUE, fg_clustering = sample_peak_clustering, alternative = "less", nc = parallel::detectCores())  
+head(ks_mat)  
+>>>>>>> master
 ```

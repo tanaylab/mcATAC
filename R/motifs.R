@@ -136,7 +136,7 @@ gen_random_genome_peak_motif_matrix <- function(num_peaks = 1e+5,
                                                 motif_regex = NULL,
                                                 motif_tracks = NULL,
                                                 parallel = TRUE) {
-    ALLGENOME[[1]] <- ALLGENOME[[1]][!grepl("_", ALLGENOME[[1]]$chrom),]
+    ALLGENOME[[1]] <- ALLGENOME[[1]][!grepl("_", ALLGENOME[[1]]$chrom), ]
     chrom_lens <- apply(ALLGENOME[[1]][, 2:3], 1, diff)
     chrom_fracs <- setNames(chrom_lens / sum(chrom_lens), ALLGENOME[[1]][, 1])
     sample_seqs <- mapply(chrom_fracs, names(chrom_fracs), chrom_lens, FUN = function(x, y, z) {
@@ -216,7 +216,7 @@ calculate_d_stats <- function(pssm_fg, pssm_bg, fg_clustering = NULL, parallel =
 #' @noRd
 get_peaks_for_pssm <- function(atac) {
     cl <- class(atac)
-    if (any(c("ScATAC", "McATAC")  %in% cl[[1]])) {
+    if (any(c("ScATAC", "McATAC") %in% cl[[1]])) {
         peaks <- atac@peaks
     } else if ("PeakIntervals" %in% cl[[1]]) {
         peaks <- atac
