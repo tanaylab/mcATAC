@@ -174,7 +174,6 @@ export_to_h5ad(atac_mc, "pbmc_data/atac_mc.h5ad", compression = "gzip")
 # Load using: atac_mc <- import_from_h5ad("pbmc_data/atac_mc.h5ad")
 ```
 
-<<<<<<< HEAD
 ## Make per-metacell BAMs, WIGs and tracks
 
 ```{r bams-wigs-tracks}
@@ -198,7 +197,6 @@ mcmd = readr::read_csv("./data/mcmd.csv") ## metacell metadata
 merge_metacell_bams(bam_path = bam_output_folder, output_filename="./pseudo_bulk.bam", mcs = which(mcmd$cell_type == cell_type), parallel = T)
 bam_to_wig(bam_path = "./pseudo_bulk.bam", output_filename = "./pseudo_bulk.wig", track_name_prefix = track_name_prefix)
 make_one_track(fp = "./pseudo_bulk.wig", track_name_prefix = track_name_prefix, description = glue::glue("Pseudo-bulk track of ATAC signal from {cell_type} cells"))
-=======
 ## Get available motif PSSM datasets and extract motif energies
 
 ```{r motifs}
@@ -234,5 +232,4 @@ sample_mc <- subset_peaks(atac_mc = atac_mc, sample_peaks)
 sample_peak_clustering <- gen_atac_peak_clust(atac_mc = sample_mc, k = 10)  
 ks_mat <- calculate_d_stats(motif_mat, rg, parallel = TRUE, fg_clustering = sample_peak_clustering, alternative = "less", nc = parallel::detectCores())  
 head(ks_mat)  
->>>>>>> master
 ```
