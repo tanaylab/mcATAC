@@ -6,7 +6,6 @@
 \usage{
 generate_motif_pssm_matrix(
   atac = NULL,
-  peak_set = NULL,
   peak_width = 200,
   pssm_path = NULL,
   datasets_of_interest = NULL,
