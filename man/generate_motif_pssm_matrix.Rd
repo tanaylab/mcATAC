@@ -6,19 +6,19 @@
 \usage{
 generate_motif_pssm_matrix(
   atac = NULL,
-  peak_set = NULL,
   peak_width = 200,
   pssm_path = NULL,
   datasets_of_interest = NULL,
   motif_tracks = NULL,
   motif_regex = NULL,
-  parallel = FALSE
+  parallel = FALSE,
+  nc = parallel::detectCores()
 )
 }
 \arguments{
-\item{atac}{(optional) - an ScATAC/McATAC object}
-
-\item{peak_set}{(optional) - a PeakIntervals object}
+\item{atac}{\itemize{
+\item an ScATAC/McATAC or PeakIntervals object
+}}
 
 \item{peak_width}{(optional) - size of region around peak centers to extract motif energies for}
 
@@ -31,6 +31,8 @@ generate_motif_pssm_matrix(
 \item{motif_regex}{(optional) - a vector of regular expressions for which to match motif track names and extract motif PSSMs}
 
 \item{parallel}{(optional) - whether to use parallel computations}
+
+\item{nc}{(optional) - number of cores to use for parallel computations}
 }
 \value{
 a matrix of peaks (rows) vs. aggregated motif energies (columns)
@@ -41,9 +43,11 @@ This function calculates aggregated log-PSSM energies (as derived by the misha p
 }
 \examples{
 \dontrun{
-     peak_motif_mat <- generate_motif_pssm_matrix(peak_set=head(scatac@peaks), 
-                               motif_regex = c("Bcl", "Atf"), 
-                               datasets_of_interest = c("homer", "jaspar", "jolma"),
-                               parallel = F)
+peak_motif_mat <- generate_motif_pssm_matrix(
+    peak_set = head(scatac@peaks),
+    motif_regex = c("Bcl", "Atf"),
+    datasets_of_interest = c("homer", "jaspar", "jolma"),
+    parallel = F
+)
 }
 }

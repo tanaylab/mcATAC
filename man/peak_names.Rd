@@ -4,10 +4,12 @@
 \alias{peak_names}
 \title{Return the names of PeakIntervals}
 \usage{
-peak_names(peaks, promoters = FALSE)
+peak_names(peaks, tad_based = TRUE, promoters = FALSE)
 }
 \arguments{
 \item{peaks}{a PeakIntervals object or misha intervals}
+
+\item{tad_based}{whether to name peaks based on TADs}
 
 \item{promoters}{are the peaks promoters? When true, the peak names (which are gene names) are returned.}
 }
