@@ -20,7 +20,7 @@ Imports:
     mclust,
     methods,
     misha,
-    misha.ext (>= 0.0.4),
+    misha.ext (>= 0.0.5),
     pheatmap,
     purrr,
     randomNames,
@@ -35,7 +35,10 @@ Imports:
     magrittr,
     ggtext,
     scattermore,
-    grDevices
+    grDevices,
+    cowplot,
+    chameleon, 
+    tglkmeans
 Suggests: 
     testthat (>= 3.0.0),
     metacell,
@@ -47,8 +50,6 @@ Remotes:
     tanaylab/misha.ext,
     tanaylab/tgutil,
     tanaylab/metacell,
-    tanaylab/tglkmeans,
-    tanaylab/chameleon,
     bioc::3.14/sparseMatrixStats
 Config/testthat/edition: 3
 Encoding: UTF-8

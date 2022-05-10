@@ -50,11 +50,11 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, path, met
     if (nrow(mat) != nrow(peaks)) {
         cli_abort("Number of peaks is not equal to the matrix rows.")
     }
-    rownames(mat) <- peak_names(peaks)
-
+    rownames(mat) <- peak_names(peaks, tad_based = FALSE)
     peaks <- PeakIntervals(peaks, genome)
-    mat <- mat[peak_names(peaks), ] # remove from matrix peaks that were filtered
-
+    mat <- mat[peak_names(peaks, tad_based = FALSE), ] # remove from matrix peaks that were filtered
+    peaks$peak_name <- peak_names(peaks, tad_based = TRUE)
+    rownames(mat) <- peak_names(peaks, tad_based = TRUE)
     if (is.null(id)) {
         id <- gsub(" ", "_", randomNames::randomNames(n = 1, name.order = "first.last", name.sep = "_"))
         cli_alert("No id was given, setting id to {.field {id}}")
@@ -297,10 +297,10 @@ setMethod(
 #' @return
 #' @examples
 #' \dontrun{
-#'      max_peak_length <= 1000
-#'      peak_stats <- get_peak_coverage_stats(scatac, scale = 100)
-#'      too_long_peaks <- peak_stats$peak_name[peak_stats$len > max_peak_length]
-#'      scatac_filtered <- atac_ignore_peaks(scatac, too_long_peaks)
+#' max_peak_length <= 1000
+#' peak_stats <- get_peak_coverage_stats(scatac, scale = 100)
+#' too_long_peaks <- peak_stats$peak_name[peak_stats$len > max_peak_length]
+#' scatac_filtered <- atac_ignore_peaks(scatac, too_long_peaks)
 #' }
 #' @export
 atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
@@ -312,7 +312,7 @@ atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
     }
 
     if (is.null(dim(ig_peaks)) && length(ig_peaks) > 0 && is.character(ig_peaks)) {
-        ig_peaks <- misha.ext::convert_10x_peak_names_to_misha_intervals(ig_peaks)
+        ig_peaks$peak_name <- peak_names(ig_peaks)
     }
 
     ig_peaks <- ig_peaks %>% distinct(chrom, start, end, peak_name)
@@ -367,9 +367,9 @@ atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
 #' @return
 #' @examples
 #' \dontrun{
-#'      cs <- Matrix::colSums(scatac@mat)
-#'      big_cells <- names(cs)[which(cs >= quantile(cs, 0.98))]
-#'      scatac_filtered <- atac_ignore_cells(scatac, big_cells)
+#' cs <- Matrix::colSums(scatac@mat)
+#' big_cells <- names(cs)[which(cs >= quantile(cs, 0.98))]
+#' scatac_filtered <- atac_ignore_cells(scatac, big_cells)
 #' }
 #' @export
 atac_ignore_cells <- function(atac, ig_cells) {
@@ -379,11 +379,10 @@ atac_ignore_cells <- function(atac, ig_cells) {
         cli_alert_warning("Cells to ignore should be specified (they are either NULL or length 0), returning original object.")
         return(atac)
     }
-    atac@mat <- atac@mat[,cells_in]
+    atac@mat <- atac@mat[, cells_in]
     if (nrow(atac@ignore_pmat) > 0) {
-        atac@ignore_pmat <- atac@ignore_pmat[,cells_in]
-    }
-    else {
+        atac@ignore_pmat <- atac@ignore_pmat[, cells_in]
+    } else {
         atac@ignore_pmat <- methods::as(matrix(0, nrow = 0, ncol = ncol(atac@mat)), "dgCMatrix")
     }
     return(atac)
