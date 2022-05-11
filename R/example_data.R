@@ -5,21 +5,22 @@
 #' Download the following dataset from 10x site:
 #' PBMC from a healthy donor - granulocytes removed through cell
 #' sorting (10k)
-#' \code{download_pbmc_example_data} downloads the processed data, while \code{download_pbmc_example_data_raw} downloads the raw data. \cr
+#' When \code{fragments=TRUE} the fragment file and it's index are downloaded as well.
 #' Link: https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k \cr
 #' Processed data: Filtered feature barcode matrix MEX (DIR) \cr
-#' Raw data: ATAC Position-sorted alignments (BAM), ATAC Position-sorted alignments (BAM index) \cr
+#' Fragments: ATAC Per fragment information file (TSV.GZ) \cr
 #'
 #' @param dir directory to download the data to
+#' @param fragments download fragments file (and its index)
 #'
 #' @examples
 #' \dontrun{
 #' download_pbmc_example_data()
-#' download_pbmc_example_data_raw()
+#' download_pbmc_example_data(fragments = TRUE)
 #' }
 #'
 #' @export
-download_pbmc_example_data <- function(dir = "pbmc_data") {
+download_pbmc_example_data <- function(dir = "pbmc_data", fragments = FALSE) {
     url <- "https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k"
     file_url <- "https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.tar.gz"
 
@@ -31,25 +32,15 @@ download_pbmc_example_data <- function(dir = "pbmc_data") {
         cli_abort("Download failed. Please try to download manually from {.url {url}}")
     }
     file.rename("filtered_feature_bc_matrix", dir)
+    cli_alert_info("downloaded processed matrix")
 
-    cli_alert_success("successfully downloaded data to {.file {dir}}")
-}
-
-#' @rdname download_pbmc_example_data
-#' @export
-download_pbmc_example_data_raw <- function(dir = "pbmc_data") {
-    url <- "https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k"
-    bam_url <- "https://cg.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_atac_possorted_bam.bam"
-    index_url <- "https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_atac_possorted_bam.bam.bai"
-
-    if (!dir.exists(dir)) {
-        dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+    if (fragments) {
+        fragments_url <- "https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_atac_fragments.tsv.gz"
+        fragment_index_url <- "https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_atac_fragments.tsv.gz.tbi"
+        download.file(fragments_url, file.path(dir, "fragments.tsv.gz"))
+        download.file(fragment_index_url, file.path(dir, "fragments.tsv.gz.tbi"))
+        cli_alert_info("downloaded fragments")
     }
 
-    withr::with_options(list(timeout = 1e5), {
-        download.file(bam_url, file.path(dir, "possorted_bam.bam"))
-        download.file(index_url, file.path(dir, "possorted_bam.bam.bai"))
-    })
-
-    cli_alert_success("successfully downloaded raw data to {.file {dir}}")
+    cli_alert_success("successfully downloaded data to {.file {dir}}")
 }

@@ -62,9 +62,13 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, path, met
 
     description <- description %||% ""
 
+    if (path != "") {
+        path <- normalizePath(path)
+    }
+
     obj@id <- id
     obj@description <- description
-    obj@path <- normalizePath(path)
+    obj@path <- path
     obj@mat <- mat
     obj@peaks <- peaks
     obj@genome <- genome

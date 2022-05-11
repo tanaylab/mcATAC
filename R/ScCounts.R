@@ -35,17 +35,50 @@ setMethod(
         .Object@genome <- genome
         .Object@genomic_bins <- genomic_bins
         .Object@cell_names <- cell_names
-        .Object@path <- normalizePath(path)
+        if (path != "") {
+            path <- normalizePath(path)
+        }
+        .Object@path <- path
         validate_ScCounts(.Object)
         return(.Object)
     }
 )
 
 validate_ScCounts <- function(obj) {
-    # make sure genomic bins exist in the genome
-    # make sure files of genomic bins exist
-    # make sure that the dimensions of the matrices are correct
-    # make sure that the cell names are correct
+    gset_genome(obj@genome)
+    if (!all(has_name(obj@genomic_bins, c("chrom", "start", "end", "name")))) {
+        cli_abort("genomic bins should have columns named 'chrom', 'start', 'end' and 'name'")
+    }
+
+    if (!intervals_in_genome(obj@genomic_bins)) {
+        cli_abort("some genomic bins are not within the genome")
+    }
+
+    withr::with_options(list(scipen = 1e5), {
+        if (!all(obj@genomic_bins$name == paste(obj@genomic_bins$chrom, obj@genomic_bins$start, obj@genomic_bins$end, sep = "_"))) {
+            cli_abort("genomic bins should have a name that is the concatenation of the chromosome, start and end position")
+        }
+    })
+
+    if (!all(names(obj@data) == obj@genomic_bins$name)) {
+        cli_abort("data be a list with the same names as the genomic bins")
+    }
+
+    purrr::walk2(obj@data, 1:length(obj@data), ~ {
+        if (!is_sparse_matrix(.x)) {
+            cli_abort("data should be a list with sparse matrices")
+        }
+        if (ncol(.x) != length(obj@cell_names)) {
+            cli_abort("data should have the same number of columns as the number of cell names")
+        }
+        if (!all(colnames(.x) == obj@cell_names)) {
+            cli_abort("data matrices should have the same columns as the cell names")
+        }
+        intervs <- obj@genomic_bins %>% slice(.y)
+        if (nrow(.x) != (intervs$end - intervs$start)) {
+            cli_abort("data should have the same number of rows as coordintes in the genomic bin")
+        }
+    })
 }
 
 #' @export
@@ -182,16 +215,15 @@ read_sc_counts_data <- function(data_dir, genomic_bins, cell_names, genome, num_
     gset_genome(genome)
     intervals <- gintervals.all()
 
-    # TODO: make sure the scope is OK
-
     if (any(setdiff(unique(genomic_bins$chrom), intervals$chrom))) {
         missing_chroms <- setdiff(unique(genomic_bins$chrom), intervals$chrom)
         cli_abort("The following chromosomes are not present in the genome: {.val {missing_chroms}}")
     }
 
-    # TODO: chromosomes <- intersect(chromosomes, intervals$chrom)
-
-    # TODO: again: make sure the scope is OK
+    # Make sure all genomic bins are within the genome boundries
+    if (!intervals_in_genome(genomic_bins)) {
+        cli_abort("Some genomic bins are outside the genome boundaries.")
+    }
 
     doMC::registerDoMC(num_cores)
     data <- plyr::llply(genomic_bins$name, function(region) {

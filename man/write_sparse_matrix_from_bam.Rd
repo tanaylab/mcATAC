@@ -49,7 +49,7 @@ This function reads a bam file and writes a sparse-matrix file, where rows are t
 and columns are the cells. It does so by:
 \enumerate{
 \item filtering the bam file by the given region (e.g. chromosom, using the "regions" paramter)
-\item extracting the cell name using the "CB" tag added by cellranger
+\item extracting the cell name using the "CB" tag added by cellranger, while excluding reads which were marked as PCR duplicates (1024)
 \item use awk to extract the start coordinates and the tag
 \item use unix "sort" and "uniq" to count the number of times each coordinate appears for each cell
 \item use an R script to convert the cell names to indices

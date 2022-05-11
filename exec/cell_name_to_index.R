@@ -6,11 +6,13 @@ args <- commandArgs(trailingOnly = TRUE)
 
 cell_names <- read.table(args[1], header = FALSE, sep = "\t")[, 1]
 start <- as.numeric(args[2])
+end <- as.numeric(args[3])
 
 # read from stdin
 df <- read.table(file("stdin"), header = FALSE, sep = " ", col.names = c("count", "pos", "cell_name"))
 
 df <- df %>%
+    filter(pos >= start, pos <= end) %>% 
     mutate(
         # convert cell names to indices
         cell_name = as.numeric(factor(x = cell_name, levels = cell_names)),

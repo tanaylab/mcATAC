@@ -150,3 +150,51 @@ overwrite_file <- function(file, overwrite) {
         }
     }
 }
+
+#' Test if a binary file exists
+#'
+#' @description tests if a binary file exists by trying to run a command. If the return value is 0 or 1 the
+#' function returns TRUE, otherwise FALSE.
+#'
+#' @param command a string with the command
+#'
+#' @return TRUE if the command returns 0 or 1, FALSE otherwise
+#'
+#' @inheritParams system2
+#' @examples
+#' bin_exists("echo 'test'")
+#' bin_exists("tabix")
+#'
+#' @noRd
+bin_exists <- function(command, args = character(0)) {
+    code <- system2(command, args, stdout = FALSE, stderr = FALSE)
+    return(code %in% c(0, 1))
+}
+
+#' Check if intervals are within genome boundries
+#'
+#' @param intervals an intervals set
+#' @param genome name of the genome (optional)
+#'
+#' @noRd
+intervals_in_genome <- function(intervals, genome = NULL) {
+    if (!is.null(genome)) {
+        gset_genome(genome)
+    }
+
+    if (any(intervals$chrom %!in% gintervals.all()$chrom)) {
+        return(FALSE)
+    }
+
+    intervals <- intervals %>%
+        select(chrom, start, end) %>%
+        as.data.frame()
+
+    if (gintervals.force_range(intervals) %>%
+        anti_join(intervals, by = c("chrom", "start", "end")) %>%
+        nrow() != 0) {
+        return(FALSE)
+    }
+
+    return(TRUE)
+}
