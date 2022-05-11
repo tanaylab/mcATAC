@@ -176,8 +176,8 @@ export_to_h5ad(atac_mc, "pbmc_data/atac_mc.h5ad", compression = "gzip")
 
 ## Make per-metacell BAMs, WIGs and tracks
 
-```{r bams-wigs-tracks}
-bam_path <- "path/to/filtered_feature_barcode_matrix" ## if using 10X data
+```{r bams-wigs-tracks, eval = FALSE}
+bam_path <- "path/to/possorted_bam.bam"
 bam_output_folder <- "./my_mc_bams/"
 c2mc_folder <- "./c2mc/"
 wig_folder <- "./wig_output"
@@ -189,22 +189,22 @@ convert_wigs_to_tracks(wig_folder, track_name_prefix = track_name_prefix, descri
 
 ## Make pseudo-bulk ATAC tracks from per-metacell tracks
 
-```{r merge-bams}
+```{r merge-bams, eval = FALSE}
 bam_output_folder <- "./my_mc_bams/"
 track_name_prefix = "My_scATAC_project"
 cell_type = "Neuron"
-mcmd = readr::read_csv("./data/mcmd.csv") ## metacell metadata
+mcmd = tgutil::fread("./data/mcmd.csv") ## metacell metadata
 merge_metacell_bams(bam_path = bam_output_folder, output_filename="./pseudo_bulk.bam", mcs = which(mcmd$cell_type == cell_type), parallel = T)
 bam_to_wig(bam_path = "./pseudo_bulk.bam", output_filename = "./pseudo_bulk.wig", track_name_prefix = track_name_prefix)
-make_one_track(fp = "./pseudo_bulk.wig", track_name_prefix = track_name_prefix, description = glue::glue("Pseudo-bulk track of ATAC signal from {cell_type} cells"))
+make_misha_track_from_wig(fp = "./pseudo_bulk.wig", track_name_prefix = track_name_prefix, description = glue::glue("Pseudo-bulk track of ATAC signal from {cell_type} cells"))
 ## Get available motif PSSM datasets and extract motif energies
 
 ```{r motifs}
 gset_genome("hg38")
 available_datasets <- get_available_pssms(return_datasets_only = TRUE)
 available_datasets
-sample_peaks <- sample_n(mc_atac@peaks, 1e+4)
-motif_mat = generate_motif_pssm_matrix(peak_set = sample_peaks, motif_regex = c("Bcl", "Atf"), datasets_of_interest = "jaspar", parallel = T)
+sample_peaks <- sample_n(atac_mc@peaks, 1e+4)
+motif_mat = generate_motif_pssm_matrix(atac = sample_peaks, motif_regex = c("Bcl", "Atf"), datasets_of_interest = "jaspar", parallel = T)
 head(motif_mat)
 ```
 

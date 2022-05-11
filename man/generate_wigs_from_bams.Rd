@@ -6,7 +6,6 @@
 \usage{
 generate_wigs_from_bams(
   bam_folder_path,
-  track_name_prefix,
   output_path = file.path(bam_folder_path, "wig_output"),
   parallel = TRUE,
   nc = parallel::detectCores()
@@ -14,8 +13,6 @@ generate_wigs_from_bams(
 }
 \arguments{
 \item{bam_folder_path}{path to BAMs}
-
-\item{track_name_prefix}{(optional) name to prepend to track (e.g. for display in UCSC genome browser)}
 
 \item{output_path}{(optional) where to put WIGs. Default - bam_folder_path/wig_output}
 
