@@ -10,7 +10,7 @@ annotate_intervals(
   min_proximal = 1000,
   max_proximal = 20000,
   min_distal = max_proximal,
-  max_distal = 1000000,
+  max_distal = 1e+06,
   exonic_peak_dist = 0,
   tss = "intervs.global.tss",
   exons = "intervs.global.exon"

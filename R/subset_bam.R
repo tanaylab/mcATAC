@@ -12,6 +12,9 @@ generate_per_metacell_bams <- function(bam_path,
                         out_dir = file.path(bam_path, paste0(mcatac@id, "_mc_bams")), 
                         gparallel_path = "/usr/wisdom/parallel",
                         samtools_path="/home/feshap/src/samtools-1.15.1/samtools") {
+    if (!file.exists(paste0(bam_path, ".bai"))) {
+        cli_abort("Index file not found for {.file {bam_path}}. Please run 'samtools index {bam_path}'.")
+    }
     c2mc_path = file.path(dirname(bam_path), paste0(mcatac@id, "_c2mc"))
     write_metacell_cell_names(mcatac, c2mc_path)
     fp_sb2mc <- system.file("exec", "split_bam_to_metacells.sh", package = "mcATAC")
@@ -37,10 +40,8 @@ generate_per_metacell_bams <- function(bam_path,
 #' @param parallel (optional) whether to do parallel computations
 #' @param nc (optional) number of cores for parallel computations
 #' @return error log 
-#' @inheritParams bam_to_wig
 #' @export
 generate_wigs_from_bams <- function(bam_folder_path, 
-                                    track_name_prefix, 
                                     output_path = file.path(bam_folder_path, "wig_output"), 
                                     parallel = TRUE, 
                                     nc = parallel::detectCores()) {
@@ -160,7 +161,7 @@ convert_wigs_to_tracks = function(wig_dir, track_name_prefix = NULL, description
         description = "ATAC fragment track for {track_name_prefix} - {bn}"
     }
     tracks_folder <- file.path(GWD, track_name_prefix)
-    if (!dir.exists(tracks_folder)) {dir.create(tracks_folder)}
+    if (!dir.exists(tracks_folder)) {misha.ext::gtrack.create_dirs(tracks_folder)}
     if (parallel) {
         error_log <- parallel::mclapply(wig_file_paths,
                                         FUN = function(x) make_misha_track_from_wig(x, track_name_prefix = track_name_prefix, description = description, force = force), 

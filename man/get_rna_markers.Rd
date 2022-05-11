@@ -12,7 +12,7 @@ get_rna_markers(
   fold_change_reg = 0.1,
   genes = NULL,
   rm_zeros = TRUE,
-  epsilon = 0.00001
+  epsilon = 1e-05
 )
 }
 \arguments{
