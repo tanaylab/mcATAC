@@ -12,7 +12,7 @@ bam_chroms=$($samtools_path view -H $bamfile | \
                 egrep @SQ | \
                 cut -f2 | \
                 sed -e "s/^SN://" | \
-                egrep chr)
+                grep -E chr)
 printf "%s\n" "${bam_chroms[@]}" > bam_chroms.txt
 printf "%s\n" "${cell_name_files[@]}" > cell_name_files.txt
 trap "rm -f bam_chroms.txt cell_name_files.txt" EXIT
