@@ -4,7 +4,7 @@
 #' and columns are the cells. It does so by:
 #' \enumerate{
 #' \item filtering the bam file by the given region (e.g. chromosom, using the "regions" paramter)
-#' \item extracting the cell name using the "CB" tag added by cellranger
+#' \item extracting the cell name using the "CB" tag added by cellranger, while excluding reads which were marked as PCR duplicates (1024)
 #' \item use awk to extract the start coordinates and the tag
 #' \item use unix "sort" and "uniq" to count the number of times each coordinate appears for each cell
 #' \item use an R script to convert the cell names to indices
@@ -90,7 +90,7 @@ write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region,
         writeLines(paste(dims[1], dims[2], "unknown", sep = " "), output) # we do not know yet what would be the length of the file
         close(output)
 
-        cmd <- glue("{samtools_bin} view --keep-tag CB {mapq_filt_cmd} {samtools_opts} {bam_file} {region_str} | grep CB | {awk_cmd} {num_reads_cmd} | sort | uniq -c | sed 's/^ *//g' | {cell_name_to_index_bin} {cell_names_file} {fixed_region$start} >> {out_file}", awk_cmd = "awk '{print $4,substr($12, 6)}'")
+        cmd <- glue("{samtools_bin} view --keep-tag CB --exclude-flags 1024 {mapq_filt_cmd} {samtools_opts} {bam_file} {region_str} | grep CB | {awk_cmd} {num_reads_cmd} | sort | uniq -c | sed 's/^ *//g' | {cell_name_to_index_bin} {cell_names_file} {fixed_region$start} >> {out_file}", awk_cmd = "awk '{print $4,substr($12, 6)}'")
         system(cmd)
 
         # we now replace the second header line with the actual length of the file

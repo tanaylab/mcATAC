@@ -18,7 +18,7 @@ test_that("write_sparse_matrix_from_bam works", {
     # Extract the reads directly from the BAM file and compare
     cell_names <- colnames(atac_sc@mat)
     region_str <- paste0(reg$chrom, ":", reg$start, "-", reg$end)
-    cmd <- glue("{samtools_bin} view --keep-tag CB {bam_file} {region_str} | grep CB | {awk_cmd}", awk_cmd = "awk '{print $4,substr($12, 6)}'")
+    cmd <- glue("{samtools_bin} view --keep-tag CB --exclude-flags 1024 {bam_file} {region_str} | grep CB | {awk_cmd}", awk_cmd = "awk '{print $4,substr($12, 6)}'")
     df <- tgutil::fread(cmd = cmd, col.names = c("start", "cell_name"), header = FALSE) %>% as_tibble()
     df_count <- df %>%
         filter(cell_name %in% cell_names) %>%
