@@ -345,34 +345,60 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust = NULL, peak_clust = NULL,
 #'
 #' @param tracks (optional) all tracks to plot
 #' @param gene (optional) which gene to plot around
+#' @param intervals (optional) what genomic interval to plot
+#' @param mc_rna (optional) RNA metacell object to extract gene expression data from
 #' @param atac (optional) ScATAC, McATAC or PeakIntervals object from which to extract peaks in locus
 #' @param track_regex (optional) regular expression for matching tracks to plot
-#' @param intervals (optional) what genomic interval to plot
+#' @param rna_legc_eps (optional) what regularization value to add to mc_rna@e_gc when calculating log
+#' @param gene_annot (optional) whether to add gene annotations
+#' @param silent (optional) whether to print generated plot
+#' @param annotation_row pheatmap-format annotation
+#' @param annotation_col pheatmap-format annotation
+#' @param annotation_colors pheatmap-format annotation
 #' @param iterator (optional) misha iterator
 #' @param extend (optional) how much to extend \code{intervals} by on each side
 #' @param colors (optional) colorRampPalette vector of colors for scaling colors in heatmap
 #'
-#' @inheritParams pheatmap
+#' @inheritParams ComplexHeatmap
 #' @inheritDotParams save_pheatmap
 #'
-#' @return a pheatmap figure.
+#' @return a ComplexHeatmap figure
 #' @examples
 #' \dontrun{
-#'
+#'     library(metacell)
+#'     scdb_init("scdb")
+#'     mc_rna = scdb_mc('rna_w_color_key')
+#'     mcmd = readr::read_csv('./data/mcmd.csv')
+#'     color_key = unique(mcmd[,c('st', 'color')])
+#'     colnames(color_key) = c('cell_type', 'color')
+#'     col_annot = data.frame(cell_type = mcmd$st)
+#'     rownames(col_annot) = mcmd$mc
+#'     ann_colors = list(cell_type = setNames(color_key$color, color_key$cell_type))
+#'     plot_tracks_at_locus(tracks = pbmc_tracks, extend = 5e+4,
+#'                     gene = "ATF3", 
+#'                     mc_rna = mc_rna, 
+#'                     gene_annot = T, 
+#'                     order_rows = T,
+#'                     annotation_row = col_annot, 
+#'                     annotation_colors = ann_colors)
 #' }
 #' @export
 plot_tracks_at_locus <- function(tracks = NULL, 
                                 gene = NULL, 
-                                atac = NULL,
+                                intervals = NULL, 
+                                mc_rna = NULL,
                                 gene_feature = "exon",
                                 track_regex = NULL, 
-                                intervals = NULL, 
                                 iterator = 100,
                                 extend = 0, 
                                 order_rows = FALSE,
+                                row_order = NULL,
+                                gene_annot = TRUE,
                                 annotation_row = NULL,
                                 annotation_col = NULL,
                                 annotation_colors = NULL,
+                                silent = FALSE,
+                                rna_legc_eps = 1e-5,
                                 colors = colorRampPalette(c("white", "darkblue","red"))(100),
                                ...) {
     if (is.null(tracks)) {
@@ -398,47 +424,112 @@ plot_tracks_at_locus <- function(tracks = NULL,
                     that this feature exists in the field {.field geneSymbol} of gintervals.load('intervs.global.{gene_feature}')")
         }
         intervals <- gintervals(unique(gene_features$chrom), min(gene_features$start) - extend, max(gene_features$end) + extend)
-    }
-    else {
+    } else {
         intervals <- dplyr::mutate(intervals, start = start - extend, end = end + extend)
     }
-    mc_gene_vals <- gextract(pbmc_tracks, intervals = intervals, iterator = iterator)
+    if (gene_annot) {
+        gene_annots <- make_gene_annot(intervals, iterator)
+    } else {
+        gene_annots <- NULL
+    }
+    if (order_rows) {
+        if (!is.null(annotation_row) && has_name(annotation_row, "cell_type")) {
+            if (!is.null(row_order)) {
+                cli_alert_info("Both {.var order_rows} == TRUE and {.var row_order} specified. Ordering rows and ignoring {.var row_order}.")    
+            }
+            row_order <- order(annotation_row[,"cell_type"])
+        }
+        else {
+            cli_alert_info("No appropriate metacell annotation provided for ordering tracks. Tracks will not be ordered.")
+        }
+    } else {
+        row_order <- 1:length(tracks)
+    }
+    if (!is.null(mc_rna)) {
+        if (length(tracks) != ncol(mc_rna@e_gc)) {
+            cli_abort("Number of tracks and number of RNA metacells do not match.")
+        }
+        rna_ha <- make_rna_annot(mc_rna, gene, rna_legc_eps, row_order)
+    }
+    mc_gene_vals <- gextract(tracks, intervals = intervals, iterator = iterator)
     mat <- t(subset(mc_gene_vals, select = -c(chrom, start, end, intervalID)))
     rownames(mat) <- 1:nrow(mat)
     mat_n <- apply(mat, 2, function(x) {x[is.na(x)] <- 0; return(x)})
-    # if (!is.null(atac)) {
-    #     cl <- class(atac)
-    #     if (cl[[1]] %in% c("ScATAC", "McATAC")) {
-    #         peaks <- atac@peaks
-    #     }
-    #     else if (cl[[1]] == "PeakIntervals") {
-    #         peaks <- atac
-    #     }
-    #     peaks_in <- gintervals.neighbors1(peaks, intervals, mindist = 0, maxdist = 0)
-    #     peaks_coords <- dplyr::mutate(peaks_in, 
-    #                                     start = round((start - intervals$start)/iterator),
-    #                                     end = round((intervals$end - end)/iterator)
-    #     )
-    #     peak_plot <- plot(1:ncol(mat_n), col = 'white')
-    #     rect(xleft = peaks_coords$start, xright = peaks_coords$end, ybottom = -0.5, ytop = 0.5, col = "red")
-    # }
-    if (order_rows) {
-        if (!is.null(annotation_row) && has_name(annotation_row, "cell_type")) {
-            ord <- order(annotation_row[,"cell_type"])
+    if (!is.null(annotation_row)) {
+        if (is.null(annotation_colors)) {
+            cli_abort("Must specify {.var annotation_colors} if {.var annotation_row} is specified.")
         }
-        else {
-            cli_alert_info("No appropriate metacell annotation provided for ordering tracks.")
-        }
+        ct_ha <- HeatmapAnnotation(cell_type = unlist(annotation_row[row_order,]), which = 'row', col = annotation_colors)
+    } else {
+        ct_ha <- HeatmapAnnotation(cell_type = row_order, which = 'row')
     }
-    atac_plot <- pheatmap::pheatmap(mat_n, 
-                    cluster_cols = FALSE, 
-                    color = colors, 
-                    cluster_rows = FALSE, 
-                    show_rownames = FALSE, 
-                    show_colnames = FALSE, 
-                    annotation_row = annotation_row, 
-                    annotation_col = annotation_col,
-                    annotation_colors = annotation_colors,
-                    silent = TRUE)
-    return(atac_plot)
+    ch <- Heatmap(mat_n[row_order,], 
+                    use_raster = F,
+                    top_annotation = gene_annots, 
+                    left_annotation = ct_ha, 
+                    right_annotation = rna_ha, 
+                    col = colors,
+                    cluster_rows = F, 
+                    cluster_columns = F, 
+                    show_row_names = F, 
+                    show_column_names = F)
+    return(ch)
+}
+
+
+#' @param intervals what genomic interval to generate gene annotations for
+#' @param iterator misha iterator of the associated matrix
+#' @return gene annotations: a binary vector for exon locations and associated text labels for starts and ends of transcripts
+#' @noRd
+make_gene_annot <- function(intervals, iterator) {
+    file_path <- file.path(dirname(GROOT), "annots", "refGene.txt")
+    refgene <- tgutil::fread(file_path, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
+    rg_here <- dplyr::filter(refgene, chrom == as.character(intervals$chrom), txStart >= intervals$start, txEnd <= intervals$end)
+    make_binary_exon_vec <- function(exon_intervals, genomic_intervals, iterator) {
+        vec = matrix(0, nrow = 1, ncol = round((genomic_intervals[['end']] - genomic_intervals[['start']])/iterator + 1))
+        exon_bins = apply(exon_intervals[,2:3], 2, function(x) {
+            round((x - genomic_intervals[['start']])/iterator)
+        })
+        if (nrow(exon_intervals) > 1) {
+            for (i in 1:nrow(exon_intervals)) {
+                vec[exon_bins[i,1]:exon_bins[i,2]] = 1
+            }
+        } else {
+            vec[exon_bins[[1]]:exon_bins[[2]]] = 1
+        }
+        return(as.numeric(vec))
+    }
+    if (nrow(rg_here) > 0) {
+        vecs <- t(apply(rg_here, 1, function(x) {
+                        starts = as.numeric(stringi::stri_remove_empty(unlist(stringr::str_split(x[['exonStarts']], ','))))
+                        ends = as.numeric(stringi::stri_remove_empty(unlist(stringr::str_split(x[['exonEnds']], ','))))
+                        df <- data.frame('chrom' = rep(x[['chrom']], length(starts)), 'start' = starts, 'end' = ends)
+                        vec <- make_binary_exon_vec(df, intervals, iterator)
+                        return(vec)
+                    }))
+        vecsums = as.numeric(pmin(colSums(vecs), 1))
+        print(length(vecsums))
+        genes_ha <- HeatmapAnnotation(gene_names = anno_mark(labels = rep(rg_here$name2, 2),
+                                                        at = c(round((rg_here$txEnd - intervals$start)/iterator), 
+                                                                round((rg_here$txStart - intervals$start)/iterator)),
+                                                        ),
+                                        genes = vecsums, col = list(genes = setNames(c('white', 'black'), c(0,1))),
+                                        which = 'column')
+    } else {
+        genes_ha <- NULL
+    }
+    return(genes_ha)
+}
+
+#' @param mc_rna RNA metacell object
+#' @param gene gene of interest
+#' @param rna_legc_eps regularization value when taking log of mc_rna@e_gc
+#' @param row_order order of rows
+#' @noRd
+make_rna_annot <- function(mc_rna, gene, rna_legc_eps, row_order) {
+    rna_vals <- log2(mc_rna@e_gc[gene,] + rna_legc_eps)
+    rna_vals <- rna_vals - median(rna_vals)
+    rna_vals <- rna_vals[row_order]
+    rna_ha <- HeatmapAnnotation('rna\nlegc\nminus\nmedian' = anno_barplot(rna_vals), which = 'row')
+    return(rna_ha)
 }
