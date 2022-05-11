@@ -81,7 +81,7 @@ write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region,
             num_reads_cmd <- glue("| head -n {num_reads}")
         }
 
-        cell_name_to_index_bin <- system.file("cell_name_to_index.R", package = "mcATAC")
+        cell_name_to_index_bin <- system.file("exec", "cell_name_to_index.R", package = "mcATAC")
 
         dims <- c(abs(fixed_region$end - fixed_region$start), length(cell_names))
 
