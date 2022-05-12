@@ -9,7 +9,7 @@ For the TAD naming scheme see: https://github.com/tanaylab/tadbris.}
 name_enhancers(atac, tad_names = gintervals.load("intervs.global.tad_names"))
 }
 \arguments{
-\item{atac}{a McATAC or ScATAC or PeakIntervals object}
+\item{atac}{a McATAC or ScATAC a PeakIntervals object or a misha intervals set}
 }
 \value{
 the original \code{atac} object, with the field \code{peak_name} replaced by the new TAD-referenced name
