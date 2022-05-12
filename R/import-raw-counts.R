@@ -37,7 +37,7 @@
 #' @export
 write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region, genome = NULL, min_mapq = NULL, samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools", samtools_opts = NULL, num_reads = NULL, verbose = TRUE, overwrite = FALSE) {
     withr::with_options(list(scipen = 1e5), {
-        if (methods::is(cell_names, "ATAC")) {
+        if (class(cell_names) == "ScATAC") {
             genome <- genome %||% cell_names@genome
             cell_names <- colnames(cell_names@mat)
         }
@@ -108,7 +108,7 @@ write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region,
 
 write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_names, region, num_reads = NULL, genome = NULL, overwrite = FALSE, verbose = FALSE, tabix_bin = "tabix", use_tabix = FALSE) {
     withr::with_options(list(scipen = 1e5), {
-        if (methods::is(cell_names, "ATAC")) {
+        if (class(cell_names) == "ScATAC") {
             genome <- genome %||% cell_names@genome
             cell_names <- colnames(cell_names@mat)
         }
@@ -180,7 +180,7 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
 #'
 #' @param fragments_file path to fragments file
 #' @param out_dir output directory.
-#' @param cell_names a vector with the cell names or an ATAC object
+#' @param cell_names a vector with the cell names or an ScATAC object
 #' @param id an identifier for the object, e.g. "pbmc".
 #' @param description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
 #' @param bin_size Size of the genomic bins to use (in bp). Each chromsome will be chunked into bins with size which is
