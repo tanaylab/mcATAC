@@ -86,5 +86,6 @@ Collate:
     'project_on_mc.R'
     'promoters.R'
     'rna.R'
+    'subset_bam.R'
     'utils-pipe.R'
     'utils.R'

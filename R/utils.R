@@ -55,7 +55,7 @@ save_pheatmap <- function(x, filename, dev = png, width = 2000, height = 2000, r
 #' @param feature_name (optional) name of the feature that was clustered
 #' @return 2-element list containing a pheatmap-compatible dataframe and a list containing a named vector
 
-#' @noRd
+#' @export
 generate_pheatmap_annotation <- function(clust_vec, feature_type = NULL, feature_annotation = NULL) {
     if (is.null(feature_type)) {
         feature_type <- "type"
