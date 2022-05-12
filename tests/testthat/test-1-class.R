@@ -5,8 +5,9 @@ test_that("import from 10x works", {
     expect_equal(colnames(atac_sc@peaks), c("chrom", "start", "end", "peak_name"))
     expect_equal(peak_names(atac_sc@peaks), atac_sc@peaks$peak_name)
     expect_equal(atac_sc@id, "pbmc")
+    expect_equal(atac_sc@tad_based, TRUE)
     expect_equal(atac_sc@description, "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
-    expect_equal(atac_sc@path, file.path(raw_dir, "matrix.mtx"))
+    expect_equal(atac_sc@path, normalizePath(file.path(raw_dir, "matrix.mtx")), ignore_attr = TRUE)
 })
 
 test_that("projection works", {
@@ -18,6 +19,7 @@ test_that("projection works", {
     expect_equal(peak_names(atac_mc@peaks), atac_mc@peaks$peak_name)
     expect_equal(colSums(atac_mc@egc), rep(quantile(colSums(atac_mc@mat), 0.1), ncol(atac_mc@egc)), ignore_attr = TRUE)
     expect_equal(atac_mc@id, "pbmc")
+    expect_equal(atac_mc@tad_based, TRUE)
     expect_equal(atac_mc@description, "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
     expect_equal(atac_mc@cell_to_metacell, cell_to_metacell_pbmc_example)
 })
@@ -39,8 +41,9 @@ test_that("export works", {
     expect_equal(atac_mc@genome, atac_mc1@genome)
     expect_equal(atac_mc@metadata, atac_mc1@metadata, ignore_attr = TRUE)
     expect_equal(atac_mc@id, atac_mc1@id)
+    expect_equal(atac_mc@tad_based, atac_mc1@tad_based)
     expect_equal(atac_mc@description, atac_mc1@description)
-    expect_equal(atac_mc1@path, fs::path(raw_dir, "atac_mc.h5ad"))
+    expect_equal(atac_mc1@path, normalizePath(fs::path(raw_dir, "atac_mc.h5ad")))
     expect_equal(atac_mc1@cell_to_metacell, atac_mc@cell_to_metacell, ignore_attr = TRUE)
 })
 

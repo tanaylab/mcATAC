@@ -45,21 +45,22 @@ plot_atac_rna <- function(atac_mc, gene, atac_promoter = gene, mc_rna = NULL, pe
         } else if (length(peaks) > 1) {
             cli_alert("The gene {.val {atac_promoter}} has multiple ({.val {length(peaks)}}) peaks within {.val {max_dist_to_promoter_peak}} bp of its TSS. Summing the ATAC signal from all of them.")
         }
-
-        if (length(peaks) > 1) {
-            peak_range <- misha.ext::convert_10x_peak_names_to_misha_intervals(peaks) %>%
-                summarise(chrom = chrom[1], start = min(start), end = max(end)) %>%
-                peak_names()
-            peak_str <- glue("{peak_range} ({length(peaks)} peaks)")
-        } else {
-            peak_str <- peaks
-        }
     } else {
         if (peak %!in% atac_mc@peaks$peak_name) {
             cli_abort("{.val {peak}} is not a peak in the McATAC object.")
         }
         peaks <- peak
-        peak_str <- peak
+    }
+
+    peak_range <- atac_mc@peaks %>%
+        filter(peak_name %in% peaks) %>%
+        summarise(chrom = chrom[1], start = min(start), end = max(end)) %>%
+        peak_names(tad_based = FALSE)
+
+    if (length(peaks) > 1) {
+        peak_str <- glue("{peak_range} ({length(peaks)} peaks)")
+    } else {
+        peak_str <- peak_range
     }
 
     if (normalize_atac) {

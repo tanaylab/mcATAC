@@ -13,7 +13,7 @@ test_that("write_sparse_matrix_from_bam works", {
     expect_true(file.exists(paste0(mm_file, ".gz")))
     mat <- tgutil::fread_mm(paste0(mm_file, ".gz"))
     expect_equal(dim(mat), c(50000000L, 11909))
-    expect_equal(sum(mat), 99340)
+    expect_equal(sum(mat), 71459)
 
     # Extract the reads directly from the BAM file and compare
     cell_names <- colnames(atac_sc@mat)

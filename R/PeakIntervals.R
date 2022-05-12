@@ -74,31 +74,41 @@ validate_peaks <- function(peaks) {
 #' Return the names of PeakIntervals
 #'
 #' @param peaks a PeakIntervals object or misha intervals
-#' @param tad_based whether to name peaks based on TADs
+#' @param tad_based whether to name peaks based on TADs. If an intervals set named "intervs.global.tad_names" does not
+#' exists - the function will return coordinate based names.
 #' @param promoters are the peaks promoters? When true, the peak names (which are gene names) are returned.
 #'
-#' @return the field called 'peak_name' if exists in \code{peaks}, or the coordinates seperated by an underscore.
+#' @return the field called 'peak_name' if exists in \code{peaks}, or a tad based peak name if \code{tad_based=TRUE} and the coordinates seperated by an underscore otherwise.
+#'
+#' @examples
+#' \dontrun{
+#' misha.ext::gset_genome("hg38")
+#' head(peak_names(atac_sc@peaks)) # return the "peak_name" field
+#' head(peak_names(atac_sc@peaks[, -4])) # return tad based peak names
+#' head(peak_names(atac_sc@peaks[, -4], tad_based = FALSE)) # return coordinate based peak names
+#' }
 #'
 #' @export
 peak_names <- function(peaks, tad_based = TRUE, promoters = FALSE) {
+    if (has_name(peaks, "peak_name")) {
+        return(peaks$peak_name)
+    } else if (promoters) {
+        cli_abort("{.field peaks} does not have a 'peak_name' field. Please use {.code promoters = FALSE} to get the coordinates instead of the gene names.")
+    }
     if (tad_based) {
         if (gintervals.exists("intervs.global.tad_names")) {
             peaks <- name_enhancers(peaks)
             peak_names <- peaks$peak_name
+            return(peak_names)
         } else {
-            cli_abort("There are no TAD names for this assembly (check gintervals.exists('intervs.global.tad_names')).")
+            cli_alert_warning("There are no TAD names for this assembly (check gintervals.exists('intervs.global.tad_names')). Using the coordinates instead.")
         }
-    } else {
-        if (has_name(peaks, "peak_name")) {
-            return(peaks$peak_name)
-        } else if (promoters) {
-            cli_abort("{.field peaks} does not have a 'peak_name' field. Please use {.code promoters = FALSE} to get the coordinates instead of the gene names.")
-        }
-        peak_names <- peaks %>%
-            tidyr::unite("coord", start, end, sep = "-") %>%
-            tidyr::unite("peak_name", chrom, coord, sep = ":") %>%
-            pull(peak_name)
     }
+    peak_names <- peaks %>%
+        tidyr::unite("coord", start, end, sep = "-") %>%
+        tidyr::unite("peak_name", chrom, coord, sep = ":") %>%
+        pull(peak_name)
+
     return(peak_names)
 }
 

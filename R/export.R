@@ -31,7 +31,7 @@ export_to_h5ad <- function(object, out_file, ...) {
         mat <- cbind(mat, t(object@ignore_pmat))
     }
 
-    rownames(peaks) <- peak_names(peaks, object@promoters)
+    rownames(peaks) <- peak_names(peaks, tad_based = object@tad_based, promoters = object@promoters)
 
     if (!is.null(object@metadata)) {
         metadata <- data.frame(rowname = colnames(object@mat)) %>%
@@ -47,7 +47,7 @@ export_to_h5ad <- function(object, out_file, ...) {
     slots <- methods::slotNames(object)
     slots <- slots[slots %!in% c(
         "egc", "fp", "mat", "peaks", "genome", "metadata",
-        "ignore_peaks", "ignore_pmat", "rna_egc"
+        "ignore_peaks", "ignore_pmat", "rna_egc", "tad_based"
     )]
     for (s in slots) {
         if (!is.null(slot(object, s))) {

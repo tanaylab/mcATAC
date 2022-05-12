@@ -12,7 +12,8 @@ import_from_10x(
   metadata = NULL,
   matrix_fn = file.path(dir, "matrix.mtx"),
   cells_fn = file.path(dir, "barcodes.tsv"),
-  features_fn = file.path(dir, "features.tsv")
+  features_fn = file.path(dir, "features.tsv"),
+  tad_based = TRUE
 )
 }
 \arguments{
@@ -33,6 +34,8 @@ For more details see: https://support.10xgenomics.com/single-cell-multiome-atac-
 \item{cells_fn}{if \code{dir} is missing, the filename of the cells to import ("barcodes.tsv" or "barcodes.tsv.gz")}
 
 \item{features_fn}{if \code{dir} is missing, the filename of the features to import ("features.tsv" or "features.tsv.gz")}
+
+\item{tad_based}{whether to name peaks based on TADs if possible (when an intervals set named "intervs.global.tad_names" exists). When FALSE - peaks are named based on their coordinates.}
 }
 \value{
 an ScATAC object

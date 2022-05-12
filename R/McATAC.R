@@ -17,6 +17,7 @@ setOldClass("PeakIntervals")
 #' @slot metadata data frame with a column called 'metacell' and additional metacell annotations for McATAC, or 'cell_id' and per-cell annotatoins for ScATAC. The constructor can also include or the name of a delimited file which contains such annotations.
 #' @slot path original path from which the object was loaded (optional)
 #' @slot promoters are the peaks promoters (optional). When peaks are promoters the peak name would be the gene name instead of coordinates.
+#' @slot tad_based are the peaks named based on TADs.
 #'
 #' @exportClass ATAC
 ATAC <- setClass(
@@ -31,7 +32,8 @@ ATAC <- setClass(
         ignore_peaks = "PeakIntervals",
         ignore_pmat = "dgCMatrix",
         path = "character",
-        promoters = "logical"
+        promoters = "logical",
+        tad_based = "logical"
     ),
     contains = "VIRTUAL"
 )
@@ -39,22 +41,27 @@ ATAC <- setClass(
 setMethod(
     "initialize",
     signature = "ATAC",
-    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, path = "") {
-        .Object <- make_atac_object(.Object, mat, peaks, genome, id, description, path = path)
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, path = "", tad_based = TRUE) {
+        .Object <- make_atac_object(.Object, mat, peaks, genome, id, description, path = path, tad_based = tad_based)
         validate_atac_object(.Object)
         return(.Object)
     }
 )
 
-make_atac_object <- function(obj, mat, peaks, genome, id, description, path, metadata, metadata_id_field) {
+make_atac_object <- function(obj, mat, peaks, genome, id, description, path, metadata, metadata_id_field, tad_based) {
     if (nrow(mat) != nrow(peaks)) {
         cli_abort("Number of peaks is not equal to the matrix rows.")
     }
-    rownames(mat) <- peak_names(peaks, tad_based = FALSE)
+
     peaks <- PeakIntervals(peaks, genome)
-    mat <- mat[peak_names(peaks, tad_based = FALSE), ] # remove from matrix peaks that were filtered
-    peaks$peak_name <- peak_names(peaks, tad_based = TRUE)
-    rownames(mat) <- peak_names(peaks, tad_based = TRUE)
+    if (!is.null(rownames(mat)) && has_name(peaks, "peak_name")) {
+        mat <- mat[peaks$peak_name, ] # filter out peaks that do not exists in peak intervals
+    }
+    gset_genome(genome)
+    peaks <- peaks %>% select(-any_of("peak_name"))
+    peaks$peak_name <- peak_names(peaks, tad_based = tad_based)
+    rownames(mat) <- peaks$peak_name
+
     if (is.null(id)) {
         id <- gsub(" ", "_", randomNames::randomNames(n = 1, name.order = "first.last", name.sep = "_"))
         cli_alert("No id was given, setting id to {.field {id}}")
@@ -63,7 +70,7 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, path, met
     description <- description %||% ""
 
     if (path != "") {
-        path <- normalizePath(path)
+        path <- as.character(normalizePath(path))
     }
 
     obj@id <- id
@@ -75,6 +82,7 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, path, met
     obj@ignore_peaks <- subset(peaks, subset = rep(FALSE, nrow(peaks)))
     obj@ignore_pmat <- methods::as(matrix(0, nrow = 0, ncol = ncol(obj@mat)), "dgCMatrix")
     obj@promoters <- FALSE
+    obj@tad_based <- tad_based
     validate_atac_object(obj)
     return(obj)
 }
@@ -112,7 +120,7 @@ validate_atac_object_params <- function(mat, peaks, genome, promoters = FALSE) {
     }
 
     # make sure the matrix rownames are the peak names
-    if (any(rownames(mat) != peak_names(peaks, promoters))) {
+    if (any(rownames(mat) != peak_names(peaks, tad_based = TRUE, promoters = promoters))) {
         cli_abort("rownames of the matrix are not the same as the peak names.")
     }
 }
@@ -155,6 +163,7 @@ McATAC <- setClass(
 #' @param cell_to_metacell a data frame mapping 'cell_id' to 'metacell' (optional). See \code{project_atac_on_mc}
 #' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
 #' @param path path from which the object was loaded (optional)
+#' @param tad_based whether the peak names are TAD-based
 #'
 #' @description McATAC is a shallow object holding ATAC data over metacells.
 #' Minimally it should include a count matrix of peaks over metacells, and \code{PeakIntervals} which hold the coordinates
@@ -165,8 +174,8 @@ McATAC <- setClass(
 setMethod(
     "initialize",
     signature = "McATAC",
-    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, cell_to_metacell = NULL, mc_size_eps_q = 0.1, path = "") {
-        .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description, path = path)
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, cell_to_metacell = NULL, mc_size_eps_q = 0.1, path = "", tad_based = TRUE) {
+        .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based)
         validate_atac_object(.Object)
         .Object <- add_metadata(.Object, metadata, "metacell")
         .Object@egc <- calc_mc_egc(.Object, mc_size_eps_q)
@@ -261,6 +270,7 @@ ScATAC <- setClass(
 #' @param genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
 #' @param metadata data frame with a column called 'cell_id' and additional per-cell annotations, or the name of a delimited file which contains such annotations.
 #' @param path path from which the object was loaded (optional)
+#' @param tad_based wether the peak names are TAD-based
 #'
 #' @description ScATAC is a shallow object holding ATAC data over cells.
 #' Minimally it should include a count matrix of peaks over cells, and \code{PeakIntervals} which hold the coordinates
@@ -271,8 +281,8 @@ ScATAC <- setClass(
 setMethod(
     "initialize",
     signature = "ScATAC",
-    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, path = "") {
-        .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description, path = path)
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, path = "", tad_based = TRUE) {
+        .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based)
         validate_atac_object(.Object)
         .Object <- add_metadata(.Object, metadata, "cell_id")
         return(.Object)
@@ -315,8 +325,11 @@ atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
         return(atac)
     }
 
+    peaks_merge <- bind_rows(atac@peaks, atac@ignore_peaks)
+    # if ig_peaks is a character vector, we need to convert it to a PeakIntervals object by selecting the
+    # peaks with the given names
     if (is.null(dim(ig_peaks)) && length(ig_peaks) > 0 && is.character(ig_peaks)) {
-        ig_peaks$peak_name <- peak_names(ig_peaks)
+        ig_peaks <- peaks_merge %>% filter(peak_name %in% ig_peaks)
     }
 
     ig_peaks <- ig_peaks %>% distinct(chrom, start, end, peak_name)
@@ -333,7 +346,6 @@ atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
     }
 
     atac@mat <- rbind(atac@mat, atac@ignore_pmat)
-    peaks_merge <- bind_rows(atac@peaks, atac@ignore_peaks)
     cn <- c("chrom", "start", "end", "peak_name")
     new_ord <- with(peaks_merge, order(chrom, start))
     atac@mat <- atac@mat[new_ord, ]

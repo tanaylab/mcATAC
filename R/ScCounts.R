@@ -36,7 +36,7 @@ setMethod(
         .Object@genomic_bins <- genomic_bins
         .Object@cell_names <- cell_names
         if (path != "") {
-            path <- normalizePath(path)
+            path <- as.character(normalizePath(path))
         }
         .Object@path <- path
         validate_ScCounts(.Object)
