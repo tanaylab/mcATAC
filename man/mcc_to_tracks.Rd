@@ -9,6 +9,7 @@ mcc_to_tracks(
   track_prefix,
   metacells = NULL,
   overwrite = FALSE,
+  normalize = TRUE,
   num_cores = parallel::detectCores()
 )
 }
@@ -21,13 +22,16 @@ mcc_to_tracks(
 
 \item{overwrite}{Whether to overwrite existing tracks.}
 
+\item{normalize}{Normalize each metacell by the sum of its counts.}
+
 \item{num_cores}{The number of cores to use.}
 }
 \value{
 None.
 }
 \description{
-This would create a sparse track of the form "{track_prefix}.mc{metacell}" for each metacell in the McCounts object.
+This would create a sparse track of the form "{track_prefix}.mc{metacell}" for each metacell in the McCounts object. By default, the counts are normalized to the total counts of each metacell, set \code{normalize = FALSE}
+to disable this.
 }
 \examples{
 \dontrun{

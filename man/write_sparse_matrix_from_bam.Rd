@@ -23,7 +23,7 @@ write_sparse_matrix_from_bam(
 
 \item{out_file}{name of the output file. A ".gz" extension will be added to the file name.}
 
-\item{cell_names}{a vector with the cell names or an ScATAC object}
+\item{cell_names}{a vector with the cell names or an ATAC object}
 
 \item{region}{intervals set to filter. See samtools docs \url{http://www.htslib.org/doc/samtools-view.html} for details}
 

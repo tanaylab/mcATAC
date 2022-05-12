@@ -26,7 +26,7 @@ write_sc_counts_from_bam(
 
 \item{out_dir}{output directory.}
 
-\item{cell_names}{a vector with the cell names or an ScATAC object}
+\item{cell_names}{a vector with the cell names or an ATAC object}
 
 \item{genome}{genome name (e.g. hg19). Will be inferred from the ScATAC object if provided}
 

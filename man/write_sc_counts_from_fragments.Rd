@@ -23,6 +23,8 @@ write_sc_counts_from_fragments(
 
 \item{out_dir}{output directory.}
 
+\item{cell_names}{a vector with the cell names or an ATAC object}
+
 \item{bin_size}{Size of the genomic bins to use (in bp). Each chromsome will be chunked into bins with size which is
 smaller than this value. Default is 50Mb.}
 

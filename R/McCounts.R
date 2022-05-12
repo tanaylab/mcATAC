@@ -192,6 +192,61 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
     return(mc_atac)
 }
 
+#' Return the total coverage of each metacell in an McCounts object
+#'
+#' @param mc_counts a McCounts object
+#' @param num_cores number of cores to use.
+#'
+#' @return a named vector with the total coverage for each metacell
+#'
+#' @examples
+#' \dontrun{
+#' mc_counts <- mcc_read("pbmc_reads_mc")
+#' mc_covs <- mcc_cov(mc_counts)
+#' }
+#'
+#' @export
+mcc_metacell_total_cov <- function(mc_counts, num_cores = parallel::detectCores()) {
+    assert_atac_object(mc_counts, class = "McCounts")
+
+    sums <- plyr::llply(mc_counts@data, function(m) {
+        colSums(m)
+    }, .parallel = TRUE)
+
+    mc_covs <- Reduce("+", sums)
+    return(mc_covs)
+}
+
+#' Normalize each metacell in an McCounts of object by its total counts
+#'
+#' @param mc_counts a McCounts object
+#' @param num_cores number of cores to use.
+#'
+#' @return an McCounts object with the metacells normalized
+#'
+#' @examples
+#' \dontrun{
+#' mc_counts <- mcc_read("pbmc_reads_mc")
+#' mc_counts_norm <- mcc_normalize(mc_counts)
+#' }
+#'
+#' @export
+mcc_normalize_metacells <- function(mc_counts, num_cores = parallel::detectCores()) {
+    assert_atac_object(mc_counts, class = "McCounts")
+
+    mc_covs <- mcc_metacell_total_cov(mc_counts, num_cores = num_cores)
+
+    new_data <- plyr::llply(mc_counts@data, function(m) {
+        t(t(m) / mc_covs)
+    }, .parallel = TRUE)
+
+    stopifnot(all(names(new_data) == names(mc_counts@data)))
+
+    res <- mc_counts
+    res@data <- new_data
+    return(res)
+}
+
 extract_bin <- function(mat, bin, metacells, all_metacells) {
     Matrix::summary(mat[, metacells, drop = FALSE]) %>%
         mutate(
@@ -239,11 +294,13 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL, num_cores = parallel:
 
 #' Create a misha track for each metacell in a McCounts object
 #'
-#' @description This would create a sparse track of the form "{track_prefix}.mc{metacell}" for each metacell in the McCounts object.
+#' @description This would create a sparse track of the form "{track_prefix}.mc{metacell}" for each metacell in the McCounts object. By default, the counts are normalized to the total counts of each metacell, set \code{normalize = FALSE}
+#' to disable this.
 #'
 #' @param mc_counts A McCounts object
 #' @param track_prefix The prefix of the tracks to create. Track names will be of the form "{track_prefix}.mc{metacell}"
 #' @param metacells metacells for which to create tracks. If NULL, all metacells will be used.
+#' @param normalize Normalize each metacell by the sum of its counts.
 #' @param num_cores The number of cores to use.
 #' @param overwrite Whether to overwrite existing tracks.
 #'
@@ -255,14 +312,19 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL, num_cores = parallel:
 #' }
 #'
 #' @export
-mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite = FALSE, num_cores = parallel::detectCores()) {
+mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite = FALSE, normalize = TRUE, num_cores = parallel::detectCores()) {
     assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
     gset_genome(mc_counts@genome)
 
+    if (normalize) {
+        cli_alert("Normalizing each metacell by its total counts")
+        mc_counts <- mcc_normalize_metacells(mc_counts, num_cores = num_cores)
+    }
+
     cli_alert("Extracting metacell data")
-    d <- mcc_extract_to_df(mc_counts, metacells, num_cores)
+    d <- mcc_extract_to_df(mc_counts, metacells, num_cores = num_cores)
 
     misha.ext::gtrack.create_dirs(paste0(track_prefix, ".mc"), showWarnings = FALSE)
 

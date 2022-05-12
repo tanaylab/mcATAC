@@ -151,9 +151,9 @@ overwrite_file <- function(file, overwrite) {
     }
 }
 
-#' Test if a binary file exists
+#' Test if an executable file exists
 #'
-#' @description tests if a binary file exists by trying to run a command. If the return value is 0 or 1 the
+#' @description tests if an executable file exists by trying to run a command. If the return value is 0 or 1 the
 #' function returns TRUE, otherwise FALSE.
 #'
 #' @param command a string with the command
