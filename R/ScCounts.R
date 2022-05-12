@@ -211,6 +211,15 @@ scc_read <- function(path, id = NULL, description = NULL) {
     return(counts)
 }
 
+#' Read the sparse matrices of a ScCounts object from a directory
+#'
+#' @param data_dir path to the directory containing the sparse matrices
+#' @param genomic_bins genomic_bins slot of the ScCounts object
+#' @param cell_names cell_names slot of the ScCounts object
+#' @param genome genome slot of the ScCounts object
+#' @param num_cores number of cores to use
+#'
+#' @noRd
 read_sc_counts_data <- function(data_dir, genomic_bins, cell_names, genome, num_cores = parallel::detectCores()) {
     gset_genome(genome)
     intervals <- gintervals.all()
