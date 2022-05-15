@@ -21,6 +21,7 @@ ScCounts is a data structure that contains the counts of reads for a set of cell
 
 \item{\code{path}}{original path from which the object was loaded (optional)}
 
-\item{\code{genomic_bins}}{an intervals set with the genomic bins. Should have columns named "chrom", "start", "end" and "name" with the chromosome, start and end positions and name of the bin.}
+\item{\code{genomic_bins}}{an intervals set with the genomic bins. Should have columns named "chrom", "start", "end" and "name" with the chromosome, start and end positions and name of the bin. The names of the data matrices are the "name" field. Note that even though the data is stored in
+1-based format, the genomic bins are in 0-based format (misha format), hence the filenames are in 0-based format.}
 }}
 

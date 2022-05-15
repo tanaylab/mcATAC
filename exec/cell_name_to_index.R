@@ -12,6 +12,7 @@ end <- as.numeric(args[3])
 df <- read.table(file("stdin"), header = FALSE, sep = " ", col.names = c("count", "pos", "cell_name"))
 
 df <- df %>%
+    # note that we include the last base so this works only if the start and end parameters are 0-based
     filter(pos >= start, pos <= end) %>% 
     mutate(
         # convert cell names to indices

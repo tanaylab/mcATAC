@@ -122,6 +122,7 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
 
 #' Create an ScATAC object from 10x directory
 #'
+#'
 #' @param dir 10x directory. Should have the following files: 'matrix.mtx', 'barcodes.tsv' and 'features.tsv'.
 #' If you used 'Cell Ranger ARC', this should be the 'outs/filtered_feature_bc_matrix' directory. \cr
 #' For more details see: https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/overview/welcome
@@ -133,6 +134,7 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
 #' @param id an identifier for the object, e.g. "pbmc". If NULL - a random id would be assigned.
 #' @param description (Optional) description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)".
 #' @param metadata (Optional) data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
+#' @param zero_based are the coordinates of the features 0-based? Note that when this is FALSE (default) the coordinates of the created object would be different from the ones in \code{features_fn} by 1 bp.
 #'
 #'
 #' @return an ScATAC object
@@ -144,7 +146,7 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
 #' }
 #'
 #' @export
-import_from_10x <- function(dir, genome, id = NULL, description = NULL, metadata = NULL, matrix_fn = file.path(dir, "matrix.mtx"), cells_fn = file.path(dir, "barcodes.tsv"), features_fn = file.path(dir, "features.tsv"), tad_based = TRUE) {
+import_from_10x <- function(dir, genome, id = NULL, description = NULL, metadata = NULL, matrix_fn = file.path(dir, "matrix.mtx"), cells_fn = file.path(dir, "barcodes.tsv"), features_fn = file.path(dir, "features.tsv"), tad_based = TRUE, zero_based = FALSE) {
     if (!file.exists(matrix_fn)) {
         matrix_fn <- glue("{matrix_fn}.gz")
     }
@@ -179,6 +181,12 @@ import_from_10x <- function(dir, genome, id = NULL, description = NULL, metadata
         cli_alert_info("Removed {.val {nrow(atac_mat)}} ATAC peaks which were all zero")
     }
 
+    if (!zero_based) {
+        atac_peaks <- atac_peaks %>%
+            mutate(start = start - 1, end = end - 1) %>%
+            mutate(peak_name = misha.ext::convert_misha_intervals_to_10x_peak_names(.))
+        rownames(atac_mat) <- atac_peaks$peak_name
+    }
 
     cli_alert_info("{.val {nrow(atac_mat)}} ATAC peaks")
     res <- new("ScATAC", atac_mat, atac_peaks, genome = genome, id = id, description = description, metadata = metadata, path = matrix_fn, tad_based = tad_based)

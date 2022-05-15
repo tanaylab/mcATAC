@@ -1,3 +1,6 @@
+sc_counts <- scc_read(file.path(raw_dir, "reads"))
+mc_counts <- scc_project_on_mc(sc_counts, cell_to_metacell_pbmc_example)
+
 test_that("write_sparse_matrix_from_fragments works", {
     gset_genome("hg38")
     reg <- giterator.intervals(intervals = gintervals.all() %>%
@@ -46,7 +49,6 @@ test_that("write_sparse_matrix_from_fragments works", {
         0
     )
 })
-
 
 test_that("write_sparse_matrix_from_bam works", {
     gset_genome("hg38")
@@ -98,6 +100,15 @@ test_that("write_sparse_matrix_from_bam works", {
             nrow(),
         0
     )
+})
+
+test_that("mcc_to_mcatac works", {
+    atac_mc_new <- mcc_to_mcatac(mc_counts, atac_sc@peaks)
+    expect_equal(colnames(atac_mc@mat), colnames(atac_mc_new@mat))
+    expect_true(atac_mc@peaks$peak_name %in% rownames(atac_mc_new@mat))
+    intervs <- intersect(atac_mc@peaks$peak_name, atac_mc_new@peaks$peak_name)
+
+    expect_equal(sum(abs(atac_mc@mat[intervs, ] - atac_mc_new@mat[intervs, ])), 0)
 })
 
 # skipped for now since it is heavy

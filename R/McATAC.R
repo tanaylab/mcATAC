@@ -41,14 +41,14 @@ ATAC <- setClass(
 setMethod(
     "initialize",
     signature = "ATAC",
-    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, path = "", tad_based = TRUE) {
-        .Object <- make_atac_object(.Object, mat, peaks, genome, id, description, path = path, tad_based = tad_based)
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, path = "", tad_based = TRUE, rename = TRUE) {
+        .Object <- make_atac_object(.Object, mat, peaks, genome, id, description, path = path, tad_based = tad_based, rename = rename)
         validate_atac_object(.Object)
         return(.Object)
     }
 )
 
-make_atac_object <- function(obj, mat, peaks, genome, id, description, path, metadata, metadata_id_field, tad_based) {
+make_atac_object <- function(obj, mat, peaks, genome, id, description, path, metadata, metadata_id_field, tad_based, rename = TRUE) {
     if (nrow(mat) != nrow(peaks)) {
         cli_abort("Number of peaks is not equal to the matrix rows.")
     }
@@ -58,8 +58,10 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, path, met
         mat <- mat[peaks$peak_name, ] # filter out peaks that do not exists in peak intervals
     }
     gset_genome(genome)
-    peaks <- peaks %>% select(-any_of("peak_name"))
-    peaks$peak_name <- peak_names(peaks, tad_based = tad_based)
+    if (rename || !has_name(peaks, "peak_name")) {
+        peaks <- peaks %>% select(-any_of("peak_name"))
+        peaks$peak_name <- peak_names(peaks, tad_based = tad_based)
+    }
     rownames(mat) <- peaks$peak_name
 
     if (is.null(id)) {
@@ -175,7 +177,7 @@ setMethod(
     "initialize",
     signature = "McATAC",
     definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, cell_to_metacell = NULL, mc_size_eps_q = 0.1, path = "", tad_based = TRUE) {
-        .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based)
+        .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based, rename = FALSE)
         validate_atac_object(.Object)
         .Object <- add_metadata(.Object, metadata, "metacell")
         .Object@egc <- calc_mc_egc(.Object, mc_size_eps_q)

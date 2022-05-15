@@ -15,7 +15,7 @@ download_pbmc_example_data(dir = "pbmc_data", fragments = FALSE)
 Download the following dataset from 10x site:
 PBMC from a healthy donor - granulocytes removed through cell
 sorting (10k)
-When \code{fragments=TRUE} the fragment file and it's index are downloaded as well.
+When \code{fragments=TRUE} the fragment file and its index are downloaded as well.
 Link: https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k \cr
 Processed data: Filtered feature barcode matrix MEX (DIR) \cr
 Fragments: ATAC Per fragment information file (TSV.GZ) \cr

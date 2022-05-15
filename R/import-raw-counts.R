@@ -132,7 +132,7 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
 
         fixed_region <- gintervals.force_range(region)
         if (fixed_region$start != region$start || fixed_region$end != region$end) {
-            cli_warn("Region {.val {region}} was adjusted to {.val {fixed_region}}")
+            cli_warn("Region {.val {region}} was adjusted to {.val {fixed_region}}. This usually means we constructing a matrix for the wrong assembly. The current genome assembly is {.val {genome}}.")
         }
 
         dims <- c(abs(fixed_region$end - fixed_region$start), length(cell_names))

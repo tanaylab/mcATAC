@@ -7,7 +7,7 @@
 scc_read(path, id = NULL, description = NULL)
 }
 \arguments{
-\item{path}{path to the directory containing the object (which was created by \code{write_sc_counts})}
+\item{path}{path to the directory containing the object (which was created by \code{write_sc_counts_from_fragments/bam})}
 
 \item{id}{an identifier for the object (optional)}
 

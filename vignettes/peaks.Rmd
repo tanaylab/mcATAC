@@ -35,7 +35,7 @@ This would download the fragments file and its index from:
 
 [PBMC from a healthy donor - granulocytes removed through cell sorting (10k)](https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k?)
 
-Note that the 'bam' file is large - ~2GB, so this step might take some time. 
+Note that the 'fragments' file is large - ~2GB, so this step might take some time. 
 
 ## Import raw reads into a ScCounts format
 

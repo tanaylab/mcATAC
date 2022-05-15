@@ -42,6 +42,7 @@ setMethod(
 #'
 #' @param sc_counts A ScCounts object
 #' @param cell_to_metacell a data frame with a column named "cell_id" with cell id and another column named "metacell" with the metacell the cell is part of.
+#' @param ignore_metacells a vector of metacells to ignore. Default: [-1] (the "outliers" metacell in the metacell2 python package).
 #'
 #' @return A McCounts object
 #'
@@ -52,10 +53,14 @@ setMethod(
 #' }
 #'
 #' @export
-scc_project_on_mc <- function(sc_counts, cell_to_metacell) {
+scc_project_on_mc <- function(sc_counts, cell_to_metacell, ignore_metacells = -1) {
     assert_atac_object(sc_counts, class = "ScCounts")
+    if (any(cell_to_metacell$metacell %in% ignore_metacells)) {
+        ignored <- cell_to_metacell$metacell[cell_to_metacell$metacell %in% ignore_metacells]
+        cli_alert_warning("Ignoring metacells: {.val {ignore_metacells}}")
+        cell_to_metacell <- cell_to_metacell %>% filter(!(metacell %in% ignored))
+    }
     cell_to_metacell <- deframe(cell_to_metacell)
-    cell_to_metacell <- cell_to_metacell[cell_to_metacell %!in% c(-2, -1, 0)] # make sure we don't have any outlier metacells
     assert_that(all(names(cell_to_metacell) %in% sc_counts@cell_names))
 
 
@@ -120,8 +125,8 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
     metacells <- metacells %||% colnames(mat)
     intervs <- as.data.frame(intervs)
 
-    # find the coordinates that overlap with the intervals (note that we transform the coordinates to be 0-based)
-    mat_intervs <- tibble(chrom = bin$chrom, start = mat@i + bin$start - 1, end = start + 1) %>%
+    # find the coordinates that overlap with the intervals (note that we mat@i is zero based)
+    mat_intervs <- tibble(chrom = bin$chrom, start = mat@i + bin$start, end = start + 1) %>%
         gintervals.intersect(intervs)
 
     # no overlap, return empty matrix
@@ -136,13 +141,19 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
         return(msum)
     }
 
+    mat_intervs <- giterator.intervals(intervals = mat_intervs, iterator = 1)
+
+    # make sure we do not take coordinates outside the bin
+    mat_intervs <- mat_intervs %>%
+        mutate(start = pmax(start, bin$start), end = pmin(end, bin$end))
+
     mat_intervs <- mat_intervs %>%
         misha.ext::gintervals.neighbors1(intervs) %>%
-        mutate(ind = start - bin$start)
+        # although mat@i is 0-based, R indices are 1-based (hence the +1)
+        mutate(ind = start - bin$start + 1)
 
     group <- factor(mat_intervs$peak_name, levels = intervs$peak_name)
     mat_f <- mat[mat_intervs$ind, metacells]
-
     res <- t(sparse_matrix_tapply_sum(t(mat_f), group))
 
     return(res)
@@ -241,6 +252,16 @@ mcc_normalize_metacells <- function(mc_counts) {
     return(res)
 }
 
+#' Extract an intervals set from a counts matrix
+#'
+#' @param mat a counts sparse matrix (e.g. from McCounts object)
+#' @param bin a data frame with a single line with the genomic bin coordinates
+#' @param metacells names of metacells to include.
+#' @param all_metacells names of all metacells in the counts matrix.
+#'
+#' @return a data frame with "chrom", "start", "metacell" and "value" columns
+#'
+#' @noRd
 extract_bin <- function(mat, bin, metacells, all_metacells) {
     Matrix::summary(mat[, metacells, drop = FALSE]) %>%
         mutate(

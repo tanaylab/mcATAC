@@ -8,7 +8,8 @@
 #' @slot genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
 #' @slot data a named list with sparse matrices for each chromosome. Each sparse matrix at position i,j contains the number of reads that map to the cell j in the genomic coordinate i (**in 1 based format**).
 #' @slot path original path from which the object was loaded (optional)
-#' @slot genomic_bins an intervals set with the genomic bins. Should have columns named "chrom", "start", "end" and "name" with the chromosome, start and end positions and name of the bin.
+#' @slot genomic_bins an intervals set with the genomic bins. Should have columns named "chrom", "start", "end" and "name" with the chromosome, start and end positions and name of the bin. The names of the data matrices are the "name" field. Note that even though the data is stored in
+#' 1-based format, the genomic bins are in 0-based format (misha format), hence the filenames are in 0-based format.
 #'
 #' @exportClass ScCounts
 ScCounts <- setClass(
@@ -171,7 +172,7 @@ mcc_write <- function(object, out_dir, overwrite = FALSE) {
 
 #' Read an ScCounts object from a directory
 #'
-#' @param path path to the directory containing the object (which was created by \code{write_sc_counts})
+#' @param path path to the directory containing the object (which was created by \code{write_sc_counts_from_fragments/bam})
 #' @param id an identifier for the object (optional)
 #' @param description description of the object (optional)
 #'

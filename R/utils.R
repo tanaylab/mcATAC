@@ -148,6 +148,25 @@ sparse_matrix_tapply_sum <- function(x, index) {
     return(res)
 }
 
+#' A helper function to deal with file overwrite
+#'
+#' @description if the file exists and overwrite is set to FALSE, the function will return an error, and if overwrite is set to TRUE the file will be deleted. If the file does not exist, nothing would happen.
+#'
+#' @param file name of the file to check
+#' @param overwrite whether to overwrite the file
+#'
+#' @return None.
+#'
+#' @examples
+#' \dontrun{
+#' fn <- tempfile()
+#' overwrite_file(fn, overwrite = FALSE) # this returns an error
+#' overwrite_file(fn, overwrite = TRUE)
+#' file.exists(fn) # returns FALSE
+#' overwrite_file(fn)
+#' }
+#'
+#' @noRd
 overwrite_file <- function(file, overwrite) {
     if (file.exists(file)) {
         if (!overwrite) {
