@@ -123,14 +123,21 @@ sparse_matrix_tapply_sum <- function(x, index) {
         index <- factor(index)
     }
     groups <- levels(index)
+
     if (!is.null(colnames(x)) && !is.null(names(index))) {
         if (!all(colnames(x) == names(index))) {
             cli_warn("The column names of the input matrix do not match the index names. The index names would be ignored.")
         }
     }
 
-    index_mat <- t(Matrix::sparse.model.matrix(~ 0 + index))
-    rownames(index_mat) <- gsub("group", "", rownames(index_mat))
+    if (length(groups) == 1) {
+        index_mat <- t(Matrix::Matrix(matrix(rep(1, length(index))), sparse = TRUE))
+        rownames(index_mat) <- groups
+    } else {
+        index_mat <- t(Matrix::sparse.model.matrix(~ 0 + index))
+        rownames(index_mat) <- groups
+    }
+
 
     res <- t(index_mat %*% t(x))
 
