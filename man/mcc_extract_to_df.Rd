@@ -4,18 +4,12 @@
 \alias{mcc_extract_to_df}
 \title{Extract McCounts to a tidy data frame}
 \usage{
-mcc_extract_to_df(
-  mc_counts,
-  metacells = NULL,
-  num_cores = parallel::detectCores()
-)
+mcc_extract_to_df(mc_counts, metacells = NULL)
 }
 \arguments{
 \item{mc_counts}{A McCounts object}
 
 \item{metacells}{metacells to extract.}
-
-\item{num_cores}{The number of cores to use.}
 }
 \value{
 an intervals set (tibble) with additional "metacell" and "value" columns

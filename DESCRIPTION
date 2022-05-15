@@ -89,3 +89,4 @@ Collate:
     'subset_bam.R'
     'utils-pipe.R'
     'utils.R'
+    'zzz.R'

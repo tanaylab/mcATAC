@@ -5,26 +5,14 @@
 \alias{mcc_write}
 \title{Write a counts object to a file.}
 \usage{
-scc_write(
-  object,
-  out_dir,
-  num_cores = parallel::detectCores(),
-  overwrite = FALSE
-)
+scc_write(object, out_dir, overwrite = FALSE)
 
-mcc_write(
-  object,
-  out_dir,
-  overwrite = FALSE,
-  num_cores = parallel::detectCores()
-)
+mcc_write(object, out_dir, overwrite = FALSE)
 }
 \arguments{
 \item{object}{a counts object (ScCounts or McCounts)}
 
 \item{out_dir}{the output directory}
-
-\item{num_cores}{the number of cores to use}
 
 \item{overwrite}{whether to overwrite existing directory}
 }

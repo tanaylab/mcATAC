@@ -114,7 +114,6 @@ print_counts_object <- function(object, object_type, column_type) {
 #'
 #' @param object a counts object (ScCounts or McCounts)
 #' @param out_dir the output directory
-#' @param num_cores the number of cores to use
 #' @param overwrite whether to overwrite existing directory
 #'
 #' @examples
@@ -124,7 +123,7 @@ print_counts_object <- function(object, object_type, column_type) {
 #' }
 #'
 #' @export
-scc_write <- function(object, out_dir, num_cores = parallel::detectCores(), overwrite = FALSE) {
+scc_write <- function(object, out_dir, overwrite = FALSE) {
     data_dir <- file.path(out_dir, "data")
 
     if (dir.exists(out_dir)) {
@@ -138,12 +137,11 @@ scc_write <- function(object, out_dir, num_cores = parallel::detectCores(), over
     dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
     cli_alert("Writing to {.file {out_dir}}")
 
-    doMC::registerDoMC(num_cores)
     plyr::l_ply(names(object@data), function(region) {
         out_file <- file.path(data_dir, glue("{region}.mtx"))
         tgutil::fwrite_mm(object@data[[region]], out_file)
         system(glue("gzip {out_file} && rm -f {out_file}"))
-    }, .parallel = TRUE)
+    }, .parallel = getOption("mcatac.parallel"))
 
     cli_alert_info("Written sparse matrices for {.val {nrow(object@genomic_bins)}} genomic bins")
 
@@ -167,8 +165,8 @@ scc_write <- function(object, out_dir, num_cores = parallel::detectCores(), over
 
 #' @rdname scc_write
 #' @export
-mcc_write <- function(object, out_dir, overwrite = FALSE, num_cores = parallel::detectCores()) {
-    scc_write(object, out_dir, num_cores = num_cores, overwrite = overwrite)
+mcc_write <- function(object, out_dir, overwrite = FALSE) {
+    scc_write(object, out_dir, overwrite = overwrite)
 }
 
 #' Read an ScCounts object from a directory
@@ -217,10 +215,9 @@ scc_read <- function(path, id = NULL, description = NULL) {
 #' @param genomic_bins genomic_bins slot of the ScCounts object
 #' @param cell_names cell_names slot of the ScCounts object
 #' @param genome genome slot of the ScCounts object
-#' @param num_cores number of cores to use
 #'
 #' @noRd
-read_sc_counts_data <- function(data_dir, genomic_bins, cell_names, genome, num_cores = parallel::detectCores()) {
+read_sc_counts_data <- function(data_dir, genomic_bins, cell_names, genome) {
     gset_genome(genome)
     intervals <- gintervals.all()
 
@@ -234,7 +231,6 @@ read_sc_counts_data <- function(data_dir, genomic_bins, cell_names, genome, num_
         cli_abort("Some genomic bins are outside the genome boundaries.")
     }
 
-    doMC::registerDoMC(num_cores)
     data <- plyr::llply(genomic_bins$name, function(region) {
         region_file <- file.path(data_dir, paste0(region, ".mtx.gz"))
         if (!file.exists(region_file)) {
@@ -244,7 +240,7 @@ read_sc_counts_data <- function(data_dir, genomic_bins, cell_names, genome, num_
         m <- tgutil::fread_mm(region_file)
         colnames(m) <- cell_names
         return(m)
-    }, .parallel = TRUE)
+    }, .parallel = getOption("mcatac.parallel"))
 
     names(data) <- genomic_bins$name
 

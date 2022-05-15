@@ -4,18 +4,12 @@
 \alias{scc_project_on_mc}
 \title{Given metacells (usually from RNA data), project ATAC counts to get a McCounts object}
 \usage{
-scc_project_on_mc(
-  sc_counts,
-  cell_to_metacell,
-  num_cores = parallel::detectCores()
-)
+scc_project_on_mc(sc_counts, cell_to_metacell)
 }
 \arguments{
 \item{sc_counts}{A ScCounts object}
 
 \item{cell_to_metacell}{a data frame with a column named "cell_id" with cell id and another column named "metacell" with the metacell the cell is part of.}
-
-\item{num_cores}{The number of cores to use.}
 }
 \value{
 A McCounts object

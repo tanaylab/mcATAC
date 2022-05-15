@@ -47,8 +47,8 @@ generate_per_metacell_bams <- function(bam_path,
 #' @export
 generate_wigs_from_bams <- function(bam_folder_path,
                                     output_path = file.path(bam_folder_path, "wig_output"),
-                                    parallel = TRUE,
-                                    nc = parallel::detectCores()) {
+                                    parallel = getOption("mcatac.parallel"),
+                                    nc = getOption("mcatac.parallel.nc")) {
     bam_folder_path <- normalizePath(bam_folder_path)
     output_path <- normalizePath(output_path)
     if (!dir.exists(output_path)) {
@@ -93,7 +93,7 @@ write_metacell_cell_names <- function(mcatac, c2mc_path = NULL) {
 #' @param mcs vector of mcs to merge BAMs of
 #' @inheritParams generate_wigs_from_bams
 #' @export
-merge_metacell_bams <- function(bam_path, output_filename, mcs, parallel = TRUE, nc = parallel::detectCores()) {
+merge_metacell_bams <- function(bam_path, output_filename, mcs, parallel = getOption("mcatac.parallel"), nc = getOption("mcatac.parallel.nc")) {
     file_list <- paste(paste0(bam_path, "/mc", mcs, ".bam"))
     if (!grepl(".bam$", output_filename)) {
         output_filename <- paste0(output_filename, ".bam")
@@ -159,7 +159,7 @@ bam_to_wig <- function(bam_path, output_filename = NULL, track_name_prefix = NUL
 #' @return error log
 #' @inheritParams generate_wigs_from_bams
 #' @export
-convert_wigs_to_tracks <- function(wig_dir, track_name_prefix = NULL, description = NULL, parallel = TRUE, force = FALSE, nc = parallel::detectCores()) {
+convert_wigs_to_tracks <- function(wig_dir, track_name_prefix = NULL, description = NULL, parallel = getOption("mcatac.parallel"), force = FALSE, nc = getOption("mcatac.parallel.nc")) {
     wig_file_paths <- file.path(wig_dir, grep("\\.wig$", list.files(wig_dir), v = T))
     if (is.null(track_name_prefix)) {
         track_name_prefix <- basename(wig_dir)

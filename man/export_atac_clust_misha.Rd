@@ -10,8 +10,8 @@ export_atac_clust_misha(
   description = NULL,
   clust_vec = NULL,
   normalization = "none",
-  parallel = FALSE,
-  num_cores = NULL
+  parallel = getOption("mcatac.parallel"),
+  num_cores = getOption("mcatac.parallel")
 )
 }
 \arguments{

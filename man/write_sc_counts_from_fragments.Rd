@@ -13,7 +13,6 @@ write_sc_counts_from_fragments(
   overwrite = FALSE,
   id = "",
   description = "",
-  num_cores = parallel::detectCores(),
   verbose = FALSE,
   tabix_bin = "tabix"
 )
@@ -33,8 +32,6 @@ smaller than this value. Default is 50Mb.}
 \item{id}{an identifier for the object, e.g. "pbmc".}
 
 \item{description}{description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"}
-
-\item{num_cores}{number of cores to use (optional)}
 
 \item{verbose}{verbose output (optional)}
 

@@ -11,8 +11,8 @@ generate_motif_pssm_matrix(
   datasets_of_interest = NULL,
   motif_tracks = NULL,
   motif_regex = NULL,
-  parallel = FALSE,
-  nc = parallel::detectCores()
+  parallel = getOption("mcatac.parallel"),
+  nc = getOption("mcatac.parallel.nc")
 )
 }
 \arguments{

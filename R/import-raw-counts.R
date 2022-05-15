@@ -186,7 +186,6 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
 #' @param bin_size Size of the genomic bins to use (in bp). Each chromsome will be chunked into bins with size which is
 #' smaller than this value. Default is 50Mb.
 #' @param overwrite overwrite existing directory (optional)
-#' @param num_cores number of cores to use (optional)
 #' @param verbose verbose output (optional)
 #' @param tabix_bin path to the tabix binary (optional)
 #'
@@ -198,7 +197,7 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
 #' }
 #'
 #' @export
-write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", num_cores = parallel::detectCores(), verbose = FALSE, tabix_bin = "tabix") {
+write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix") {
     withr::with_options(list(scipen = 1e5), {
         data_dir <- file.path(out_dir, "data")
         if (dir.exists(out_dir)) {
@@ -237,7 +236,6 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
 
         cli_alert_info("Processing {.val {nrow(genomic_bins)}} genomic bins of maximal size {.val {bin_size}}")
 
-        doMC::registerDoMC(num_cores)
         plyr::a_ply(genomic_bins, 1, function(region) {
             cli_alert("Processing {.val {region$name}}")
             write_sparse_matrix_from_fragments(
@@ -252,7 +250,7 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
                 use_tabix = use_tabix
             )
             cli_alert_success("Finished processing {.val {region$name}}")
-        }, .parallel = TRUE)
+        }, .parallel = getOption("mcatac.parallel"))
 
         counts_md <- list(
             cell_names = cell_names,
@@ -277,7 +275,6 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
 #' @param description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
 #' @param bin_size Size of the genomic bins to use (in bp). Each chromsome will be chunked into bins with size which is
 #' smaller than this value. Default is 50Mb.
-#' @param num_cores number of cores to use (optional)
 #' @param overwrite overwrite existing directory (optional)
 #'
 #' @return None
@@ -290,7 +287,7 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
 #' }
 #'
 #' @export
-write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE, num_cores = parallel::detectCores(), overwrite = FALSE) {
+write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE, overwrite = FALSE) {
     withr::with_options(list(scipen = 1e5), {
         data_dir <- file.path(out_dir, "data")
         if (dir.exists(out_dir)) {
@@ -319,12 +316,11 @@ write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NUL
 
         cli_alert_info("Processing {.val {nrow(genomic_bins)}} genomic bins of maximal size {.val {bin_size}}")
 
-        doMC::registerDoMC(num_cores)
         plyr::a_ply(genomic_bins, 1, function(region) {
             cli_alert("Processing {.val {region$name}}")
             write_sparse_matrix_from_bam(bam_file, glue("{data_dir}/{region$chrom}_{region$start}_{region$end}.mtx"), cell_names, region, genome, min_mapq, samtools_bin, samtools_opts, num_reads, verbose, overwrite = overwrite)
             cli_alert_success("Finished processing {.val {region$name}}")
-        }, .parallel = TRUE)
+        }, .parallel = getOption("mcatac.parallel"))
 
         counts_md <- list(
             cell_names = cell_names,

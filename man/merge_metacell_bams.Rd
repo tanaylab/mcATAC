@@ -8,8 +8,8 @@ merge_metacell_bams(
   bam_path,
   output_filename,
   mcs,
-  parallel = TRUE,
-  nc = parallel::detectCores()
+  parallel = getOption("mcatac.parallel"),
+  nc = getOption("mcatac.parallel.nc")
 )
 }
 \arguments{

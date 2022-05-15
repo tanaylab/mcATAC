@@ -4,12 +4,10 @@
 \alias{mcc_metacell_total_cov}
 \title{Return the total coverage of each metacell in an McCounts object}
 \usage{
-mcc_metacell_total_cov(mc_counts, num_cores = parallel::detectCores())
+mcc_metacell_total_cov(mc_counts)
 }
 \arguments{
 \item{mc_counts}{a McCounts object}
-
-\item{num_cores}{number of cores to use.}
 }
 \value{
 a named vector with the total coverage for each metacell

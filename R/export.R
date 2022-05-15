@@ -120,10 +120,10 @@ export_atac_clust_ucsc <- function(atac_mc, track_prefix, output_dir = getwd(), 
 #' @param description (optional) description for tracks (can be a \code{glue}-formatted expression)
 #' @param parallel (optional) run function with parallel processing
 #' @param num_cores (required if parallel == TRUE) number of cores to use for parallel processing
-
+#'
 #' @return track_names names of generated misha tracks
 #' @export
-export_atac_clust_misha <- function(atac_mc, track_prefix, description = NULL, clust_vec = NULL, normalization = "none", parallel = FALSE, num_cores = NULL) {
+export_atac_clust_misha <- function(atac_mc, track_prefix, description = NULL, clust_vec = NULL, normalization = "none", parallel = getOption("mcatac.parallel"), num_cores = getOption("mcatac.parallel")) {
     res_lst <- prepare_clusters(atac_mc, clust_vec, normalization)
     if (!is.null(description)) {
         if (!is.null(clust_vec) && length(description) == 1) {
@@ -137,7 +137,7 @@ export_atac_clust_misha <- function(atac_mc, track_prefix, description = NULL, c
     if (parallel) {
         track_names <- parallel::mclapply(seq_along(res_lst$clusts), function(cl, i) {
             write_cluster_misha_track(cl[[i]], res_lst$atac_mc_mat_clust, track_prefix, atac_mc@peaks, description = description[[i]])
-        }, cl = res_lst$clusts, mc.cores = num_cores)
+        }, cl = res_lst$clusts, mc.cores = getOption("mcatac.parallel.nc"))
     } else {
         track_names <- sapply(seq_along(res_lst$clusts), function(cl, i) {
             write_cluster_misha_track(cl[[i]], res_lst$atac_mc_mat_clust, track_prefix, atac_mc@peaks, description = description[[i]])

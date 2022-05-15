@@ -42,7 +42,6 @@ setMethod(
 #'
 #' @param sc_counts A ScCounts object
 #' @param cell_to_metacell a data frame with a column named "cell_id" with cell id and another column named "metacell" with the metacell the cell is part of.
-#' @param num_cores The number of cores to use.
 #'
 #' @return A McCounts object
 #'
@@ -53,7 +52,7 @@ setMethod(
 #' }
 #'
 #' @export
-scc_project_on_mc <- function(sc_counts, cell_to_metacell, num_cores = parallel::detectCores()) {
+scc_project_on_mc <- function(sc_counts, cell_to_metacell) {
     assert_atac_object(sc_counts, class = "ScCounts")
     cell_to_metacell <- deframe(cell_to_metacell)
     cell_to_metacell <- cell_to_metacell[cell_to_metacell %!in% c(-2, -1, 0)] # make sure we don't have any outlier metacells
@@ -67,12 +66,11 @@ scc_project_on_mc <- function(sc_counts, cell_to_metacell, num_cores = parallel:
 
     cell_to_metacell <- cell_to_metacell[intersect(names(cell_to_metacell), sc_counts@cell_names)]
 
-    doMC::registerDoMC(num_cores)
     new_data <- plyr::llply(sc_counts@data, function(sc_mat) {
         cells <- intersect(colnames(sc_mat), names(cell_to_metacell))
         mc_mat <- sparse_matrix_tapply_sum(sc_mat[, cells], cell_to_metacell[cells])
         return(mc_mat)
-    }, .parallel = TRUE)
+    }, .parallel = getOption("mcatac.parallel"))
 
     res <- new("McCounts", data = new_data, cell_names = as.character(sort(unique(cell_to_metacell))), genome = sc_counts@genome, genomic_bins = sc_counts@genomic_bins, id = sc_counts@id, description = sc_counts@description, path = sc_counts@path, cell_to_metacell = enframe(cell_to_metacell, "cell_id", "metacell"))
 
@@ -157,7 +155,6 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
 #' @param mc_counts a McCounts object
 #' @param peaks a data frame with the peak intervals (chrom, start, end) and a column called "peak_name"
 #' @param metacells names of metacells to include. Default: all metacells.
-#' @param num_cores number of cores to use.
 #'
 #' @inheritParams project_atac_on_mc
 #'
@@ -171,17 +168,16 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
 #' }
 #'
 #' @export
-mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, mc_size_eps_q = 0.1, num_cores = parallel::detectCores()) {
+mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, mc_size_eps_q = 0.1) {
     assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
 
-    doMC::registerDoMC(num_cores)
     matrices <- plyr::alply(mc_counts@genomic_bins, 1, function(bin) {
         return(
             summarise_bin(mc_counts@data[[bin$name]], bin, peaks, metacells)
         )
-    }, .parallel = TRUE)
+    }, .parallel = getOption("mcatac.parallel"))
 
     mat <- Reduce("+", matrices)
 
@@ -195,7 +191,6 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
 #' Return the total coverage of each metacell in an McCounts object
 #'
 #' @param mc_counts a McCounts object
-#' @param num_cores number of cores to use.
 #'
 #' @return a named vector with the total coverage for each metacell
 #'
@@ -206,12 +201,12 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
 #' }
 #'
 #' @export
-mcc_metacell_total_cov <- function(mc_counts, num_cores = parallel::detectCores()) {
+mcc_metacell_total_cov <- function(mc_counts) {
     assert_atac_object(mc_counts, class = "McCounts")
 
     sums <- plyr::llply(mc_counts@data, function(m) {
         colSums(m)
-    }, .parallel = TRUE)
+    }, .parallel = getOption("mcatac.parallel"))
 
     mc_covs <- Reduce("+", sums)
     return(mc_covs)
@@ -220,7 +215,6 @@ mcc_metacell_total_cov <- function(mc_counts, num_cores = parallel::detectCores(
 #' Normalize each metacell in an McCounts of object by its total counts
 #'
 #' @param mc_counts a McCounts object
-#' @param num_cores number of cores to use.
 #'
 #' @return an McCounts object with the metacells normalized
 #'
@@ -231,10 +225,10 @@ mcc_metacell_total_cov <- function(mc_counts, num_cores = parallel::detectCores(
 #' }
 #'
 #' @export
-mcc_normalize_metacells <- function(mc_counts, num_cores = parallel::detectCores()) {
+mcc_normalize_metacells <- function(mc_counts) {
     assert_atac_object(mc_counts, class = "McCounts")
 
-    mc_covs <- mcc_metacell_total_cov(mc_counts, num_cores = num_cores)
+    mc_covs <- mcc_metacell_total_cov(mc_counts)
 
     new_data <- plyr::llply(mc_counts@data, function(m) {
         t(t(m) / mc_covs)
@@ -263,7 +257,6 @@ extract_bin <- function(mat, bin, metacells, all_metacells) {
 #'
 #' @param mc_counts A McCounts object
 #' @param metacells metacells to extract.
-#' @param num_cores The number of cores to use.
 #'
 #' @return an intervals set (tibble) with additional "metacell" and "value" columns
 #'
@@ -273,17 +266,16 @@ extract_bin <- function(mat, bin, metacells, all_metacells) {
 #' }
 #'
 #' @export
-mcc_extract_to_df <- function(mc_counts, metacells = NULL, num_cores = parallel::detectCores()) {
+mcc_extract_to_df <- function(mc_counts, metacells = NULL) {
     assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
 
-    doMC::registerDoMC(num_cores)
     mc_data <- plyr::adply(mc_counts@genomic_bins, 1, function(bin) {
         return(
             extract_bin(mc_counts@data[[bin$name]], bin, metacells, mc_counts@cell_names)
         )
-    }, .parallel = TRUE)
+    }, .parallel = getOption("mcatac.parallel"))
 
     mc_data <- mc_data %>%
         select(chrom, start, end, metacell, value) %>%
@@ -301,7 +293,6 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL, num_cores = parallel:
 #' @param track_prefix The prefix of the tracks to create. Track names will be of the form "{track_prefix}.mc{metacell}"
 #' @param metacells metacells for which to create tracks. If NULL, all metacells will be used.
 #' @param normalize Normalize each metacell by the sum of its counts.
-#' @param num_cores The number of cores to use.
 #' @param overwrite Whether to overwrite existing tracks.
 #'
 #' @return None.
@@ -312,7 +303,7 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL, num_cores = parallel:
 #' }
 #'
 #' @export
-mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite = FALSE, normalize = TRUE, num_cores = parallel::detectCores()) {
+mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite = FALSE, normalize = TRUE) {
     assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
@@ -320,15 +311,14 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
 
     if (normalize) {
         cli_alert("Normalizing each metacell by its total counts")
-        mc_counts <- mcc_normalize_metacells(mc_counts, num_cores = num_cores)
+        mc_counts <- mcc_normalize_metacells(mc_counts)
     }
 
     cli_alert("Extracting metacell data")
-    d <- mcc_extract_to_df(mc_counts, metacells, num_cores = num_cores)
+    d <- mcc_extract_to_df(mc_counts, metacells)
 
     misha.ext::gtrack.create_dirs(paste0(track_prefix, ".mc"), showWarnings = FALSE)
 
-    doMC::registerDoMC(num_cores)
     plyr::l_ply(mc_counts@cell_names, function(metacell) {
         track <- glue("{track_prefix}.mc{metacell}")
         cli_alert("Creating {track} track")
@@ -347,7 +337,7 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
             intervals = x %>% select(chrom, start, end),
             values = x$value
         )
-    }, .parallel = TRUE)
+    }, .parallel = getOption("mcatac.parallel"))
 
     gdb.reload()
 

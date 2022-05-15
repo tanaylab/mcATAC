@@ -9,8 +9,7 @@ mcc_to_mcatac(
   peaks,
   metacells = NULL,
   metadata = NULL,
-  mc_size_eps_q = 0.1,
-  num_cores = parallel::detectCores()
+  mc_size_eps_q = 0.1
 )
 }
 \arguments{
@@ -24,8 +23,6 @@ mcc_to_mcatac(
 
 \item{mc_size_eps_q}{(optional) quantile of MC size (in UMIs) to scale the number of UMIs per metacell. \eqn{egc_ij} would then be
 the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quantile of metacell sizes.}
-
-\item{num_cores}{number of cores to use.}
 }
 \value{
 a McATAC object

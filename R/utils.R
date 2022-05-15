@@ -153,22 +153,22 @@ overwrite_file <- function(file, overwrite) {
 
 #' Test if an executable file exists
 #'
-#' @description tests if an executable file exists by trying to run a command. If the return value is 0 or 1 the
+#' @description tests if an executable file exists by trying to run a command. If the return value is 0 the
 #' function returns TRUE, otherwise FALSE.
 #'
 #' @param command a string with the command
 #'
-#' @return TRUE if the command returns 0 or 1, FALSE otherwise
+#' @return TRUE if the command returns 0, FALSE otherwise
 #'
 #' @inheritParams system2
 #' @examples
-#' bin_exists("echo 'test'")
-#' bin_exists("tabix")
+#' bin_exists("echo", "test")
+#' bin_exists("tabix", "--version")
 #'
 #' @noRd
 bin_exists <- function(command, args = character(0)) {
     code <- system2(command, args, stdout = FALSE, stderr = FALSE)
-    return(code %in% c(0, 1))
+    return(code == 0)
 }
 
 #' Check if intervals are within genome boundries
@@ -197,4 +197,28 @@ intervals_in_genome <- function(intervals, genome = NULL) {
     }
 
     return(TRUE)
+}
+
+#' Set parallel threads
+#'
+#' @description Set the number of parallel threads to use. mcATAC uses the R function \code{doMC::registerDoMC} to register the parallelization.
+#' By default, mcATAC uses 80% of the number of available cores. The options are saved under 'mcatac.parallel' (should we use parallelization, logical) and 'mcatac.parallel.nc' (number of cores to use, integer).
+#'
+#' @param thread_num number of threads. use '1' for non parallel behavior
+#'
+#' @return None
+#'
+#' @examples
+#' \donttest{
+#' set_parallel(8)
+#' }
+#' @export
+set_parallel <- function(thread_num = max(1, round(parallel::detectCores() * 0.8))) {
+    if (thread_num <= 1) {
+        options(mcatac.parallel = FALSE)
+    } else {
+        doMC::registerDoMC(thread_num)
+        options(mcatac.parallel = TRUE)
+        options(mcatac.parallel.nc = thread_num)
+    }
 }

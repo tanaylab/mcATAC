@@ -17,7 +17,6 @@ write_sc_counts_from_bam(
   samtools_opts = NULL,
   num_reads = NULL,
   verbose = FALSE,
-  num_cores = parallel::detectCores(),
   overwrite = FALSE
 )
 }
@@ -46,8 +45,6 @@ smaller than this value. Default is 50Mb.}
 \item{num_reads}{number of reads (within the \code{region}) to process (optional).}
 
 \item{verbose}{verbose output (optional)}
-
-\item{num_cores}{number of cores to use (optional)}
 
 \item{overwrite}{overwrite existing directory (optional)}
 }
