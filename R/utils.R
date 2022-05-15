@@ -216,9 +216,11 @@ intervals_in_genome <- function(intervals, genome = NULL) {
 set_parallel <- function(thread_num = max(1, round(parallel::detectCores() * 0.8))) {
     if (thread_num <= 1) {
         options(mcatac.parallel = FALSE)
+        cli_alert_info("Parallelization disabled.")
     } else {
         doMC::registerDoMC(thread_num)
         options(mcatac.parallel = TRUE)
         options(mcatac.parallel.nc = thread_num)
+        cli_alert_info("Parallelization enabled. Using {.val {thread_num}} threads.")
     }
 }
