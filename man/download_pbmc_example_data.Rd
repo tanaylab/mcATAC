@@ -4,21 +4,26 @@
 \alias{download_pbmc_example_data}
 \title{Download example data from 10x}
 \usage{
-download_pbmc_example_data(dir = "pbmc_data")
+download_pbmc_example_data(dir = "pbmc_data", fragments = FALSE)
 }
 \arguments{
 \item{dir}{directory to download the data to}
+
+\item{fragments}{download fragments file (and its index)}
 }
 \description{
 Download the following dataset from 10x site:
 PBMC from a healthy donor - granulocytes removed through cell
 sorting (10k)
-Link: https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k
-File: Filtered feature barcode matrix MEX (DIR)
+When \code{fragments=TRUE} the fragment file and its index are downloaded as well.
+Link: https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k \cr
+Processed data: Filtered feature barcode matrix MEX (DIR) \cr
+Fragments: ATAC Per fragment information file (TSV.GZ) \cr
 }
 \examples{
 \dontrun{
 download_pbmc_example_data()
+download_pbmc_example_data(fragments = TRUE)
 }
 
 }

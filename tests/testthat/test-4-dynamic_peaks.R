@@ -29,5 +29,5 @@ test_that("identify_dynamic_peaks works when plot = FALSE", {
 })
 
 test_that("identify_dynamic_peaks errors with unknown methods", {
-    expect_error(identify_dynamic_peaks(mcatac = atac_mc, mean_thresh_q = 0.05, method = "savta"))
+    expect_error(identify_dynamic_peaks(atac_mc, mean_thresh_q = 0.05, method = "savta"))
 })

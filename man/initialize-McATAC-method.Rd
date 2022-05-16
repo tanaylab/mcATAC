@@ -14,7 +14,8 @@
   metadata = NULL,
   cell_to_metacell = NULL,
   mc_size_eps_q = 0.1,
-  path = ""
+  path = "",
+  tad_based = TRUE
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ projection was done using RNA metacells"}
 the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quantile of metacell sizes.}
 
 \item{path}{path from which the object was loaded (optional)}
+
+\item{tad_based}{whether the peak names are TAD-based}
 }
 \description{
 McATAC is a shallow object holding ATAC data over metacells.

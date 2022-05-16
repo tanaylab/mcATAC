@@ -4,10 +4,10 @@
 \alias{add_mc_rna}
 \title{Add per-metacell gene expression data to an McATAC object}
 \usage{
-add_mc_rna(mcatac, mc_rna)
+add_mc_rna(atac_mc, mc_rna)
 }
 \arguments{
-\item{mcatac}{an McATAC object}
+\item{atac_mc}{an McATAC object}
 
 \item{mc_rna}{a \code{metacell1} 'mc' object or a \code{metacells} metacell UMI matrix (a matrix where each row is a gene and each column is a metacell)}
 }
@@ -19,7 +19,7 @@ Add per-metacell gene expression data to an McATAC object
 data(mcmd)
 metacell::scdb_init("pbmc_data/scdb", force_reinit = TRUE)
 mc_rna <- metacell::scdb_mc("rna")
-mc_atac <- add_mc_rna(mc_atac, mc_rna)
+atac_mc <- add_mc_rna(atac_mc, mc_rna)
 }
 
 }

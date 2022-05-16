@@ -8,9 +8,9 @@ calculate_d_stats(
   pssm_fg,
   pssm_bg,
   fg_clustering = NULL,
-  parallel = TRUE,
+  parallel = getOption("mcatac.parallel"),
   alternative = "less",
-  nc = parallel::detectCores()
+  nc = getOption("mcatac.parallel.nc")
 )
 }
 \arguments{

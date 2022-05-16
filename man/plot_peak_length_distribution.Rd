@@ -17,7 +17,7 @@ Plot the distribution of the peak length
 }
 \examples{
 \dontrun{
-plot_peak_length_distribution(scatac)
+plot_peak_length_distribution(atac_sc)
 }
 
 }

@@ -32,7 +32,7 @@ See https://doi.org/10.1038/s41598-019-45839-z for more details
 }
 \examples{
 \dontrun{
-blacklist_overlaps <- find_blacklist_overlaps(atac = my_mcatac, max_dist_to_blacklist_region = 100)
+blacklist_overlaps <- find_blacklist_overlaps(atac = my_atac_mc, max_dist_to_blacklist_region = 100)
 blacklist_overlaps <- find_blacklist_overlaps(peaks = my_peak_set, genome = "mm10")
 }
 }

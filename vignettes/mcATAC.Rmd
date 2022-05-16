@@ -110,7 +110,7 @@ atac_mc <- add_mc_metadata(atac_mc, mcmd)
 ```
 ## Identify dynamic peaks
 ```{r dynamic-peaks, dpi=300, fig.width=7, fig.height=7}
-dyn_peaks <- identify_dynamic_peaks(mcatac = atac_mc, mean_thresh_q = 0.05)
+dyn_peaks <- identify_dynamic_peaks(atac_mc, mean_thresh_q = 0.05)
 ```
 
 ## Cluster a peak set
@@ -197,6 +197,8 @@ mcmd = tgutil::fread("./data/mcmd.csv") ## metacell metadata
 merge_metacell_bams(bam_path = bam_output_folder, output_filename="./pseudo_bulk.bam", mcs = which(mcmd$cell_type == cell_type), parallel = T)
 bam_to_wig(bam_path = "./pseudo_bulk.bam", output_filename = "./pseudo_bulk.wig", track_name_prefix = track_name_prefix)
 make_misha_track_from_wig(fp = "./pseudo_bulk.wig", track_name_prefix = track_name_prefix, description = glue::glue("Pseudo-bulk track of ATAC signal from {cell_type} cells"))
+```
+
 ## Get available motif PSSM datasets and extract motif energies
 
 ```{r motifs}

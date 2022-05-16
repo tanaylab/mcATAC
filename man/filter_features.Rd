@@ -5,7 +5,7 @@
 \title{Filter features by summary statistics}
 \usage{
 filter_features(
-  scatac,
+  atac_sc,
   minimal_max_umi = NULL,
   min_peak_length = NULL,
   max_peak_length = NULL,
@@ -13,7 +13,7 @@ filter_features(
 )
 }
 \arguments{
-\item{scatac}{the ScATAC object to analyze}
+\item{atac_sc}{the ScATAC object to analyze}
 
 \item{minimal_max_umi}{(optional) threshold on minimum maximal coverage - i.e. remove all peaks that DON'T have a cell with at least \code{abs_cov_thresh} UMIs}
 
@@ -24,7 +24,7 @@ filter_features(
 \item{max_peak_density}{(optional) remove all peaks that have more than \code{max_peak_density} UMIs per 100bp}
 }
 \value{
-scatac - the filtered ScATAC object
+atac_sc - the filtered ScATAC object
 }
 \description{
 Remove ATAC peaks with low coverage, or that are too long etc.
@@ -32,10 +32,10 @@ Remove ATAC peaks with low coverage, or that are too long etc.
 \examples{
 \dontrun{
 ## quantiles of peak lengths before filtering
-quantile(my_scatac@peaks$end - my_scatac@peaks$start, (0:10) / 10)
-my_scatac <- filter_features(scatac = my_scatac, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
+quantile(my_atac_sc@peaks$end - my_atac_sc@peaks$start, (0:10) / 10)
+my_atac_sc <- filter_features(atac_sc = my_atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
 
 ## quantiles of peak lengths after filtering
-quantile(my_scatac@peaks$end - my_scatac@peaks$start, (0:10) / 10)
+quantile(my_atac_sc@peaks$end - my_atac_sc@peaks$start, (0:10) / 10)
 }
 }

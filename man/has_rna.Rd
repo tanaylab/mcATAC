@@ -4,10 +4,10 @@
 \alias{has_rna}
 \title{Does the McATAC object contain per-metacell gene expression data?}
 \usage{
-has_rna(mc_atac)
+has_rna(atac_mc)
 }
 \arguments{
-\item{mc_atac}{an McATAC object}
+\item{atac_mc}{an McATAC object}
 }
 \value{
 TRUE if the McATAC object contains per-metacell gene expression data, FALSE otherwise
@@ -17,7 +17,7 @@ Does the McATAC object contain per-metacell gene expression data?
 }
 \examples{
 \dontrun{
-has_rna(mc_atac)
+has_rna(atac_mc)
 }
 
 }
