@@ -11,8 +11,8 @@ generate_motif_pssm_matrix(
   datasets_of_interest = NULL,
   motif_tracks = NULL,
   motif_regex = NULL,
-  parallel = FALSE,
-  nc = parallel::detectCores()
+  parallel = getOption("mcatac.parallel"),
+  nc = getOption("mcatac.parallel.nc")
 )
 }
 \arguments{
@@ -44,7 +44,7 @@ This function calculates aggregated log-PSSM energies (as derived by the misha p
 \examples{
 \dontrun{
 peak_motif_mat <- generate_motif_pssm_matrix(
-    peak_set = head(scatac@peaks),
+    peak_set = head(atac_sc@peaks),
     motif_regex = c("Bcl", "Atf"),
     datasets_of_interest = c("homer", "jaspar", "jolma"),
     parallel = F

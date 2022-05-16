@@ -67,7 +67,7 @@ plot_peak_coverage_distribution(atac_sc)
 Filter:
 
 ``` r
-atac_sc <- filter_features(scatac = atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
+atac_sc <- filter_features(atac_sc = atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
 #> • 8544 features were shorter than 200bp
 #> • 37160 features were longer than 1000bp
 #> • 676 features had a maximal UMI count less than 3

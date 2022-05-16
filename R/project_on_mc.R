@@ -15,20 +15,26 @@
 #' @param id an identifier for the object, e.g. "pbmc". If NULL - the id would be taken from the scATAC object \code{atac}.
 #' @param description an identifier for the object, e.g. "pbmc". If NULL - the description would be taken from the scATAC object \code{atac}
 #' @param rm_zero_peaks remove peaks without any reads (all-zero peaks). Default: TRUE
+#' @param ignore_metacells a vector of metacells to ignore. Default: [-1] (the "outliers" metacell in the metacell2 python package).
 #'
 #' @return an McATAC object
 #'
 #' @examples
 #' \dontrun{
 #' atac_sc <- import_from_10x("pbmc_data", genome = "hg38")
-#' atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")
+#' data(cell_to_metacell_pbmc_example)
+#' atac_mc <- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example)
 #' }
 #'
 #' @export
-project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5, mc_size_eps_q = 0.1, id = NULL, description = NULL, rm_zero_peaks = TRUE) {
+project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5, mc_size_eps_q = 0.1, id = NULL, description = NULL, rm_zero_peaks = TRUE, ignore_metacells = -1) {
     assert_atac_object(atac)
+    if (any(cell_to_metacell$metacell %in% ignore_metacells)) {
+        ignored <- cell_to_metacell$metacell[cell_to_metacell$metacell %in% ignore_metacells]
+        cli_alert_warning("Ignoring metacells: {.val {ignore_metacells}}")
+        cell_to_metacell <- cell_to_metacell %>% filter(!(metacell %in% ignored))
+    }
     cell_to_metacell <- deframe(cell_to_metacell)
-    cell_to_metacell <- cell_to_metacell[cell_to_metacell %!in% c(-2, -1, 0)] # make sure you don't have any outlier metacells
     assert_that(all(names(cell_to_metacell) %in% colnames(atac@mat)))
     sc_mat <- atac@mat[, colnames(atac@mat) %in% names(cell_to_metacell), drop = FALSE]
     n_removed_cells <- ncol(atac@mat) - ncol(sc_mat)
@@ -59,7 +65,7 @@ project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, m
 
     description <- description %||% atac@description
     id <- id %||% atac@id
-    mc_atac <- new("McATAC", mat = mc_mat, peaks = atac@peaks[non_zero_peaks, ], genome = atac@genome, metadata = metadata, cell_to_metacell = enframe(cell_to_metacell, "cell_id", "metacell"), mc_size_eps_q = mc_size_eps_q, id = id, description = description)
+    mc_atac <- new("McATAC", mat = mc_mat, peaks = atac@peaks[non_zero_peaks, ], genome = atac@genome, metadata = metadata, cell_to_metacell = enframe(cell_to_metacell, "cell_id", "metacell"), mc_size_eps_q = mc_size_eps_q, id = id, description = description, tad_based = atac@tad_based)
     cli_alert_success("Created a new McATAC object with {.val {ncol(mc_atac@mat)}} metacells and {.val {nrow(mc_atac@mat)}} ATAC peaks.")
 
     return(mc_atac)

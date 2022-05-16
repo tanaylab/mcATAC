@@ -5,26 +5,26 @@
 \title{Plot a scatter of gene expression vs an atac profile}
 \usage{
 plot_atac_rna(
-  mc_atac,
+  atac_mc,
   gene,
   atac_promoter = gene,
   mc_rna = NULL,
   peak = NULL,
   max_dist_to_promoter_peak = 500,
   normalize_atac = TRUE,
-  eps_rna = 1e-05,
+  eps_rna = 0.00001,
   tss_intervals = "intervs.global.tss",
   plot_object_id = TRUE
 )
 }
 \arguments{
-\item{mc_atac}{a McATAC object}
+\item{atac_mc}{a McATAC object}
 
 \item{gene}{name of the gene to plot}
 
 \item{atac_promoter}{name of the promoter to plot. By default this would be the rna gene \code{gene}.}
 
-\item{mc_rna}{a \code{metacell1} 'mc' object or a \code{metacells} metacell UMI matrix (a matrix where each row is a gene and each column is a metacell). Can be NULL if \code{mc_atac} already contains the gene expression data (added by \code{add_mc_rna}).}
+\item{mc_rna}{a \code{metacell1} 'mc' object or a \code{metacells} metacell UMI matrix (a matrix where each row is a gene and each column is a metacell). Can be NULL if \code{atac_mc} already contains the gene expression data (added by \code{add_mc_rna}).}
 
 \item{peak}{name of the peak to plot. If NULL - the promoter of \code{atac_promoter} would be shown. You can get the peak names from \code{atac@peaks$peak_name}}
 
@@ -36,7 +36,7 @@ plot_atac_rna(
 
 \item{tss_intervals}{name of the intervals set containing the TSSs}
 
-\item{plot_object_id}{plot the object id of the \code{mc_atac} object in the bottom left corner of the plot (default: TRUE)}
+\item{plot_object_id}{plot the object id of the \code{atac_mc} object in the bottom left corner of the plot (default: TRUE)}
 }
 \value{
 a ggplot object with the scatter plot
@@ -46,13 +46,13 @@ Plot a scatter of gene expression vs an atac profile
 }
 \examples{
 \dontrun{
-p1 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4")
+p1 <- plot_atac_rna(atac_mc = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4")
 
-p2 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4", atac_promoter = "CD8")
+p2 <- plot_atac_rna(atac_mc = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4", atac_promoter = "CD8")
 
 # Plot gene vs some peak of interest
-peak <- mc_atac@peaks[1]$peak_name
-p3 <- plot_atac_rna(mc_atac = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4", peak = peak)
+peak <- atac_mc@peaks[1]$peak_name
+p3 <- plot_atac_rna(atac_mc = pbmc_atac_mc, mc_rna = pbmc_rna_mc, gene = "CD4", peak = peak)
 }
 
 }

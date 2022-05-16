@@ -17,7 +17,7 @@ Plot the maximal per-cell coverage distribution of the peaks
 }
 \examples{
 \dontrun{
-plot_peak_max_cov_distribution(scatac)
+plot_peak_max_cov_distribution(atac_sc)
 }
 
 }

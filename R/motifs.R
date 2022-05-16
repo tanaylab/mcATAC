@@ -15,7 +15,7 @@
 #' @examples
 #' \dontrun{
 #' peak_motif_mat <- generate_motif_pssm_matrix(
-#'     peak_set = head(scatac@peaks),
+#'     peak_set = head(atac_sc@peaks),
 #'     motif_regex = c("Bcl", "Atf"),
 #'     datasets_of_interest = c("homer", "jaspar", "jolma"),
 #'     parallel = F
@@ -28,8 +28,8 @@ generate_motif_pssm_matrix <- function(atac = NULL,
                                        datasets_of_interest = NULL,
                                        motif_tracks = NULL,
                                        motif_regex = NULL,
-                                       parallel = FALSE,
-                                       nc = parallel::detectCores()) {
+                                       parallel = getOption("mcatac.parallel"),
+                                       nc = getOption("mcatac.parallel.nc")) {
     cli_alert_warning("The runtime of this function call may take several minutes, depending on the numbers of peaks and motifs evaluated, and the number of processors available. Consider running it in a separate terminal and saving the output.")
     withr::local_options(list(gmax.data.size = 1e8))
     suffix <- stringi::stri_rand_strings(1, 5)
@@ -185,7 +185,7 @@ gen_random_genome_peak_motif_matrix <- function(num_peaks = 1e+5,
 #' d_vs_rg_cl <- calculate_d_stats(pssm_fg, pssm_bg, fg_clustering = peak_clust)
 #' }
 #' @export
-calculate_d_stats <- function(pssm_fg, pssm_bg, fg_clustering = NULL, parallel = TRUE, alternative = "less", nc = parallel::detectCores()) {
+calculate_d_stats <- function(pssm_fg, pssm_bg, fg_clustering = NULL, parallel = getOption("mcatac.parallel"), alternative = "less", nc = getOption("mcatac.parallel.nc")) {
     cols_fg <- grep("chrom|start|end$|interval", colnames(pssm_fg), ignore.case = T, invert = T, value = T)
     cols_bg <- grep("chrom|start|end$|interval", colnames(pssm_bg), ignore.case = T, invert = T, value = T)
     cols_both <- intersect(cols_fg, cols_bg)
@@ -294,7 +294,7 @@ get_available_pssms <- function(pssm_path = NULL, datasets_of_interest = NULL, r
 #' @return the same object with fake peaks for missing chromosomes
 #' @examples
 #' \dontrun{
-#' peaks_fix <- fix_missing_chroms_in_peaks(sc_atac@peaks)
+#' peaks_fix <- fix_missing_chroms_in_peaks(atac_sc@peaks)
 #' }
 #' @noRd
 fix_missing_chroms_in_peaks <- function(peaks) {

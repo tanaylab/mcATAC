@@ -9,7 +9,8 @@ import_from_h5ad(
   class = NULL,
   genome = NULL,
   id = NULL,
-  description = NULL
+  description = NULL,
+  tad_based = NULL
 )
 }
 \arguments{
@@ -24,6 +25,8 @@ of the h5ad file, if exists and otherwise the class would be McATAC.}
 h5ad file, and if this doesn't exist - a random id would be assigned.}
 
 \item{description}{description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)". If NULL - the id would be determined by the 'description' field in the 'uns' part of the h5ad file}
+
+\item{tad_based}{whether to name peaks based on TADs if possible (when an intervals set named "intervs.global.tad_names" exists). When FALSE - peaks are named based on their coordinates. if NULL - the value would be determined by the 'tad_based' field in the 'uns' part of the h5ad file, and if this doesn't exist - the value would be TRUE.}
 }
 \value{
 an ScATAC/McATAC object

@@ -4,10 +4,10 @@
 \alias{plot_atac_atac_cor}
 \title{Plot a correlation matrix of ATAC metacells}
 \usage{
-plot_atac_atac_cor(mc_atac, sp_f = TRUE)
+plot_atac_atac_cor(atac_mc, sp_f = TRUE)
 }
 \arguments{
-\item{mc_atac}{McATAC object}
+\item{atac_mc}{McATAC object}
 
 \item{sp_f}{whether to use Spearman correlation (default) or Pearson}
 }
