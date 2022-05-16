@@ -198,16 +198,52 @@ scc_read <- function(path, id = NULL, description = NULL) {
         }
     })
 
-    genomic_bins <- tibble(name = md$genomic_bins) %>%
-        tidyr::separate(name, c("chrom", "start", "end"), sep = "_", remove = FALSE) %>%
-        mutate(start = as.numeric(start), end = as.numeric(end)) %>%
-        select(chrom, start, end, name)
+    genomic_bins <- parse_genomic_bin_names(md$genomic_bins, md$genome)
+
     data <- read_sc_counts_data(data_dir, genomic_bins, md$cell_names, md$genome)
 
     counts <- new("ScCounts", data = data, cell_names = md$cell_names, genome = md$genome, genomic_bins = genomic_bins, id = id %||% md$id, description = description %||% md$description, path = path)
 
     cli_alert_success("Succesfully read a ScCounts object from {.file {path}}")
     return(counts)
+}
+
+#' Covert genomic bin names to intervals
+#'
+#' @param bin_names genomic bin names in the format of "{chrom}_{start}_{end}"
+#' @param genome name of the genome assembly
+#'
+#' @return an intervals set with an additional "name" field with the genomic bin name. Names that were not parsed correctly (e.g.
+#'  because the chromosome name is not recognized) are removed.
+#'
+#' @examples
+#' \dontrun{
+#' parse_genomic_bin_names(c("chr1_0_100", "chr1_100_200", "chrUn_KI270747v1_0_100"), "hg38")
+#' parse_genomic_bin_names(c("saba_0_100", "chr1_0_100"), "hg38")
+#' }
+#'
+#' @noRd
+parse_genomic_bin_names <- function(bin_names, genome) {
+    gset_genome(genome)
+
+    chroms <- gintervals.all()$chrom
+    pattern <- glue("^({chr})_(.+)_(.+)$", chr = paste0(chroms, collapse = "|"))
+    genomic_bins <- stringr::str_match_all(bin_names, pattern) %>%
+        purrr::map_dfr(~ tibble(chrom = .x[2], start = .x[3], end = .x[4], name = .x[1])) %>%
+        mutate(chrom = as.character(chrom), start = as.numeric(start), end = as.numeric(end)) %>%
+        select(chrom, start, end, name) %>%
+        # make sure that the order remained
+        mutate(name = factor(name, levels = bin_names)) %>%
+        arrange(name) %>%
+        mutate(name = as.character(name)) %>%
+        na.omit()
+
+    unknown_bins <- setdiff(bin_names, genomic_bins$name)
+    if (length(unknown_bins) > 0) {
+        cli_warn("The following bins were not found in the genome: {.val {unknown_bins}}. This usually means that the genome ({.val {genome}}) is not compatible with the bins.")
+    }
+
+    return(genomic_bins)
 }
 
 #' Read the sparse matrices of a ScCounts object from a directory
