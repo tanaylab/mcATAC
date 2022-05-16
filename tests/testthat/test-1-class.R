@@ -17,6 +17,14 @@ test_that("projection works", {
     expect_setequal(colnames(atac_mc@mat), cell_to_metacell_pbmc_example$metacell)
     expect_equal(colnames(atac_mc@peaks), c("chrom", "start", "end", "peak_name"))
     expect_equal(peak_names(atac_mc@peaks), atac_mc@peaks$peak_name)
+    # make sure we didn't change the peak names form the scATAC
+    expect_equal(
+        atac_mc@peaks %>%
+            left_join(atac_sc@peaks %>% rename(peak_name_old = peak_name), by = c("chrom", "start", "end")) %>%
+            filter(peak_name != peak_name_old) %>%
+            nrow(),
+        0
+    )
     expect_equal(colSums(atac_mc@egc), rep(quantile(colSums(atac_mc@mat), 0.1), ncol(atac_mc@egc)), ignore_attr = TRUE)
     expect_equal(atac_mc@id, "pbmc")
     expect_equal(atac_mc@tad_based, TRUE)
