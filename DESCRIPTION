@@ -27,6 +27,7 @@ Imports:
     rlang,
     sparseMatrixStats,
     stringi,
+    stringr,
     tgstat,
     tgutil,
     tibble,
