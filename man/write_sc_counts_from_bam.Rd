@@ -13,7 +13,7 @@ write_sc_counts_from_bam(
   id = "",
   description = "",
   min_mapq = NULL,
-  samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools",
+  samtools_bin = "samtools",
   samtools_opts = NULL,
   num_reads = NULL,
   verbose = FALSE,

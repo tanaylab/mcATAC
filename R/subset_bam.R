@@ -11,7 +11,7 @@ generate_per_metacell_bams <- function(bam_path,
                                        mcatac,
                                        out_dir = file.path(bam_path, paste0(mcatac@id, "_mc_bams")),
                                        gparallel_path = "/usr/wisdom/parallel",
-                                       samtools_path = "/home/feshap/src/samtools-1.15.1/samtools") {
+                                       samtools_path = "samtools") {
     if (!file.exists(paste0(bam_path, ".bai"))) {
         cli_abort("Index file not found for {.file {bam_path}}. Please run 'samtools index {bam_path}'.")
     }

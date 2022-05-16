@@ -4,10 +4,7 @@
 \alias{bam_file_chromosomes}
 \title{Get chromosomes from a bam file}
 \usage{
-bam_file_chromosomes(
-  bam_file,
-  samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools"
-)
+bam_file_chromosomes(bam_file, samtools_bin = "samtools")
 }
 \arguments{
 \item{bam_file}{name of the bam file}

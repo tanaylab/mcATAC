@@ -35,7 +35,7 @@
 #' }
 #'
 #' @export
-write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region, genome = NULL, min_mapq = NULL, samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools", samtools_opts = NULL, num_reads = NULL, verbose = TRUE, overwrite = FALSE) {
+write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region, genome = NULL, min_mapq = NULL, samtools_bin = "samtools", samtools_opts = NULL, num_reads = NULL, verbose = TRUE, overwrite = FALSE) {
     withr::with_options(list(scipen = 1e5), {
         if (class(cell_names) == "ScATAC") {
             genome <- genome %||% cell_names@genome
@@ -308,7 +308,7 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
 #' }
 #'
 #' @export
-write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE, overwrite = FALSE) {
+write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE, overwrite = FALSE) {
     withr::with_options(list(scipen = 1e5), {
         data_dir <- file.path(out_dir, "data")
         if (dir.exists(out_dir)) {
@@ -373,7 +373,7 @@ write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NUL
 #' }
 #'
 #' @export
-bam_file_chromosomes <- function(bam_file, samtools_bin = "/home/feshap/src/samtools-1.15.1/samtools") {
+bam_file_chromosomes <- function(bam_file, samtools_bin = "samtools") {
     cmd <- glue("{samtools_bin} view -H {bam_file} | grep '^@SQ' | cut -f 2 | cut -d ':' -f 2 | cut -d ' ' -f 1 | sort | uniq", samtools_bin = samtools_bin)
     return(system(cmd, intern = TRUE))
 }

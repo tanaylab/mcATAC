@@ -27,7 +27,7 @@ lockBinding("atac_sc", globalenv())
 lockBinding("atac_mc", globalenv())
 
 
-samtools_bin <- "/home/feshap/src/samtools-1.15.1/samtools"
+samtools_bin <- "samtools"
 
 withr::defer(
     {
