@@ -106,6 +106,27 @@ write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region,
     })
 }
 
+#' Write a sparse-matrix file from an 10x fragments file for a specific region
+#'
+#' @description This function reads a "fragments.tsv.gz" which is an output of the 10x pipeline ("Barcoded and aligned fragment file"), and writes a sparse-matrix file, where rows are the genomic coordinates and columns are the cells.
+#'
+#' @param fragments_file path to fragments file
+#' @param out_file name of the output file. A ".gz" extension will be added to the file name.
+#' @param cell_names a vector with the cell names or an ScATAC object
+#' @param region intervals set to filter.
+#' @param overwrite overwrite existing file (optional)
+#' @param verbose verbose output (optional)
+#' @param tabix_bin path to the tabix binary (optional)
+#' @param use_tabix use tabix to speed up region filtering (optional)
+#'
+#' @return None
+#'
+#' @examples
+#' \dontrun{
+#' write_sparse_matrix_from_fragments("pbmc_data/fragments.tsv.gz", "matrix.mm", cell_names = atac_sc, gintervals(1, 0, 1e5))
+#' }
+#'
+#' @noRd
 write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_names, region, num_reads = NULL, genome = NULL, overwrite = FALSE, verbose = FALSE, tabix_bin = "tabix", use_tabix = FALSE) {
     withr::with_options(list(scipen = 1e5), {
         if (class(cell_names) == "ScATAC") {
