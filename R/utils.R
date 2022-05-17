@@ -193,7 +193,7 @@ overwrite_file <- function(file, overwrite) {
 #'
 #' @noRd
 bin_exists <- function(command, args = character(0)) {
-    code <- system2(command, args, stdout = FALSE, stderr = FALSE)
+    code <- suppressWarnings(system2(command, args, stdout = FALSE, stderr = FALSE))
     return(code == 0)
 }
 
