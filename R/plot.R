@@ -374,9 +374,19 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust = NULL, peak_clust = NULL,
 #'     col_annot = data.frame(cell_type = mcmd$st)
 #'     rownames(col_annot) = mcmd$mc
 #'     ann_colors = list(cell_type = setNames(color_key$color, color_key$cell_type))
+#'
+## plot gene-centered intervals
 #'     plot_tracks_at_locus(tracks = pbmc_tracks, extend = 5e+4,
 #'                     gene = "ATF3", 
 #'                     mc_rna = mc_rna, 
+#'                     gene_annot = T, 
+#'                     order_rows = T,
+#'                     annotation_row = col_annot, 
+#'                     annotation_colors = ann_colors)
+#'
+## plot arbitrary intervals
+#'     plot_tracks_at_locus(tracks = pbmc_tracks,
+#'                     intervals = gintervals(2, 1e+7, 1.15e+7),
 #'                     gene_annot = T, 
 #'                     order_rows = T,
 #'                     annotation_row = col_annot, 
@@ -420,17 +430,18 @@ plot_tracks_at_locus <- function(tracks = NULL,
         feature_df <- dplyr::filter(feature_df, !grepl("_", feature_df$chrom))
         gene_features <- dplyr::filter(feature_df, geneSymbol == gene)
         if (nrow(gene_features) == 0) {
-            cli_abort("No {.val gene_feature}s matching {.val gene} were found. Maybe check \\
-                    that this feature exists in the field {.field geneSymbol} of gintervals.load('intervs.global.{gene_feature}')")
+            gene_features <- feature_df[grep(gene, feature_df$geneSymbol),]
+            if (nrow(gene_features) == 0) {
+                cli_alert_warning("No {.val {gene_feature}}s matching {.val {gene}} were found. Maybe check \\
+                    that this feature exists in the field `geneSymbol` of gintervals.load('intervs.global.{.var gene_feature}')")
+                intervals <- dplyr::mutate(intervals, start = start - extend, end = end + extend)        
+            }
         }
-        intervals <- gintervals(unique(gene_features$chrom), min(gene_features$start) - extend, max(gene_features$end) + extend)
+        else {
+            intervals <- gintervals(unique(gene_features$chrom), min(gene_features$start) - extend, max(gene_features$end) + extend)
+        }
     } else {
         intervals <- dplyr::mutate(intervals, start = start - extend, end = end + extend)
-    }
-    if (gene_annot) {
-        gene_annots <- make_gene_annot(intervals, iterator)
-    } else {
-        gene_annots <- NULL
     }
     if (order_rows) {
         if (!is.null(annotation_row) && has_name(annotation_row, "cell_type")) {
@@ -451,6 +462,9 @@ plot_tracks_at_locus <- function(tracks = NULL,
         }
         rna_ha <- make_rna_annot(mc_rna, gene, rna_legc_eps, row_order)
     }
+    else {
+        rna_ha <- NULL
+    }
     mc_gene_vals <- gextract(tracks, intervals = intervals, iterator = iterator)
     mat <- t(subset(mc_gene_vals, select = -c(chrom, start, end, intervalID)))
     rownames(mat) <- 1:nrow(mat)
@@ -459,11 +473,16 @@ plot_tracks_at_locus <- function(tracks = NULL,
         if (is.null(annotation_colors)) {
             cli_abort("Must specify {.var annotation_colors} if {.var annotation_row} is specified.")
         }
-        ct_ha <- HeatmapAnnotation(cell_type = unlist(annotation_row[row_order,]), which = 'row', col = annotation_colors)
+        ct_ha <- ComplexHeatmap::HeatmapAnnotation(cell_type = unlist(annotation_row[row_order,]), which = 'row', col = annotation_colors)
     } else {
-        ct_ha <- HeatmapAnnotation(cell_type = row_order, which = 'row')
+        ct_ha <- ComplexHeatmap::HeatmapAnnotation(cell_type = row_order, which = 'row')
     }
-    ch <- Heatmap(mat_n[row_order,], 
+    if (gene_annot) {
+        gene_annots <- make_gene_annot(intervals, iterator, ncol(mat_n))
+    } else {
+        gene_annots <- NULL
+    }
+    ch <- ComplexHeatmap::Heatmap(mat_n[row_order,], 
                     use_raster = F,
                     top_annotation = gene_annots, 
                     left_annotation = ct_ha, 
@@ -479,14 +498,18 @@ plot_tracks_at_locus <- function(tracks = NULL,
 
 #' @param intervals what genomic interval to generate gene annotations for
 #' @param iterator misha iterator of the associated matrix
+#' @param num_bins the number of bins needed to plot (haven't figured out yet how misha parametrizes the bin number)
 #' @return gene annotations: a binary vector for exon locations and associated text labels for starts and ends of transcripts
 #' @noRd
-make_gene_annot <- function(intervals, iterator) {
+make_gene_annot <- function(intervals, iterator, num_bins) {
     file_path <- file.path(dirname(GROOT), "annots", "refGene.txt")
     refgene <- tgutil::fread(file_path, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
     rg_here <- dplyr::filter(refgene, chrom == as.character(intervals$chrom), txStart >= intervals$start, txEnd <= intervals$end)
     make_binary_exon_vec <- function(exon_intervals, genomic_intervals, iterator) {
-        vec = matrix(0, nrow = 1, ncol = round((genomic_intervals[['end']] - genomic_intervals[['start']])/iterator + 1))
+        vec = matrix(0, nrow = 1, ncol = num_bins)
+        if (abs(num_bins - round((genomic_intervals[['end']] - genomic_intervals[['start']])/iterator + 1)) > 1) {
+            cli_alert_warning("Number of bins given to gene annotation function is not aligned with {.var intervals} and {.var iterator} parameters")
+        }
         exon_bins = apply(exon_intervals[,2:3], 2, function(x) {
             round((x - genomic_intervals[['start']])/iterator)
         })
@@ -508,8 +531,7 @@ make_gene_annot <- function(intervals, iterator) {
                         return(vec)
                     }))
         vecsums = as.numeric(pmin(colSums(vecs), 1))
-        print(length(vecsums))
-        genes_ha <- HeatmapAnnotation(gene_names = anno_mark(labels = rep(rg_here$name2, 2),
+        genes_ha <- ComplexHeatmap::HeatmapAnnotation(gene_names = ComplexHeatmap::anno_mark(labels = rep(rg_here$name2, 2),
                                                         at = c(round((rg_here$txEnd - intervals$start)/iterator), 
                                                                 round((rg_here$txStart - intervals$start)/iterator)),
                                                         ),
@@ -530,6 +552,6 @@ make_rna_annot <- function(mc_rna, gene, rna_legc_eps, row_order) {
     rna_vals <- log2(mc_rna@e_gc[gene,] + rna_legc_eps)
     rna_vals <- rna_vals - median(rna_vals)
     rna_vals <- rna_vals[row_order]
-    rna_ha <- HeatmapAnnotation('rna\nlegc\nminus\nmedian' = anno_barplot(rna_vals), which = 'row')
+    rna_ha <- ComplexHeatmap::HeatmapAnnotation('rna\nlegc\nminus\nmedian' = ComplexHeatmap::anno_barplot(rna_vals), which = 'row')
     return(rna_ha)
 }

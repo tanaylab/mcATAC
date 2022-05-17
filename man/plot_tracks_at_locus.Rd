@@ -42,6 +42,12 @@ plot_tracks_at_locus(
 
 \item{gene_annot}{(optional) whether to add gene annotations}
 
+\item{annotation_row}{pheatmap-format annotation}
+
+\item{annotation_col}{pheatmap-format annotation}
+
+\item{annotation_colors}{pheatmap-format annotation}
+
 \item{silent}{(optional) whether to print generated plot}
 
 \item{rna_legc_eps}{(optional) what regularization value to add to mc_rna@e_gc when calculating log}
