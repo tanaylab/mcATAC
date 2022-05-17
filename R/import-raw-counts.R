@@ -169,18 +169,20 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
             num_reads_cmd <- glue("head -n {num_reads} | ")
         }
 
+        if (grepl(".gz$", tools::file_ext(fragments_file))) {
+            cat_cmd <- "zcat"
+        } else {
+            cat_cmd <- "cat"
+            use_tabix <- FALSE
+        }
+
         if (use_tabix) {
             filter_cmd <- glue("{tabix_bin} {fragments_file} {fixed_region$chrom}:{fixed_region$start}-{fixed_region$end} | {num_reads_cmd} awk '{{print $2,$4; print $3,$4}}'")
         } else {
             filter_cmd <- glue("{num_reads_cmd} awk '$1 == \"{region$chrom}\" && $2 >= {region$start} && $3 < {region$end} {{print $2,$4; print $3,$4}}'")
         }
 
-        # get file extension
-        if (grepl(".gz$", tools::file_ext(fragments_file))) {
-            cat_cmd <- "zcat"
-        } else {
-            cat_cmd <- "cat"
-        }
+
 
         cat_cmd <- glue("{cat_cmd} {fragments_file} | {filter_cmd} ")
 
@@ -206,7 +208,7 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
 #'
 #' @description This function writes an ScCounts object from a "fragments.tsv.gz" which is an output of the 10x pipeline ("Barcoded and aligned fragment file").
 #'
-#' @param fragments_file path to fragments file. Can be a gzipped file.
+#' @param fragments_file path to fragments file. Note that in order to use tabix, the file must be compressed with gzip and have a ".gz" extension.
 #' @param out_dir output directory.
 #' @param cell_names a vector with the cell names or an ScATAC object
 #' @param id an identifier for the object, e.g. "pbmc".
@@ -247,7 +249,7 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
             cell_names <- colnames(cell_names@mat)
         }
         gset_genome(genome)
-        use_tabix <- bin_exists(tabix_bin, "--version") && file.exists(paste0(fragments_file, ".tbi"))
+        use_tabix <- bin_exists(tabix_bin, "--version") && file.exists(paste0(fragments_file, ".tbi")) && grepl(".gz$", tools::file_ext(fragments_file))
 
         chromosomes <- chromosomes %||% gintervals.all()$chrom
 
@@ -259,7 +261,7 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
             )[, 1]
             chroms <- intersect(chroms, chromosomes)
         } else {
-            cli_alert_info("'tabix' was not found or an index file doesn't exist.")
+            cli_alert_info("'tabix' was not found, an index file doesn't exist or the file is not gzipped.")
             chroms <- chromosomes
         }
 

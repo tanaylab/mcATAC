@@ -19,7 +19,7 @@ write_sc_counts_from_fragments(
 )
 }
 \arguments{
-\item{fragments_file}{path to fragments file. Can be a gzipped file.}
+\item{fragments_file}{path to fragments file. Note that in order to use tabix, the file must be compressed with gzip and have a ".gz" extension.}
 
 \item{out_dir}{output directory.}
 
