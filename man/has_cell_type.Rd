@@ -4,10 +4,10 @@
 \alias{has_cell_type}
 \title{Does the McATAC object contain per-metacell cell type annotation}
 \usage{
-has_cell_type(mc_atac)
+has_cell_type(atac_mc)
 }
 \arguments{
-\item{mc_atac}{an McATAC object}
+\item{atac_mc}{an McATAC object}
 }
 \value{
 TRUE if the McATAC object contains per-metacell cell type annotation, FALSE otherwise

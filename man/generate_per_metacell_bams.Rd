@@ -9,7 +9,7 @@ generate_per_metacell_bams(
   mcatac,
   out_dir = file.path(bam_path, paste0(mcatac@id, "_mc_bams")),
   gparallel_path = "/usr/wisdom/parallel",
-  samtools_path = "/home/feshap/src/samtools-1.15.1/samtools"
+  samtools_path = "samtools"
 )
 }
 \arguments{

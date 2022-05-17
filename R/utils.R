@@ -55,7 +55,7 @@ save_pheatmap <- function(x, filename, dev = png, width = 2000, height = 2000, r
 #' @param feature_name (optional) name of the feature that was clustered
 #' @return 2-element list containing a pheatmap-compatible dataframe and a list containing a named vector
 
-#' @noRd
+#' @export
 generate_pheatmap_annotation <- function(clust_vec, feature_type = NULL, feature_annotation = NULL) {
     if (is.null(feature_type)) {
         feature_type <- "type"
@@ -79,30 +79,174 @@ generate_pheatmap_annotation <- function(clust_vec, feature_type = NULL, feature
 #'
 #' @description Generate a generic pheatmap-compatible annotation for metacells
 #'
-#' @param mc_atac (optional) a McATAC object to annotate
+#' @param atac_mc (optional) a McATAC object to annotate
 #' @param mc_clust (optional) a clustering of metacells, e.g. from gen_atac_mc_clust
 #' @param k (optional) parameter for k-means clustering
 #'
 #' @return 2-element list containing a pheatmap-compatible dataframe and a list containing a named vector
 #'
 #' @noRd
-generate_mc_annotation <- function(mc_atac, mc_clust = NULL, k = 10) {
-    if (!is.null(mc_atac)) {
-        if (all(has_name(mc_atac@metadata, c("metacell", "cell_type")))) {
-            col_annot <- tibble::column_to_rownames(mc_atac@metadata[, c("metacell", "cell_type")], "metacell")
-            ann_colors <- list("cell_type" = setNames(unlist(mc_atac@metadata[, "color"]), unlist(mc_atac@metadata[, "cell_type"])))
+generate_mc_annotation <- function(atac_mc, mc_clust = NULL, k = 10) {
+    if (!is.null(atac_mc)) {
+        if (all(has_name(atac_mc@metadata, c("metacell", "cell_type")))) {
+            col_annot <- tibble::column_to_rownames(atac_mc@metadata[, c("metacell", "cell_type")], "metacell")
+            ann_colors <- list("cell_type" = setNames(unlist(atac_mc@metadata[, "color"]), unlist(atac_mc@metadata[, "cell_type"])))
             mc_annot <- list(col_annot, ann_colors)
         } else {
             cli_alert_warning("McATAC object specified but no metacell annotation exists. Clustering metacells.")
-            mc_clust <- gen_atac_mc_clust(atac_mc = mc_atac, use_prior_annot = F, k = k)
+            mc_clust <- gen_atac_mc_clust(atac_mc = atac_mc, use_prior_annot = F, k = k)
             mc_annot <- generate_pheatmap_annotation(mc_clust, feature_type = "metacell", feature_annotation = "cluster")
         }
     } else {
         if (!is.null(mc_clust)) {
             mc_annot <- generate_pheatmap_annotation(mc_clust, feature_type = "metacell", feature_annotation = "cluster")
         } else {
-            cli_abort("Error: no McATAC object ({.var mc_atac}) and no metacell clustering ({.var mc_clust}) specified")
+            cli_abort("Error: no McATAC object ({.var atac_mc}) and no metacell clustering ({.var mc_clust}) specified")
         }
     }
     return(mc_annot)
+}
+
+#' For each sparse matrix row compute the sum over a ragged array
+#'
+#' @param x a dgCMatrix sparse matrix
+#' @param index a factor of the same length as the columns of x (would be coerced to a factor by \code{as.factor})
+#'
+#' @return A sparse dgCMatrix matrix of length(index) X nrow(x) size. Each ‘[i,j]’ element
+#'    represents the ‘sum(x[i,which(index==levels(index)[j])])’.
+#'
+#'
+#'
+#' @noRd
+sparse_matrix_tapply_sum <- function(x, index) {
+    if (!is.factor(index)) {
+        index <- factor(index)
+    }
+    groups <- levels(index)
+
+    if (!is.null(colnames(x)) && !is.null(names(index))) {
+        if (!all(colnames(x) == names(index))) {
+            cli_warn("The column names of the input matrix do not match the index names. The index names would be ignored.")
+        }
+    }
+
+    if (length(groups) == 1) {
+        index_mat <- t(Matrix::Matrix(matrix(rep(1, length(index))), sparse = TRUE))
+        rownames(index_mat) <- groups
+    } else {
+        index_mat <- t(Matrix::sparse.model.matrix(~ 0 + index))
+        rownames(index_mat) <- groups
+    }
+
+
+    res <- t(index_mat %*% t(x))
+
+    colnames(res) <- levels(index)
+    if (!is.null(rownames(x))) {
+        rownames(res) <- rownames(x)
+    }
+    return(res)
+}
+
+#' A helper function to deal with file overwrite
+#'
+#' @description if the file exists and overwrite is set to FALSE, the function will return an error, and if overwrite is set to TRUE the file will be deleted. If the file does not exist, nothing would happen.
+#'
+#' @param file name of the file to check
+#' @param overwrite whether to overwrite the file
+#'
+#' @return None.
+#'
+#' @examples
+#' \dontrun{
+#' fn <- tempfile()
+#' overwrite_file(fn, overwrite = FALSE) # this returns an error
+#' overwrite_file(fn, overwrite = TRUE)
+#' file.exists(fn) # returns FALSE
+#' overwrite_file(fn)
+#' }
+#'
+#' @noRd
+overwrite_file <- function(file, overwrite) {
+    if (file.exists(file)) {
+        if (!overwrite) {
+            cli_abort("File {.file {file}} already exists. Use 'overwrite = TRUE' to overwrite.")
+        } else {
+            unlink(file, recursive = TRUE)
+        }
+    }
+}
+
+#' Test if an executable file exists
+#'
+#' @description tests if an executable file exists by trying to run a command. If the return value is 0 the
+#' function returns TRUE, otherwise FALSE.
+#'
+#' @param command a string with the command
+#'
+#' @return TRUE if the command returns 0, FALSE otherwise
+#'
+#' @inheritParams system2
+#' @examples
+#' bin_exists("echo", "test")
+#' bin_exists("tabix", "--version")
+#'
+#' @noRd
+bin_exists <- function(command, args = character(0)) {
+    code <- system2(command, args, stdout = FALSE, stderr = FALSE)
+    return(code == 0)
+}
+
+#' Check if intervals are within genome boundries
+#'
+#' @param intervals an intervals set
+#' @param genome name of the genome (optional)
+#'
+#' @noRd
+intervals_in_genome <- function(intervals, genome = NULL) {
+    if (!is.null(genome)) {
+        gset_genome(genome)
+    }
+
+    if (any(intervals$chrom %!in% gintervals.all()$chrom)) {
+        return(FALSE)
+    }
+
+    intervals <- intervals %>%
+        select(chrom, start, end) %>%
+        as.data.frame()
+
+    if (gintervals.force_range(intervals) %>%
+        anti_join(intervals, by = c("chrom", "start", "end")) %>%
+        nrow() != 0) {
+        return(FALSE)
+    }
+
+    return(TRUE)
+}
+
+#' Set parallel threads
+#'
+#' @description Set the number of parallel threads to use. mcATAC uses the R function \code{doMC::registerDoMC} to register the parallelization.
+#' By default, mcATAC uses 80% of the number of available cores. The options are saved under 'mcatac.parallel' (should we use parallelization, logical) and 'mcatac.parallel.nc' (number of cores to use, integer).
+#'
+#' @param thread_num number of threads. use '1' for non parallel behavior
+#'
+#' @return None
+#'
+#' @examples
+#' \donttest{
+#' set_parallel(8)
+#' }
+#' @export
+set_parallel <- function(thread_num = max(1, round(parallel::detectCores() * 0.8))) {
+    if (thread_num <= 1) {
+        options(mcatac.parallel = FALSE)
+        cli_alert_info("Parallelization disabled.")
+    } else {
+        doMC::registerDoMC(thread_num)
+        options(mcatac.parallel = TRUE)
+        options(mcatac.parallel.nc = thread_num)
+        cli_alert_info("Parallelization enabled. Using {.val {thread_num}} threads.")
+    }
 }

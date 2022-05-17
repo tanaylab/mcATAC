@@ -4,10 +4,10 @@
 \alias{add_mc_metadata}
 \title{Add per-metacell metadata to an McATAC object}
 \usage{
-add_mc_metadata(mcatac, metadata)
+add_mc_metadata(atac_mc, metadata)
 }
 \arguments{
-\item{mcatac}{an McATAC object}
+\item{atac_mc}{an McATAC object}
 
 \item{metadata}{data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.}
 }
@@ -17,7 +17,7 @@ Add per-metacell metadata to an McATAC object
 \examples{
 \dontrun{
 data(mcmd)
-mc_atac <- add_metadata(mc_atac, mcmd)
+atac_mc <- add_metadata(atac_mc, mcmd)
 }
 
 }

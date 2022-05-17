@@ -27,9 +27,11 @@ lockBinding("atac_sc", globalenv())
 lockBinding("atac_mc", globalenv())
 
 
+samtools_bin <- "samtools"
+
 withr::defer(
     {
-        unlink(raw_dir)
+        unlink(raw_dir, recursive = TRUE)
         unlockBinding("atac_sc", globalenv())
         unlockBinding("atac_mc", globalenv())
     },

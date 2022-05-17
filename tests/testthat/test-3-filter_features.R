@@ -25,16 +25,6 @@ test_that("filter_features doesn't remove additional fields from peaks", {
     expect_equal(colnames(atac_sc_f@peaks), colnames(atac_sc1@peaks))
 })
 
-test_that("export works when there are ignored peaks", {
-    atac_sc_f <- filter_features(scatac = atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
-    export_to_h5ad(atac_sc_f, fs::path(raw_dir, "atac_sc.h5ad"), compression = "gzip")
-    atac_sc1 <- import_from_h5ad(fs::path(raw_dir, "atac_sc.h5ad"))
-    expect_true(Matrix::mean(abs(atac_sc_f@mat - atac_sc1@mat)) <= 1e-9)
-    expect_true(Matrix::mean(abs(atac_sc_f@ignore_pmat - atac_sc1@ignore_pmat)) <= 1e-9)
-    expect_equal(atac_sc_f@peaks, atac_sc1@peaks, ignore_attr = TRUE)
-    expect_equal(atac_sc_f@ignore_peaks, atac_sc1@ignore_peaks, ignore_attr = TRUE)
-})
-
 test_that("find_blacklist_overlaps works", {
     blacklist_overlaps <- find_blacklist_overlaps(atac_sc)
     atac_sc_f <- atac_ignore_peaks(atac_sc, blacklist_overlaps)
@@ -88,4 +78,15 @@ test_that("atac_ignore_peaks works twice when reset=TRUE", {
 
     expect_setequal(atac_sc2@ignore_peaks$peak_name, ignore_peaks2$peak_name)
     expect_true(!any(atac_sc2@ignore_peaks$peak_name %in% atac_sc1@ignore_peaks$peak_name))
+})
+
+test_that("export works when there are ignored peaks", {
+    atac_sc_f <- filter_features(atac_sc = atac_sc, minimal_max_umi = 3, min_peak_length = 200, max_peak_length = 1000)
+    export_to_h5ad(atac_sc_f, fs::path(raw_dir, "atac_sc.h5ad"), compression = "gzip")
+    atac_sc1 <- import_from_h5ad(fs::path(raw_dir, "atac_sc.h5ad"))
+
+    expect_equal(atac_sc_f@peaks, atac_sc1@peaks, ignore_attr = TRUE)
+    expect_equal(atac_sc_f@ignore_peaks, atac_sc1@ignore_peaks, ignore_attr = TRUE)
+    expect_true(Matrix::mean(abs(atac_sc_f@mat - atac_sc1@mat)) <= 1e-9)
+    expect_true(Matrix::mean(abs(atac_sc_f@ignore_pmat - atac_sc1@ignore_pmat)) <= 1e-9)
 })
