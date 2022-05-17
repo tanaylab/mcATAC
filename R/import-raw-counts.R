@@ -186,8 +186,7 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
 
         cat_cmd <- glue("{cat_cmd} {fragments_file} | {filter_cmd} ")
 
-        cmd <- glue("{cat_cmd} | sort | uniq -c | sed 's/^ *//g' | {cell_name_to_index_bin} {cell_names_file} {fixed_region$start} {fixed_region$end} >> {out_file}", cell_name_to_index_bin = system.file("exec", "cell_name_to_index.R", package = "mcATAC"))
-        browser()
+        cmd <- glue("{cat_cmd} | sort | uniq -c | sed 's/^ *//g' | {cell_name_to_index_bin} {cell_names_file} {fixed_region$start} {fixed_region$end} >> {out_file}", cell_name_to_index_bin = system.file("exec", "cell_name_to_index.R", package = "mcATAC"))        
         system(cmd)
 
         # we now replace the second header line with the actual length of the file
