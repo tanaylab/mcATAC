@@ -182,11 +182,9 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
             filter_cmd <- glue("{num_reads_cmd} awk '$1 == \"{region$chrom}\" && $2 >= {region$start} && $3 < {region$end} {{print $2,$4; print $3,$4}}'")
         }
 
-
-
         cat_cmd <- glue("{cat_cmd} {fragments_file} | {filter_cmd} ")
 
-        cmd <- glue("{cat_cmd} | sort | uniq -c | sed 's/^ *//g' | {cell_name_to_index_bin} {cell_names_file} {fixed_region$start} {fixed_region$end} >> {out_file}", cell_name_to_index_bin = system.file("exec", "cell_name_to_index.R", package = "mcATAC"))        
+        cmd <- glue("{cat_cmd} | sort | uniq -c | sed 's/^ *//g' | {cell_name_to_index_bin} {cell_names_file} {fixed_region$start} {fixed_region$end} >> {out_file}", cell_name_to_index_bin = system.file("exec", "cell_name_to_index.R", package = "mcATAC"))
         system(cmd)
 
         # we now replace the second header line with the actual length of the file
