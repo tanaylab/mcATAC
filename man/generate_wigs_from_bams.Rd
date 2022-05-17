@@ -7,8 +7,8 @@
 generate_wigs_from_bams(
   bam_folder_path,
   output_path = file.path(bam_folder_path, "wig_output"),
-  parallel = TRUE,
-  nc = parallel::detectCores()
+  parallel = getOption("mcatac.parallel"),
+  nc = getOption("mcatac.parallel.nc")
 )
 }
 \arguments{

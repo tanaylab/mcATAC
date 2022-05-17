@@ -10,6 +10,8 @@
 #' h5ad file, and if this doesn't exist - a random id would be assigned.
 #' @param description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)". If NULL - the id would be determined by the 'description' field in the 'uns' part of the h5ad file
 #'
+#' @param tad_based whether to name peaks based on TADs if possible (when an intervals set named "intervs.global.tad_names" exists). When FALSE - peaks are named based on their coordinates. if NULL - the value would be determined by the 'tad_based' field in the 'uns' part of the h5ad file, and if this doesn't exist - the value would be TRUE.
+#'
 #' @description Reads an ATAC object from an h5ad file. Peak data is taken from the 'X' section and metadata is taken from 'obs'.
 #' The 'var' section can contain a special field called 'ignore' which marks peaks that should be ignored.
 #'
@@ -23,7 +25,7 @@
 #' }
 #'
 #' @export
-import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, description = NULL) {
+import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, description = NULL, tad_based = NULL) {
     check_files_exist(file)
     cli_li("Reading {.file {file}}")
     adata <- anndata::read_h5ad(file)
@@ -66,6 +68,12 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
         id <- adata$uns[["id"]]
     }
 
+    if (is.null(tad_based) && !is.null(adata$uns[["tad_based"]])) {
+        tad_based <- adata$uns[["tad_based"]]
+    } else {
+        tad_based <- TRUE
+    }
+
     if (is.null(description) && !is.null(adata$uns[["description"]])) {
         description <- adata$uns[["description"]]
     }
@@ -77,12 +85,15 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
             mc_size_eps_q <- 0.1
             cli_alert_warning("h5ad file doesn't have the {.field mc_size_eps_q} at the {.file uns} section. Using the default: {.val {mc_size_eps_q}")
         }
+
         if (!is.null(adata$uns[["cell_to_metacell"]])) {
             cell_to_metacell <- adata$uns[["cell_to_metacell"]]
         } else {
             cell_to_metacell <- NULL
         }
-        res <- new("McATAC", mat = mat, peaks = peaks, genome = genome, id = id, description = description, metadata = metadata, cell_to_metacell = cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = file)
+
+        res <- new("McATAC", mat = mat, peaks = peaks, genome = genome, id = id, description = description, metadata = metadata, cell_to_metacell = cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = file, tad_based = tad_based)
+
         if (!is.null(adata$uns[["rna_egc"]]) && !is.null(adata$uns[["rna_mcs"]]) && !is.null(adata$uns[["rna_gene_names"]])) {
             rna_egc <- adata$uns[["rna_egc"]]
             colnames(rna_egc) <- adata$uns[["rna_mcs"]]
@@ -90,7 +101,7 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
             res <- add_mc_rna(res, rna_egc)
         }
     } else {
-        res <- new("ScATAC", mat, peaks, genome, id, description, metadata, path = file)
+        res <- new("ScATAC", mat, peaks, genome, id, description, metadata, path = file, tad_based = tad_based)
     }
 
     if (has_name(peaks, "ignore")) {
@@ -111,16 +122,19 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
 
 #' Create an ScATAC object from 10x directory
 #'
+#'
 #' @param dir 10x directory. Should have the following files: 'matrix.mtx', 'barcodes.tsv' and 'features.tsv'.
 #' If you used 'Cell Ranger ARC', this should be the 'outs/filtered_feature_bc_matrix' directory. \cr
 #' For more details see: https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/overview/welcome
 #' @param matrix_fn if \code{dir} is missing, the filename of the matrix to import ("matrix.mtx" or "matrix.mtx.gz")
 #' @param cells_fn if \code{dir} is missing, the filename of the cells to import ("barcodes.tsv" or "barcodes.tsv.gz")
 #' @param features_fn if \code{dir} is missing, the filename of the features to import ("features.tsv" or "features.tsv.gz")
+#' @param tad_based whether to name peaks based on TADs if possible (when an intervals set named "intervs.global.tad_names" exists). When FALSE - peaks are named based on their coordinates.
 #' @param genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
 #' @param id an identifier for the object, e.g. "pbmc". If NULL - a random id would be assigned.
 #' @param description (Optional) description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)".
 #' @param metadata (Optional) data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
+#' @param zero_based are the coordinates of the features 0-based? Note that when this is FALSE (default) the coordinates of the created object would be different from the ones in \code{features_fn} by 1 bp.
 #'
 #'
 #' @return an ScATAC object
@@ -132,7 +146,7 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
 #' }
 #'
 #' @export
-import_from_10x <- function(dir, genome, id = NULL, description = NULL, metadata = NULL, matrix_fn = file.path(dir, "matrix.mtx"), cells_fn = file.path(dir, "barcodes.tsv"), features_fn = file.path(dir, "features.tsv")) {
+import_from_10x <- function(dir, genome, id = NULL, description = NULL, metadata = NULL, matrix_fn = file.path(dir, "matrix.mtx"), cells_fn = file.path(dir, "barcodes.tsv"), features_fn = file.path(dir, "features.tsv"), tad_based = TRUE, zero_based = FALSE) {
     if (!file.exists(matrix_fn)) {
         matrix_fn <- glue("{matrix_fn}.gz")
     }
@@ -167,8 +181,15 @@ import_from_10x <- function(dir, genome, id = NULL, description = NULL, metadata
         cli_alert_info("Removed {.val {nrow(atac_mat)}} ATAC peaks which were all zero")
     }
 
+    if (!zero_based) {
+        atac_peaks <- atac_peaks %>%
+            mutate(start = start - 1, end = end - 1) %>%
+            mutate(peak_name = misha.ext::convert_misha_intervals_to_10x_peak_names(.))
+        rownames(atac_mat) <- atac_peaks$peak_name
+    }
+
     cli_alert_info("{.val {nrow(atac_mat)}} ATAC peaks")
-    res <- new("ScATAC", atac_mat, atac_peaks, genome = genome, id = id, description = description, metadata = metadata, path = matrix_fn)
+    res <- new("ScATAC", atac_mat, atac_peaks, genome = genome, id = id, description = description, metadata = metadata, path = matrix_fn, tad_based = tad_based)
     cli_alert_success("successfully imported to an ScATAC object with {.val {ncol(res@mat)}} cells and {.val {nrow(res@mat)}} ATAC peaks")
 
     return(res)

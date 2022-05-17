@@ -27,5 +27,7 @@ McATAC extend the ATAC object by adding metadata and additional slots.
 \item{\code{path}}{original path from which the object was loaded (optional)}
 
 \item{\code{promoters}}{are the peaks promoters (optional). When peaks are promoters the peak name would be the gene name instead of coordinates.}
+
+\item{\code{tad_based}}{are the peaks named based on TADs.}
 }}
 

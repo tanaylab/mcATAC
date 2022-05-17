@@ -5,7 +5,7 @@
 \title{Generate a ucsc genome browser file for each metacell cluster}
 \usage{
 export_atac_clust_ucsc(
-  mc_atac,
+  atac_mc,
   track_prefix,
   output_dir = getwd(),
   clust_vec = NULL,
@@ -13,7 +13,7 @@ export_atac_clust_ucsc(
 )
 }
 \arguments{
-\item{mc_atac}{McATAC object}
+\item{atac_mc}{McATAC object}
 
 \item{track_prefix}{prefix for generated misha tracks.}
 
