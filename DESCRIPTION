@@ -29,7 +29,7 @@ Imports:
     stringi,
     stringr,
     tgstat,
-    tgutil,
+    tgutil (>= 0.1.12),
     tibble,
     tidyr,
     withr,

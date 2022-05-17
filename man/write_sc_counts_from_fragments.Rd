@@ -14,11 +14,12 @@ write_sc_counts_from_fragments(
   id = "",
   description = "",
   verbose = FALSE,
-  tabix_bin = "tabix"
+  tabix_bin = "tabix",
+  chromosomes = NULL
 )
 }
 \arguments{
-\item{fragments_file}{path to fragments file}
+\item{fragments_file}{path to fragments file. Can be a gzipped file.}
 
 \item{out_dir}{output directory.}
 
@@ -36,6 +37,8 @@ smaller than this value. Default is 50Mb.}
 \item{verbose}{verbose output (optional)}
 
 \item{tabix_bin}{path to the tabix binary (optional)}
+
+\item{chromosomes}{process only specific chromosomes (optional)}
 }
 \value{
 None
@@ -46,6 +49,7 @@ This function writes an ScCounts object from a "fragments.tsv.gz" which is an ou
 \examples{
 \dontrun{
 write_sc_counts_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_reads", cell_names = atac_sc)
+write_sc_counts_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_reads", cell_names = atac_sc, chromosomes = paste0("chr", c(1:22, "X", "Y")))
 }
 
 }

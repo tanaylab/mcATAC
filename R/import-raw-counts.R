@@ -175,7 +175,14 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
             filter_cmd <- glue("{num_reads_cmd} awk '$1 == \"{region$chrom}\" && $2 >= {region$start} && $3 < {region$end} {{print $2,$4; print $3,$4}}'")
         }
 
-        cat_cmd <- glue("zcat {fragments_file} | {filter_cmd} ")
+        # get file extension
+        if (grepl(".gz$", tools::file_ext(fragments_file))) {
+            cat_cmd <- "zcat"
+        } else {
+            cat_cmd <- "cat"
+        }
+
+        cat_cmd <- glue("{cat_cmd} {fragments_file} | {filter_cmd} ")
 
         cmd <- glue("{cat_cmd} | sort | uniq -c | sed 's/^ *//g' | {cell_name_to_index_bin} {cell_names_file} {fixed_region$start} {fixed_region$end} >> {out_file}", cell_name_to_index_bin = system.file("exec", "cell_name_to_index.R", package = "mcATAC"))
         system(cmd)
@@ -199,7 +206,7 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
 #'
 #' @description This function writes an ScCounts object from a "fragments.tsv.gz" which is an output of the 10x pipeline ("Barcoded and aligned fragment file").
 #'
-#' @param fragments_file path to fragments file
+#' @param fragments_file path to fragments file. Can be a gzipped file.
 #' @param out_dir output directory.
 #' @param cell_names a vector with the cell names or an ScATAC object
 #' @param id an identifier for the object, e.g. "pbmc".
@@ -209,16 +216,18 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
 #' @param overwrite overwrite existing directory (optional)
 #' @param verbose verbose output (optional)
 #' @param tabix_bin path to the tabix binary (optional)
+#' @param chromosomes process only specific chromosomes (optional)
 #'
 #' @return None
 #'
 #' @examples
 #' \dontrun{
 #' write_sc_counts_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_reads", cell_names = atac_sc)
+#' write_sc_counts_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_reads", cell_names = atac_sc, chromosomes = paste0("chr", c(1:22, "X", "Y")))
 #' }
 #'
 #' @export
-write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix") {
+write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = NULL) {
     withr::with_options(list(scipen = 1e5), {
         data_dir <- file.path(out_dir, "data")
         if (dir.exists(out_dir)) {
@@ -240,16 +249,18 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
         gset_genome(genome)
         use_tabix <- bin_exists(tabix_bin, "--version") && file.exists(paste0(fragments_file, ".tbi"))
 
+        chromosomes <- chromosomes %||% gintervals.all()$chrom
+
         if (use_tabix) {
-            cli_alert_info("using tabix index to get available chromosomes")
+            cli_alert_info("using tabix")
             chroms <- tgutil::fread(
                 cmd = glue("{tabix_bin} -l {fragments_file}"),
                 header = FALSE
             )[, 1]
-            chroms <- intersect(chroms, gintervals.all()$chrom)
+            chroms <- intersect(chroms, chromosomes)
         } else {
-            cli_alert_info("'tabix' was not found or an index file doesn't exist. Using all chromosomes")
-            chroms <- gintervals.all()$chrom
+            cli_alert_info("'tabix' was not found or an index file doesn't exist.")
+            chroms <- chromosomes
         }
 
         genomic_bins <- giterator.intervals(iterator = bin_size, intervals = gintervals.all() %>% filter(chrom %in% chroms)) %>%
