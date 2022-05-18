@@ -265,6 +265,7 @@ mcc_marginal <- function(mc_counts, metacells = NULL) {
 #' Normalize each metacell in a McCounts object by its total counts
 #'
 #' @param mc_counts a McCounts object
+#' @param metacells metacells to normalize. Default: all metacells.
 #'
 #' @return an McCounts object with the metacells normalized
 #'
@@ -275,14 +276,18 @@ mcc_marginal <- function(mc_counts, metacells = NULL) {
 #' }
 #'
 #' @export
-mcc_normalize_metacells <- function(mc_counts) {
+mcc_normalize_metacells <- function(mc_counts, metacells = NULL) {
     assert_atac_object(mc_counts, class = "McCounts")
+    metacells <- metacells %||% mc_counts@cell_names
+    metacells <- as.character(metacells)
 
-    mc_covs <- mcc_metacell_total_cov(mc_counts)
+    mc_covs <- mcc_metacell_total_cov(mc_counts, metacells)
 
     new_data <- plyr::llply(mc_counts@data, function(m) {
-        t(t(m) / mc_covs)
-    }, .parallel = TRUE)
+        m_f <- m[, metacells]
+        m_f@x <- m_f@x / rep.int(mc_covs, diff(m_f@p))
+        return(m_f)
+    }, .parallel = getOption("mcatac.parallel"))
 
     stopifnot(all(names(new_data) == names(mc_counts@data)))
 
@@ -403,6 +408,8 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
 
     cli_alert("Extracting per-metacell data")
     d <- mcc_extract_to_df(mc_counts, metacells)
+
+    withr::local_options(list(gmultitasking = !getOption("mcatac.parallel")))
 
     plyr::l_ply(mc_counts@cell_names, function(metacell) {
         track <- glue("{track_prefix}.mc{metacell}")

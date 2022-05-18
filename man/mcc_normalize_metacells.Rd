@@ -4,10 +4,12 @@
 \alias{mcc_normalize_metacells}
 \title{Normalize each metacell in a McCounts object by its total counts}
 \usage{
-mcc_normalize_metacells(mc_counts)
+mcc_normalize_metacells(mc_counts, metacells = NULL)
 }
 \arguments{
 \item{mc_counts}{a McCounts object}
+
+\item{metacells}{metacells to normalize. Default: all metacells.}
 }
 \value{
 an McCounts object with the metacells normalized
