@@ -72,7 +72,6 @@ generate_wigs_from_bams <- function(bam_folder_path,
 #' @param mcatac an McATAC object (from which to get metacell assignments)
 #' @param c2mc_path (optional) path to write out metacell assignments to
 #'
-#' @noRd
 write_metacell_cell_names <- function(mcatac, c2mc_path = NULL) {
     if (is.null(c2mc_path)) {
         c2mc_path <- file.path("data", paste0(mcatac@id, "_c2mc"))

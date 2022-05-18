@@ -15,6 +15,8 @@ generate_per_metacell_bams(
 \arguments{
 \item{bam_path}{path to the 10X atac_possorted.bam file}
 
+\item{mcatac}{an McATAC object (from which to get metacell assignments)}
+
 \item{out_dir}{(optional) directory to output per-metacell bam files. Default: /bam_path/mcatac@id_mc_bams}
 
 \item{gparallel_path}{(optional) path to GNU parallel}
