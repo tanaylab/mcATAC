@@ -36,74 +36,73 @@
 #'
 #' @export
 write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region, genome = NULL, min_mapq = NULL, samtools_bin = "samtools", samtools_opts = NULL, num_reads = NULL, verbose = TRUE, overwrite = FALSE) {
-    withr::with_options(list(scipen = 1e5), {
-        if (class(cell_names) == "ScATAC") {
-            genome <- genome %||% cell_names@genome
-            cell_names <- colnames(cell_names@mat)
-        }
-        gset_genome(genome)
+    withr::local_options(list(scipen = 1e5))
+    if (class(cell_names) == "ScATAC") {
+        genome <- genome %||% cell_names@genome
+        cell_names <- colnames(cell_names@mat)
+    }
+    gset_genome(genome)
 
-        if (!file.exists(paste0(bam_file, ".bai"))) {
-            cli_abort("Index file not found for {.file {bam_file}}. Please run 'samtools index {bam_file}'.")
-        }
+    if (!file.exists(paste0(bam_file, ".bai"))) {
+        cli_abort("Index file not found for {.file {bam_file}}. Please run 'samtools index {bam_file}'.")
+    }
 
-        overwrite_file(out_file, overwrite)
-        overwrite_file(paste0(out_file, "gz"), overwrite)
+    overwrite_file(out_file, overwrite)
+    overwrite_file(paste0(out_file, "gz"), overwrite)
 
-        cell_names_file <- paste0(out_file, ".colnames")
-        write.table(cell_names, cell_names_file, row.names = FALSE, col.names = FALSE, quote = FALSE)
-        withr::defer(unlink(cell_names_file))
+    cell_names_file <- paste0(out_file, ".colnames")
+    write.table(cell_names, cell_names_file, row.names = FALSE, col.names = FALSE, quote = FALSE)
+    withr::defer(unlink(cell_names_file))
 
-        if (nrow(region) != 1 || !all(c("chrom", "start", "end") %in% colnames(region))) {
-            cli_abort("Invalid region parameter. Must be a single row with columns 'chrom', 'start' and 'end'.")
-        }
+    if (nrow(region) != 1 || !all(c("chrom", "start", "end") %in% colnames(region))) {
+        cli_abort("Invalid region parameter. Must be a single row with columns 'chrom', 'start' and 'end'.")
+    }
 
-        if (region$chrom %!in% gintervals.all()$chrom) {
-            cli_abort("Chromosome {.val {chrom}} not found in the genome")
-        }
+    if (region$chrom %!in% gintervals.all()$chrom) {
+        cli_abort("Chromosome {.val {chrom}} not found in the genome")
+    }
 
-        fixed_region <- gintervals.force_range(region)
-        if (fixed_region$start != region$start || fixed_region$end != region$end) {
-            cli_warn("Region {.val {region}} was adjusted to {.val {fixed_region}}")
-        }
+    fixed_region <- gintervals.force_range(region)
+    if (fixed_region$start != region$start || fixed_region$end != region$end) {
+        cli_warn("Region {.val {region}} was adjusted to {.val {fixed_region}}")
+    }
 
-        region_str <- paste0(fixed_region$chrom, ":", fixed_region$start, "-", fixed_region$end)
+    region_str <- paste0(fixed_region$chrom, ":", fixed_region$start, "-", fixed_region$end)
 
-        mapq_filt_cmd <- ""
-        if (!is.null(min_mapq)) {
-            mapq_filt_cmd <- glue("-q {min_mapq}")
-        }
+    mapq_filt_cmd <- ""
+    if (!is.null(min_mapq)) {
+        mapq_filt_cmd <- glue("-q {min_mapq}")
+    }
 
-        samtools_opts <- samtools_opts %||% ""
+    samtools_opts <- samtools_opts %||% ""
 
-        num_reads_cmd <- ""
-        if (!is.null(num_reads)) {
-            num_reads_cmd <- glue("| head -n {num_reads}")
-        }
+    num_reads_cmd <- ""
+    if (!is.null(num_reads)) {
+        num_reads_cmd <- glue("| head -n {num_reads}")
+    }
 
-        dims <- c(abs(fixed_region$end - fixed_region$start), length(cell_names))
+    dims <- c(abs(fixed_region$end - fixed_region$start), length(cell_names))
 
-        output <- file(out_file, open = "w")
-        writeLines("%%MatrixMarket matrix coordinate real general", output)
-        writeLines(paste(dims[1], dims[2], "unknown", sep = " "), output) # we do not know yet what would be the length of the file
-        close(output)
+    output <- file(out_file, open = "w")
+    writeLines("%%MatrixMarket matrix coordinate real general", output)
+    writeLines(paste(dims[1], dims[2], "unknown", sep = " "), output) # we do not know yet what would be the length of the file
+    close(output)
 
-        cmd <- glue("{samtools_bin} view --keep-tag CB --exclude-flags 1024 {mapq_filt_cmd} {samtools_opts} {bam_file} {region_str} | grep CB | {awk_cmd} {num_reads_cmd} | sort | uniq -c | sed 's/^ *//g' | {cell_name_to_index_bin} {cell_names_file} {fixed_region$start} {fixed_region$end} >> {out_file}", awk_cmd = "awk '{print $4,substr($12, 6)}'", cell_name_to_index_bin = system.file("exec", "cell_name_to_index.R", package = "mcATAC"))
-        system(cmd)
+    cmd <- glue("{samtools_bin} view --keep-tag CB --exclude-flags 1024 {mapq_filt_cmd} {samtools_opts} {bam_file} {region_str} | grep CB | {awk_cmd} {num_reads_cmd} | sort | uniq -c | sed 's/^ *//g' | {cell_name_to_index_bin} {cell_names_file} {fixed_region$start} {fixed_region$end} >> {out_file}", awk_cmd = "awk '{print $4,substr($12, 6)}'", cell_name_to_index_bin = system.file("exec", "cell_name_to_index.R", package = "mcATAC"))
+    system(cmd)
 
-        # we now replace the second header line with the actual length of the file
-        num_rows <- as.numeric(system(glue("wc -l {out_file} | cut -d ' ' -f 1"), intern = TRUE)) - 2
-        system(glue("sed -i '2 s/^.*$/{header}/' {out_file}", header = paste(dims[1], dims[2], as.integer(num_rows), sep = " ")))
+    # we now replace the second header line with the actual length of the file
+    num_rows <- as.numeric(system(glue("wc -l {out_file} | cut -d ' ' -f 1"), intern = TRUE)) - 2
+    system(glue("sed -i '2 s/^.*$/{header}/' {out_file}", header = paste(dims[1], dims[2], as.integer(num_rows), sep = " ")))
 
-        if (verbose) {
-            cli_alert("zipping {out_file} to {out_file}.gz")
-        }
-        system(glue("gzip {out_file} && rm -f {out_file}"))
+    if (verbose) {
+        cli_alert("zipping {out_file} to {out_file}.gz")
+    }
+    system(glue("gzip {out_file} && rm -f {out_file}"))
 
-        if (verbose) {
-            cli_alert_success("Saved sparse matrix of {.val {region_str}} with {.val {num_rows}} rows to {.file {out_file}}. Dimensions: {.file {dims[1]} x {dims[2]}}")
-        }
-    })
+    if (verbose) {
+        cli_alert_success("Saved sparse matrix of {.val {region_str}} with {.val {num_rows}} rows to {.file {out_file}}. Dimensions: {.file {dims[1]} x {dims[2]}}")
+    }
 }
 
 #' Write a sparse-matrix file from an 10x fragments file for a specific region
@@ -228,76 +227,75 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
 #'
 #' @export
 write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = NULL) {
-    withr::with_options(list(scipen = 1e5), {
-        data_dir <- file.path(out_dir, "data")
-        if (dir.exists(out_dir)) {
-            if (!overwrite) {
-                cli_abort("Output directory {.file {out_dir}} already exists. Use 'overwrite = TRUE' to overwrite.")
-            } else {
-                cli_warn("Output directory {.file {out_dir}} already exists. Overwriting.")
-                unlink(out_dir, recursive = TRUE)
-            }
-        }
-
-        dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
-        cli_alert("Writing to {.file {out_dir}}")
-
-        if (class(cell_names) == "ScATAC") {
-            genome <- genome %||% cell_names@genome
-            cell_names <- colnames(cell_names@mat)
-        }
-        gset_genome(genome)
-        use_tabix <- bin_exists(tabix_bin, "--version") && file.exists(paste0(fragments_file, ".tbi")) && grepl("gz$", tools::file_ext(fragments_file))
-
-        chromosomes <- chromosomes %||% gintervals.all()$chrom
-
-        if (use_tabix) {
-            cli_alert_info("using tabix")
-            chroms <- tgutil::fread(
-                cmd = glue("{tabix_bin} -l {fragments_file}"),
-                header = FALSE
-            )[, 1]
-            chroms <- intersect(chroms, chromosomes)
+    withr::local_options(list(scipen = 1e5))
+    data_dir <- file.path(out_dir, "data")
+    if (dir.exists(out_dir)) {
+        if (!overwrite) {
+            cli_abort("Output directory {.file {out_dir}} already exists. Use 'overwrite = TRUE' to overwrite.")
         } else {
-            cli_alert_info("'tabix' was not found, an index file doesn't exist or the file is not gzipped.")
-            chroms <- chromosomes
+            cli_warn("Output directory {.file {out_dir}} already exists. Overwriting.")
+            unlink(out_dir, recursive = TRUE)
         }
+    }
 
-        genomic_bins <- giterator.intervals(iterator = bin_size, intervals = gintervals.all() %>% filter(chrom %in% chroms)) %>%
-            mutate(name = glue("{chrom}_{start}_{end}"))
+    dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
+    cli_alert("Writing to {.file {out_dir}}")
 
-        cli_alert_info("Processing {.val {nrow(genomic_bins)}} genomic bins of maximal size {.val {bin_size}}")
+    if (class(cell_names) == "ScATAC") {
+        genome <- genome %||% cell_names@genome
+        cell_names <- colnames(cell_names@mat)
+    }
+    gset_genome(genome)
+    use_tabix <- bin_exists(tabix_bin, "--version") && file.exists(paste0(fragments_file, ".tbi")) && grepl("gz$", tools::file_ext(fragments_file))
 
-        plyr::a_ply(genomic_bins, 1, function(region) {
-            cli_alert("Processing {.val {region$name}}")
-            write_sparse_matrix_from_fragments(
-                fragments_file,
-                glue("{data_dir}/{region$chrom}_{region$start}_{region$end}.mtx"),
-                cell_names,
-                region = region,
-                genome = genome,
-                overwrite = overwrite,
-                verbose = verbose,
-                tabix_bin = tabix_bin,
-                use_tabix = use_tabix
-            )
-            cli_alert_success("Finished processing {.val {region$name}}")
-        }, .parallel = getOption("mcatac.parallel"))
+    chromosomes <- chromosomes %||% gintervals.all()$chrom
 
-        counts_md <- list(
-            cell_names = cell_names,
+    if (use_tabix) {
+        cli_alert_info("using tabix")
+        chroms <- tgutil::fread(
+            cmd = glue("{tabix_bin} -l {fragments_file}"),
+            header = FALSE
+        )[, 1]
+        chroms <- intersect(chroms, chromosomes)
+    } else {
+        cli_alert_info("'tabix' was not found, an index file doesn't exist or the file is not gzipped.")
+        chroms <- chromosomes
+    }
+
+    genomic_bins <- giterator.intervals(iterator = bin_size, intervals = gintervals.all() %>% filter(chrom %in% chroms)) %>%
+        mutate(name = glue("{chrom}_{start}_{end}"))
+
+    cli_alert_info("Processing {.val {nrow(genomic_bins)}} genomic bins of maximal size {.val {bin_size}}")
+
+    plyr::a_ply(genomic_bins, 1, function(region) {
+        cli_alert("Processing {.val {region$name}}")
+        write_sparse_matrix_from_fragments(
+            fragments_file,
+            glue("{data_dir}/{region$chrom}_{region$start}_{region$end}.mtx"),
+            cell_names,
+            region = region,
             genome = genome,
-            id = id,
-            description = description,
-            data_dir = "data",
-            genomic_bins = genomic_bins$name
+            overwrite = overwrite,
+            verbose = verbose,
+            tabix_bin = tabix_bin,
+            use_tabix = use_tabix
         )
+        cli_alert_success("Finished processing {.val {region$name}}")
+    }, .parallel = getOption("mcatac.parallel"))
 
-        yaml::write_yaml(counts_md, file = file.path(out_dir, "metadata.yaml"))
+    counts_md <- list(
+        cell_names = cell_names,
+        genome = genome,
+        id = id,
+        description = description,
+        data_dir = "data",
+        genomic_bins = genomic_bins$name
+    )
 
-        cli_alert_info("Created sparse matrices for {.val {nrow(genomic_bins)}} genomic bins")
-        cli_alert_success("Created an ScCounts object at {.file {out_dir}}")
-    })
+    yaml::write_yaml(counts_md, file = file.path(out_dir, "metadata.yaml"))
+
+    cli_alert_info("Created sparse matrices for {.val {nrow(genomic_bins)}} genomic bins")
+    cli_alert_success("Created an ScCounts object at {.file {out_dir}}")
 }
 
 #' Write single cell counts from an indexed bam file
@@ -320,54 +318,53 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
 #'
 #' @export
 write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE, overwrite = FALSE) {
-    withr::with_options(list(scipen = 1e5), {
-        data_dir <- file.path(out_dir, "data")
-        if (dir.exists(out_dir)) {
-            if (!overwrite) {
-                cli_abort("Output directory {.file {out_dir}} already exists. Use 'overwrite = TRUE' to overwrite.")
-            } else {
-                cli_warn("Output directory {.file {out_dir}} already exists. Overwriting.")
-                unlink(out_dir, recursive = TRUE)
-            }
+    withr::local_options(list(scipen = 1e5))
+    data_dir <- file.path(out_dir, "data")
+    if (dir.exists(out_dir)) {
+        if (!overwrite) {
+            cli_abort("Output directory {.file {out_dir}} already exists. Use 'overwrite = TRUE' to overwrite.")
+        } else {
+            cli_warn("Output directory {.file {out_dir}} already exists. Overwriting.")
+            unlink(out_dir, recursive = TRUE)
         }
+    }
 
-        dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
-        cli_alert("Writing to {.file {out_dir}}")
+    dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
+    cli_alert("Writing to {.file {out_dir}}")
 
-        if (class(cell_names) == "ScATAC") {
-            genome <- genome %||% cell_names@genome
-            cell_names <- colnames(cell_names@mat)
-        }
-        gset_genome(genome)
+    if (class(cell_names) == "ScATAC") {
+        genome <- genome %||% cell_names@genome
+        cell_names <- colnames(cell_names@mat)
+    }
+    gset_genome(genome)
 
-        chroms <- intersect(gintervals.all()$chrom, bam_file_chromosomes(bam_file))
+    chroms <- intersect(gintervals.all()$chrom, bam_file_chromosomes(bam_file))
 
 
-        genomic_bins <- giterator.intervals(iterator = bin_size, intervals = gintervals.all() %>% filter(chrom %in% chroms)) %>%
-            mutate(name = glue("{chrom}_{start}_{end}"))
+    genomic_bins <- giterator.intervals(iterator = bin_size, intervals = gintervals.all() %>% filter(chrom %in% chroms)) %>%
+        mutate(name = glue("{chrom}_{start}_{end}"))
 
-        cli_alert_info("Processing {.val {nrow(genomic_bins)}} genomic bins of maximal size {.val {bin_size}}")
+    cli_alert_info("Processing {.val {nrow(genomic_bins)}} genomic bins of maximal size {.val {bin_size}}")
 
-        plyr::a_ply(genomic_bins, 1, function(region) {
-            cli_alert("Processing {.val {region$name}}")
-            write_sparse_matrix_from_bam(bam_file, glue("{data_dir}/{region$chrom}_{region$start}_{region$end}.mtx"), cell_names, region, genome, min_mapq, samtools_bin, samtools_opts, num_reads, verbose, overwrite = overwrite)
-            cli_alert_success("Finished processing {.val {region$name}}")
-        }, .parallel = getOption("mcatac.parallel"))
+    plyr::a_ply(genomic_bins, 1, function(region) {
+        cli_alert("Processing {.val {region$name}}")
+        write_sparse_matrix_from_bam(bam_file, glue("{data_dir}/{region$chrom}_{region$start}_{region$end}.mtx"), cell_names, region, genome, min_mapq, samtools_bin, samtools_opts, num_reads, verbose, overwrite = overwrite)
+        cli_alert_success("Finished processing {.val {region$name}}")
+    }, .parallel = getOption("mcatac.parallel"))
 
-        counts_md <- list(
-            cell_names = cell_names,
-            genome = genome,
-            id = id,
-            description = description,
-            data_dir = "data",
-            genomic_bins = genomic_bins$name
-        )
+    counts_md <- list(
+        cell_names = cell_names,
+        genome = genome,
+        id = id,
+        description = description,
+        data_dir = "data",
+        genomic_bins = genomic_bins$name
+    )
 
-        yaml::write_yaml(counts_md, file = file.path(out_dir, "metadata.yaml"))
+    yaml::write_yaml(counts_md, file = file.path(out_dir, "metadata.yaml"))
 
-        cli_alert_info("Created sparse matrices for {.val {nrow(genomic_bins)}} genomic bins")
-        cli_alert_success("Created an ScCounts object at {.file {out_dir}}")
-    })
+    cli_alert_info("Created sparse matrices for {.val {nrow(genomic_bins)}} genomic bins")
+    cli_alert_success("Created an ScCounts object at {.file {out_dir}}")
 }
 
 

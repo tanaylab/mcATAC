@@ -250,3 +250,32 @@ set_parallel <- function(thread_num = max(1, round(parallel::detectCores() * 0.8
         cli_alert_info("Parallelization enabled. Using {.val {thread_num}} threads.")
     }
 }
+
+#' Get a temporary track name
+#'
+#' @description This function returns a temporary track name, which would be deleted when the calling function exits.
+#'
+#' @param prefix a prefix for the track name
+#' @param envir environment to to pass the \code{withr::defer} function (do not change unless you know what you are doing)
+#'
+#' @return a temporary track name
+#'
+#' @examples
+#' func <- function() {
+#'     tmp <- temp_track()
+#'     print(tmp)
+#'     gtrack.create_sparse(tmp, description = "", intervals = gintervals.all(), values = rep(1, nrow(gintervals.all())))
+#'     gtrack.exists(tmp) # returns TRUE
+#'     a <- gextract(tmp, gintervals.all())
+#'     print(head(a))
+#'     return(tmp)
+#' }
+#' tmp <- func()
+#' gtrack.exists(tmp) # returns FALSE
+#'
+#' @export
+temp_track_name <- function(prefix = "", envir = parent.frame()) {
+    temp_track <- paste0(prefix, "tmp_", stringi::stri_rand_strings(1, 10))
+    withr::defer(gtrack.rm(temp_track, force = TRUE), envir = envir)
+    return(temp_track)
+}

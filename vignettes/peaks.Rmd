@@ -77,12 +77,12 @@ mcc_write(mc_counts, "pbmc_data/mc_counts", overwrite = TRUE)
 We can now create a 'misha' track for each metacell:
 
 ```{r misha-tracks}
-mcc_to_tracks(mc_counts, "temp.pbmc_mc", overwrite = TRUE)
+mcc_to_tracks(mc_counts, "pbmc_mc", overwrite = TRUE)
 ```
 
 ## Identify peaks
 
-We can then use the tracks we created to indetify peaks on the metacell level. We think it is more robust than looking only at the marginal of all the data (as the cell ranger does), or than trying to identify peaks on the single cell level which is very sparse. 
+We can then use the tracks we created to identify peaks on the metacell level. We think it is more robust than looking only at the marginal of all the data (as the cell ranger does), or than trying to identify peaks on the single cell level which is very sparse. 
 
 ```{r identify-peaks}
 # identify peaks on the metacell level. In the meantime - a placeholder using the ScATAC peaks

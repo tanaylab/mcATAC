@@ -9,17 +9,27 @@ mcc_to_tracks(
   track_prefix,
   metacells = NULL,
   overwrite = FALSE,
-  normalize = TRUE
+  window_size = 100,
+  resolution = 10,
+  create_marginal_track = TRUE,
+  normalize = FALSE
 )
 }
 \arguments{
 \item{mc_counts}{A McCounts object}
 
-\item{track_prefix}{The prefix of the tracks to create. Track names will be of the form "{track_prefix}.mc{metacell}"}
+\item{track_prefix}{The prefix of the tracks to create (i.e. misha directory).
+Track names will be of the form "{track_prefix}.mc{metacell}"}
 
 \item{metacells}{metacells for which to create tracks. If NULL, all metacells will be used.}
 
 \item{overwrite}{Whether to overwrite existing tracks.}
+
+\item{window_size}{The size of the window used to smooth the counts. The counts of at position i are smoothed by a sum of the counts of \link{i - window_size, i + window_size}.}
+
+\item{resolution}{The resolution of each track (default: 10bp)}
+
+\item{create_marginal_track}{Create a track with the total counts from all the metacells. The track would be named "{track_prefix}.marginal"}
 
 \item{normalize}{Normalize each metacell by the sum of its counts.}
 }
@@ -27,8 +37,11 @@ mcc_to_tracks(
 None.
 }
 \description{
-This would create a sparse track of the form "{track_prefix}.mc{metacell}" for each metacell in the McCounts object. By default, the counts are normalized to the total counts of each metacell, set \code{normalize = FALSE}
-to disable this.
+This would create a sparse track of the form "{track_prefix}.mc{metacell}" for each metacell in the McCounts object. The counts are smoothed by a running sum window of size \code{window_size * 2 + 1} (default: 201).
+The resulted track would be stored in a 'dense' format with a resolution of \code{resolution} bp (default: 10). \cr
+Each track would have a track attribute named "total_cov" with the total coverage of the metacell. \cr
+If \code{create_marginal_track} is \code{TRUE} (default), an additional track with the total counts over all the metacells will be created. \cr
+Counts can be normalized to the total counts of each metacell by setting \code{normalize = TRUE}.
 }
 \examples{
 \dontrun{
