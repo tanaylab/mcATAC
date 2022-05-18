@@ -2,7 +2,7 @@
 % Please edit documentation in R/McCounts.R
 \name{mcc_normalize_metacells}
 \alias{mcc_normalize_metacells}
-\title{Normalize each metacell in an McCounts of object by its total counts}
+\title{Normalize each metacell in a McCounts object by its total counts}
 \usage{
 mcc_normalize_metacells(mc_counts)
 }
@@ -13,7 +13,7 @@ mcc_normalize_metacells(mc_counts)
 an McCounts object with the metacells normalized
 }
 \description{
-Normalize each metacell in an McCounts of object by its total counts
+Normalize each metacell in a McCounts object by its total counts
 }
 \examples{
 \dontrun{

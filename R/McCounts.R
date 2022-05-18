@@ -95,8 +95,8 @@ scc_project_on_mc <- function(sc_counts, cell_to_metacell, ignore_metacells = -1
 #'
 #' @inheritParams scc_read
 #' @export
-mcc_read <- function(path, id = NULL, description = NULL) {
-    sc_counts <- scc_read(path, id, description)
+mcc_read <- function(path, id = NULL, description = NULL, verbose = TRUE) {
+    sc_counts <- scc_read(path, id, description, verbose = FALSE)
     md_file <- file.path(path, "metadata.yaml")
     md <- yaml::read_yaml(md_file)
 
@@ -106,7 +106,10 @@ mcc_read <- function(path, id = NULL, description = NULL) {
 
     mc_counts <- new("McCounts", data = sc_counts@data, cell_names = sc_counts@cell_names, genome = sc_counts@genome, genomic_bins = sc_counts@genomic_bins, id = sc_counts@id, description = sc_counts@description, path = sc_counts@path, cell_to_metacell = as_tibble(md$cell_to_metacell))
 
-    cli_alert_success("Succesfully read a McCounts object from {.file {path}}")
+    if (verbose) {
+        cli_alert_success("Succesfully read a McCounts object from {.file {path}}")
+    }
+
     return(mc_counts)
 }
 
@@ -202,6 +205,7 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
 #' Return the total coverage of each metacell in an McCounts object
 #'
 #' @param mc_counts a McCounts object
+#' @param metacells names of metacells to include. Default: all metacells.
 #'
 #' @return a named vector with the total coverage for each metacell
 #'
@@ -212,18 +216,21 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
 #' }
 #'
 #' @export
-mcc_metacell_total_cov <- function(mc_counts) {
+mcc_metacell_total_cov <- function(mc_counts, metacells = NULL) {
     assert_atac_object(mc_counts, class = "McCounts")
+    metacells <- metacells %||% mc_counts@cell_names
+    metacells <- as.character(metacells)
 
     sums <- plyr::llply(mc_counts@data, function(m) {
-        colSums(m)
+        colSums(m[, metacells])
     }, .parallel = getOption("mcatac.parallel"))
 
     mc_covs <- Reduce("+", sums)
     return(mc_covs)
 }
 
-#' Normalize each metacell in an McCounts of object by its total counts
+
+#' Normalize each metacell in a McCounts object by its total counts
 #'
 #' @param mc_counts a McCounts object
 #'

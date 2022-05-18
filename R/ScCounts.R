@@ -175,6 +175,7 @@ mcc_write <- function(object, out_dir, overwrite = FALSE) {
 #' @param path path to the directory containing the object (which was created by \code{write_sc_counts_from_fragments/bam})
 #' @param id an identifier for the object (optional)
 #' @param description description of the object (optional)
+#' @param verbose print success message (default: TRUE)
 #'
 #' @return a ScCounts object
 #'
@@ -184,7 +185,7 @@ mcc_write <- function(object, out_dir, overwrite = FALSE) {
 #' }
 #'
 #' @export
-scc_read <- function(path, id = NULL, description = NULL) {
+scc_read <- function(path, id = NULL, description = NULL, verbose = TRUE) {
     md_file <- file.path(path, "metadata.yaml")
     if (!file.exists(md_file)) {
         cli_abort("Directory {.file {path}} does not contain a valid ScCounts object")
@@ -204,7 +205,10 @@ scc_read <- function(path, id = NULL, description = NULL) {
 
     counts <- new("ScCounts", data = data, cell_names = md$cell_names, genome = md$genome, genomic_bins = genomic_bins, id = id %||% md$id, description = description %||% md$description, path = path)
 
-    cli_alert_success("Succesfully read a ScCounts object from {.file {path}}")
+    if (verbose) {
+        cli_alert_success("Succesfully read a ScCounts object from {.file {path}}")
+    }
+
     return(counts)
 }
 
