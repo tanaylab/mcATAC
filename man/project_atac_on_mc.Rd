@@ -14,7 +14,8 @@ project_atac_on_mc(
   mc_size_eps_q = 0.1,
   id = NULL,
   description = NULL,
-  rm_zero_peaks = TRUE
+  rm_zero_peaks = TRUE,
+  ignore_metacells = -1
 )
 
 project_atac_on_mc_from_metacell1(
@@ -54,6 +55,8 @@ the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quan
 
 \item{rm_zero_peaks}{remove peaks without any reads (all-zero peaks). Default: TRUE}
 
+\item{ignore_metacells}{a vector of metacells to ignore. Default: \link{-1} (the "outliers" metacell in the metacell2 python package).}
+
 \item{scdb}{a metacell1 \code{scdb} path}
 
 \item{mc_id}{id of the metacell object within \code{scdb}}
@@ -71,7 +74,8 @@ uses the output of the 'metacells' python package (metacell2).
 \examples{
 \dontrun{
 atac_sc <- import_from_10x("pbmc_data", genome = "hg38")
-atac_mc <- project_atac_on_mc_from_metacell1(atac_sc, "pbmc_data/scdb", "rna")
+data(cell_to_metacell_pbmc_example)
+atac_mc <- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example)
 }
 
 }

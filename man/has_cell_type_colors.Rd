@@ -4,10 +4,10 @@
 \alias{has_cell_type_colors}
 \title{Does the McATAC object contain cell type color annotation}
 \usage{
-has_cell_type_colors(mc_atac)
+has_cell_type_colors(atac_mc)
 }
 \arguments{
-\item{mc_atac}{an McATAC object}
+\item{atac_mc}{an McATAC object}
 }
 \value{
 TRUE if the McATAC object contains cell type color annotation, FALSE otherwise

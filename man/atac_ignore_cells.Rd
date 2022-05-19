@@ -19,8 +19,8 @@ This function removes a given list of cells from the {.code mat} slot.
 }
 \examples{
 \dontrun{
-cs <- Matrix::colSums(scatac@mat)
+cs <- Matrix::colSums(atac_sc@mat)
 big_cells <- names(cs)[which(cs >= quantile(cs, 0.98))]
-scatac_filtered <- atac_ignore_cells(scatac, big_cells)
+atac_sc_filtered <- atac_ignore_cells(atac_sc, big_cells)
 }
 }
