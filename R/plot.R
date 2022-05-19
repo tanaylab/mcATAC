@@ -456,6 +456,17 @@ plot_tracks_at_locus <- function(tracks = NULL,
     } else {
         row_order <- 1:length(tracks)
     }
+    
+    if (has_rna(atac)) {
+        rna_vals <- log2(rna_legc_eps + get_rna_egc(atac_mc, genes = gene))
+        rna_vals <- rna_vals - median(rna_vals)
+        rna_vals <- rna_vals[row_order]
+        rna_ha <- ComplexHeatmap::SingleAnnotation(name = 'rna\nlegc\nminus\nmedian', value = ComplexHeatmap::anno_barplot(rna_vals), which = 'row')
+    }
+    else {
+        cli_alert_info("Not plotting gene expression values since no RNA metacell object is attached to {.var atac}. To attach, use the function `add_mc_rna`.")
+        rna_ha <- NULL
+    }
     if (!is.null(mc_rna)) {
         if (length(tracks) != ncol(mc_rna@e_gc)) {
             cli_abort("Number of tracks and number of RNA metacells do not match.")
@@ -552,6 +563,6 @@ make_rna_annot <- function(mc_rna, gene, rna_legc_eps, row_order) {
     rna_vals <- log2(mc_rna@e_gc[gene,] + rna_legc_eps)
     rna_vals <- rna_vals - median(rna_vals)
     rna_vals <- rna_vals[row_order]
-    rna_ha <- ComplexHeatmap::HeatmapAnnotation('rna\nlegc\nminus\nmedian' = ComplexHeatmap::anno_barplot(rna_vals), which = 'row')
+    rna_ha <- ComplexHeatmap::SingleAnnotation(name = 'rna\nlegc\nminus\nmedian', value = ComplexHeatmap::anno_barplot(rna_vals), which = 'row')
     return(rna_ha)
 }
