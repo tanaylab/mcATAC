@@ -8,14 +8,17 @@ plot_tracks_at_locus(
   tracks = NULL,
   gene = NULL,
   intervals = NULL,
+  iterator = 100,
+  extend = 0,
   mc_rna = NULL,
   gene_feature = "exon",
   track_regex = NULL,
-  iterator = 100,
-  extend = 0,
+  chromosomes = gintervals.all() \%>\% filter(!grepl("_", chrom)) \%>\% pull(chrom),
+  atac = NULL,
   order_rows = FALSE,
   row_order = NULL,
   gene_annot = TRUE,
+  name = NULL,
   annotation_row = NULL,
   annotation_col = NULL,
   annotation_colors = NULL,
@@ -28,19 +31,30 @@ plot_tracks_at_locus(
 \arguments{
 \item{tracks}{(optional) all tracks to plot}
 
-\item{gene}{(optional) which gene to plot around}
+\item{gene}{(optional) which gene to plot around; if no gene is found as a whole, partial matches are searched for}
 
 \item{intervals}{(optional) what genomic interval to plot}
 
-\item{mc_rna}{(optional) RNA metacell object to extract gene expression data from}
+\item{iterator}{(optional; default - 10) misha iterator, determines the resolution at which the data is extracted and plotted}
+
+\item{extend}{(optional; default - 0) how much to extend \code{intervals} by on each side}
+
+\item{gene_feature}{(optional; default - "exon") whether to use the exon or tss as features of the gene on which to center the plot}
 
 \item{track_regex}{(optional) regular expression for matching tracks to plot}
 
-\item{iterator}{(optional) misha iterator}
+\item{chromosomes}{(optional) which set of chromosomes to use; mainly used to filter out contigs by default}
 
-\item{extend}{(optional) how much to extend \code{intervals} by on each side}
+\item{atac}{(optional) McATAC object from which to extract peaks in locus, and possibly \cr
+RNA expression values (if an RNA metacell object is attached)}
 
-\item{gene_annot}{(optional) whether to add gene annotations}
+\item{order_rows}{whether to order the rows by \code{cell_type} annotation}
+
+\item{row_order}{an explicit ordering of rows/tracks to use}
+
+\item{gene_annot}{(optional) whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory}
+
+\item{name}{(optional; default - 'ATAC signal') name to give the legend of the heatmap}
 
 \item{annotation_row}{pheatmap-format annotation}
 
@@ -53,51 +67,51 @@ plot_tracks_at_locus(
 \item{rna_legc_eps}{(optional) what regularization value to add to mc_rna@e_gc when calculating log}
 
 \item{colors}{(optional) colorRampPalette vector of colors for scaling colors in heatmap}
-
-\item{...}{
-  Arguments passed on to \code{\link[=save_pheatmap]{save_pheatmap}}
-  \describe{
-    \item{\code{dev}}{name of the device to save the pheatmap. e.g. "png" or "pdf"}
-    \item{\code{filename}}{the output file path.
-    The page number is substituted if a C integer format is included in
-    the character string, as in the default.  (The result must be less
-    than \code{PATH_MAX} characters long, and may be truncated if not.
-    See \code{\link[grDevices]{postscript}} for further details.)  Tilde expansion
-    is performed where supported by the platform.  An input with
-    a marked encoding is converted to the native encoding on an error is
-    given.}
-    \item{\code{width}}{the width of the device.}
-    \item{\code{height}}{the height of the device.}
-    \item{\code{res}}{The nominal resolution in ppi which will be recorded in the
-    bitmap file, if a positive integer.  Also used for \code{units}
-    other than the default, and to convert points to pixels.}
-  }}
-
-\item{atac}{(optional) ScATAC, McATAC or PeakIntervals object from which to extract peaks in locus}
 }
 \value{
 a ComplexHeatmap figure
 }
 \description{
-Plot metacell tracks around locus
+
 }
 \examples{
 \dontrun{
-    library(metacell)
-    scdb_init("scdb")
-    mc_rna = scdb_mc('rna_w_color_key')
-    mcmd = readr::read_csv('./data/mcmd.csv')
-    color_key = unique(mcmd[,c('st', 'color')])
-    colnames(color_key) = c('cell_type', 'color')
-    col_annot = data.frame(cell_type = mcmd$st)
-    rownames(col_annot) = mcmd$mc
-    ann_colors = list(cell_type = setNames(color_key$color, color_key$cell_type))
-    plot_tracks_at_locus(tracks = pbmc_tracks, extend = 5e+4,
-                    gene = "ATF3", 
-                    mc_rna = mc_rna, 
-                    gene_annot = T, 
-                    order_rows = T,
-                    annotation_row = col_annot, 
-                    annotation_colors = ann_colors)
+setwd("/net/mraid14/export/tgdata/users/yonshap/proj/matching")
+library(metacell)
+scdb_init("scdb")
+mc_rna <- scdb_mc("rna_w_color_key")
+atac_sc <- import_from_10x("./data/pbmc_data/", genome = "hg38", id = "PBMC_10X")
+mc1 <- project_atac_on_mc_from_metacell1(atac_sc, scdb = "scdb", mc_id = "rna_w_color_key")
+mc <- scdb_mc("rna_w_color_key")
+mc1 <- add_mc_rna(mc_rna = mc, mcatac = mc1)
+data(mcmd)
+color_key <- unique(mcmd[, c("st", "color")])
+colnames(color_key) <- c("cell_type", "color")
+col_annot <- data.frame(cell_type = mcmd$st)
+rownames(col_annot) <- mcmd$mc
+ann_colors <- list(cell_type = setNames(color_key$color, color_key$cell_type))
+pbmc_tracks <- grep("unnorm", gtrack.ls("PBMC_10X.mc"), inv = T, v = T)
+
+
+# plot gene-centered intervals
+plot_tracks_at_locus(
+    tracks = pbmc_tracks, extend = 5e+4,
+    gene = "ATF3",
+    mc_rna = mc_rna,
+    gene_annot = T,
+    order_rows = T,
+    annotation_row = col_annot,
+    annotation_colors = ann_colors
+)
+
+# plot arbitrary intervals
+plot_tracks_at_locus(
+    tracks = pbmc_tracks,
+    intervals = gintervals(2, 1e+7, 1.15e+7),
+    gene_annot = T,
+    order_rows = T,
+    annotation_row = col_annot,
+    annotation_colors = ann_colors
+)
 }
 }

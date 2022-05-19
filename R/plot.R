@@ -346,10 +346,10 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 #'
 #'
 #' @description This function plots a set of tracks in a certain locus. Tracks can be given as a vector (\code{tracks}), \cr
-#' or retreived using \code{track_regex}. The intervals to be plotted can be chosen explicitly using the parameter \cr 
-#' \code{intervals}. Alternatively, one can specify the parameter \code{gene}; by default, the gene body (all exons) \cr 
-#' will be plotted, this can be modified using the parameters \code{extend} (how many bp to extend from each side of \cr 
-#' the gene features) and \code{gene_feature}, where the intervals can be centered around TSSs of \cr 
+#' or retreived using \code{track_regex}. The intervals to be plotted can be chosen explicitly using the parameter \cr
+#' \code{intervals}. Alternatively, one can specify the parameter \code{gene}; by default, the gene body (all exons) \cr
+#' will be plotted, this can be modified using the parameters \code{extend} (how many bp to extend from each side of \cr
+#' the gene features) and \code{gene_feature}, where the intervals can be centered around TSSs of \cr
 #' the gene (gene_feature = 'tss').
 #' Metacell annotations can be added using \code{annotation_row} and \{annotation_colors} (phetamap-style annotations), \cr
 #' which can/should be generated automatically by \code{generate_pheatmap_annotation}.
@@ -362,7 +362,7 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 #' @param intervals (optional) what genomic interval to plot
 #' @param iterator (optional; default - 10) misha iterator, determines the resolution at which the data is extracted and plotted
 #' @param extend (optional; default - 0) how much to extend \code{intervals} by on each side
-#' @param atac (optional) McATAC object from which to extract peaks in locus, and possibly \cr 
+#' @param atac (optional) McATAC object from which to extract peaks in locus, and possibly \cr
 #' RNA expression values (if an RNA metacell object is attached)
 #' @param order_rows whether to order the rows by \code{cell_type} annotation
 #' @param row_order an explicit ordering of rows/tracks to use
@@ -384,67 +384,72 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 #' @return a ComplexHeatmap figure
 #' @examples
 #' \dontrun{
-#'     setwd('/net/mraid14/export/tgdata/users/yonshap/proj/matching')
-#'     library(metacell)
-#'     scdb_init("scdb")
-#'     mc_rna = scdb_mc('rna_w_color_key')
-#'     atac_sc <- import_from_10x('./data/pbmc_data/', genome = "hg38", id = 'PBMC_10X')
-#'     mc1 <- project_atac_on_mc_from_metacell1(atac_sc, scdb = 'scdb', mc_id = 'rna_w_color_key')
-#'     mc = scdb_mc('rna_w_color_key')
-#'     mc1 <- add_mc_rna(mc_rna = mc, mcatac = mc1)
-#'     data(mcmd)
-#'     color_key = unique(mcmd[,c('st', 'color')])
-#'     colnames(color_key) = c('cell_type', 'color')
-#'     col_annot = data.frame(cell_type = mcmd$st)
-#'     rownames(col_annot) = mcmd$mc
-#'     ann_colors = list(cell_type = setNames(color_key$color, color_key$cell_type))
-#'     pbmc_tracks <- grep('unnorm', gtrack.ls("PBMC_10X.mc"), inv=T, v=T)
+#' setwd("/net/mraid14/export/tgdata/users/yonshap/proj/matching")
+#' library(metacell)
+#' scdb_init("scdb")
+#' mc_rna <- scdb_mc("rna_w_color_key")
+#' atac_sc <- import_from_10x("./data/pbmc_data/", genome = "hg38", id = "PBMC_10X")
+#' mc1 <- project_atac_on_mc_from_metacell1(atac_sc, scdb = "scdb", mc_id = "rna_w_color_key")
+#' mc <- scdb_mc("rna_w_color_key")
+#' mc1 <- add_mc_rna(mc_rna = mc, mcatac = mc1)
+#' data(mcmd)
+#' color_key <- unique(mcmd[, c("st", "color")])
+#' colnames(color_key) <- c("cell_type", "color")
+#' col_annot <- data.frame(cell_type = mcmd$st)
+#' rownames(col_annot) <- mcmd$mc
+#' ann_colors <- list(cell_type = setNames(color_key$color, color_key$cell_type))
+#' pbmc_tracks <- grep("unnorm", gtrack.ls("PBMC_10X.mc"), inv = T, v = T)
 #'
 #'
 #' # plot gene-centered intervals
-#'     plot_tracks_at_locus(tracks = pbmc_tracks, extend = 5e+4,
-#'                     gene = "ATF3", 
-#'                     mc_rna = mc_rna, 
-#'                     gene_annot = T, 
-#'                     order_rows = T,
-#'                     annotation_row = col_annot, 
-#'                     annotation_colors = ann_colors)
+#' plot_tracks_at_locus(
+#'     tracks = pbmc_tracks, extend = 5e+4,
+#'     gene = "ATF3",
+#'     mc_rna = mc_rna,
+#'     gene_annot = T,
+#'     order_rows = T,
+#'     annotation_row = col_annot,
+#'     annotation_colors = ann_colors
+#' )
 #'
 #' # plot arbitrary intervals
-#'     plot_tracks_at_locus(tracks = pbmc_tracks,
-#'                     intervals = gintervals(2, 1e+7, 1.15e+7),
-#'                     gene_annot = T, 
-#'                     order_rows = T,
-#'                     annotation_row = col_annot, 
-#'                     annotation_colors = ann_colors)
+#' plot_tracks_at_locus(
+#'     tracks = pbmc_tracks,
+#'     intervals = gintervals(2, 1e+7, 1.15e+7),
+#'     gene_annot = T,
+#'     order_rows = T,
+#'     annotation_row = col_annot,
+#'     annotation_colors = ann_colors
+#' )
 #' }
 #' @export
-plot_tracks_at_locus <- function(tracks = NULL, 
-                                gene = NULL, 
-                                intervals = NULL, 
-                                iterator = 100,
-                                extend = 0, 
-                                mc_rna = NULL,
-                                gene_feature = "exon",
-                                track_regex = NULL, 
-                                chromosomes = gintervals.all() %>% filter(!grepl("_", chrom)) %>% pull(chrom),
-                                atac = NULL,
-                                order_rows = FALSE,
-                                row_order = NULL,
-                                gene_annot = TRUE,
-                                name = NULL,
-                                annotation_row = NULL,
-                                annotation_col = NULL,
-                                annotation_colors = NULL,
-                                silent = FALSE,
-                                rna_legc_eps = 1e-5,
-                                colors = colorRampPalette(c("white", "darkblue","red"))(100),
-                               ...) {
+plot_tracks_at_locus <- function(tracks = NULL,
+                                 gene = NULL,
+                                 intervals = NULL,
+                                 iterator = 100,
+                                 extend = 0,
+                                 mc_rna = NULL,
+                                 gene_feature = "exon",
+                                 track_regex = NULL,
+                                 chromosomes = gintervals.all() %>%
+                                     filter(!grepl("_", chrom)) %>%
+                                     pull(chrom),
+                                 atac = NULL,
+                                 order_rows = FALSE,
+                                 row_order = NULL,
+                                 gene_annot = TRUE,
+                                 name = NULL,
+                                 annotation_row = NULL,
+                                 annotation_col = NULL,
+                                 annotation_colors = NULL,
+                                 silent = FALSE,
+                                 rna_legc_eps = 1e-5,
+                                 colors = colorRampPalette(c("white", "darkblue", "red"))(100),
+                                 ...) {
     if (is.null(tracks)) {
         if (is.null(track_regex)) {
             cli_abort("Must specify either {.var tracks} or {.var track_regex")
-        }
-        else {
+        } else {
             tracks <- gtrack.ls(track_regex)
             if (length(tracks) == 0) {
                 cli_abort("No tracks matching {.var track_regex} were found.")
@@ -456,65 +461,62 @@ plot_tracks_at_locus <- function(tracks = NULL,
             cli_alert_warning("Length of {.var gene} is {.var {length(gene)}}, while it should be 1. Using only first gene, {.val {gene[[1]]}}")
             gene <- gene[[1]]
         }
-        if (gene_feature %!in% c('tss', 'exon')) {
+        if (gene_feature %!in% c("tss", "exon")) {
             cli_abort("{.var gene_feature} should be either 'tss' or 'exon'")
         }
         feature_df <- gintervals.load(glue::glue("intervs.global.{gene_feature}"))
         feature_df <- dplyr::filter(feature_df, !grepl("_", feature_df$chrom))
         gene_features <- dplyr::filter(feature_df, geneSymbol == gene)
         if (nrow(gene_features) == 0) {
-            gene_features <- feature_df[grep(gene, feature_df$geneSymbol),]
+            gene_features <- feature_df[grep(gene, feature_df$geneSymbol), ]
             if (nrow(gene_features) == 0) {
                 cli_alert_warning("No {.val {gene_feature}}s matching {.val {gene}} were found. Maybe check \\
                     that this feature exists in the field `geneSymbol` of gintervals.load('intervs.global.{.var gene_feature}')")
-                intervals <- dplyr::mutate(intervals, start = start - extend, end = end + extend)        
+                intervals <- dplyr::mutate(intervals, start = start - extend, end = end + extend)
             }
-        }
-        else {
+        } else {
             intervals <- gintervals(unique(gene_features$chrom), min(gene_features$start) - extend, max(gene_features$end) + extend)
         }
     } else {
         intervals <- dplyr::mutate(intervals, start = start - extend, end = end + extend)
         if (nrow(intervals) > 1) {
             cli_alert_warning("{.var intervals} should be a single interval (there are {.var {nrow(intervals)}} rows). Using only the first row of {.var intervals}.")
-            intervals <- intervals[1,]
+            intervals <- intervals[1, ]
         }
     }
     if (order_rows) {
         if (!is.null(annotation_row) && has_name(annotation_row, "cell_type")) {
             if (!is.null(row_order)) {
-                cli_alert_info("Both {.var order_rows} == TRUE and {.var row_order} specified. Ordering rows and ignoring {.var row_order}.")    
+                cli_alert_info("Both {.var order_rows} == TRUE and {.var row_order} specified. Ordering rows and ignoring {.var row_order}.")
             }
-            row_order <- order(annotation_row[,"cell_type"])
-        }
-        else {
+            row_order <- order(annotation_row[, "cell_type"])
+        } else {
             cli_alert_info("No appropriate metacell annotation provided for ordering tracks. Tracks will not be ordered.")
         }
-    } else if (is.null(row_order) ){
+    } else if (is.null(row_order)) {
         row_order <- 1:length(tracks)
     } else {
         row_order <- row_order
     }
     if (!is.null(atac)) {
-        name = atac@id
+        name <- atac@id
         if (has_cell_type(atac) && has_cell_type_colors(atac)) {
             if (!is.null(annotation_row) || !is.null(annotation_colors)) {
                 cli_alert_info("{.var atac} has cell type annotation; ignoring {.var annotation_row} and {.var annotation_colors}.")
             }
-            color_key = unique(atac@metadata[,c('cell_type', 'color')])
-            colnames(color_key) = c('cell_type', 'color')
-            annotation_row = data.frame(cell_type = atac@metadata$cell_type)
-            rownames(annotation_row) = atac@metadata$metacell
-            annotation_colors = list(cell_type = setNames(color_key$color, color_key$cell_type))
-            ct_ha <- ComplexHeatmap::HeatmapAnnotation(cell_type = unlist(annotation_row[row_order,]), which = 'row', col = annotation_colors)
+            color_key <- unique(atac@metadata[, c("cell_type", "color")])
+            colnames(color_key) <- c("cell_type", "color")
+            annotation_row <- data.frame(cell_type = atac@metadata$cell_type)
+            rownames(annotation_row) <- atac@metadata$metacell
+            annotation_colors <- list(cell_type = setNames(color_key$color, color_key$cell_type))
+            ct_ha <- ComplexHeatmap::HeatmapAnnotation(cell_type = unlist(annotation_row[row_order, ]), which = "row", col = annotation_colors)
         }
         if (has_rna(atac)) {
             rna_vals <- log2(rna_legc_eps + get_rna_egc(atac, genes = gene))
             rna_vals <- rna_vals - median(rna_vals)
             rna_vals <- rna_vals[row_order]
-            rna_ha <- ComplexHeatmap::HeatmapAnnotation('rna\nlegc\nminus\nmedian' = ComplexHeatmap::anno_barplot(rna_vals), which = 'row')
-        }
-        else {
+            rna_ha <- ComplexHeatmap::HeatmapAnnotation("rna\nlegc\nminus\nmedian" = ComplexHeatmap::anno_barplot(rna_vals), which = "row")
+        } else {
             cli_alert_info("Not plotting gene expression values since no RNA metacell object is attached to {.var atac}. To attach, use the function `add_mc_rna`.")
             rna_ha <- NULL
         }
@@ -523,14 +525,14 @@ plot_tracks_at_locus <- function(tracks = NULL,
             if (is.null(annotation_colors)) {
                 cli_abort("Must specify {.var annotation_colors} if {.var annotation_row} is specified.")
             }
-            ct_ha <- ComplexHeatmap::HeatmapAnnotation(cell_type = unlist(annotation_row[row_order,]), which = 'row', col = annotation_colors)
+            ct_ha <- ComplexHeatmap::HeatmapAnnotation(cell_type = unlist(annotation_row[row_order, ]), which = "row", col = annotation_colors)
         } else {
-            ct_ha <- ComplexHeatmap::HeatmapAnnotation(cell_type = row_order, which = 'row')
+            ct_ha <- ComplexHeatmap::HeatmapAnnotation(cell_type = row_order, which = "row")
         }
         rna_ha <- NULL
     }
-    mc_gene_vals <- gextract(tracks, intervals = intervals, iterator = iterator) %>% 
-            select(-intervalID)
+    mc_gene_vals <- gextract(tracks, intervals = intervals, iterator = iterator) %>%
+        select(-intervalID)
     mat_n <- t(misha.ext::intervs_to_mat(mc_gene_vals))
     mat_n[is.na(mat_n)] <- 0
     if (gene_annot) {
@@ -546,36 +548,39 @@ plot_tracks_at_locus <- function(tracks = NULL,
     if (gene_annot) {
         gene_annots <- make_gene_annot(intervals, iterator, ncol(mat_n))
         if (!is.null(gene_annots[["labels"]]) && !is.null(gene_annots[["label_coords"]])) {
-            gene_name_annots <- ComplexHeatmap::anno_mark(labels = gene_annots[["labels"]],
-                                                        at = gene_annots[["label_coords"]]
-                                                        )
+            gene_name_annots <- ComplexHeatmap::anno_mark(
+                labels = gene_annots[["labels"]],
+                at = gene_annots[["label_coords"]]
+            )
         } else {
             gene_name_annots <- NULL
         }
-        top_ha <- ComplexHeatmap::HeatmapAnnotation(peaks = peaks_ha, 
-                                                    genes = gene_name_annots, 
-                                                    exons = gene_annots[["exon_coords"]],
-                                                    col = list(peaks = setNames(c('white', 'red'), c(0,1)),
-                                                                genes = 'black',
-                                                                exons = setNames(c('white', 'black'), c(0,1))
-                                                                )
-                                                    )
-        
+        top_ha <- ComplexHeatmap::HeatmapAnnotation(
+            peaks = peaks_ha,
+            genes = gene_name_annots,
+            exons = gene_annots[["exon_coords"]],
+            col = list(
+                peaks = setNames(c("white", "red"), c(0, 1)),
+                genes = "black",
+                exons = setNames(c("white", "black"), c(0, 1))
+            )
+        )
     } else {
         gene_annots <- NULL
         top_ha <- ComplexHeatmap::HeatmapAnnotation(peaks = peaks_ha, genes = gene_annots)
     }
-    ch <- ComplexHeatmap::Heatmap(mat_n[row_order,], 
-                    name = name,
-                    use_raster = F,
-                    top_annotation = top_ha, 
-                    left_annotation = ct_ha, 
-                    right_annotation = rna_ha, 
-                    col = colors,
-                    cluster_rows = F, 
-                    cluster_columns = F, 
-                    show_row_names = F, 
-                    show_column_names = F)
+    ch <- ComplexHeatmap::Heatmap(mat_n[row_order, ],
+        name = name,
+        use_raster = F,
+        top_annotation = top_ha,
+        left_annotation = ct_ha,
+        right_annotation = rna_ha,
+        col = colors,
+        cluster_rows = F,
+        cluster_columns = F,
+        show_row_names = F,
+        show_column_names = F
+    )
     return(ch)
 }
 
@@ -588,10 +593,9 @@ plot_tracks_at_locus <- function(tracks = NULL,
 make_gene_annot <- function(intervals, iterator, num_bins) {
     file_path <- file.path(dirname(GROOT), "annots", "refGene.txt")
     if (!file.exists(file.path)) {
-        cli_alert_warning('Gene annotations do not exist in the appropriate location ({.val {file_path}}). Not annotating genes...')
+        cli_alert_warning("Gene annotations do not exist in the appropriate location ({.val {file_path}}). Not annotating genes...")
         genes_ha <- list(labels = NULL, label_coords = NULL, exon_coords = NULL)
-    }
-    else {
+    } else {
         refgene <- tgutil::fread(file_path, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
         rg_here <- dplyr::filter(refgene, chrom == as.character(intervals$chrom), txStart >= intervals$start, txEnd <= intervals$end)
         if (nrow(rg_here) > 0) {
@@ -605,11 +609,15 @@ make_gene_annot <- function(intervals, iterator, num_bins) {
             has_gene <- gbins %>%
                 misha.ext::gintervals.neighbors1(exons_df) %>%
                 mutate(val = as.numeric(dist == 0)) %>%
-                pull(val)        
-            genes_ha <- list(labels = rep(rg_here$name2, 2),
-                             label_coords = c(round((rg_here$txEnd - intervals$start)/iterator), 
-                                        round((rg_here$txStart - intervals$start)/iterator)),
-                             exon_coords = has_gene)
+                pull(val)
+            genes_ha <- list(
+                labels = rep(rg_here$name2, 2),
+                label_coords = c(
+                    round((rg_here$txEnd - intervals$start) / iterator),
+                    round((rg_here$txStart - intervals$start) / iterator)
+                ),
+                exon_coords = has_gene
+            )
         } else {
             genes_ha <- NULL
         }
@@ -622,7 +630,7 @@ make_gene_annot <- function(intervals, iterator, num_bins) {
 #' @inheritParams plot_tracks_at_locus
 #' @noRd
 make_peak_annotation <- function(atac, intervals, iterator, num_bins) {
-    cl <- class(atac)   
+    cl <- class(atac)
     if ("ScATAC" %in% cl || "McATAC" %in% cl) {
         peaks <- atac@peaks
     } else if ("PeakIntervals" %in% cl) {
@@ -630,18 +638,19 @@ make_peak_annotation <- function(atac, intervals, iterator, num_bins) {
     }
     intervals <- as.data.frame(intervals)
     peaks_here <- gintervals.neighbors(as.data.frame(peaks), intervals, maxdist = 0, mindist = 0, maxneighbors = 1)
-    peaks_here[peaks_here[,2] <= min(intervals$start) & peaks_here[,3] <= max(intervals$end),2] = min(intervals$start)
-    peaks_here[peaks_here[,2] >= min(intervals$start) & peaks_here[,3] >= max(intervals$end),3] = max(intervals$end)
-    peaks_coords <- dplyr::mutate(peaks_here[,c("start", "end")], 
-                                    start = round((start - intervals$start)/iterator),
-                                    end = round((end - intervals$start)/iterator))
+    peaks_here[peaks_here[, 2] <= min(intervals$start) & peaks_here[, 3] <= max(intervals$end), 2] <- min(intervals$start)
+    peaks_here[peaks_here[, 2] >= min(intervals$start) & peaks_here[, 3] >= max(intervals$end), 3] <- max(intervals$end)
+    peaks_coords <- dplyr::mutate(peaks_here[, c("start", "end")],
+        start = round((start - intervals$start) / iterator),
+        end = round((end - intervals$start) / iterator)
+    )
     if (nrow(peaks_coords) > 0) {
-        bins_mark <- sapply(1:nrow(peaks_coords), function(i) peaks_coords[i,1]:peaks_coords[i,2])
+        bins_mark <- sapply(1:nrow(peaks_coords), function(i) peaks_coords[i, 1]:peaks_coords[i, 2])
         bins_mark <- unlist(bins_mark)
     } else {
         bins_mark <- c()
     }
     vec <- rep(0, num_bins)
-    vec[bins_mark] = 1
+    vec[bins_mark] <- 1
     return(vec)
 }
