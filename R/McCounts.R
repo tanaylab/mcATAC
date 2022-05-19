@@ -503,7 +503,8 @@ create_smoothed_track_from_dataframe <- function(x, track_prefix, ...) {
 
 #' Create a smoothed track from a sparse track
 #'
-#' @description Create a track smoothed by a sum of [i - window_size, i + window_size].
+#' @description Create a track smoothed by a sum of [i - window_size, i + window_size], where i is the middle of the \code{resolution}. For
+#' examples, if \code{resolution} is 5, and \code{window_size} is 10, when the iterator is at position 20 the smoothed track will be created by summing the values of positions 10-29.
 #'
 #' @param raw_track name of the track to smooth.
 #' @param track The name of the track to create.
@@ -528,7 +529,7 @@ create_smoothed_track <- function(raw_track, track, description, window_size, re
     gvtrack.create(vt, raw_track, func = "sum")
     withr::defer(gvtrack.rm(vt))
 
-    shift <- window_size - round(resolution / 2)
+    shift <- window_size - floor(resolution / 2)
     gvtrack.iterator(vt, sshift = -shift, eshift = shift)
 
     gtrack.create(
