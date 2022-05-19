@@ -594,38 +594,22 @@ make_gene_annot <- function(intervals, iterator, num_bins) {
     else {
         refgene <- tgutil::fread(file_path, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
         rg_here <- dplyr::filter(refgene, chrom == as.character(intervals$chrom), txStart >= intervals$start, txEnd <= intervals$end)
-        make_binary_exon_vec <- function(exon_intervals, genomic_intervals, iterator) {
-            vec = matrix(0, nrow = 1, ncol = num_bins)
-            if (abs(num_bins - round((genomic_intervals[['end']] - genomic_intervals[['start']])/iterator + 1)) > 1) {
-                cli_alert_warning("Number of bins given to gene annotation function is not aligned with {.var intervals} and {.var iterator} parameters")
-            }
-            exon_bins = apply(exon_intervals[,2:3], 2, function(x) {
-                round((x - genomic_intervals[['start']])/iterator)
-            })
-            if (nrow(exon_intervals) > 1) {
-                for (i in 1:nrow(exon_intervals)) {
-                    vec[exon_bins[i,1]:exon_bins[i,2]] = 1
-                }
-            } else {
-                vec[exon_bins[[1]]:exon_bins[[2]]] = 1
-            }
-            return(as.numeric(vec))
-        }
         if (nrow(rg_here) > 0) {
-            vecs <- t(apply(rg_here, 1, function(x) {
-                            starts = as.numeric(stringi::stri_remove_empty(unlist(stringr::str_split(x[['exonStarts']], ','))))
-                            ends = as.numeric(stringi::stri_remove_empty(unlist(stringr::str_split(x[['exonEnds']], ','))))
-                            df <- data.frame('chrom' = rep(x[['chrom']], length(starts)), 'start' = starts, 'end' = ends)
-                            vec <- make_binary_exon_vec(df, intervals, iterator)
-                            return(vec)
-                        }))
-            vecsums = as.numeric(pmin(colSums(vecs), 1))
-            genes_ha <- list(
-                    labels = rep(rg_here$name2, 2),
-                    label_coords = c(round((rg_here$txEnd - intervals$start)/iterator), 
+            gbins <- giterator.intervals(intervals = intervals, iterator = iterator)
+            exons_df <- rg_here %>%
+                select(chrom, name, exonStarts, exonEnds) %>%
+                mutate(exonStarts = strsplit(exonStarts, ","), exonEnds = strsplit(exonEnds, ",")) %>%
+                tidyr::unnest(c("exonStarts", "exonEnds")) %>%
+                select(chrom, start = exonStarts, end = exonEnds, name) %>%
+                mutate(start = as.numeric(start), end = as.numeric(end))
+            has_gene <- gbins %>%
+                misha.ext::gintervals.neighbors1(exons_df) %>%
+                mutate(val = as.numeric(dist == 0)) %>%
+                pull(val)        
+            genes_ha <- list(labels = rep(rg_here$name2, 2),
+                             label_coords = c(round((rg_here$txEnd - intervals$start)/iterator), 
                                         round((rg_here$txStart - intervals$start)/iterator)),
-                    exon_coords = vecsums
-                    )
+                             exon_coords = has_gene)
         } else {
             genes_ha <- NULL
         }
