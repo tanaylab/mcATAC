@@ -1,21 +1,21 @@
 #' Subset 10X atac_possorted.bam file into per-metacell BAM files
-#' 
+#'
 #' @param bam_path path to the 10X atac_possorted.bam file
 #' @param out_dir (optional) directory to output per-metacell bam files. Default: /bam_path/mcatac@id_mc_bams
 #' @param gparallel_path (optional) path to GNU parallel
 #' @param samtools_path (optional) path to samtools (requires a version which supports the -D/--tag-file option in samtools view)
-#' @return error log 
+#' @return error log
 #' @inheritParams write_metacell_cell_names
 #' @export
-generate_per_metacell_bams <- function(bam_path, 
-                        mcatac, 
-                        out_dir = file.path(bam_path, paste0(mcatac@id, "_mc_bams")), 
-                        gparallel_path = "/usr/wisdom/parallel",
-                        samtools_path="/home/feshap/src/samtools-1.15.1/samtools") {
+generate_per_metacell_bams <- function(bam_path,
+                                       mcatac,
+                                       out_dir = file.path(bam_path, paste0(mcatac@id, "_mc_bams")),
+                                       gparallel_path = "/usr/wisdom/parallel",
+                                       samtools_path = "/home/feshap/src/samtools-1.15.1/samtools") {
     if (!file.exists(paste0(bam_path, ".bai"))) {
         cli_abort("Index file not found for {.file {bam_path}}. Please run 'samtools index {bam_path}'.")
     }
-    c2mc_path = file.path(dirname(bam_path), paste0(mcatac@id, "_c2mc"))
+    c2mc_path <- file.path(dirname(bam_path), paste0(mcatac@id, "_c2mc"))
     write_metacell_cell_names(mcatac, c2mc_path)
     fp_sb2mc <- system.file("exec", "split_bam_to_metacells.sh", package = "mcATAC")
     fp_rgp <- system.file("exec", "run_gnu_parallel.sh", package = "mcATAC")
@@ -38,13 +38,13 @@ generate_per_metacell_bams <- function(bam_path,
 }
 
 #' Write WIGs from BAMs
-#' 
+#'
 
 #' @param bam_folder_path path to BAMs
 #' @param output_path (optional) where to put WIGs. Default - bam_folder_path/wig_output
 #' @param parallel (optional) whether to do parallel computations
 #' @param nc (optional) number of cores for parallel computations
-#' @return error log 
+#' @return error log
 #' @export
 generate_wigs_from_bams <- function(bam_folder_path,
                                     output_path = file.path(bam_folder_path, "wig_output"),
@@ -74,13 +74,15 @@ generate_wigs_from_bams <- function(bam_folder_path,
 #' @param c2mc_path (optional) path to write out metacell assignments to
 write_metacell_cell_names <- function(mcatac, c2mc_path = NULL) {
     if (is.null(c2mc_path)) {
-        c2mc_path <- file.path('data', paste0(mcatac@id, "_c2mc"))
+        c2mc_path <- file.path("data", paste0(mcatac@id, "_c2mc"))
     }
-    if (!dir.exists(c2mc_path)) {dir.create(c2mc_path, recursive = TRUE)}
+    if (!dir.exists(c2mc_path)) {
+        dir.create(c2mc_path, recursive = TRUE)
+    }
     c2mc <- mcatac@cell_to_metacell
     dummy <- sapply(sort(unique(c2mc$metacell)), function(mci) {
         nmc <- c2mc$cell_id[c2mc$metacell == mci]
-        write(nmc,file=file.path(c2mc_path, paste0("mc", mci, ".txt")),sep='\n')
+        write(nmc, file = file.path(c2mc_path, paste0("mc", mci, ".txt")), sep = "\n")
         c2mc_path <- file.path("data", paste0(mcatac@id, "_c2mc"))
     })
     if (!dir.exists(c2mc_path)) {
@@ -95,7 +97,7 @@ write_metacell_cell_names <- function(mcatac, c2mc_path = NULL) {
 }
 
 #' Merge BAMs by metacells
-#' 
+#'
 #' @param bam_path path to the per-metacell BAM tracks
 #' @param output_filename what to call the output BAM file
 #' @param mcs vector of mcs to merge BAMs of
@@ -109,10 +111,10 @@ merge_metacell_bams <- function(bam_path, output_filename, mcs, parallel = getOp
     }
     if (all(file.exists(file_list))) {
         if (!parallel) {
-            nc = 0
+            nc <- 0
         }
         command <- glue::glue("samtools merge -f --threads {nc}")
-        command <-paste(command, output_filename, paste0(file_list, collapse = ' '))
+        command <- paste(command, output_filename, paste0(file_list, collapse = " "))
         system(command)
     } else {
         bad_mcs <- mcs[!file.exists(file_list)]
@@ -122,7 +124,7 @@ merge_metacell_bams <- function(bam_path, output_filename, mcs, parallel = getOp
 }
 
 #' Convert BAM file to WIG file
-#' 
+#'
 #' @param bam_path path to the BAM file
 #' @param output_filename (optional) what to call the output WIG file. By default it saves the file at the same directory and with the same name as the .bam input (with the appropriate file type suffix).
 #' @param track_name_prefix (optional) name to prepend to track (e.g. for display in UCSC genome browser)
@@ -139,20 +141,21 @@ bam_to_wig <- function(bam_path, output_filename = NULL, track_name_prefix = NUL
     if (is.null(header_line)) {
         if (is.null(track_name_prefix)) {
             header_line <- "track type=wiggle_0 name='{base_name}'"
-        }
-        else {
+        } else {
             header_line <- "track type=wiggle_0 name='{track_name_prefix} - {base_name}'"
         }
     }
-    hli = glue::glue(header_line)
+    hli <- glue::glue(header_line)
     create_file_command <- glue::glue('echo "{hli}" > {output_filename}')
     system(command = create_file_command)
-    smt_cmd = glue::glue("samtools mpileup -BQ0 {bam_path}")
-    perl_cmd = paste0("perl -pe '($c, $start, undef, $depth) = split;if ($c ne $lastC || $start != $lastStart+1) {print ", 
-                                '"fixedStep chrom=$c start=$start step=1 span=1\n"',
-                                ";}$_ = $depth.\"\n\";($lastC, $lastStart) = ($c, $start);'")
-    out_cmd = glue::glue(" >> {output_filename}")
-    bam2wig_command = paste0(paste0(c(smt_cmd, perl_cmd), collapse = " | "), out_cmd)
+    smt_cmd <- glue::glue("samtools mpileup -BQ0 {bam_path}")
+    perl_cmd <- paste0(
+        "perl -pe '($c, $start, undef, $depth) = split;if ($c ne $lastC || $start != $lastStart+1) {print ",
+        '"fixedStep chrom=$c start=$start step=1 span=1\n"',
+        ";}$_ = $depth.\"\n\";($lastC, $lastStart) = ($c, $start);'"
+    )
+    out_cmd <- glue::glue(" >> {output_filename}")
+    bam2wig_command <- paste0(paste0(c(smt_cmd, perl_cmd), collapse = " | "), out_cmd)
     system(command = bam2wig_command)
     return(NULL)
 }
@@ -164,41 +167,46 @@ bam_to_wig <- function(bam_path, output_filename = NULL, track_name_prefix = NUL
 #' @param description (optional) description for misha tracks
 #' @param parallel (optional) whether to use parallel computation
 #' @param force (optional) whether to force rewrite of existing misha tracks
-#' @return error log 
+#' @return error log
 #' @inheritParams generate_wigs_from_bams
 #' @export
-convert_wigs_to_tracks = function(wig_dir, 
-                                    track_name_prefix = NULL, 
-                                    description = NULL, 
-                                    parallel = TRUE, 
-                                    force = FALSE, 
-                                    nc = parallel::detectCores()) {
-    wig_file_paths = file.path(wig_dir, grep("\\.wig$", list.files(wig_dir), v=T))
-    track_name_suffix = "unnorm"
+convert_wigs_to_tracks <- function(wig_dir,
+                                   track_name_prefix = NULL,
+                                   description = NULL,
+                                   parallel = TRUE,
+                                   force = FALSE,
+                                   nc = parallel::detectCores()) {
+    wig_file_paths <- file.path(wig_dir, grep("\\.wig$", list.files(wig_dir), v = T))
+    track_name_suffix <- "unnorm"
     if (is.null(track_name_prefix)) {
-        track_name_prefix = basename(wig_dir)
+        track_name_prefix <- basename(wig_dir)
     }
     if (is.null(description)) {
-        description = "ATAC fragment track for {track_name_prefix} - {bn}"
+        description <- "ATAC fragment track for {track_name_prefix} - {bn}"
     }
     tracks_folder <- file.path(GWD, track_name_prefix)
-    if (!dir.exists(tracks_folder)) {misha.ext::gtrack.create_dirs(tracks_folder)}
+    if (!dir.exists(tracks_folder)) {
+        misha.ext::gtrack.create_dirs(tracks_folder)
+    }
     if (parallel) {
         error_log <- parallel::mclapply(wig_file_paths,
-                                        FUN = function(x) make_misha_track_from_wig(x, 
-                                                                    track_name_prefix = track_name_prefix, 
-                                                                    track_name_suffix = track_name_suffix,
-                                                                    description = description, 
-                                                                    force = force), 
-                                        mc.cores = nc)
-    }
-    else {
+            FUN = function(x) {
+                make_misha_track_from_wig(x,
+                    track_name_prefix = track_name_prefix,
+                    track_name_suffix = track_name_suffix,
+                    description = description,
+                    force = force
+                )
+            },
+            mc.cores = nc
+        )
+    } else {
         error_log <- sapply(wig_file_paths, make_misha_track_from_wig)
     }
     gdb.reload()
     temp_tracks <- gtrack.ls(glue::glue("{track_name_prefix}.*{track_name_suffix}"))
     error_log_2 <- normalize_tracks(tracks = temp_tracks, track_name_suffix = track_name_suffix)
-    dummy <- sapply(temp_tracks, gtrack.rm, f=T)
+    dummy <- sapply(temp_tracks, gtrack.rm, f = T)
     gdb.reload()
     return(list(error_log, error_log_2))
 }
@@ -217,15 +225,16 @@ make_misha_track_from_wig <- function(fp, track_name_prefix = NULL, description 
             cli_alert_warning("Deleting track {.val track_name}")
             gtrack.rm(track_name, force = force)
             gdb.reload()
-        }
-        else {
+        } else {
             cli_alert_info("Track {.val track_name} exists and {.var force} is {.val force}. Skipping import of track.")
         }
     }
-    dummy <- gtrack.import(track = track_name, 
-                    description = glue::glue(description), 
-                    file = fp,
-                    binsize = 0)
+    dummy <- gtrack.import(
+        track = track_name,
+        description = glue::glue(description),
+        file = fp,
+        binsize = 0
+    )
     return(dummy)
 }
 
@@ -238,21 +247,33 @@ normalize_tracks <- function(tracks, track_name_suffix, parallel = TRUE, nc = pa
     new_track_names <- gsub(glue::glue("_{track_name_suffix}"), "", tracks)
     if (parallel) {
         gsums <- parallel::mclapply(tracks, gsummary, mc.cores = nc)
-        error_log <- parallel::mcmapply(FUN = function(ntrki,trki,sumi) gtrack.create(track = ntrki, 
-                                                               description = glue::glue("Track {trki} normalized to library size"), 
-                                                               expr = glue::glue("{trki}/{sumi[['Sum']]}")), 
-                                                               new_track_names, 
-                                                               tracks, 
-                                                               gsums, 
-                                                               mc.cores = nc)
+        error_log <- parallel::mcmapply(
+            FUN = function(ntrki, trki, sumi) {
+                gtrack.create(
+                    track = ntrki,
+                    description = glue::glue("Track {trki} normalized to library size"),
+                    expr = glue::glue("{trki}/{sumi[['Sum']]}")
+                )
+            },
+            new_track_names,
+            tracks,
+            gsums,
+            mc.cores = nc
+        )
     } else {
         gsums <- lapply(tracks, gsummary)
-        error_log <- mapply(FUN = function(ntrki,trki,sumi) gtrack.create(track = ntrki, 
-                                                               description = glue::glue("Track {trki} normalized to library size"), 
-                                                               expr = glue::glue("{trki}/{sumi[['Sum']]}")), 
-                                                               new_track_names, 
-                                                               tracks, 
-                                                               gsums)
+        error_log <- mapply(
+            FUN = function(ntrki, trki, sumi) {
+                gtrack.create(
+                    track = ntrki,
+                    description = glue::glue("Track {trki} normalized to library size"),
+                    expr = glue::glue("{trki}/{sumi[['Sum']]}")
+                )
+            },
+            new_track_names,
+            tracks,
+            gsums
+        )
     }
     gdb.reload()
     return(error_log)

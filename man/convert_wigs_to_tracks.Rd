@@ -8,9 +8,9 @@ convert_wigs_to_tracks(
   wig_dir,
   track_name_prefix = NULL,
   description = NULL,
-  parallel = getOption("mcatac.parallel"),
+  parallel = TRUE,
   force = FALSE,
-  nc = getOption("mcatac.parallel.nc")
+  nc = parallel::detectCores()
 )
 }
 \arguments{
