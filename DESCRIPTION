@@ -1,11 +1,11 @@
 Package: mcATAC
-Title: Metacell analysis for ATAC data
+Title: Metacell analysis for scATAC data
 Version: 0.0.0.9000
 Authors@R: c(
     person("Aviezer", "Lifshitz", , "aviezer.lifshitz@weizmann.ac.il", role = c("aut", "cre")),
     person("Yonatan", "Shapira", , "yonatan.shapira@weizmann.ac.il", role = "aut")
   )
-Description: Metacell analysis for ATAC data
+Description: Metacell analysis for scATAC data
 License: MIT + file LICENSE
 Imports: 
     anndata,

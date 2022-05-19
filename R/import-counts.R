@@ -246,7 +246,7 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
         cell_names <- colnames(cell_names@mat)
     }
     gset_genome(genome)
-    use_tabix <- bin_exists(tabix_bin, "--version") && file.exists(paste0(fragments_file, ".tbi")) && grepl("gz$", tools::file_ext(fragments_file))
+    use_tabix <- bin_exists(tabix_bin) && file.exists(paste0(fragments_file, ".tbi")) && grepl("gz$", tools::file_ext(fragments_file))
 
     chromosomes <- chromosomes %||% gintervals.all()$chrom
 
