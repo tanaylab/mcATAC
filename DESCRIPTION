@@ -27,6 +27,7 @@ Imports:
     rlang,
     sparseMatrixStats,
     stringi,
+    stringr,
     tgstat,
     tgutil,
     tibble,
@@ -37,8 +38,11 @@ Imports:
     scattermore,
     grDevices,
     cowplot,
-    chameleon, 
-    tglkmeans
+    chameleon,
+    tglkmeans,
+    parallel,
+    plyr,
+    yaml
 Suggests: 
     testthat (>= 3.0.0),
     metacell,
@@ -63,3 +67,28 @@ VignetteBuilder: knitr
 Depends: 
     R (>= 3.5)
 LazyData: true
+Collate: 
+    'McATAC.R'
+    'ScCounts.R'
+    'McCounts.R'
+    'PeakIntervals.R'
+    'annotate.R'
+    'cluster.R'
+    'example_data.R'
+    'export.R'
+    'feature_selection.R'
+    'import-raw-counts.R'
+    'import.R'
+    'mcATAC-package.R'
+    'metadata.R'
+    'motifs.R'
+    'peak_calling.R'
+    'plot-markers.R'
+    'plot.R'
+    'project_on_mc.R'
+    'promoters.R'
+    'rna.R'
+    'subset_bam.R'
+    'utils-pipe.R'
+    'utils.R'
+    'zzz.R'

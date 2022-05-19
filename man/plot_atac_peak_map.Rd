@@ -5,21 +5,21 @@
 \title{Plot normalized accessibility of peaks over metacells, ordered by clustering}
 \usage{
 plot_atac_peak_map(
-  mc_atac,
-  mc_atac_clust = NULL,
+  atac_mc,
+  atac_mc_clust = NULL,
   peak_clust = NULL,
   peak_annotation = NULL,
   filename = NULL,
   dev = png,
-  main = mc_atac@id,
+  main = atac_mc@id,
   colors = colorRampPalette(c("blue4", "white", "red4"))(100),
   ...
 )
 }
 \arguments{
-\item{mc_atac}{McATAC object}
+\item{atac_mc}{McATAC object}
 
-\item{mc_atac_clust}{output of \code{gen_atac_mc_clust} (for meaningful visuals, make sure this is ordered by cluster)}
+\item{atac_mc_clust}{output of \code{gen_atac_mc_clust} (for meaningful visuals, make sure this is ordered by cluster)}
 
 \item{peak_clust}{output of \code{gen_atac_peak_clust} or other clustering of peaks (for meaningful visuals, make sure this is ordered by cluster)}
 
@@ -57,6 +57,6 @@ is_dyn <- setNames(as.numeric(rownames(my_mcatac@mat) \%in\% my_mcatac_dynamic_p
 pa1 <- list("is_dyn" = setNames(c("black", "red"), c(0, 1)))
 pa2 <- tibble::column_to_rownames(enframe(is_dyn, name = "peak_name", value = "is_dyn"), "peak_name")
 pa <- list(pa1, pa2)
-plot_atac_peak_map(my_mcatac, mc_atac_clust = order(my_mcatac@metadata$cell_type), peak_annotation = pa)
+plot_atac_peak_map(my_mcatac, atac_mc_clust = order(my_mcatac@metadata$cell_type), peak_annotation = pa)
 }
 }

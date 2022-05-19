@@ -110,7 +110,7 @@ atac_mc <- add_mc_metadata(atac_mc, mcmd)
 ```
 ## Identify dynamic peaks
 ```{r dynamic-peaks, dpi=300, fig.width=7, fig.height=7}
-dyn_peaks <- identify_dynamic_peaks(mcatac = atac_mc, mean_thresh_q = 0.05)
+dyn_peaks <- identify_dynamic_peaks(atac_mc, mean_thresh_q = 0.05)
 ```
 
 ## Cluster a peak set
@@ -174,6 +174,7 @@ export_to_h5ad(atac_mc, "pbmc_data/atac_mc.h5ad", compression = "gzip")
 # Load using: atac_mc <- import_from_h5ad("pbmc_data/atac_mc.h5ad")
 ```
 
+
 ## Plot per-metacell tracks around some gene/interval
 ```{r plot_tracks_at_locus}
 library(metacell)
@@ -192,4 +193,66 @@ plot_tracks_at_locus(tracks = pbmc_tracks, extend = 5e+4,
                 order_rows = T,
                 annotation_row = col_annot, 
                 annotation_colors = ann_colors)
+
+
+## Make per-metacell BAMs, WIGs and tracks
+
+```{r bams-wigs-tracks, eval = FALSE}
+bam_path <- "path/to/possorted_bam.bam"
+bam_output_folder <- "./my_mc_bams/"
+c2mc_folder <- "./c2mc/"
+wig_folder <- "./wig_output"
+track_name_prefix = "My_scATAC_project"
+generate_per_metacell_bams(bam_path = bam_path, mcatac = atac_mc, out_dir = bam_output_folder, c2mc_path = c2mc_folder)
+generate_wigs_from_bams(bam_folder_path = bam_output_folder, track_name_prefix = track_name_prefix, output_path = wig_folder, parallel = TRUE)
+convert_wigs_to_tracks(wig_folder, track_name_prefix = track_name_prefix, description = NULL, parallel = TRUE, force = FALSE)
+```
+
+## Make pseudo-bulk ATAC tracks from per-metacell tracks
+
+```{r merge-bams, eval = FALSE}
+bam_output_folder <- "./my_mc_bams/"
+track_name_prefix = "My_scATAC_project"
+cell_type = "Neuron"
+mcmd = tgutil::fread("./data/mcmd.csv") ## metacell metadata
+merge_metacell_bams(bam_path = bam_output_folder, output_filename="./pseudo_bulk.bam", mcs = which(mcmd$cell_type == cell_type), parallel = T)
+bam_to_wig(bam_path = "./pseudo_bulk.bam", output_filename = "./pseudo_bulk.wig", track_name_prefix = track_name_prefix)
+make_misha_track_from_wig(fp = "./pseudo_bulk.wig", track_name_prefix = track_name_prefix, description = glue::glue("Pseudo-bulk track of ATAC signal from {cell_type} cells"))
+```
+
+## Get available motif PSSM datasets and extract motif energies
+
+```{r motifs}
+gset_genome("hg38")
+available_datasets <- get_available_pssms(return_datasets_only = TRUE)
+available_datasets
+sample_peaks <- sample_n(atac_mc@peaks, 1e+4)
+motif_mat = generate_motif_pssm_matrix(atac = sample_peaks, motif_regex = c("Bcl", "Atf"), datasets_of_interest = "jaspar", parallel = T)
+head(motif_mat)
+```
+
+## Extract motif energies from random genomic background
+
+```{r random_genome}
+gset_genome("hg38")
+rg = gen_random_genome_peak_motif_matrix(num_peaks = 1e+4,
+                                          bp_from_chrom_edge_to_avoid = 1e+6, 
+                                          motif_regex = c("Bcl", "Atf"),
+                                          datasets_of_interest = "jaspar", 
+                                          parallel = T)
+head(rg)
+```
+
+## Compare Kolmogorov-Smirnov statistics on distribution of motif energies between peaks of interest and genomic background
+
+```{r ks_d}
+gset_genome("hg38")
+## all peaks
+ks_all <- calculate_d_stats(motif_mat, rg, parallel = TRUE, alternative = "less", nc = parallel::detectCores())  
+
+## by peak cluster
+sample_mc <- subset_peaks(atac_mc = atac_mc, sample_peaks)  
+sample_peak_clustering <- gen_atac_peak_clust(atac_mc = sample_mc, k = 10)  
+ks_mat <- calculate_d_stats(motif_mat, rg, parallel = TRUE, fg_clustering = sample_peak_clustering, alternative = "less", nc = parallel::detectCores())  
+head(ks_mat)  
 ```

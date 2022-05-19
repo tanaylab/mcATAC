@@ -12,7 +12,8 @@
   id = NULL,
   description = NULL,
   metadata = NULL,
-  path = ""
+  path = "",
+  tad_based = TRUE
 )
 }
 \arguments{
@@ -29,6 +30,8 @@
 \item{metadata}{data frame with a column called 'cell_id' and additional per-cell annotations, or the name of a delimited file which contains such annotations.}
 
 \item{path}{path from which the object was loaded (optional)}
+
+\item{tad_based}{wether the peak names are TAD-based}
 }
 \description{
 ScATAC is a shallow object holding ATAC data over cells.
