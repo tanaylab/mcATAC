@@ -347,7 +347,8 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust = NULL, peak_clust = NULL,
 #' @param gene (optional) which gene to plot around
 #' @param intervals (optional) what genomic interval to plot
 #' @param mc_rna (optional) RNA metacell object to extract gene expression data from
-#' @param atac (optional) ScATAC, McATAC or PeakIntervals object from which to extract peaks in locus
+#' @param atac (optional) McATAC object from which to extract peaks in locus, and possibly \cr 
+#' RNA expression values (if an RNA metacell object is attached)
 #' @param track_regex (optional) regular expression for matching tracks to plot
 #' @param rna_legc_eps (optional) what regularization value to add to mc_rna@e_gc when calculating log
 #' @param gene_annot (optional) whether to add gene annotations
@@ -401,6 +402,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
                                 track_regex = NULL, 
                                 iterator = 100,
                                 extend = 0, 
+                                atac = NULL,
                                 order_rows = FALSE,
                                 row_order = NULL,
                                 gene_annot = TRUE,
@@ -456,26 +458,25 @@ plot_tracks_at_locus <- function(tracks = NULL,
     } else {
         row_order <- 1:length(tracks)
     }
-    
     if (has_rna(atac)) {
-        rna_vals <- log2(rna_legc_eps + get_rna_egc(atac_mc, genes = gene))
+        rna_vals <- log2(rna_legc_eps + get_rna_egc(atac, genes = gene))
         rna_vals <- rna_vals - median(rna_vals)
         rna_vals <- rna_vals[row_order]
-        rna_ha <- ComplexHeatmap::SingleAnnotation(name = 'rna\nlegc\nminus\nmedian', value = ComplexHeatmap::anno_barplot(rna_vals), which = 'row')
+        rna_ha <- ComplexHeatmap::HeatmapAnnotation('rna\nlegc\nminus\nmedian' = ComplexHeatmap::anno_barplot(rna_vals), which = 'row')
     }
     else {
         cli_alert_info("Not plotting gene expression values since no RNA metacell object is attached to {.var atac}. To attach, use the function `add_mc_rna`.")
         rna_ha <- NULL
     }
-    if (!is.null(mc_rna)) {
-        if (length(tracks) != ncol(mc_rna@e_gc)) {
-            cli_abort("Number of tracks and number of RNA metacells do not match.")
-        }
-        rna_ha <- make_rna_annot(mc_rna, gene, rna_legc_eps, row_order)
-    }
-    else {
-        rna_ha <- NULL
-    }
+    # if (!is.null(mc_rna)) {
+    #     if (length(tracks) != ncol(mc_rna@e_gc)) {
+    #         cli_abort("Number of tracks and number of RNA metacells do not match.")
+    #     }
+    #     rna_ha <- make_rna_annot(mc_rna, gene, rna_legc_eps, row_order)
+    # }
+    # else {
+    #     rna_ha <- NULL
+    # }
     mc_gene_vals <- gextract(tracks, intervals = intervals, iterator = iterator)
     mat <- t(subset(mc_gene_vals, select = -c(chrom, start, end, intervalID)))
     rownames(mat) <- 1:nrow(mat)
@@ -493,9 +494,38 @@ plot_tracks_at_locus <- function(tracks = NULL,
     } else {
         gene_annots <- NULL
     }
+    if (!is.null(atac)) {
+        peaks_ha <- make_peak_annotation(atac, intervals, iterator, ncol(mat_n))
+        # peaks_ha <- ComplexHeatmap::SingleAnnotation(name = 'peaks', value = peaks_ha, col = setNames(c('white', 'red'), c(0,1)),
+        #                             which = 'column')
+    } else {
+        peaks_ha <- NULL
+    }
+    if (gene_annot) {
+        gene_annots <- make_gene_annot(intervals, iterator, ncol(mat_n))
+        gene_name_annots <- ComplexHeatmap::anno_mark(labels = gene_annots[["labels"]],
+                                                        at = gene_annots[["label_coords"]]
+                                                        )
+        exon_annots <- ComplexHeatmap::SingleAnnotation(name = "exons", 
+                                                value = gene_annots[["exon_coords"]], 
+                                                col = setNames(c('white', 'black'), c(0,1)),
+                                                which = 'column')
+        top_ha <- ComplexHeatmap::HeatmapAnnotation(peaks = peaks_ha, 
+                                                    genes = gene_name_annots, 
+                                                    exons = gene_annots[["exon_coords"]],
+                                                    col = list(peaks = setNames(c('white', 'red'), c(0,1)),
+                                                                genes = 'black',
+                                                                exons = setNames(c('white', 'black'), c(0,1))
+                                                                )
+                                                    )
+        
+    } else {
+        gene_annots <- NULL
+        top_ha <- ComplexHeatmap::HeatmapAnnotation(peaks = peaks_ha, genes = gene_annots)
+    }
     ch <- ComplexHeatmap::Heatmap(mat_n[row_order,], 
                     use_raster = F,
-                    top_annotation = gene_annots, 
+                    top_annotation = top_ha, 
                     left_annotation = ct_ha, 
                     right_annotation = rna_ha, 
                     col = colors,
@@ -542,12 +572,12 @@ make_gene_annot <- function(intervals, iterator, num_bins) {
                         return(vec)
                     }))
         vecsums = as.numeric(pmin(colSums(vecs), 1))
-        genes_ha <- ComplexHeatmap::HeatmapAnnotation(gene_names = ComplexHeatmap::anno_mark(labels = rep(rg_here$name2, 2),
-                                                        at = c(round((rg_here$txEnd - intervals$start)/iterator), 
-                                                                round((rg_here$txStart - intervals$start)/iterator)),
-                                                        ),
-                                        genes = vecsums, col = list(genes = setNames(c('white', 'black'), c(0,1))),
-                                        which = 'column')
+        genes_ha <- list(
+                labels = rep(rg_here$name2, 2),
+                label_coords = c(round((rg_here$txEnd - intervals$start)/iterator), 
+                                    round((rg_here$txStart - intervals$start)/iterator)),
+                exon_coords = vecsums
+                )
     } else {
         genes_ha <- NULL
     }
@@ -563,6 +593,35 @@ make_rna_annot <- function(mc_rna, gene, rna_legc_eps, row_order) {
     rna_vals <- log2(mc_rna@e_gc[gene,] + rna_legc_eps)
     rna_vals <- rna_vals - median(rna_vals)
     rna_vals <- rna_vals[row_order]
-    rna_ha <- ComplexHeatmap::SingleAnnotation(name = 'rna\nlegc\nminus\nmedian', value = ComplexHeatmap::anno_barplot(rna_vals), which = 'row')
+    rna_ha <- ComplexHeatmap::HeatmapAnnotation('rna\nlegc\nminus\nmedian' = ComplexHeatmap::anno_barplot(rna_vals), which = 'row')
     return(rna_ha)
+}
+
+# Function to make annotation of peak locations in ATAC object corresponding to tracks
+#' @param num_bins length of vector to generate the annotation for (number of columns in the heatmap)
+#' @inheritParams plot_tracks_at_locus
+#' @noRd
+make_peak_annotation <- function(atac, intervals, iterator, num_bins) {
+    cl <- class(atac)   
+    if ("ScATAC" %in% cl || "McATAC" %in% cl) {
+        peaks <- atac@peaks
+    } else if ("PeakIntervals" %in% cl) {
+        peaks <- atac
+    }
+    intervals <- as.data.frame(intervals)
+    peaks_here <- gintervals.neighbors(as.data.frame(peaks), intervals, maxdist = 0, mindist = 0, maxneighbors = 1)
+    peaks_here[peaks_here[,2] <= min(intervals$start) & peaks_here[,3] <= max(intervals$end),2] = min(intervals$start)
+    peaks_here[peaks_here[,2] >= min(intervals$start) & peaks_here[,3] >= max(intervals$end),3] = max(intervals$end)
+    peaks_coords <- dplyr::mutate(peaks_here[,c("start", "end")], 
+                                    start = round((start - intervals$start)/iterator),
+                                    end = round((end - intervals$start)/iterator))
+    if (nrow(peaks_coords) > 0) {
+        bins_mark <- sapply(1:nrow(peaks_coords), function(i) peaks_coords[i,1]:peaks_coords[i,2])
+        bins_mark <- unlist(bins_mark)
+    } else {
+        bins_mark <- c()
+    }
+    vec <- rep(0, num_bins)
+    vec[bins_mark] = 1
+    return(vec)
 }
