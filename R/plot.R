@@ -343,10 +343,22 @@ plot_atac_peak_map <- function(mc_atac, mc_atac_clust = NULL, peak_clust = NULL,
 
 #' Plot metacell tracks around locus
 #'
+#'
+#' @description This function plots a set of tracks in a certain locus. Tracks can be given as a vector (\code{tracks}), \cr
+#' or retreived using \code{track_regex}. The intervals to be plotted can be chosen explicitly using the parameter \cr 
+#' \code{intervals}. Alternatively, one can specify the parameter \code{gene}; by default, the gene body (all exons) \cr 
+#' will be plotted, this can be modified using the parameters \code{extend} (how many bp to extend from each side of \cr 
+#' the gene features) and \code{gene_feature}, where the intervals can be centered around TSSs of \cr 
+#' the gene (gene_feature = 'tss').
+#' Metacell annotations can be added using \code{annotation_row} and \{annotation_colors} (phetamap-style annotations), \cr
+#' which can/should be generated automatically by \code{generate_pheatmap_annotation}.
+#' RNA expression values of the \code{gene} of interest can be added by specifying an McATAC object, \code{atac}, to \cr
+#' which an RNA metacell object is attached (see the function \code{add_mc_rna})
+#'
+#'
 #' @param tracks (optional) all tracks to plot
 #' @param gene (optional) which gene to plot around
 #' @param intervals (optional) what genomic interval to plot
-#' @param mc_rna (optional) RNA metacell object to extract gene expression data from
 #' @param atac (optional) McATAC object from which to extract peaks in locus, and possibly \cr 
 #' RNA expression values (if an RNA metacell object is attached)
 #' @param track_regex (optional) regular expression for matching tracks to plot
@@ -468,15 +480,6 @@ plot_tracks_at_locus <- function(tracks = NULL,
         cli_alert_info("Not plotting gene expression values since no RNA metacell object is attached to {.var atac}. To attach, use the function `add_mc_rna`.")
         rna_ha <- NULL
     }
-    # if (!is.null(mc_rna)) {
-    #     if (length(tracks) != ncol(mc_rna@e_gc)) {
-    #         cli_abort("Number of tracks and number of RNA metacells do not match.")
-    #     }
-    #     rna_ha <- make_rna_annot(mc_rna, gene, rna_legc_eps, row_order)
-    # }
-    # else {
-    #     rna_ha <- NULL
-    # }
     mc_gene_vals <- gextract(tracks, intervals = intervals, iterator = iterator)
     mat <- t(subset(mc_gene_vals, select = -c(chrom, start, end, intervalID)))
     rownames(mat) <- 1:nrow(mat)
@@ -496,8 +499,6 @@ plot_tracks_at_locus <- function(tracks = NULL,
     }
     if (!is.null(atac)) {
         peaks_ha <- make_peak_annotation(atac, intervals, iterator, ncol(mat_n))
-        # peaks_ha <- ComplexHeatmap::SingleAnnotation(name = 'peaks', value = peaks_ha, col = setNames(c('white', 'red'), c(0,1)),
-        #                             which = 'column')
     } else {
         peaks_ha <- NULL
     }
@@ -582,19 +583,6 @@ make_gene_annot <- function(intervals, iterator, num_bins) {
         genes_ha <- NULL
     }
     return(genes_ha)
-}
-
-#' @param mc_rna RNA metacell object
-#' @param gene gene of interest
-#' @param rna_legc_eps regularization value when taking log of mc_rna@e_gc
-#' @param row_order order of rows
-#' @noRd
-make_rna_annot <- function(mc_rna, gene, rna_legc_eps, row_order) {
-    rna_vals <- log2(mc_rna@e_gc[gene,] + rna_legc_eps)
-    rna_vals <- rna_vals - median(rna_vals)
-    rna_vals <- rna_vals[row_order]
-    rna_ha <- ComplexHeatmap::HeatmapAnnotation('rna\nlegc\nminus\nmedian' = ComplexHeatmap::anno_barplot(rna_vals), which = 'row')
-    return(rna_ha)
 }
 
 # Function to make annotation of peak locations in ATAC object corresponding to tracks
