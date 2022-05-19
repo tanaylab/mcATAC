@@ -96,13 +96,18 @@ scc_project_on_mc <- function(sc_counts, cell_to_metacell, ignore_metacells = -1
 #' @inheritParams scc_read
 #' @export
 mcc_read <- function(path, id = NULL, description = NULL, verbose = TRUE) {
-    sc_counts <- scc_read(path, id, description, verbose = FALSE)
+    if (!file.exists(md_file)) {
+        cli_abort("Directory {.file {path}} does not contain a valid McCounts object")
+    }
+
     md_file <- file.path(path, "metadata.yaml")
     md <- yaml::read_yaml(md_file)
 
     if (is.null(md$cell_to_metacell)) {
         cli_abort("Directory {.file {path}} does not contain a valid McCounts object (the metadata file {.file {md_file}} is missing the {.field cell_to_metacell} field.)")
     }
+
+    sc_counts <- scc_read(path, id, description, verbose = FALSE)
 
     mc_counts <- new("McCounts", data = sc_counts@data, cell_names = sc_counts@cell_names, genome = sc_counts@genome, genomic_bins = sc_counts@genomic_bins, id = sc_counts@id, description = sc_counts@description, path = sc_counts@path, cell_to_metacell = as_tibble(md$cell_to_metacell))
 
@@ -523,7 +528,9 @@ create_smoothed_track <- function(raw_track, track, description, window_size, re
     gvtrack.create(vt, raw_track, func = "sum")
     withr::defer(gvtrack.rm(vt))
 
-    gvtrack.iterator(vt, sshift = -window_size, eshift = window_size)
+    shift <- window_size - round(resolution / 2)
+    gvtrack.iterator(vt, sshift = -shift, eshift = shift)
+
     gtrack.create(
         track,
         description = description,
