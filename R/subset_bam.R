@@ -19,32 +19,6 @@ generate_per_metacell_bams <- function(bam_path,
     write_metacell_cell_names(mcatac, c2mc_path)
     fp_sb2mc <- system.file("exec", "split_bam_to_metacells.sh", package = "mcATAC")
     fp_rgp <- system.file("exec", "run_gnu_parallel.sh", package = "mcATAC")
-    error_log <- withr::with_path(new = gparallel_path, 
-                                    code = system2(command = fp_sb2mc,
-                                                    args = c(bam_path, 
-                                                             c2mc_path, 
-                                                             out_dir,
-                                                             fp_rgp,
-                                                             gparallel_path, 
-                                                             samtools_path)
-                                                    )
-                                )
-
-#' @return error log
-#' @inheritParams write_metacell_cell_names
-#' @export
-generate_per_metacell_bams <- function(bam_path,
-                                       mcatac,
-                                       out_dir = file.path(bam_path, paste0(mcatac@id, "_mc_bams")),
-                                       gparallel_path = "/usr/wisdom/parallel",
-                                       samtools_path = "samtools") {
-    if (!file.exists(paste0(bam_path, ".bai"))) {
-        cli_abort("Index file not found for {.file {bam_path}}. Please run 'samtools index {bam_path}'.")
-    }
-    c2mc_path <- file.path(dirname(bam_path), paste0(mcatac@id, "_c2mc"))
-    write_metacell_cell_names(mcatac, c2mc_path)
-    fp_sb2mc <- system.file("exec", "split_bam_to_metacells.sh", package = "mcATAC")
-    fp_rgp <- system.file("exec", "run_gnu_parallel.sh", package = "mcATAC")
     error_log <- withr::with_path(
         new = gparallel_path,
         code = system2(
@@ -71,24 +45,6 @@ generate_per_metacell_bams <- function(bam_path,
 #' @param parallel (optional) whether to do parallel computations
 #' @param nc (optional) number of cores for parallel computations
 #' @return error log 
-#' @export
-generate_wigs_from_bams <- function(bam_folder_path, 
-                                    output_path = file.path(bam_folder_path, "wig_output"), 
-                                    parallel = TRUE, 
-                                    nc = parallel::detectCores()) {
-    bam_folder_path = normalizePath(bam_folder_path)
-    output_path = normalizePath(output_path)
-    if (!dir.exists(output_path)) {dir.create(output_path, recursive = TRUE)}
-    bams <- list.files(bam_folder_path, pattern = "\\.bam$")
-    if (parallel) {
-        error_log <- parallel::mclapply(bams, FUN = function(fl) {
-                        output_filename = file.path(output_path, gsub('\\.bam$', '.wig', basename(fl)));
-                        bam_to_wig(file.path(bam_folder_path, fl), output_filename)
-        }, mc.cores = nc)
-    }
-    else {
-
-#' @return error log
 #' @export
 generate_wigs_from_bams <- function(bam_folder_path,
                                     output_path = file.path(bam_folder_path, "wig_output"),
@@ -126,7 +82,7 @@ write_metacell_cell_names <- function(mcatac, c2mc_path = NULL) {
         nmc <- c2mc$cell_id[c2mc$metacell == mci]
         write(nmc,file=file.path(c2mc_path, paste0("mc", mci, ".txt")),sep='\n')
         c2mc_path <- file.path("data", paste0(mcatac@id, "_c2mc"))
-    }
+    })
     if (!dir.exists(c2mc_path)) {
         dir.create(c2mc_path, recursive = TRUE)
     }
@@ -157,13 +113,6 @@ merge_metacell_bams <- function(bam_path, output_filename, mcs, parallel = getOp
         }
         command <- glue::glue("samtools merge -f --threads {nc}")
         command <-paste(command, output_filename, paste0(file_list, collapse = ' '))
-        system(command)
-    }
-    else {
-            nc <- 0
-        }
-        command <- glue::glue("samtools merge -f --threads {nc}")
-        command <- paste(command, output_filename, paste0(file_list, collapse = " "))
         system(command)
     } else {
         bad_mcs <- mcs[!file.exists(file_list)]
@@ -307,16 +256,4 @@ normalize_tracks <- function(tracks, track_name_suffix, parallel = TRUE, nc = pa
     }
     gdb.reload()
     return(error_log)
-}
-        } else {
-            cli_alert_info("Track {.val track_name} exists and {.var force} is {.val force}. Skipping import of track.")
-        }
-    }
-    dummy <- gtrack.import(
-        track = track_name,
-        description = glue::glue(description),
-        file = fp,
-        binsize = 0
-    )
-    return(dummy)
 }
