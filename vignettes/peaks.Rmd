@@ -10,7 +10,8 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = FALSE
 )
 ```
 
@@ -41,16 +42,11 @@ Note that the 'fragments' file is large - ~2GB, so this step might take some tim
 
 `mcATAC` allows you to load the raw counts data into an `ScCounts` object. A `ScCounts` holds the raw reads as a set of sparse matrices where the rows are genomic coordinates and the columns are cell barcodes. The number of sparse matrices ("genomic bins") is controlled by the `bin_size` parameter. The matrices are stored in a 'gzip' compressed form under a directory called 'data', together with a 'yaml' file containing the some metadata such as the genomic bins coordinates and the cell barcodes.
 
-In order to parse the fragments file, we need to know the names of the cell barcodes. We can get this from the atac matrix provided by 10x: 
-
-```{r atac-sc}
-atac_sc <- import_from_10x("pbmc_data", genome = "hg38", id = "pbmc", description = "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
-```
-
 We can now import the raw reads into a `ScCounts` object that we are going to store at "pbmc_data/reads". Note that this might take ~4 minutes on a machine with 96 cores. 
   
 ```{r import-scounts, eval = FALSE}
-write_sc_counts_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_data/reads", cell_names = atac_sc, overwrite = TRUE)
+barcodes <- tgutil::fread("pbmc_data/barcodes.tsv", header = FALSE)[, 1]
+write_sc_counts_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_data/reads", cell_names = barcodes, genome = "hg38", overwrite = TRUE)
 ```
 
 ## Load ScCounts object
@@ -81,12 +77,12 @@ mcc_write(mc_counts, "pbmc_data/mc_counts", overwrite = TRUE)
 We can now create a 'misha' track for each metacell:
 
 ```{r misha-tracks}
-mcc_to_tracks(mc_counts, "temp.pbmc_mc", overwrite = TRUE)
+mcc_to_tracks(mc_counts, "pbmc_mc", overwrite = TRUE)
 ```
 
 ## Identify peaks
 
-We can then use the tracks we created to indetify peaks on the metacell level. We think it is more robust than looking only at the marginal of all the data (as the cell ranger does), or than trying to identify peaks on the single cell level which is very sparse. 
+We can then use the tracks we created to identify peaks on the metacell level. We think it is more robust than looking only at the marginal of all the data (as the cell ranger does), or than trying to identify peaks on the single cell level which is very sparse. 
 
 ```{r identify-peaks}
 # identify peaks on the metacell level. In the meantime - a placeholder using the ScATAC peaks

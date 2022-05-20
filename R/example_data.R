@@ -37,8 +37,10 @@ download_pbmc_example_data <- function(dir = "pbmc_data", fragments = FALSE) {
     if (fragments) {
         fragments_url <- "https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_atac_fragments.tsv.gz"
         fragment_index_url <- "https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_atac_fragments.tsv.gz.tbi"
+        barcodes_url <- "https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_per_barcode_metrics.csv"
         download.file(fragments_url, file.path(dir, "fragments.tsv.gz"))
         download.file(fragment_index_url, file.path(dir, "fragments.tsv.gz.tbi"))
+        download.file(barcodes_url, file.path(dir, "barcodes.csv"))
         cli_alert_info("downloaded fragments")
     }
 
