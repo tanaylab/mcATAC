@@ -485,13 +485,19 @@ plot_tracks_at_locus <- function(tracks = NULL,
         }
     }
     if (order_rows) {
-        if (!is.null(annotation_row) && has_name(annotation_row, "cell_type")) {
+        if (is.null(annotation_row) && has_name(atac@metadata, "cell_type")) {
             if (!is.null(row_order)) {
                 cli_alert_info("Both {.var order_rows} == TRUE and {.var row_order} specified. Ordering rows and ignoring {.var row_order}.")
             }
+            row_order <- order(atac@metadata[, "cell_type"])
+        } else if (!has_name(atac@metadata, "cell_type") | 
+                    (!is.null(annotation_row) && has_name(annotation_row, "cell_type"))
+                    ) {
+            cli_alert_info("{.var atac@metadata} has no field {.field cell_type}, cannot order rows; using {.var annotation_rows)")
             row_order <- order(annotation_row[, "cell_type"])
-        } else {
-            cli_alert_info("No appropriate metacell annotation provided for ordering tracks. Tracks will not be ordered.")
+        }
+        else {
+            cli_alert_info("No appropriate metacell annotation provided for ordering tracks. Need either {.var atac@metadata$cell_type} or {.var annotation_row$cell_type}. Tracks will not be ordered.")
         }
     } else if (is.null(row_order)) {
         row_order <- 1:length(tracks)
@@ -552,7 +558,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
                 labels = gene_annots[["labels"]],
                 at = gene_annots[["label_coords"]]
             )
-            exon_annots <- gene_annots[["label_coords"]]
+            exon_annots <- gene_annots[["exon_coords"]]
         } else {
             gene_name_annots <- NULL
             exon_annots <- NULL
