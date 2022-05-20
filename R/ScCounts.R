@@ -191,6 +191,10 @@ scc_read <- function(path, id = NULL, description = NULL, verbose = TRUE) {
         cli_abort("Directory {.file {path}} does not contain a valid ScCounts object")
     }
     md <- yaml::read_yaml(md_file)
+    if (!is.null(md$cell_to_metacell)) {
+        cli_abort("Directory {.file {path}} contains a McCounts object. Please use {.code mcc_read} instead.")
+    }
+
     data_dir <- file.path(path, md$data_dir)
     required_fields <- c("cell_names", "genome", "id", "description", "data_dir", "genomic_bins")
     purrr::walk(required_fields, ~ {

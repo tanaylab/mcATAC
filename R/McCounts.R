@@ -133,7 +133,7 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
     metacells <- metacells %||% colnames(mat)
     intervs <- as.data.frame(intervs)
 
-    # find the coordinates that overlap with the intervals (note that we mat@i is zero based)
+    # find the coordinates that overlap with the intervals (note that we assume mat@i is zero based, as in the standard 'dgCMatrix' implementation)
     mat_intervs <- tibble(chrom = bin$chrom, start = unique(mat@i) + bin$start, end = start + 1) %>%
         gintervals.intersect(intervs)
 
