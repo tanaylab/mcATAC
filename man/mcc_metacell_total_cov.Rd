@@ -4,10 +4,12 @@
 \alias{mcc_metacell_total_cov}
 \title{Return the total coverage of each metacell in an McCounts object}
 \usage{
-mcc_metacell_total_cov(mc_counts)
+mcc_metacell_total_cov(mc_counts, metacells = NULL)
 }
 \arguments{
 \item{mc_counts}{a McCounts object}
+
+\item{metacells}{names of metacells to include. Default: all metacells.}
 }
 \value{
 a named vector with the total coverage for each metacell
