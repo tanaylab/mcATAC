@@ -485,13 +485,19 @@ plot_tracks_at_locus <- function(tracks = NULL,
         }
     }
     if (order_rows) {
-        if (!is.null(annotation_row) && has_name(annotation_row, "cell_type")) {
+        if (is.null(annotation_row) && has_name(atac@metadata, "cell_type")) {
             if (!is.null(row_order)) {
                 cli_alert_info("Both {.var order_rows} == TRUE and {.var row_order} specified. Ordering rows and ignoring {.var row_order}.")
             }
+            row_order <- order(atac@metadata[, "cell_type"])
+        } else if (!has_name(atac@metadata, "cell_type") | 
+                    (!is.null(annotation_row) && has_name(annotation_row, "cell_type"))
+                    ) {
+            cli_alert_info("{.var atac@metadata} has no field {.field cell_type}, cannot order rows; using {.var annotation_rows)")
             row_order <- order(annotation_row[, "cell_type"])
-        } else {
-            cli_alert_info("No appropriate metacell annotation provided for ordering tracks. Tracks will not be ordered.")
+        }
+        else {
+            cli_alert_info("No appropriate metacell annotation provided for ordering tracks. Need either {.var atac@metadata$cell_type} or {.var annotation_row$cell_type}. Tracks will not be ordered.")
         }
     } else if (is.null(row_order)) {
         row_order <- 1:length(tracks)
@@ -552,13 +558,15 @@ plot_tracks_at_locus <- function(tracks = NULL,
                 labels = gene_annots[["labels"]],
                 at = gene_annots[["label_coords"]]
             )
+            exon_annots <- gene_annots[["exon_coords"]]
         } else {
             gene_name_annots <- NULL
+            exon_annots <- NULL
         }
         top_ha <- ComplexHeatmap::HeatmapAnnotation(
             peaks = peaks_ha,
             genes = gene_name_annots,
-            exons = gene_annots[["exon_coords"]],
+            exons = exon_annots,
             col = list(
                 peaks = setNames(c("white", "red"), c(0, 1)),
                 genes = "black",
@@ -592,7 +600,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
 #' @noRd
 make_gene_annot <- function(intervals, iterator, num_bins) {
     file_path <- file.path(dirname(GROOT), "annots", "refGene.txt")
-    if (!file.exists(file.path)) {
+    if (!file.exists(file_path)) {
         cli_alert_warning("Gene annotations do not exist in the appropriate location ({.val {file_path}}). Not annotating genes...")
         genes_ha <- list(labels = NULL, label_coords = NULL, exon_coords = NULL)
     } else {
@@ -638,15 +646,19 @@ make_peak_annotation <- function(atac, intervals, iterator, num_bins) {
     }
     intervals <- as.data.frame(intervals)
     peaks_here <- gintervals.neighbors(as.data.frame(peaks), intervals, maxdist = 0, mindist = 0, maxneighbors = 1)
-    peaks_here[peaks_here[, 2] <= min(intervals$start) & peaks_here[, 3] <= max(intervals$end), 2] <- min(intervals$start)
-    peaks_here[peaks_here[, 2] >= min(intervals$start) & peaks_here[, 3] >= max(intervals$end), 3] <- max(intervals$end)
-    peaks_coords <- dplyr::mutate(peaks_here[, c("start", "end")],
-        start = round((start - intervals$start) / iterator),
-        end = round((end - intervals$start) / iterator)
-    )
-    if (nrow(peaks_coords) > 0) {
-        bins_mark <- sapply(1:nrow(peaks_coords), function(i) peaks_coords[i, 1]:peaks_coords[i, 2])
-        bins_mark <- unlist(bins_mark)
+    if (!is.null(peaks_here)) {
+        peaks_here[peaks_here[, 2] <= min(intervals$start) & peaks_here[, 3] <= max(intervals$end), 2] <- min(intervals$start)
+        peaks_here[peaks_here[, 2] >= min(intervals$start) & peaks_here[, 3] >= max(intervals$end), 3] <- max(intervals$end)
+        peaks_coords <- dplyr::mutate(peaks_here[, c("start", "end")],
+            start = round((start - intervals$start) / iterator),
+            end = round((end - intervals$start) / iterator)
+        )
+        if (nrow(peaks_coords) > 0) {
+            bins_mark <- sapply(1:nrow(peaks_coords), function(i) peaks_coords[i, 1]:peaks_coords[i, 2])
+            bins_mark <- unlist(bins_mark)
+        } else {
+            bins_mark <- c()
+        }
     } else {
         bins_mark <- c()
     }
