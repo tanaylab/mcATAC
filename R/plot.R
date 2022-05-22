@@ -345,15 +345,15 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 #' Plot metacell tracks around locus
 #'
 #'
-#' @description This function plots a set of tracks in a certain locus. Tracks can be given as a vector (\code{tracks}), \cr
-#' or retreived using \code{track_regex}. The intervals to be plotted can be chosen explicitly using the parameter \cr
-#' \code{intervals}. Alternatively, one can specify the parameter \code{gene}; by default, the gene body (all exons) \cr
-#' will be plotted, this can be modified using the parameters \code{extend} (how many bp to extend from each side of \cr
-#' the gene features) and \code{gene_feature}, where the intervals can be centered around TSSs of \cr
-#' the gene (gene_feature = 'tss').
-#' Metacell annotations can be added using \code{annotation_row} and \{annotation_colors} (phetamap-style annotations), \cr
+#' @description This function plots a set of tracks in a certain locus. Tracks can be given as a vector (\code{tracks}),
+#' or retreived using \code{track_regex}. The intervals to be plotted can be chosen explicitly using the parameter
+#' \code{intervals}. Alternatively, one can specify the parameter \code{gene}; by default, the gene body (all exons)
+#' will be plotted, this can be modified using the parameters \code{extend} (how many bp to extend from each side of
+#' the gene features) and \code{gene_feature}, where the intervals can be centered around TSSs of
+#' the gene (gene_feature = 'tss'). \cr
+#' Metacell annotations can be added using \code{annotation_row} and \code{annotation_colors} (phetamap-style annotations),
 #' which can/should be generated automatically by \code{generate_pheatmap_annotation}.
-#' RNA expression values of the \code{gene} of interest can be added by specifying an McATAC object, \code{atac}, to \cr
+#' RNA expression values of the \code{gene} of interest can be added by specifying an McATAC object, \code{atac}, to
 #' which an RNA metacell object is attached (see the function \code{add_mc_rna})
 #'
 #'
@@ -379,7 +379,7 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 
 #' @param colors (optional) colorRampPalette vector of colors for scaling colors in heatmap
 #'
-#' @inheritParams Heatmap
+#' @inheritParams ComplexHeatmap::Heatmap
 #'
 #' @return a ComplexHeatmap figure
 #' @examples
@@ -491,13 +491,12 @@ plot_tracks_at_locus <- function(tracks = NULL,
                 cli_alert_info("Both {.var order_rows} == TRUE and {.var row_order} specified. Ordering rows and ignoring {.var row_order}.")
             }
             row_order <- order(atac@metadata[, "cell_type"])
-        } else if (!has_name(atac@metadata, "cell_type") | 
-                    (!is.null(annotation_row) && has_name(annotation_row, "cell_type"))
-                    ) {
+        } else if (!has_name(atac@metadata, "cell_type") |
+            (!is.null(annotation_row) && has_name(annotation_row, "cell_type"))
+        ) {
             cli_alert_info("{.var atac@metadata} has no field {.field cell_type}, cannot order rows; using {.var annotation_rows)")
             row_order <- order(annotation_row[, "cell_type"])
-        }
-        else {
+        } else {
             cli_alert_info("No appropriate metacell annotation provided for ordering tracks. Need either {.var atac@metadata$cell_type} or {.var annotation_row$cell_type}. Tracks will not be ordered.")
         }
     } else if (is.null(row_order)) {

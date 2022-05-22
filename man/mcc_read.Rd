@@ -4,7 +4,7 @@
 \alias{mcc_read}
 \title{Read an McCounts object from a directory}
 \usage{
-mcc_read(path, id = NULL, description = NULL)
+mcc_read(path, id = NULL, description = NULL, verbose = TRUE)
 }
 \arguments{
 \item{path}{path to the directory containing the object (which was created by \code{write_sc_counts_from_bam})}
@@ -12,6 +12,8 @@ mcc_read(path, id = NULL, description = NULL)
 \item{id}{an identifier for the object (optional)}
 
 \item{description}{description of the object (optional)}
+
+\item{verbose}{print success message (default: TRUE)}
 }
 \value{
 A McCounts object

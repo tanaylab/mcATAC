@@ -24,7 +24,7 @@ plot_tracks_at_locus(
   annotation_colors = NULL,
   silent = FALSE,
   scale_bar_length = NULL,
-  rna_legc_eps = 1e-05,
+  rna_legc_eps = 0.00001,
   colors = colorRampPalette(c("white", "darkblue", "red"))(100),
   ...
 )
@@ -73,7 +73,16 @@ RNA expression values (if an RNA metacell object is attached)}
 a ComplexHeatmap figure
 }
 \description{
-
+This function plots a set of tracks in a certain locus. Tracks can be given as a vector (\code{tracks}),
+or retreived using \code{track_regex}. The intervals to be plotted can be chosen explicitly using the parameter
+\code{intervals}. Alternatively, one can specify the parameter \code{gene}; by default, the gene body (all exons)
+will be plotted, this can be modified using the parameters \code{extend} (how many bp to extend from each side of
+the gene features) and \code{gene_feature}, where the intervals can be centered around TSSs of
+the gene (gene_feature = 'tss'). \cr
+Metacell annotations can be added using \code{annotation_row} and \code{annotation_colors} (phetamap-style annotations),
+which can/should be generated automatically by \code{generate_pheatmap_annotation}.
+RNA expression values of the \code{gene} of interest can be added by specifying an McATAC object, \code{atac}, to
+which an RNA metacell object is attached (see the function \code{add_mc_rna})
 }
 \examples{
 \dontrun{
