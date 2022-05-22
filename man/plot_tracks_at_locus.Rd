@@ -10,7 +10,6 @@ plot_tracks_at_locus(
   intervals = NULL,
   iterator = 100,
   extend = 0,
-  mc_rna = NULL,
   gene_feature = "exon",
   track_regex = NULL,
   chromosomes = gintervals.all() \%>\% filter(!grepl("_", chrom)) \%>\% pull(chrom),
@@ -85,42 +84,30 @@ which an RNA metacell object is attached (see the function \code{add_mc_rna})
 }
 \examples{
 \dontrun{
-setwd("/net/mraid14/export/tgdata/users/yonshap/proj/matching")
-library(metacell)
-scdb_init("scdb")
-mc_rna <- scdb_mc("rna_w_color_key")
-atac_sc <- import_from_10x("./data/pbmc_data/", genome = "hg38", id = "PBMC_10X")
-mc1 <- project_atac_on_mc_from_metacell1(atac_sc, scdb = "scdb", mc_id = "rna_w_color_key")
-mc <- scdb_mc("rna_w_color_key")
-mc1 <- add_mc_rna(mc_rna = mc, mcatac = mc1)
+atac_sc <- import_from_10x("pbmc_data", genome = "hg38", id = "PBMC", description = "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
+data(cell_to_metacell_pbmc_example)
+atac_mc <- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example)
 data(mcmd)
-color_key <- unique(mcmd[, c("st", "color")])
-colnames(color_key) <- c("cell_type", "color")
-col_annot <- data.frame(cell_type = mcmd$st)
-rownames(col_annot) <- mcmd$mc
-ann_colors <- list(cell_type = setNames(color_key$color, color_key$cell_type))
-pbmc_tracks <- grep("unnorm", gtrack.ls("PBMC_10X.mc"), inv = T, v = T)
-
-
+atac_mc <- add_mc_metadata(atac_mc, mcmd)
+data(rna_mc_mat)
+atac_mc <- add_mc_rna(atac_mc, rna_mc_mat)
+pbmc_tracks <- grep("unnorm", gtrack.ls("PBMC_10X.mc"), inv = TRUE, v = TRUE)
 # plot gene-centered intervals
 plot_tracks_at_locus(
     tracks = pbmc_tracks, extend = 5e+4,
     gene = "ATF3",
-    mc_rna = mc_rna,
-    gene_annot = T,
-    order_rows = T,
-    annotation_row = col_annot,
-    annotation_colors = ann_colors
+    atac = atac_mc,
+    gene_annot = TRUE,
+    order_rows = TRUE
 )
 
 # plot arbitrary intervals
 plot_tracks_at_locus(
     tracks = pbmc_tracks,
     intervals = gintervals(2, 1e+7, 1.15e+7),
-    gene_annot = T,
-    order_rows = T,
-    annotation_row = col_annot,
-    annotation_colors = ann_colors
+    atac = atac_mc,
+    gene_annot = TRUE,
+    order_rows = TRUE
 )
 }
 }
