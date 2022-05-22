@@ -96,18 +96,18 @@ scc_project_on_mc <- function(sc_counts, cell_to_metacell, ignore_metacells = -1
 #' @inheritParams scc_read
 #' @export
 mcc_read <- function(path, id = NULL, description = NULL, verbose = TRUE) {
+    md_file <- file.path(path, "metadata.yaml")
     if (!file.exists(md_file)) {
         cli_abort("Directory {.file {path}} does not contain a valid McCounts object")
     }
 
-    md_file <- file.path(path, "metadata.yaml")
     md <- yaml::read_yaml(md_file)
 
     if (is.null(md$cell_to_metacell)) {
         cli_abort("Directory {.file {path}} does not contain a valid McCounts object (the metadata file {.file {md_file}} is missing the {.field cell_to_metacell} field.)")
     }
 
-    sc_counts <- scc_read(path, id, description, verbose = FALSE)
+    sc_counts <- read_counts_object(path, "McCounts", id, description, verbose = FALSE)
 
     mc_counts <- new("McCounts", data = sc_counts@data, cell_names = sc_counts@cell_names, genome = sc_counts@genome, genomic_bins = sc_counts@genomic_bins, id = sc_counts@id, description = sc_counts@description, path = sc_counts@path, cell_to_metacell = as_tibble(md$cell_to_metacell))
 
@@ -159,7 +159,7 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
         misha.ext::gintervals.neighbors1(intervs) %>%
         # although mat@i is 0-based, R indices are 1-based (hence the +1)
         mutate(ind = start - bin$start + 1)
-
+    browser()
     group <- factor(mat_intervs$peak_name, levels = intervs$peak_name)
     mat_f <- mat[mat_intervs$ind, metacells]
     res <- t(sparse_matrix_tapply_sum(t(mat_f), group))
