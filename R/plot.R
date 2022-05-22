@@ -430,6 +430,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
                                  annotation_col = NULL,
                                  annotation_colors = NULL,
                                  silent = FALSE,
+                                 scale_bar_length = NULL,
                                  rna_legc_eps = 1e-5,
                                  colors = colorRampPalette(c("white", "darkblue", "red"))(100),
                                  ...) {
@@ -505,7 +506,11 @@ plot_tracks_at_locus <- function(tracks = NULL,
         if (has_rna(atac)) {
             rna_vals <- log2(get_rna_fp(atac, genes = gene, rm_zeros = FALSE, epsilon = rna_legc_eps))
             rna_vals <- rna_vals[row_order]
-            rna_ha <- ComplexHeatmap::HeatmapAnnotation("rna\nlegc\nminus\nmedian" = ComplexHeatmap::anno_barplot(rna_vals), which = "row")
+            rna_ha <- ComplexHeatmap::HeatmapAnnotation(
+                "rna\nlegc\nminus\nmedian" = ComplexHeatmap::anno_barplot(rna_vals),
+                which = "row",
+                annotation_name_offset = unit(0.05, "npc")
+            )
         } else {
             cli_alert_info("Not plotting gene expression values since no RNA metacell object is attached to {.var atac}. To attach, use the function `add_mc_rna`.")
             rna_ha <- NULL
@@ -535,6 +540,27 @@ plot_tracks_at_locus <- function(tracks = NULL,
     } else {
         peaks_ha <- NULL
     }
+    if (!is.null(scale_bar_length)) {
+        if (scale_bar_length > intervals$end - intervals$start) {
+            cli_alert_warning("Specified {.var scale_bar_length} is bigger than interval length. Ignoring.")
+            scale_bar_length <- 10**round(log10((intervals$end - intervals$start) / 10))
+        } else if (scale_bar_length < iterator) {
+            cli_alert_warning("Specified {.var scale_bar_length} is shorter than {.var iterator}. Ignoring.")
+            scale_bar_length <- 10**round(log10((intervals$end - intervals$start) / 10))
+        }
+    } else {
+        scale_bar_length <- 10**round(log10((intervals$end - intervals$start) / 10))
+    }
+    scale_bar_bins <- round(scale_bar_length / iterator)
+    sb_vec <- as.numeric(matrix(0, nrow = 1, ncol(mat_n)))
+    sb_vec[(length(sb_vec) - scale_bar_bins):length(sb_vec)] <- 1
+    bottom_ha <- ComplexHeatmap::HeatmapAnnotation(
+        "scale_bar" = sb_vec,
+        which = "column",
+        annotation_label = paste0(scale_bar_length, " bp"),
+        show_legend = FALSE,
+        col = list("scale_bar" = setNames(c("white", "black"), c(0, 1)))
+    )
     if (gene_annot) {
         gene_annots <- make_gene_annot(intervals, iterator, ncol(mat_n))
         if (!is.null(gene_annots[["labels"]]) && !is.null(gene_annots[["label_coords"]])) {
@@ -555,7 +581,8 @@ plot_tracks_at_locus <- function(tracks = NULL,
                 peaks = setNames(c("white", "red"), c(0, 1)),
                 genes = "black",
                 exons = setNames(c("white", "black"), c(0, 1))
-            )
+            ),
+            show_legend = FALSE
         )
     } else {
         gene_annots <- NULL
@@ -567,6 +594,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
         top_annotation = top_ha,
         left_annotation = ct_ha,
         right_annotation = rna_ha,
+        bottom_annotation = bottom_ha,
         col = colors,
         cluster_rows = F,
         cluster_columns = F,
