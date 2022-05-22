@@ -384,42 +384,30 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 #' @return a ComplexHeatmap figure
 #' @examples
 #' \dontrun{
-#' setwd("/net/mraid14/export/tgdata/users/yonshap/proj/matching")
-#' library(metacell)
-#' scdb_init("scdb")
-#' mc_rna <- scdb_mc("rna_w_color_key")
-#' atac_sc <- import_from_10x("./data/pbmc_data/", genome = "hg38", id = "PBMC_10X")
-#' mc1 <- project_atac_on_mc_from_metacell1(atac_sc, scdb = "scdb", mc_id = "rna_w_color_key")
-#' mc <- scdb_mc("rna_w_color_key")
-#' mc1 <- add_mc_rna(mc_rna = mc, mcatac = mc1)
+#' atac_sc <- import_from_10x("pbmc_data", genome = "hg38", id = "PBMC", description = "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)")
+#' data(cell_to_metacell_pbmc_example)
+#' atac_mc <- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example)
 #' data(mcmd)
-#' color_key <- unique(mcmd[, c("st", "color")])
-#' colnames(color_key) <- c("cell_type", "color")
-#' col_annot <- data.frame(cell_type = mcmd$st)
-#' rownames(col_annot) <- mcmd$mc
-#' ann_colors <- list(cell_type = setNames(color_key$color, color_key$cell_type))
-#' pbmc_tracks <- grep("unnorm", gtrack.ls("PBMC_10X.mc"), inv = T, v = T)
-#'
-#'
+#' atac_mc <- add_mc_metadata(atac_mc, mcmd)
+#' data(rna_mc_mat)
+#' atac_mc <- add_mc_rna(atac_mc, rna_mc_mat)
+#' pbmc_tracks <- grep("unnorm", gtrack.ls("PBMC_10X.mc"), inv = TRUE, v = TRUE)
 #' # plot gene-centered intervals
 #' plot_tracks_at_locus(
 #'     tracks = pbmc_tracks, extend = 5e+4,
 #'     gene = "ATF3",
-#'     mc_rna = mc_rna,
-#'     gene_annot = T,
-#'     order_rows = T,
-#'     annotation_row = col_annot,
-#'     annotation_colors = ann_colors
+#'     atac = atac_mc,
+#'     gene_annot = TRUE,
+#'     order_rows = TRUE
 #' )
 #'
 #' # plot arbitrary intervals
 #' plot_tracks_at_locus(
 #'     tracks = pbmc_tracks,
 #'     intervals = gintervals(2, 1e+7, 1.15e+7),
-#'     gene_annot = T,
-#'     order_rows = T,
-#'     annotation_row = col_annot,
-#'     annotation_colors = ann_colors
+#'     atac = atac_mc,
+#'     gene_annot = TRUE,
+#'     order_rows = TRUE
 #' )
 #' }
 #' @export
@@ -428,7 +416,6 @@ plot_tracks_at_locus <- function(tracks = NULL,
                                  intervals = NULL,
                                  iterator = 100,
                                  extend = 0,
-                                 mc_rna = NULL,
                                  gene_feature = "exon",
                                  track_regex = NULL,
                                  chromosomes = gintervals.all() %>%
@@ -485,18 +472,19 @@ plot_tracks_at_locus <- function(tracks = NULL,
         }
     }
     if (order_rows) {
-        if (is.null(annotation_row) && has_name(atac@metadata, "cell_type")) {
+        if (is.null(annotation_row) && !is.null(atac) && has_cell_type(atac)) {
             if (!is.null(row_order)) {
                 cli_alert_info("Both {.var order_rows} == TRUE and {.var row_order} specified. Ordering rows and ignoring {.var row_order}.")
             }
             row_order <- order(atac@metadata[, "cell_type"])
-        } else if (!has_name(atac@metadata, "cell_type") |
+        } else if (!is.null(atac) && !has_cell_type(atac) ||
             (!is.null(annotation_row) && has_name(annotation_row, "cell_type"))
         ) {
-            cli_alert_info("{.var atac@metadata} has no field {.field cell_type}, cannot order rows; using {.var annotation_rows)")
+            cli_alert_info("{.var atac@metadata} has no field {.field cell_type}, cannot order rows; using {.var annotation_row)")
             row_order <- order(annotation_row[, "cell_type"])
         } else {
             cli_alert_info("No appropriate metacell annotation provided for ordering tracks. Need either {.var atac@metadata$cell_type} or {.var annotation_row$cell_type}. Tracks will not be ordered.")
+            row_order <- 1:length(tracks)
         }
     } else if (is.null(row_order)) {
         row_order <- 1:length(tracks)
@@ -509,16 +497,13 @@ plot_tracks_at_locus <- function(tracks = NULL,
             if (!is.null(annotation_row) || !is.null(annotation_colors)) {
                 cli_alert_info("{.var atac} has cell type annotation; ignoring {.var annotation_row} and {.var annotation_colors}.")
             }
-            color_key <- unique(atac@metadata[, c("cell_type", "color")])
-            colnames(color_key) <- c("cell_type", "color")
             annotation_row <- data.frame(cell_type = atac@metadata$cell_type)
             rownames(annotation_row) <- atac@metadata$metacell
-            annotation_colors <- list(cell_type = setNames(color_key$color, color_key$cell_type))
+            annotation_colors <- list(cell_type = get_cell_type_colors(atac@metadata))
             ct_ha <- ComplexHeatmap::HeatmapAnnotation(cell_type = unlist(annotation_row[row_order, ]), which = "row", col = annotation_colors)
         }
         if (has_rna(atac)) {
-            rna_vals <- log2(rna_legc_eps + get_rna_egc(atac, genes = gene))
-            rna_vals <- rna_vals - median(rna_vals)
+            rna_vals <- log2(get_rna_fp(atac, genes = gene, rm_zeros = FALSE, epsilon = rna_legc_eps))
             rna_vals <- rna_vals[row_order]
             rna_ha <- ComplexHeatmap::HeatmapAnnotation("rna\nlegc\nminus\nmedian" = ComplexHeatmap::anno_barplot(rna_vals), which = "row")
         } else {
@@ -532,7 +517,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
             }
             ct_ha <- ComplexHeatmap::HeatmapAnnotation(cell_type = unlist(annotation_row[row_order, ]), which = "row", col = annotation_colors)
         } else {
-            ct_ha <- ComplexHeatmap::HeatmapAnnotation(cell_type = row_order, which = "row")
+            ct_ha <- NULL
         }
         rna_ha <- NULL
     }
