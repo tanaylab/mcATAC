@@ -302,7 +302,7 @@ fix_missing_chroms_in_peaks <- function(peaks) {
     if (length(chroms_missing) > 0) {
         fake_seqs <- gintervals.all() %>%
             filter(chrom %!in% peaks$chrom) %>%
-            gintervals.centers() %>%
+            misha.ext::gintervals.centers() %>%
             mutate(start = start - 33, end = end + 34) %>%
             PeakIntervals() %>%
             mutate(peak_name = peak_names(.))

@@ -179,22 +179,67 @@ overwrite_file <- function(file, overwrite) {
 
 #' Test if an executable file exists
 #'
-#' @description tests if an executable file exists by trying to run a command. If the return value is 0 the
-#' function returns TRUE, otherwise FALSE.
-#'
+#' @description tests if an executable file exists using the unix command \code{which}
 #' @param command a string with the command
 #'
-#' @return TRUE if the command returns 0, FALSE otherwise
+#' @return TRUE if the command is available, FALSE otherwise
 #'
-#' @inheritParams system2
 #' @examples
-#' bin_exists("echo", "test")
-#' bin_exists("tabix", "--version")
+#' bin_exists("echo")
+#' bin_exists("tabix")
 #'
 #' @noRd
-bin_exists <- function(command, args = character(0)) {
-    code <- system2(command, args, stdout = FALSE, stderr = FALSE)
+bin_exists <- function(command) {
+    code <- suppressWarnings(system2("which", command, stdout = FALSE, stderr = FALSE))
     return(code == 0)
+}
+
+#' Test if mcATAC has the required dependencies
+#'
+#' @description Tests if mcATAC has the following dependencies: "grep", "awk", "zcat", "sed", "sort", "head", "tail", "wc" and "uniq". If samtools or tabix are not installed, a warning is issued.
+#'
+#' @return a vector of the dependencies that are not available (invisibly)
+#'
+#' @examples
+#' check_dependencies()
+#'
+#' @export
+check_dependencies <- function() {
+    deps <- c("grep", "awk", "zcat", "sed", "sort", "head", "tail", "wc", "uniq")
+    not_found <- purrr::map(deps, ~ {
+        if (!bin_exists(.x)) {
+            cli_alert_danger("Dependency {.var {.x}} not found. Please install it and make sure it is available in your {.field PATH} environment variable.")
+            return(.x)
+        } else {
+            return(NULL)
+        }
+    })
+
+
+    if (!bin_exists("samtools")) {
+        not_found <- c(not_found, "samtools")
+        cli_alert_warning("Dependency samtools not found on {.field PATH}.")
+    }
+
+    soft_deps <- c("tabix")
+    not_found <- c(not_found, purrr::map(soft_deps, ~ {
+        if (!bin_exists(.x)) {
+            cli_alert_warning("Dependency {.var {.x}} not found. Note that {.var {.x}} is not required for the McATAC pipeline, but running times may be slower.")
+            return(.x)
+        } else {
+            return(NULL)
+        }
+    }))
+
+    not_found <- purrr::flatten_chr(not_found)
+
+    if (length(not_found) == 0) {
+        cli_alert_success("All dependencies are available.")
+    } else {
+        cli_alert_warning("Some dependencies were not found. See the warnings above.")
+    }
+
+    invisible(not_found)
 }
 
 #' Check if intervals are within genome boundries
@@ -249,4 +294,33 @@ set_parallel <- function(thread_num = max(1, round(parallel::detectCores() * 0.8
         options(mcatac.parallel.nc = thread_num)
         cli_alert_info("Parallelization enabled. Using {.val {thread_num}} threads.")
     }
+}
+
+#' Get a temporary track name
+#'
+#' @description This function returns a temporary track name, which would be deleted when the calling function exits.
+#'
+#' @param prefix a prefix for the track name
+#' @param envir environment to to pass the \code{withr::defer} function (do not change unless you know what you are doing)
+#'
+#' @return a temporary track name
+#'
+#' @examples
+#' func <- function() {
+#'     tmp <- temp_track()
+#'     print(tmp)
+#'     gtrack.create_sparse(tmp, description = "", intervals = gintervals.all(), values = rep(1, nrow(gintervals.all())))
+#'     gtrack.exists(tmp) # returns TRUE
+#'     a <- gextract(tmp, gintervals.all())
+#'     print(head(a))
+#'     return(tmp)
+#' }
+#' tmp <- func()
+#' gtrack.exists(tmp) # returns FALSE
+#'
+#' @export
+temp_track_name <- function(prefix = "", envir = parent.frame()) {
+    temp_track <- paste0(prefix, "tmp_", stringi::stri_rand_strings(1, 10))
+    withr::defer(gtrack.rm(temp_track, force = TRUE), envir = envir)
+    return(temp_track)
 }

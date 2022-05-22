@@ -95,8 +95,11 @@ scc_project_on_mc <- function(sc_counts, cell_to_metacell, ignore_metacells = -1
 #'
 #' @inheritParams scc_read
 #' @export
-mcc_read <- function(path, id = NULL, description = NULL) {
-    sc_counts <- scc_read(path, id, description)
+mcc_read <- function(path, id = NULL, description = NULL, verbose = TRUE) {
+    if (!file.exists(md_file)) {
+        cli_abort("Directory {.file {path}} does not contain a valid McCounts object")
+    }
+
     md_file <- file.path(path, "metadata.yaml")
     md <- yaml::read_yaml(md_file)
 
@@ -104,9 +107,14 @@ mcc_read <- function(path, id = NULL, description = NULL) {
         cli_abort("Directory {.file {path}} does not contain a valid McCounts object (the metadata file {.file {md_file}} is missing the {.field cell_to_metacell} field.)")
     }
 
+    sc_counts <- scc_read(path, id, description, verbose = FALSE)
+
     mc_counts <- new("McCounts", data = sc_counts@data, cell_names = sc_counts@cell_names, genome = sc_counts@genome, genomic_bins = sc_counts@genomic_bins, id = sc_counts@id, description = sc_counts@description, path = sc_counts@path, cell_to_metacell = as_tibble(md$cell_to_metacell))
 
-    cli_alert_success("Succesfully read a McCounts object from {.file {path}}")
+    if (verbose) {
+        cli_alert_success("Succesfully read a McCounts object from {.file {path}}")
+    }
+
     return(mc_counts)
 }
 
@@ -125,8 +133,8 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
     metacells <- metacells %||% colnames(mat)
     intervs <- as.data.frame(intervs)
 
-    # find the coordinates that overlap with the intervals (note that we mat@i is zero based)
-    mat_intervs <- tibble(chrom = bin$chrom, start = mat@i + bin$start, end = start + 1) %>%
+    # find the coordinates that overlap with the intervals (note that we assume mat@i is zero based, as in the standard 'dgCMatrix' implementation)
+    mat_intervs <- tibble(chrom = bin$chrom, start = unique(mat@i) + bin$start, end = start + 1) %>%
         gintervals.intersect(intervs)
 
     # no overlap, return empty matrix
@@ -202,6 +210,7 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
 #' Return the total coverage of each metacell in an McCounts object
 #'
 #' @param mc_counts a McCounts object
+#' @param metacells names of metacells to include. Default: all metacells.
 #'
 #' @return a named vector with the total coverage for each metacell
 #'
@@ -212,20 +221,56 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
 #' }
 #'
 #' @export
-mcc_metacell_total_cov <- function(mc_counts) {
+mcc_metacell_total_cov <- function(mc_counts, metacells = NULL) {
     assert_atac_object(mc_counts, class = "McCounts")
+    metacells <- metacells %||% mc_counts@cell_names
+    metacells <- as.character(metacells)
 
     sums <- plyr::llply(mc_counts@data, function(m) {
-        colSums(m)
+        colSums(m[, metacells])
     }, .parallel = getOption("mcatac.parallel"))
 
     mc_covs <- Reduce("+", sums)
     return(mc_covs)
 }
 
-#' Normalize each metacell in an McCounts of object by its total counts
+#' Return the total coverage of each non-zero coordinate in an McCounts object
 #'
 #' @param mc_counts a McCounts object
+#' @param metacells names of metacells to include. Default: all metacells.
+#'
+#' @return an intervals set with an additional column called "cov" with the total coverage for each coordinate
+#'
+#' @examples
+#' \dontrun{
+#' mc_counts <- mcc_read("pbmc_reads_mc")
+#' mc_mars <- mcc_marginal(mc_counts)
+#' }
+#'
+#' @export
+mcc_marginal <- function(mc_counts, metacells = NULL) {
+    assert_atac_object(mc_counts, class = "McCounts")
+    metacells <- metacells %||% mc_counts@cell_names
+    metacells <- as.character(metacells)
+
+    mars <- plyr::adply(mc_counts@genomic_bins, 1, function(bin) {
+        mat <- mc_counts@data[[bin$name]]
+        mat <- mat[, metacells]
+        res <- tibble(chrom = bin$chrom, start = unique(mat@i) + bin$start, end = start + 1) %>%
+            mutate(cov = rowSums(mat[end - bin$start, ]))
+    }, .parallel = getOption("mcatac.parallel"))
+
+    mars <- mars %>%
+        select(chrom, start, end, cov) %>%
+        as_tibble()
+
+    return(mars)
+}
+
+#' Normalize each metacell in a McCounts object by its total counts
+#'
+#' @param mc_counts a McCounts object
+#' @param metacells metacells to normalize. Default: all metacells.
 #'
 #' @return an McCounts object with the metacells normalized
 #'
@@ -236,14 +281,18 @@ mcc_metacell_total_cov <- function(mc_counts) {
 #' }
 #'
 #' @export
-mcc_normalize_metacells <- function(mc_counts) {
+mcc_normalize_metacells <- function(mc_counts, metacells = NULL) {
     assert_atac_object(mc_counts, class = "McCounts")
+    metacells <- metacells %||% mc_counts@cell_names
+    metacells <- as.character(metacells)
 
-    mc_covs <- mcc_metacell_total_cov(mc_counts)
+    mc_covs <- mcc_metacell_total_cov(mc_counts, metacells)
 
     new_data <- plyr::llply(mc_counts@data, function(m) {
-        t(t(m) / mc_covs)
-    }, .parallel = TRUE)
+        m_f <- m[, metacells]
+        m_f@x <- m_f@x / rep.int(mc_covs, diff(m_f@p))
+        return(m_f)
+    }, .parallel = getOption("mcatac.parallel"))
 
     stopifnot(all(names(new_data) == names(mc_counts@data)))
 
@@ -307,14 +356,22 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL) {
 
 #' Create a misha track for each metacell in a McCounts object
 #'
-#' @description This would create a sparse track of the form "{track_prefix}.mc{metacell}" for each metacell in the McCounts object. By default, the counts are normalized to the total counts of each metacell, set \code{normalize = FALSE}
-#' to disable this.
+#' @description This would create a sparse track of the form "{track_prefix}.mc{metacell}" for each metacell in the McCounts object. The counts are smoothed by a running sum window of size \code{window_size * 2 + 1} (default: 201).
+#' The resulted track would be stored in a 'dense' format with a resolution of \code{resolution} bp (default: 10). \cr
+#' Each track would have a track attribute named "total_cov" with the total coverage of the metacell. \cr
+#' If \code{create_marginal_track} is \code{TRUE} (default), an additional track with the total counts over all the metacells will be created. \cr
+#' Counts can be normalized to the total counts of each metacell by setting \code{normalize = TRUE}.
 #'
 #' @param mc_counts A McCounts object
-#' @param track_prefix The prefix of the tracks to create. Track names will be of the form "{track_prefix}.mc{metacell}"
+#' @param track_prefix The prefix of the tracks to create (i.e. misha directory).
+#' Track names will be of the form "{track_prefix}.mc{metacell}"
 #' @param metacells metacells for which to create tracks. If NULL, all metacells will be used.
-#' @param normalize Normalize each metacell by the sum of its counts.
 #' @param overwrite Whether to overwrite existing tracks.
+#' @param window_size The size of the window used to smooth the counts. The counts of at position i are smoothed by a sum of the counts of [i - window_size, i + window_size].
+#' @param resolution The resolution of each track (default: 10bp)
+#' @param create_marginal_track Create a track with the total counts from all the metacells. The track would be named "{track_prefix}.marginal"
+#' @param normalize Normalize each metacell by the sum of its counts.
+#'
 #'
 #' @return None.
 #'
@@ -324,43 +381,161 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL) {
 #' }
 #'
 #' @export
-mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite = FALSE, normalize = TRUE) {
+mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite = FALSE, window_size = 100, resolution = 10, create_marginal_track = TRUE, normalize = FALSE) {
     assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
     gset_genome(mc_counts@genome)
 
-    if (normalize) {
-        cli_alert("Normalizing each metacell by its total counts")
-        mc_counts <- mcc_normalize_metacells(mc_counts)
-    }
-
-    cli_alert("Extracting metacell data")
-    d <- mcc_extract_to_df(mc_counts, metacells)
+    cli_alert_info("Creating tracks for {.val {length(metacells)}} metacells")
+    cli_alert_info("Smoothing over {.val {window_size*2+1}} bp window")
+    cli_alert_info("Tracks resolution: {.val {resolution}} bp")
 
     misha.ext::gtrack.create_dirs(paste0(track_prefix, ".mc"), showWarnings = FALSE)
+    withr::local_options(list(gmax.data.size = 1e9))
+
+    if (create_marginal_track) {
+        cli_alert("Creating marginal track")
+        mcc_to_marginal_track(
+            mc_counts,
+            track = paste0(track_prefix, ".marginal"),
+            metacells = metacells,
+            window_size = window_size,
+            resolution = resolution,
+            overwrite = overwrite
+        )
+    }
+
+    if (normalize) {
+        cli_alert("Normalizing each metacell by its total counts")
+        mc_counts <- mcc_normalize_metacells(mc_counts, metacells)
+    }
+
+    cli_alert("Extracting per-metacell data")
+    d <- mcc_extract_to_df(mc_counts, metacells)
+
+    withr::local_options(list(gmultitasking = !getOption("mcatac.parallel")))
 
     plyr::l_ply(mc_counts@cell_names, function(metacell) {
         track <- glue("{track_prefix}.mc{metacell}")
         cli_alert("Creating {track} track")
+
         x <- d %>% filter(metacell == !!metacell)
-        if (gtrack.exists(track)) {
-            if (overwrite) {
-                cli_alert_warning("Removing previous track {.val {track}}")
-                gtrack.rm(track, force = TRUE)
-            } else {
-                cli_abort("{track} already exists. Use 'overwrite = TRUE' to overwrite.")
-            }
-        }
-        gtrack.create_sparse(
+        create_smoothed_track_from_dataframe(
+            x %>% select(chrom, start, end, value),
+            track_prefix = track_prefix,
             track = track,
-            description = "",
-            intervals = x %>% select(chrom, start, end),
-            values = x$value
+            description = glue("Smoothed counts over {window_size*2} bp from metacell {metacell}"),
+            window_size = window_size,
+            resolution = resolution,
+            overwrite = overwrite
         )
+
+        gtrack.attr.set(track, "total_cov", sum(x$value))
+        num_cells <- mc_counts@cell_to_metacell %>%
+            filter(metacell == !!metacell) %>%
+            nrow()
+        gtrack.attr.set(track, "num_cells", num_cells)
     }, .parallel = getOption("mcatac.parallel"))
 
     gdb.reload()
 
     cli_alert_success("Created {length(metacells)} tracks at {track_prefix}")
+}
+
+#' Create a track with smoothed marginal counts from a McCounts object
+#'
+#' @param mc_counts A McCounts object
+#' @param track The name of the track to create.
+#' @param metacells The metacells for which to create the track. If NULL, all metacells will be used.
+#'
+#' @return None.
+#'
+#' @examples
+#' \dontrun{
+#' mcc_to_marginal_track(mc_counts, "pbmc_mc.marginal")
+#' }
+#'
+#' @inheritParams mcc_to_tracks
+#'
+#' @export
+mcc_to_marginal_track <- function(mc_counts, track, metacells = NULL, window_size = 100, resolution = 10, overwrite = FALSE) {
+    assert_atac_object(mc_counts, class = "McCounts")
+    metacells <- metacells %||% mc_counts@cell_names
+    metacells <- as.character(metacells)
+    gset_genome(mc_counts@genome)
+
+    mcc_mars <- mcc_marginal(mc_counts, metacells)
+    create_smoothed_track_from_dataframe(
+        mcc_mars,
+        track_prefix = "temp",
+        track = track,
+        description = glue("Smoothed counts over {window_size*2} bp from {length(metacells)} metacells"),
+        window_size = window_size,
+        resolution = resolution,
+        overwrite = overwrite
+    )
+}
+
+#' Create a smoothed track from a data frame
+#'
+#' @description This function first creates a temporary track with the data in the data frame, then calls \code{create_smoothed_track} to create the smoothed track.
+#'
+#' @param x an intervals set with an additional value column
+#' @param track_prefix The prefix of the track to create (i.e. misha directory).
+#'
+#' @return None.
+#'
+#' @inheritDotParams create_smoothed_track
+#' @noRd
+create_smoothed_track_from_dataframe <- function(x, track_prefix, ...) {
+    raw_track <- temp_track_name(paste0(track_prefix, "."))
+    x <- as_tibble(x)
+    gtrack.create_sparse(
+        track = raw_track,
+        description = "",
+        intervals = x[, 1:3],
+        values = x[[4]]
+    )
+
+    create_smoothed_track(raw_track = raw_track, ...)
+}
+
+#' Create a smoothed track from a sparse track
+#'
+#' @description Create a track smoothed by a sum of [i - window_size, i + window_size], where i is the middle of the \code{resolution}. For
+#' examples, if \code{resolution} is 5, and \code{window_size} is 10, when the iterator is at position 20 the smoothed track will be created by summing the values of positions 10-29.
+#'
+#' @param raw_track name of the track to smooth.
+#' @param track The name of the track to create.
+#' @param description The description of the track.
+#' @param window_size The size of the window to smooth (in bp)
+#' @param resolution The resolution of the track (in bp)
+#' @param overwrite Overwrite the track if it already exists.
+#'
+#' @return None
+#'
+#' @noRd
+create_smoothed_track <- function(raw_track, track, description, window_size, resolution, overwrite = FALSE) {
+    if (gtrack.exists(track)) {
+        if (overwrite) {
+            cli_alert_warning("Removing previous track {.val {track}}")
+            gtrack.rm(track, force = TRUE)
+        } else {
+            cli_abort("{track} already exists. Use 'overwrite = TRUE' to overwrite.")
+        }
+    }
+    vt <- glue("vt_{raw_track}")
+    gvtrack.create(vt, raw_track, func = "sum")
+    withr::defer(gvtrack.rm(vt))
+
+    shift <- window_size - floor(resolution / 2)
+    gvtrack.iterator(vt, sshift = -shift, eshift = shift)
+
+    gtrack.create(
+        track,
+        description = description,
+        expr = vt,
+        iterator = resolution
+    )
 }

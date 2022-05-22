@@ -5,10 +5,30 @@
 
 ## Installation
 
-You can install the development version of mcATAC like so:
+Install the development version of mcATAC:
 
 ``` r
 remotes::install_github("tanaylab/mcATAC")
+```
+
+### Dependencies
+
+You can make sure the dependencies are installed by running:
+
+``` r
+mcATAC::check_dependencies()
+```
+
+The pacakge assumes that a few standard unix tools are installed and
+available at your PATH: `grep`, `awk`, `zcat`, `sed`, `sort`, `head`,
+`tail`, `wc`, and `uniq`. In addition, `samtools` should also be
+installed. If `tabix` is available some functions would operate faster.
+
+Note that `samtools` and `tabix` are bundled with the cellranger
+package, so you can make them available to your PATH by running:
+
+``` r
+Sys.setenv(PATH = paste0(Sys.getenv("PATH"), ":", file.path(cell_ranger_path, "external/anaconda/bin")))
 ```
 
 ## Example
@@ -38,7 +58,8 @@ atac_sc
 #> id: "PBMC"
 #> description: "PBMC from a healthy donor - granulocytes removed through cell
 #> sorting (10k)"
-#> Loaded from: 'pbmc_data/matrix.mtx'
+#> Loaded from:
+#> '/net/mraid14/export/tgdata/users/yonshap/proj/matching/data/filtered_feature_bc_matrix/matrix.mtx'
 #> Slots include:
 #>   • `@mat`: a numeric matrix where rows are peaks and columns are cells. Can be
 #>   a sparse matrix.

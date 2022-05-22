@@ -1,11 +1,11 @@
 Package: mcATAC
-Title: Metacell analysis for ATAC data
+Title: Metacell analysis for scATAC data
 Version: 0.0.0.9000
 Authors@R: c(
     person("Aviezer", "Lifshitz", , "aviezer.lifshitz@weizmann.ac.il", role = c("aut", "cre")),
     person("Yonatan", "Shapira", , "yonatan.shapira@weizmann.ac.il", role = "aut")
   )
-Description: Metacell analysis for ATAC data
+Description: Metacell analysis for scATAC data
 License: MIT + file LICENSE
 Imports: 
     anndata,
@@ -29,7 +29,7 @@ Imports:
     stringi,
     stringr,
     tgstat,
-    tgutil,
+    tgutil (>= 0.1.12),
     tibble,
     tidyr,
     withr,
@@ -77,8 +77,8 @@ Collate:
     'example_data.R'
     'export.R'
     'feature_selection.R'
-    'import-raw-counts.R'
-    'import.R'
+    'import-counts.R'
+    'import-peaks.R'
     'mcATAC-package.R'
     'metadata.R'
     'motifs.R'
