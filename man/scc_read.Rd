@@ -4,7 +4,7 @@
 \alias{scc_read}
 \title{Read an ScCounts object from a directory}
 \usage{
-scc_read(path, id = NULL, description = NULL)
+scc_read(path, id = NULL, description = NULL, verbose = TRUE)
 }
 \arguments{
 \item{path}{path to the directory containing the object (which was created by \code{write_sc_counts_from_fragments/bam})}
@@ -12,6 +12,8 @@ scc_read(path, id = NULL, description = NULL)
 \item{id}{an identifier for the object (optional)}
 
 \item{description}{description of the object (optional)}
+
+\item{verbose}{print success message (default: TRUE)}
 }
 \value{
 a ScCounts object

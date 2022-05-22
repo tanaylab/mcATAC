@@ -111,21 +111,18 @@ test_that("mcc_to_mcatac works", {
     expect_equal(sum(abs(atac_mc@mat[intervs, ] - atac_mc_new@mat[intervs, ])), 0)
 })
 
-# skipped for now since it is heavy
-# test_that("mcc_to_tracks works", {
-#     gset_genome("hg38")
-#     mcc_to_tracks(mc_counts, "temp.pbmc_mc_norm", overwrite = TRUE, normalize = TRUE)
-#     mcc_to_tracks(mc_counts, "temp.pbmc_mc_new", overwrite = TRUE, normalize = FALSE)
-#     a <- gextract(c("temp.pbmc_mc_norm.mc1", "temp.pbmc_mc_new.mc1"),
-#         iterator = "temp.pbmc_mc_new.mc1",
-#         intervals = "temp.pbmc_mc_new.mc1", colnames = c("norm", "raw")
-#     ) %>% as_tibble()
-#     expect_equal(sum(a$norm), 0)
-#     expect_equal(
-#         a %>%
-#             mutate(norm1 = raw / sum(raw)) %>%
-#             filter(abs(norm - norm1) >= 1e-9) %>%
-#             nrow(),
-#         0
-#     )
-# })
+test_that("create_smoothed_track_from_dataframe works", {
+    prev_groot <- GROOT
+    withr::defer(gsetroot(GROOT))
+    misha.ext::gset_genome("hg38")
+    temp_track <- temp_track_name("temp.")
+    df <- giterator.intervals(iterator = 1, intervals = gintervals(1, 0, 100)) %>%
+        mutate(value = ifelse(start %in% 40:60, 1, 0)) %>%
+        as_tibble()
+    create_smoothed_track_from_dataframe(df, track_prefix = "temp", track = temp_track, description = "", window_size = 5, resolution = 1, overwrite = TRUE)
+    a <- gextract(temp_track, gintervals(1, 0, 100), colnames = "v2")
+    df1 <- df %>%
+        mutate(v1 = zoo::rollsum(value, k = 11, na.pad = TRUE)) %>%
+        left_join(a)
+    expect_equal(df1 %>% na.omit() %>% filter(v1 != v2) %>% nrow(), 0)
+})

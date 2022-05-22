@@ -12,3 +12,12 @@
 #' @param rhs A function call using the magrittr semantics.
 #' @return The result of calling `rhs(lhs)`.
 NULL
+
+#' Set misha root based on genome name
+#'
+#' @name gset_genome
+#' @importFrom misha.ext gset_genome
+#' @inheritParams misha.ext::gset_genome
+#' @noRd
+#' @export gset_genome
+NULL
