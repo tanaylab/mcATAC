@@ -480,7 +480,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
         } else if (!is.null(atac) && !has_cell_type(atac) ||
             (!is.null(annotation_row) && has_name(annotation_row, "cell_type"))
         ) {
-            cli_alert_info("{.var atac@metadata} has no field {.field cell_type}, cannot order rows; using {.var annotation_rows)")
+            cli_alert_info("{.var atac@metadata} has no field {.field cell_type}, cannot order rows; using {.var annotation_row)")
             row_order <- order(annotation_row[, "cell_type"])
         } else {
             cli_alert_info("No appropriate metacell annotation provided for ordering tracks. Need either {.var atac@metadata$cell_type} or {.var annotation_row$cell_type}. Tracks will not be ordered.")
