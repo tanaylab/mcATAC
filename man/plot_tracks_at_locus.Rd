@@ -22,6 +22,7 @@ plot_tracks_at_locus(
   annotation_col = NULL,
   annotation_colors = NULL,
   silent = FALSE,
+  scale_bar_length = NULL,
   rna_legc_eps = 0.00001,
   colors = colorRampPalette(c("white", "darkblue", "red"))(100),
   ...
