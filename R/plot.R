@@ -491,13 +491,12 @@ plot_tracks_at_locus <- function(tracks = NULL,
                 cli_alert_info("Both {.var order_rows} == TRUE and {.var row_order} specified. Ordering rows and ignoring {.var row_order}.")
             }
             row_order <- order(atac@metadata[, "cell_type"])
-        } else if (!has_name(atac@metadata, "cell_type") | 
-                    (!is.null(annotation_row) && has_name(annotation_row, "cell_type"))
-                    ) {
+        } else if (!has_name(atac@metadata, "cell_type") |
+            (!is.null(annotation_row) && has_name(annotation_row, "cell_type"))
+        ) {
             cli_alert_info("{.var atac@metadata} has no field {.field cell_type}, cannot order rows; using {.var annotation_rows)")
             row_order <- order(annotation_row[, "cell_type"])
-        }
-        else {
+        } else {
             cli_alert_info("No appropriate metacell annotation provided for ordering tracks. Need either {.var atac@metadata$cell_type} or {.var annotation_row$cell_type}. Tracks will not be ordered.")
         }
     } else if (is.null(row_order)) {
@@ -522,7 +521,11 @@ plot_tracks_at_locus <- function(tracks = NULL,
             rna_vals <- log2(rna_legc_eps + get_rna_egc(atac, genes = gene))
             rna_vals <- rna_vals - median(rna_vals)
             rna_vals <- rna_vals[row_order]
-            rna_ha <- ComplexHeatmap::HeatmapAnnotation("rna\nlegc\nminus\nmedian" = ComplexHeatmap::anno_barplot(rna_vals), which = "row")
+            rna_ha <- ComplexHeatmap::HeatmapAnnotation(
+                "rna\nlegc\nminus\nmedian" = ComplexHeatmap::anno_barplot(rna_vals),
+                which = "row",
+                annotation_name_offset = unit(0.05, "npc")
+            )
         } else {
             cli_alert_info("Not plotting gene expression values since no RNA metacell object is attached to {.var atac}. To attach, use the function `add_mc_rna`.")
             rna_ha <- NULL
@@ -555,23 +558,24 @@ plot_tracks_at_locus <- function(tracks = NULL,
     if (!is.null(scale_bar_length)) {
         if (scale_bar_length > intervals$end - intervals$start) {
             cli_alert_warning("Specified {.var scale_bar_length} is bigger than interval length. Ignoring.")
-            scale_bar_length <- 10**round(log10((intervals$end - intervals$start)/10))
+            scale_bar_length <- 10**round(log10((intervals$end - intervals$start) / 10))
         } else if (scale_bar_length < iterator) {
             cli_alert_warning("Specified {.var scale_bar_length} is shorter than {.var iterator}. Ignoring.")
-            scale_bar_length <- 10**round(log10((intervals$end - intervals$start)/10))
-        } 
+            scale_bar_length <- 10**round(log10((intervals$end - intervals$start) / 10))
+        }
     } else {
-        scale_bar_length <- 10**round(log10((intervals$end - intervals$start)/10))
+        scale_bar_length <- 10**round(log10((intervals$end - intervals$start) / 10))
     }
-    scale_bar_bins <- round(scale_bar_length/iterator)
-    sb_vec <- as.numeric(matrix(0,nrow=1,ncol(mat_n)))
-    sb_vec[(length(sb_vec)-scale_bar_bins):length(sb_vec)] <- 1
-    bottom_ha <- ComplexHeatmap::HeatmapAnnotation("scale_bar" = sb_vec,
-                                                which = "column",
-                                                show_legend = FALSE,
-                                                annotation_label = paste0(scale_bar_length, ' bp'),
-                                                col = list("scale_bar" = setNames(c('white', 'black'), c(0,1)))
-                                                )
+    scale_bar_bins <- round(scale_bar_length / iterator)
+    sb_vec <- as.numeric(matrix(0, nrow = 1, ncol(mat_n)))
+    sb_vec[(length(sb_vec) - scale_bar_bins):length(sb_vec)] <- 1
+    bottom_ha <- ComplexHeatmap::HeatmapAnnotation(
+        "scale_bar" = sb_vec,
+        which = "column",
+        annotation_label = paste0(scale_bar_length, " bp"),
+        show_legend = FALSE,
+        col = list("scale_bar" = setNames(c("white", "black"), c(0, 1)))
+    )
     if (gene_annot) {
         gene_annots <- make_gene_annot(intervals, iterator, ncol(mat_n))
         if (!is.null(gene_annots[["labels"]]) && !is.null(gene_annots[["label_coords"]])) {
