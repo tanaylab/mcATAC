@@ -4,9 +4,9 @@
 \name{mcATAC-package}
 \alias{mcATAC}
 \alias{mcATAC-package}
-\title{mcATAC: Metacell analysis for ATAC data}
+\title{mcATAC: Metacell analysis for scATAC data}
 \description{
-Metacell analysis for ATAC data
+Metacell analysis for scATAC data
 }
 \seealso{
 Useful links:
