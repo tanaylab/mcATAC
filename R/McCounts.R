@@ -124,12 +124,13 @@ mcc_read <- function(path, id = NULL, description = NULL, verbose = TRUE) {
 #' @param bin a single row data frame with the bin intervals (chrom, start, end)
 #' @param intervs an intervals set with another column called "peak_name"
 #' @param metacells names of metacells to include. Default: all metacells.
+#' @param filter_intervs intervals to filter out. The result would be the sum of the counts at \code{intervs} without the counts at \code{filter_intervs}. (optional)
 #'
 #' @return a sparse matrix where rows are the peaks, columns are the metacells, and values are the counts summed
 #' over each peak.
 #'
 #' @noRd
-summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
+summarise_bin <- function(mat, bin, intervs, metacells = NULL, filter_intervs = NULL) {
     metacells <- metacells %||% colnames(mat)
     intervs <- as.data.frame(intervs)
 
@@ -155,11 +156,17 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
     mat_intervs <- mat_intervs %>%
         mutate(start = pmax(start, bin$start), end = pmin(end, bin$end))
 
+    if (!is.null(filter_intervs)) {
+        filter_intervs <- as.data.frame(filter_intervs)
+        mat_intervs <- mat_intervs %>%
+            gintervals.intersect(filter_intervs)
+    }
+
     mat_intervs <- mat_intervs %>%
         misha.ext::gintervals.neighbors1(intervs) %>%
         # although mat@i is 0-based, R indices are 1-based (hence the +1)
         mutate(ind = start - bin$start + 1)
-    browser()
+
     group <- factor(mat_intervs$peak_name, levels = intervs$peak_name)
     mat_f <- mat[mat_intervs$ind, metacells]
     res <- t(sparse_matrix_tapply_sum(t(mat_f), group))
@@ -167,13 +174,14 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
     return(res)
 }
 
-#' Create an McATAC object from an McCounts object
+#' Create a McATAC object from an McCounts object
 #'
 #' @description given an McCounts object and peaks, summarise the counts over the peaks and return a McATAC object
 #'
 #' @param mc_counts a McCounts object
 #' @param peaks a data frame with the peak intervals (chrom, start, end) and a column called "peak_name"
 #' @param metacells names of metacells to include. Default: all metacells.
+#' @param filter_intervs intervals to filter out. The result would be the sum of the counts at \code{peaks} without the counts at \code{filter_intervs}. (optional)
 #'
 #' @inheritParams project_atac_on_mc
 #'
@@ -187,18 +195,10 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
 #' }
 #'
 #' @export
-mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, mc_size_eps_q = 0.1) {
+mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, mc_size_eps_q = 0.1, filter_intervs = NULL) {
     assert_atac_object(mc_counts, class = "McCounts")
-    metacells <- metacells %||% mc_counts@cell_names
-    metacells <- as.character(metacells)
 
-    matrices <- plyr::alply(mc_counts@genomic_bins, 1, function(bin) {
-        return(
-            summarise_bin(mc_counts@data[[bin$name]], bin, peaks, metacells)
-        )
-    }, .parallel = getOption("mcatac.parallel"))
-
-    mat <- Reduce("+", matrices)
+    mat <- summarise_counts(mc_counts, peaks, metacells, filter_intervs)
 
     mc_atac <- new("McATAC", mat = mat, peaks = peaks, genome = mc_counts@genome, id = mc_counts@id, description = mc_counts@description, metadata = metadata, cell_to_metacell = mc_counts@cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = mc_counts@path)
 
@@ -206,6 +206,54 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
 
     return(mc_atac)
 }
+
+#' Create a ScATAC object from a ScCounts object
+#'
+#' @description given an ScCounts object and peaks, summarise the counts over the peaks and return a ScATAC object
+#'
+#' @param sc_counts a ScCounts object
+#' @param cells name of the cells to include. Default: all cells.
+#' @inheritParams mcc_to_mcatac
+#'
+#' @return a ScATAC object
+#'
+#' @examples
+#' \dontrun{
+#' sc_counts <- sc_read("pbmc_reads")
+#' sc_atac <- sc_to_scatac(sc_counts, atac_sc@peaks)
+#' }
+#'
+#' @export
+scc_to_scatac <- function(sc_counts, peaks, cells = NULL, metadata = NULL, mc_size_eps_q = 0.1, filter_intervs = NULL) {
+    assert_atac_object(sc_counts, class = "ScCounts")
+
+    mat <- summarise_counts(sc_counts, peaks, cells, filter_intervs)
+
+    sc_atac <- new("ScATAC", mat = mat, peaks = peaks, genome = sc_counts@genome, id = sc_counts@id, description = sc_counts@description, metadata = metadata, path = sc_counts@path)
+
+    cli_alert_success("Created a new ScATAC object with {.val {ncol(sc_atac@mat)}} cells and {.val {nrow(sc_atac@mat)}} ATAC peaks.")
+
+    return(sc_atac)
+}
+
+summarise_counts <- function(counts, peaks, metacells, filter_intervs = NULL) {
+    metacells <- metacells %||% counts@cell_names
+    metacells <- as.character(metacells)
+
+    if (!all(has_name(peaks, c("chrom", "start", "end", "peak_name")))) {
+        cli_abort("peaks must be a data frame with columns {.code chrom}, {.code start}, {.code end}, and {.code peak_name}")
+    }
+
+    matrices <- plyr::alply(counts@genomic_bins, 1, function(bin) {
+        return(
+            summarise_bin(counts@data[[bin$name]], bin, peaks, metacells, filter_intervs = filter_intervs)
+        )
+    }, .parallel = getOption("mcatac.parallel"))
+
+    mat <- Reduce("+", matrices)
+    return(mat)
+}
+
 
 #' Return the total coverage of each metacell in an McCounts object
 #'
