@@ -186,12 +186,16 @@ mcc_write <- function(object, out_dir, overwrite = FALSE) {
 #'
 #' @export
 scc_read <- function(path, id = NULL, description = NULL, verbose = TRUE) {
+    read_counts_object(path, "ScCounts", id = id, description = description, verbose = verbose)
+}
+
+read_counts_object <- function(path, type, id = NULL, description = NULL, verbose = TRUE) {
     md_file <- file.path(path, "metadata.yaml")
     if (!file.exists(md_file)) {
         cli_abort("Directory {.file {path}} does not contain a valid ScCounts object")
     }
     md <- yaml::read_yaml(md_file)
-    if (!is.null(md$cell_to_metacell)) {
+    if (type == "ScCounts" && !is.null(md$cell_to_metacell)) {
         cli_abort("Directory {.file {path}} contains a McCounts object. Please use {.code mcc_read} instead.")
     }
 
@@ -215,6 +219,7 @@ scc_read <- function(path, id = NULL, description = NULL, verbose = TRUE) {
 
     return(counts)
 }
+
 
 #' Covert genomic bin names to intervals
 #'
