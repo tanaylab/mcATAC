@@ -411,16 +411,16 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
         mc_counts <- mcc_normalize_metacells(mc_counts, metacells)
     }
 
-    cli_alert("Extracting per-metacell data")
-    d <- mcc_extract_to_df(mc_counts, metacells)
-
     withr::local_options(list(gmultitasking = !getOption("mcatac.parallel")))
 
     plyr::l_ply(mc_counts@cell_names, function(metacell) {
         track <- glue("{track_prefix}.mc{metacell}")
         cli_alert("Creating {track} track")
 
-        x <- d %>% filter(metacell == !!metacell)
+        withr::with_options(list(mcatac.parallel = FALSE), {
+            x <- mcc_extract_to_df(mc_counts, metacell)
+        })
+
         create_smoothed_track_from_dataframe(
             x %>% select(chrom, start, end, value),
             track_prefix = track_prefix,
@@ -436,6 +436,7 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
             filter(metacell == !!metacell) %>%
             nrow()
         gtrack.attr.set(track, "num_cells", num_cells)
+        gc()
     }, .parallel = getOption("mcatac.parallel"))
 
     gdb.reload()
