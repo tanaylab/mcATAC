@@ -16,6 +16,9 @@
     <loc>/articles/mcATAC.html</loc>
   </url>
   <url>
+    <loc>/articles/peaks.html</loc>
+  </url>
+  <url>
     <loc>/authors.html</loc>
   </url>
   <url>
@@ -29,6 +32,12 @@
   </url>
   <url>
     <loc>/reference/PeakIntervals.html</loc>
+  </url>
+  <url>
+    <loc>/reference/ScCounts-class.html</loc>
+  </url>
+  <url>
+    <loc>/reference/ScCounts.html</loc>
   </url>
   <url>
     <loc>/reference/add_mc_metadata.html</loc>
@@ -49,6 +58,12 @@
     <loc>/reference/atac_ignore_peaks.html</loc>
   </url>
   <url>
+    <loc>/reference/bam_file_chromosomes.html</loc>
+  </url>
+  <url>
+    <loc>/reference/bam_to_wig.html</loc>
+  </url>
+  <url>
     <loc>/reference/calc_prom_rna_cor.html</loc>
   </url>
   <url>
@@ -56,6 +71,12 @@
   </url>
   <url>
     <loc>/reference/call_peaks.html</loc>
+  </url>
+  <url>
+    <loc>/reference/check_dependencies.html</loc>
+  </url>
+  <url>
+    <loc>/reference/convert_wigs_to_tracks.html</loc>
   </url>
   <url>
     <loc>/reference/download_pbmc_example_data.html</loc>
@@ -89,6 +110,15 @@
   </url>
   <url>
     <loc>/reference/generate_motif_pssm_matrix.html</loc>
+  </url>
+  <url>
+    <loc>/reference/generate_per_metacell_bams.html</loc>
+  </url>
+  <url>
+    <loc>/reference/generate_pheatmap_annotation.html</loc>
+  </url>
+  <url>
+    <loc>/reference/generate_wigs_from_bams.html</loc>
   </url>
   <url>
     <loc>/reference/get_available_pssms.html</loc>
@@ -151,6 +181,36 @@
     <loc>/reference/mcATAC-package.html</loc>
   </url>
   <url>
+    <loc>/reference/mcc_extract_to_df.html</loc>
+  </url>
+  <url>
+    <loc>/reference/mcc_marginal.html</loc>
+  </url>
+  <url>
+    <loc>/reference/mcc_metacell_total_cov.html</loc>
+  </url>
+  <url>
+    <loc>/reference/mcc_normalize_metacells.html</loc>
+  </url>
+  <url>
+    <loc>/reference/mcc_read.html</loc>
+  </url>
+  <url>
+    <loc>/reference/mcc_to_marginal_track.html</loc>
+  </url>
+  <url>
+    <loc>/reference/mcc_to_mcatac.html</loc>
+  </url>
+  <url>
+    <loc>/reference/mcc_to_tracks.html</loc>
+  </url>
+  <url>
+    <loc>/reference/merge_metacell_bams.html</loc>
+  </url>
+  <url>
+    <loc>/reference/name_enhancers.html</loc>
+  </url>
+  <url>
     <loc>/reference/peak_names.html</loc>
   </url>
   <url>
@@ -193,7 +253,7 @@
     <loc>/reference/plot_rna_markers_mat.html</loc>
   </url>
   <url>
-    <loc>/reference/prepare_clusters.html</loc>
+    <loc>/reference/plot_tracks_at_locus.html</loc>
   </url>
   <url>
     <loc>/reference/project_atac_on_mc.html</loc>
@@ -205,6 +265,18 @@
     <loc>/reference/save_pheatmap.html</loc>
   </url>
   <url>
+    <loc>/reference/scc_project_on_mc.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scc_read.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scc_write.html</loc>
+  </url>
+  <url>
+    <loc>/reference/set_parallel.html</loc>
+  </url>
+  <url>
     <loc>/reference/split_long_peaks.html</loc>
   </url>
   <url>
@@ -214,6 +286,18 @@
     <loc>/reference/subset_peaks.html</loc>
   </url>
   <url>
-    <loc>/reference/write_cluster_misha_track.html</loc>
+    <loc>/reference/temp_track_name.html</loc>
+  </url>
+  <url>
+    <loc>/reference/write_metacell_cell_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/write_sc_counts_from_bam.html</loc>
+  </url>
+  <url>
+    <loc>/reference/write_sc_counts_from_fragments.html</loc>
+  </url>
+  <url>
+    <loc>/reference/write_sparse_matrix_from_bam.html</loc>
   </url>
 </urlset>

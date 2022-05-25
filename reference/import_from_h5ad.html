@@ -26,6 +26,12 @@ The 'var' section can contain a special field called 'ignore' which marks peaks 
 <li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/peaks.html">peaks</a>
+  </div>
+</li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -43,7 +49,7 @@ The 'var' section can contain a special field called 'ignore' which marks peaks 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Create an ScATAC,McATAC object from an h5ad file</h1>
-      <small class="dont-index">Source: <a href="https://github.com/tanaylab/mcATAC/blob/HEAD/R/import.R" class="external-link"><code>R/import.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/tanaylab/mcATAC/blob/HEAD/R/import-peaks.R" class="external-link"><code>R/import-peaks.R</code></a></small>
       <div class="d-none name"><code>import_from_h5ad.Rd</code></div>
     </div>
 
@@ -59,7 +65,8 @@ The 'var' section can contain a special field called 'ignore' which marks peaks 
   class <span class="op">=</span> <span class="cn">NULL</span>,
   genome <span class="op">=</span> <span class="cn">NULL</span>,
   id <span class="op">=</span> <span class="cn">NULL</span>,
-  description <span class="op">=</span> <span class="cn">NULL</span>
+  description <span class="op">=</span> <span class="cn">NULL</span>,
+  tad_based <span class="op">=</span> <span class="cn">NULL</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -77,6 +84,8 @@ of the h5ad file, if exists and otherwise the class would be McATAC.</p></dd>
 h5ad file, and if this doesn't exist - a random id would be assigned.</p></dd>
 <dt>description</dt>
 <dd><p>description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)". If NULL - the id would be determined by the 'description' field in the 'uns' part of the h5ad file</p></dd>
+<dt>tad_based</dt>
+<dd><p>whether to name peaks based on TADs if possible (when an intervals set named "intervs.global.tad_names" exists). When FALSE - peaks are named based on their coordinates. if NULL - the value would be determined by the 'tad_based' field in the 'uns' part of the h5ad file, and if this doesn't exist - the value would be TRUE.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>

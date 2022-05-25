@@ -24,6 +24,12 @@
 <li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/peaks.html">peaks</a>
+  </div>
+</li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -52,7 +58,7 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_atac_rna</span><span class="op">(</span>
-  <span class="va">mc_atac</span>,
+  <span class="va">atac_mc</span>,
   <span class="va">gene</span>,
   atac_promoter <span class="op">=</span> <span class="va">gene</span>,
   mc_rna <span class="op">=</span> <span class="cn">NULL</span>,
@@ -67,14 +73,14 @@
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>mc_atac</dt>
+    <dl><dt>atac_mc</dt>
 <dd><p>a McATAC object</p></dd>
 <dt>gene</dt>
 <dd><p>name of the gene to plot</p></dd>
 <dt>atac_promoter</dt>
 <dd><p>name of the promoter to plot. By default this would be the rna gene <code>gene</code>.</p></dd>
 <dt>mc_rna</dt>
-<dd><p>a <code>metacell1</code> 'mc' object or a <code>metacells</code> metacell UMI matrix (a matrix where each row is a gene and each column is a metacell). Can be NULL if <code>mc_atac</code> already contains the gene expression data (added by <code>add_mc_rna</code>).</p></dd>
+<dd><p>a <code>metacell1</code> 'mc' object or a <code>metacells</code> metacell UMI matrix (a matrix where each row is a gene and each column is a metacell). Can be NULL if <code>atac_mc</code> already contains the gene expression data (added by <code>add_mc_rna</code>).</p></dd>
 <dt>peak</dt>
 <dd><p>name of the peak to plot. If NULL - the promoter of <code>atac_promoter</code> would be shown. You can get the peak names from <code>atac@peaks$peak_name</code></p></dd>
 <dt>max_dist_to_promoter_peak</dt>
@@ -86,7 +92,7 @@
 <dt>tss_intervals</dt>
 <dd><p>name of the intervals set containing the TSSs</p></dd>
 <dt>plot_object_id</dt>
-<dd><p>plot the object id of the <code>mc_atac</code> object in the bottom left corner of the plot (default: TRUE)</p></dd>
+<dd><p>plot the object id of the <code>atac_mc</code> object in the bottom left corner of the plot (default: TRUE)</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -96,13 +102,13 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu">plot_atac_rna</span><span class="op">(</span>mc_atac <span class="op">=</span> <span class="va">pbmc_atac_mc</span>, mc_rna <span class="op">=</span> <span class="va">pbmc_rna_mc</span>, gene <span class="op">=</span> <span class="st">"CD4"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu">plot_atac_rna</span><span class="op">(</span>atac_mc <span class="op">=</span> <span class="va">pbmc_atac_mc</span>, mc_rna <span class="op">=</span> <span class="va">pbmc_rna_mc</span>, gene <span class="op">=</span> <span class="st">"CD4"</span><span class="op">)</span></span>
 <span class="r-in"></span>
-<span class="r-in"><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu">plot_atac_rna</span><span class="op">(</span>mc_atac <span class="op">=</span> <span class="va">pbmc_atac_mc</span>, mc_rna <span class="op">=</span> <span class="va">pbmc_rna_mc</span>, gene <span class="op">=</span> <span class="st">"CD4"</span>, atac_promoter <span class="op">=</span> <span class="st">"CD8"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu">plot_atac_rna</span><span class="op">(</span>atac_mc <span class="op">=</span> <span class="va">pbmc_atac_mc</span>, mc_rna <span class="op">=</span> <span class="va">pbmc_rna_mc</span>, gene <span class="op">=</span> <span class="st">"CD4"</span>, atac_promoter <span class="op">=</span> <span class="st">"CD8"</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Plot gene vs some peak of interest</span></span>
-<span class="r-in"><span class="va">peak</span> <span class="op">&lt;-</span> <span class="va">mc_atac</span><span class="op">@</span><span class="va">peaks</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">$</span><span class="va">peak_name</span></span>
-<span class="r-in"><span class="va">p3</span> <span class="op">&lt;-</span> <span class="fu">plot_atac_rna</span><span class="op">(</span>mc_atac <span class="op">=</span> <span class="va">pbmc_atac_mc</span>, mc_rna <span class="op">=</span> <span class="va">pbmc_rna_mc</span>, gene <span class="op">=</span> <span class="st">"CD4"</span>, peak <span class="op">=</span> <span class="va">peak</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">peak</span> <span class="op">&lt;-</span> <span class="va">atac_mc</span><span class="op">@</span><span class="va">peaks</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">$</span><span class="va">peak_name</span></span>
+<span class="r-in"><span class="va">p3</span> <span class="op">&lt;-</span> <span class="fu">plot_atac_rna</span><span class="op">(</span>atac_mc <span class="op">=</span> <span class="va">pbmc_atac_mc</span>, mc_rna <span class="op">=</span> <span class="va">pbmc_rna_mc</span>, gene <span class="op">=</span> <span class="st">"CD4"</span>, peak <span class="op">=</span> <span class="va">peak</span><span class="op">)</span></span>
 <span class="r-in"><span class="op">}</span></span>
 <span class="r-in"></span>
 </code></pre></div>

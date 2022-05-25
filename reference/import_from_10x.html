@@ -24,6 +24,12 @@
 <li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/peaks.html">peaks</a>
+  </div>
+</li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -41,7 +47,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Create an ScATAC object from 10x directory</h1>
-      <small class="dont-index">Source: <a href="https://github.com/tanaylab/mcATAC/blob/HEAD/R/import.R" class="external-link"><code>R/import.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/tanaylab/mcATAC/blob/HEAD/R/import-peaks.R" class="external-link"><code>R/import-peaks.R</code></a></small>
       <div class="d-none name"><code>import_from_10x.Rd</code></div>
     </div>
 
@@ -59,7 +65,9 @@
   metadata <span class="op">=</span> <span class="cn">NULL</span>,
   matrix_fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="st">"matrix.mtx"</span><span class="op">)</span>,
   cells_fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="st">"barcodes.tsv"</span><span class="op">)</span>,
-  features_fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="st">"features.tsv"</span><span class="op">)</span>
+  features_fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="st">"features.tsv"</span><span class="op">)</span>,
+  tad_based <span class="op">=</span> <span class="cn">TRUE</span>,
+  zero_based <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -83,6 +91,10 @@ For more details see: https://support.10xgenomics.com/single-cell-multiome-atac-
 <dd><p>if <code>dir</code> is missing, the filename of the cells to import ("barcodes.tsv" or "barcodes.tsv.gz")</p></dd>
 <dt>features_fn</dt>
 <dd><p>if <code>dir</code> is missing, the filename of the features to import ("features.tsv" or "features.tsv.gz")</p></dd>
+<dt>tad_based</dt>
+<dd><p>whether to name peaks based on TADs if possible (when an intervals set named "intervs.global.tad_names" exists). When FALSE - peaks are named based on their coordinates.</p></dd>
+<dt>zero_based</dt>
+<dd><p>are the coordinates of the features 0-based? Note that when this is FALSE (default) the coordinates of the created object would be different from the ones in <code>features_fn</code> by 1 bp.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>

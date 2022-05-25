@@ -24,6 +24,12 @@
 <li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/peaks.html">peaks</a>
+  </div>
+</li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -72,9 +78,9 @@
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
 <span class="r-in"><span class="va">max_peak_length</span> <span class="op">&lt;=</span> <span class="fl">1000</span></span>
-<span class="r-in"><span class="va">peak_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_peak_coverage_stats.html">get_peak_coverage_stats</a></span><span class="op">(</span><span class="va">scatac</span>, scale <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">peak_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_peak_coverage_stats.html">get_peak_coverage_stats</a></span><span class="op">(</span><span class="va">atac_sc</span>, scale <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">too_long_peaks</span> <span class="op">&lt;-</span> <span class="va">peak_stats</span><span class="op">$</span><span class="va">peak_name</span><span class="op">[</span><span class="va">peak_stats</span><span class="op">$</span><span class="va">len</span> <span class="op">&gt;</span> <span class="va">max_peak_length</span><span class="op">]</span></span>
-<span class="r-in"><span class="va">scatac_filtered</span> <span class="op">&lt;-</span> <span class="fu">atac_ignore_peaks</span><span class="op">(</span><span class="va">scatac</span>, <span class="va">too_long_peaks</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">atac_sc_filtered</span> <span class="op">&lt;-</span> <span class="fu">atac_ignore_peaks</span><span class="op">(</span><span class="va">atac_sc</span>, <span class="va">too_long_peaks</span><span class="op">)</span></span>
 <span class="r-in"><span class="op">}</span></span>
 </code></pre></div>
     </div>

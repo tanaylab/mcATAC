@@ -24,6 +24,12 @@
 <li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/peaks.html">peaks</a>
+  </div>
+</li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -41,7 +47,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Plot the distribution of the peak length</h1>
-      <small class="dont-index">Source: <a href="https://github.com/tanaylab/mcATAC/blob/HEAD/R/feature_selection.r" class="external-link"><code>R/feature_selection.r</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/tanaylab/mcATAC/blob/HEAD/R/feature_selection.R" class="external-link"><code>R/feature_selection.R</code></a></small>
       <div class="d-none name"><code>plot_peak_length_distribution.Rd</code></div>
     </div>
 
@@ -67,7 +73,7 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="fu">plot_peak_length_distribution</span><span class="op">(</span><span class="va">scatac</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu">plot_peak_length_distribution</span><span class="op">(</span><span class="va">atac_sc</span><span class="op">)</span></span>
 <span class="r-in"><span class="op">}</span></span>
 <span class="r-in"></span>
 </code></pre></div>

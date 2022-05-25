@@ -24,6 +24,12 @@
 <li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/peaks.html">peaks</a>
+  </div>
+</li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -41,7 +47,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Filter features by summary statistics</h1>
-      <small class="dont-index">Source: <a href="https://github.com/tanaylab/mcATAC/blob/HEAD/R/feature_selection.r" class="external-link"><code>R/feature_selection.r</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/tanaylab/mcATAC/blob/HEAD/R/feature_selection.R" class="external-link"><code>R/feature_selection.R</code></a></small>
       <div class="d-none name"><code>filter_features.Rd</code></div>
     </div>
 
@@ -52,7 +58,7 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">filter_features</span><span class="op">(</span>
-  <span class="va">scatac</span>,
+  <span class="va">atac_sc</span>,
   minimal_max_umi <span class="op">=</span> <span class="cn">NULL</span>,
   min_peak_length <span class="op">=</span> <span class="cn">NULL</span>,
   max_peak_length <span class="op">=</span> <span class="cn">NULL</span>,
@@ -62,7 +68,7 @@
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>scatac</dt>
+    <dl><dt>atac_sc</dt>
 <dd><p>the ScATAC object to analyze</p></dd>
 <dt>minimal_max_umi</dt>
 <dd><p>(optional) threshold on minimum maximal coverage - i.e. remove all peaks that DON'T have a cell with at least <code>abs_cov_thresh</code> UMIs</p></dd>
@@ -75,18 +81,18 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>scatac - the filtered ScATAC object</p>
+    <p>atac_sc - the filtered ScATAC object</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
 <span class="r-in"><span class="co">## quantiles of peak lengths before filtering</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">my_scatac</span><span class="op">@</span><span class="va">peaks</span><span class="op">$</span><span class="va">end</span> <span class="op">-</span> <span class="va">my_scatac</span><span class="op">@</span><span class="va">peaks</span><span class="op">$</span><span class="va">start</span>, <span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span> <span class="op">/</span> <span class="fl">10</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">my_scatac</span> <span class="op">&lt;-</span> <span class="fu">filter_features</span><span class="op">(</span>scatac <span class="op">=</span> <span class="va">my_scatac</span>, minimal_max_umi <span class="op">=</span> <span class="fl">3</span>, min_peak_length <span class="op">=</span> <span class="fl">200</span>, max_peak_length <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">my_atac_sc</span><span class="op">@</span><span class="va">peaks</span><span class="op">$</span><span class="va">end</span> <span class="op">-</span> <span class="va">my_atac_sc</span><span class="op">@</span><span class="va">peaks</span><span class="op">$</span><span class="va">start</span>, <span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span> <span class="op">/</span> <span class="fl">10</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">my_atac_sc</span> <span class="op">&lt;-</span> <span class="fu">filter_features</span><span class="op">(</span>atac_sc <span class="op">=</span> <span class="va">my_atac_sc</span>, minimal_max_umi <span class="op">=</span> <span class="fl">3</span>, min_peak_length <span class="op">=</span> <span class="fl">200</span>, max_peak_length <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## quantiles of peak lengths after filtering</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">my_scatac</span><span class="op">@</span><span class="va">peaks</span><span class="op">$</span><span class="va">end</span> <span class="op">-</span> <span class="va">my_scatac</span><span class="op">@</span><span class="va">peaks</span><span class="op">$</span><span class="va">start</span>, <span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span> <span class="op">/</span> <span class="fl">10</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">my_atac_sc</span><span class="op">@</span><span class="va">peaks</span><span class="op">$</span><span class="va">end</span> <span class="op">-</span> <span class="va">my_atac_sc</span><span class="op">@</span><span class="va">peaks</span><span class="op">$</span><span class="va">start</span>, <span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span> <span class="op">/</span> <span class="fl">10</span><span class="op">)</span></span>
 <span class="r-in"><span class="op">}</span></span>
 </code></pre></div>
     </div>

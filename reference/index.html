@@ -24,6 +24,12 @@
 <li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/peaks.html">peaks</a>
+  </div>
+</li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -71,6 +77,16 @@
         <dd>Construct a PeakIntervals object from misha intervals</dd>
       </dl><dl><dt>
           
+          <code><a href="ScCounts-class.html">ScCounts-class</a></code> 
+        </dt>
+        <dd>ScCounts object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="ScCounts.html">McCounts-class</a></code> 
+        </dt>
+        <dd>McCounts object</dd>
+      </dl><dl><dt>
+          
           <code><a href="add_mc_metadata.html">add_mc_metadata()</a></code> 
         </dt>
         <dd>Add per-metacell metadata to an McATAC object</dd>
@@ -101,6 +117,16 @@
         <dd>Set ignored (i.e. blacklisted) peaks</dd>
       </dl><dl><dt>
           
+          <code><a href="bam_file_chromosomes.html">bam_file_chromosomes()</a></code> 
+        </dt>
+        <dd>Get chromosomes from a bam file</dd>
+      </dl><dl><dt>
+          
+          <code><a href="bam_to_wig.html">bam_to_wig()</a></code> 
+        </dt>
+        <dd>Convert BAM file to WIG file</dd>
+      </dl><dl><dt>
+          
           <code><a href="calc_prom_rna_cor.html">calc_prom_rna_cor()</a></code> 
         </dt>
         <dd>Calculate the cross-correlation between promoter accessibility and RNA expression</dd>
@@ -114,6 +140,16 @@
           <code><a href="call_peaks.html">call_peaks()</a></code> 
         </dt>
         <dd>Call peaks from ATAC marginals track</dd>
+      </dl><dl><dt>
+          
+          <code><a href="check_dependencies.html">check_dependencies()</a></code> 
+        </dt>
+        <dd>Test if mcATAC has the required dependencies</dd>
+      </dl><dl><dt>
+          
+          <code><a href="convert_wigs_to_tracks.html">convert_wigs_to_tracks()</a></code> 
+        </dt>
+        <dd>Convert WIG files to misha tracks</dd>
       </dl><dl><dt>
           
           <code><a href="download_pbmc_example_data.html">download_pbmc_example_data()</a></code> 
@@ -169,6 +205,21 @@
           <code><a href="generate_motif_pssm_matrix.html">generate_motif_pssm_matrix()</a></code> 
         </dt>
         <dd>Generate peak-motif matrix</dd>
+      </dl><dl><dt>
+          
+          <code><a href="generate_per_metacell_bams.html">generate_per_metacell_bams()</a></code> 
+        </dt>
+        <dd>Subset 10X atac_possorted.bam file into per-metacell BAM files</dd>
+      </dl><dl><dt>
+          
+          <code><a href="generate_pheatmap_annotation.html">generate_pheatmap_annotation()</a></code> 
+        </dt>
+        <dd>Function to generate generic pheatmap annotation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="generate_wigs_from_bams.html">generate_wigs_from_bams()</a></code> 
+        </dt>
+        <dd>Write WIGs from BAMs</dd>
       </dl><dl><dt>
           
           <code><a href="get_available_pssms.html">get_available_pssms()</a></code> 
@@ -261,6 +312,56 @@
         <dd>Construct a new ScATAC object</dd>
       </dl><dl><dt>
           
+          <code><a href="mcc_extract_to_df.html">mcc_extract_to_df()</a></code> 
+        </dt>
+        <dd>Extract McCounts to a tidy data frame</dd>
+      </dl><dl><dt>
+          
+          <code><a href="mcc_marginal.html">mcc_marginal()</a></code> 
+        </dt>
+        <dd>Return the total coverage of each non-zero coordinate in an McCounts object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="mcc_metacell_total_cov.html">mcc_metacell_total_cov()</a></code> 
+        </dt>
+        <dd>Return the total coverage of each metacell in an McCounts object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="mcc_normalize_metacells.html">mcc_normalize_metacells()</a></code> 
+        </dt>
+        <dd>Normalize each metacell in a McCounts object by its total counts</dd>
+      </dl><dl><dt>
+          
+          <code><a href="mcc_read.html">mcc_read()</a></code> 
+        </dt>
+        <dd>Read an McCounts object from a directory</dd>
+      </dl><dl><dt>
+          
+          <code><a href="mcc_to_marginal_track.html">mcc_to_marginal_track()</a></code> 
+        </dt>
+        <dd>Create a track with smoothed marginal counts from a McCounts object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="mcc_to_mcatac.html">mcc_to_mcatac()</a></code> 
+        </dt>
+        <dd>Create an McATAC object from an McCounts object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="mcc_to_tracks.html">mcc_to_tracks()</a></code> 
+        </dt>
+        <dd>Create a misha track for each metacell in a McCounts object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="merge_metacell_bams.html">merge_metacell_bams()</a></code> 
+        </dt>
+        <dd>Merge BAMs by metacells</dd>
+      </dl><dl><dt>
+          
+          <code><a href="name_enhancers.html">name_enhancers()</a></code> 
+        </dt>
+        <dd>Name ATAC peaks from TAD names</dd>
+      </dl><dl><dt>
+          
           <code><a href="peak_names.html">peak_names()</a></code> 
         </dt>
         <dd>Return the names of PeakIntervals</dd>
@@ -326,9 +427,9 @@
         <dd>Plot a heatmap of marker genes fold change over metacells</dd>
       </dl><dl><dt>
           
-          <code><a href="prepare_clusters.html">prepare_clusters()</a></code> 
+          <code><a href="plot_tracks_at_locus.html">plot_tracks_at_locus()</a></code> 
         </dt>
-        <dd>Prepare peak clusters for export (backend function)</dd>
+        <dd>Plot metacell tracks around locus</dd>
       </dl><dl><dt>
           
           <code><a href="project_atac_on_mc.html">project_atac_on_mc()</a></code> <code><a href="project_atac_on_mc.html">project_atac_on_mc_from_metacell1()</a></code> <code><a href="project_atac_on_mc.html">project_atac_on_mc_from_h5ad()</a></code> 
@@ -346,6 +447,26 @@
         <dd>Function to save pheatmaps to disk while showing them on screen</dd>
       </dl><dl><dt>
           
+          <code><a href="scc_project_on_mc.html">scc_project_on_mc()</a></code> 
+        </dt>
+        <dd>Given metacells (usually from RNA data), project ATAC counts to get a McCounts object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="scc_read.html">scc_read()</a></code> 
+        </dt>
+        <dd>Read an ScCounts object from a directory</dd>
+      </dl><dl><dt>
+          
+          <code><a href="scc_write.html">scc_write()</a></code> <code><a href="scc_write.html">mcc_write()</a></code> 
+        </dt>
+        <dd>Write a counts object to a file.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="set_parallel.html">set_parallel()</a></code> 
+        </dt>
+        <dd>Set parallel threads</dd>
+      </dl><dl><dt>
+          
           <code><a href="split_long_peaks.html">split_long_peaks()</a></code> 
         </dt>
         <dd>Split long peaks into smaller peaks</dd>
@@ -361,9 +482,29 @@
         <dd>Subset peaks of an McATAC object</dd>
       </dl><dl><dt>
           
-          <code><a href="write_cluster_misha_track.html">write_cluster_misha_track()</a></code> 
+          <code><a href="temp_track_name.html">temp_track_name()</a></code> 
         </dt>
-        <dd>Generate a misha track for a metacell cluster (backend function)</dd>
+        <dd>Get a temporary track name</dd>
+      </dl><dl><dt>
+          
+          <code><a href="write_metacell_cell_names.html">write_metacell_cell_names()</a></code> 
+        </dt>
+        <dd>Utility function to write metacell names to files</dd>
+      </dl><dl><dt>
+          
+          <code><a href="write_sc_counts_from_bam.html">write_sc_counts_from_bam()</a></code> 
+        </dt>
+        <dd>Write single cell counts from an indexed bam file</dd>
+      </dl><dl><dt>
+          
+          <code><a href="write_sc_counts_from_fragments.html">write_sc_counts_from_fragments()</a></code> 
+        </dt>
+        <dd>Write single cell counts from a 10x fragments file</dd>
+      </dl><dl><dt>
+          
+          <code><a href="write_sparse_matrix_from_bam.html">write_sparse_matrix_from_bam()</a></code> 
+        </dt>
+        <dd>Write a sparse-matrix file from an indexed bam file</dd>
       </dl></div>
   </main></div>
 

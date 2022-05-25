@@ -24,6 +24,12 @@
 <li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/peaks.html">peaks</a>
+  </div>
+</li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -95,7 +101,7 @@ the first column can contain id for each observation (if id_column is TRUE).</p>
 <dd><p><code>df</code>'s first column contains the observation id</p></dd>
 
     <dt><code>reorder_func</code></dt>
-<dd><p>function to reorder the clusters. operates on each center and orders by the result. e.g. <code>reorder_func = mean</code> would calculate the mean of each center and then would reorder the clusters accordingly. If <code>reorder_func = hclust</code> the centers would be ordered by hclust of the euclidian distance of the correlation matrix, i.e. <code>hclust(dist(cor(t(centers))))</code>
+<dd><p>function to reorder the clusters. operates on each center and orders by the result. e.g. <code>reorder_func = mean</code> would calculate the mean of each center and then would reorder the clusters accordingly. If <code>reorder_func = hclust</code> the centers would be ordered by hclust of the euclidean distance of the correlation matrix, i.e. <code>hclust(dist(cor(t(centers))))</code>
 if NULL, no reordering would be done.</p></dd>
 
     <dt><code>hclust_intra_clusters</code></dt>
@@ -105,7 +111,7 @@ if NULL, no reordering would be done.</p></dd>
 <dd><p>seed for the c++ random number generator</p></dd>
 
     <dt><code>parallel</code></dt>
-<dd><p>cluster every cluster parallely (if hclust_intra_clusters is true)</p></dd>
+<dd><p>cluster every cluster parallelly (if hclust_intra_clusters is true)</p></dd>
 
   
 </dl></dd>

@@ -30,6 +30,12 @@ see ks.test documentation for further details)"><!-- mathjax --><script src="htt
 <li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/peaks.html">peaks</a>
+  </div>
+</li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -47,7 +53,7 @@ see ks.test documentation for further details)"><!-- mathjax --><script src="htt
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Calculate Kolmogorov-Smirnov D statistics between two interval sets with motif energies</h1>
-      <small class="dont-index">Source: <a href="https://github.com/tanaylab/mcATAC/blob/HEAD/R/motifs.r" class="external-link"><code>R/motifs.r</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/tanaylab/mcATAC/blob/HEAD/R/motifs.R" class="external-link"><code>R/motifs.R</code></a></small>
       <div class="d-none name"><code>calculate_d_stats.Rd</code></div>
     </div>
 
@@ -64,9 +70,9 @@ see ks.test documentation for further details)</p>
   <span class="va">pssm_fg</span>,
   <span class="va">pssm_bg</span>,
   fg_clustering <span class="op">=</span> <span class="cn">NULL</span>,
-  parallel <span class="op">=</span> <span class="cn">TRUE</span>,
+  parallel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"mcatac.parallel"</span><span class="op">)</span>,
   alternative <span class="op">=</span> <span class="st">"less"</span>,
-  nc <span class="op">=</span> <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">detectCores</a></span><span class="op">(</span><span class="op">)</span>
+  nc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"mcatac.parallel.nc"</span><span class="op">)</span>
 <span class="op">)</span></code></pre></div>
     </div>
 

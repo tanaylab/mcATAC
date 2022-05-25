@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="Metacell analysis for ATAC data">
-<title>Metacell analysis for ATAC data • mcATAC</title>
+<meta name="description" content="Metacell analysis for scATAC data">
+<title>Metacell analysis for scATAC data • mcATAC</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Metacell analysis for ATAC data">
-<meta property="og:description" content="Metacell analysis for ATAC data">
+<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Metacell analysis for scATAC data">
+<meta property="og:description" content="Metacell analysis for scATAC data">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -41,6 +41,12 @@
 <li class="nav-item">
   <a class="nav-link" href="reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="articles/peaks.html">peaks</a>
+  </div>
+</li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="search.json" id="search-input" placeholder="Search for" autocomplete="off">
@@ -66,21 +72,32 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of mcATAC like so:</p>
+<p>Install the development version of mcATAC:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"tanaylab/mcATAC"</span><span class="op">)</span></code></pre></div>
+<div class="section level3">
+<h3 id="dependencies">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies"></a>
+</h3>
+<p>You can make sure the dependencies are installed by running:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">mcATAC</span><span class="fu">::</span><span class="fu"><a href="reference/check_dependencies.html">check_dependencies</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p>The pacakge assumes that a few standard unix tools are installed and available at your PATH: <code>grep</code>, <code>awk</code>, <code>zcat</code>, <code>sed</code>, <code>sort</code>, <code>head</code>, <code>tail</code>, <code>wc</code>, and <code>uniq</code>. In addition, <code>samtools</code> should also be installed. If <code>tabix</code> is available some functions would operate faster.</p>
+<p>Note that <code>samtools</code> and <code>tabix</code> are bundled with the cellranger package, so you can make them available to your PATH by running:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>PATH <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"PATH"</span><span class="op">)</span>, <span class="st">":"</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">cell_ranger_path</span>, <span class="st">"external/anaconda/bin"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="st">"pbmc_data"</span><span class="op">)</span><span class="op">)</span><span class="op">{</span>
   <span class="fu"><a href="reference/download_pbmc_example_data.html">download_pbmc_example_data</a></span><span class="op">(</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 <div class="section level3">
 <h3 id="import-atac-dataset">Import ATAC dataset<a class="anchor" aria-label="anchor" href="#import-atac-dataset"></a>
 </h3>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/import_from_10x.html">import_from_10x</a></span><span class="op">(</span><span class="st">"pbmc_data"</span>, genome <span class="op">=</span> <span class="st">"hg38"</span>, id <span class="op">=</span> <span class="st">"PBMC"</span>, description <span class="op">=</span> <span class="st">"PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"</span><span class="op">)</span>
 <span class="co">#&gt; • Importing matrix</span>
 <span class="co">#&gt; ℹ Imported a matrix of 11909 cells and 144978 features</span>
@@ -89,13 +106,14 @@
 <span class="co">#&gt; ℹ 107861 ATAC peaks</span>
 <span class="co">#&gt; ! removed 32 peaks from the following chromosome(s) which are missing from hg38: 'KI270727.1, GL000194.1, GL000205.2, GL000195.1, GL000219.1, KI270734.1, KI270721.1, KI270726.1, KI270713.1'</span>
 <span class="co">#&gt; ✔ successfully imported to an ScATAC object with 11909 cells and 107829 ATAC peaks</span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">atac_sc</span>
 <span class="co">#&gt; &lt;ScATAC&gt; object with 11909 cells and 107829 ATAC peaks from hg38.</span>
 <span class="co">#&gt; id: "PBMC"</span>
 <span class="co">#&gt; description: "PBMC from a healthy donor - granulocytes removed through cell</span>
 <span class="co">#&gt; sorting (10k)"</span>
-<span class="co">#&gt; Loaded from: 'pbmc_data/matrix.mtx'</span>
+<span class="co">#&gt; Loaded from:</span>
+<span class="co">#&gt; '/net/mraid14/export/tgdata/users/yonshap/proj/matching/data/filtered_feature_bc_matrix/matrix.mtx'</span>
 <span class="co">#&gt; Slots include:</span>
 <span class="co">#&gt;   • `@mat`: a numeric matrix where rows are peaks and columns are cells. Can be</span>
 <span class="co">#&gt;   a sparse matrix.</span>
@@ -106,25 +124,25 @@
 <h3 id="filter-peaks-by-coverage-andor-length">Filter peaks by coverage and/or length<a class="anchor" aria-label="anchor" href="#filter-peaks-by-coverage-andor-length"></a>
 </h3>
 <p>Plot the length distribution:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="reference/plot_peak_length_distribution.html">plot_peak_length_distribution</a></span><span class="op">(</span><span class="va">atac_sc</span><span class="op">)</span></code></pre></div>
 <p><img src="reference/figures/README-plot-peak-len-1.png" width="100%"></p>
 <p>Plot the coverage distribution:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="reference/plot_peak_coverage_distribution.html">plot_peak_coverage_distribution</a></span><span class="op">(</span><span class="va">atac_sc</span><span class="op">)</span></code></pre></div>
 <p><img src="reference/figures/README-plot-peak-cov-1.png" width="100%"></p>
 <p>Filter:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/filter_features.html">filter_features</a></span><span class="op">(</span>scatac <span class="op">=</span> <span class="va">atac_sc</span>, minimal_max_umi <span class="op">=</span> <span class="fl">3</span>, min_peak_length <span class="op">=</span> <span class="fl">200</span>, max_peak_length <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/filter_features.html">filter_features</a></span><span class="op">(</span>atac_sc <span class="op">=</span> <span class="va">atac_sc</span>, minimal_max_umi <span class="op">=</span> <span class="fl">3</span>, min_peak_length <span class="op">=</span> <span class="fl">200</span>, max_peak_length <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span>
 <span class="co">#&gt; • 8544 features were shorter than 200bp</span>
 <span class="co">#&gt; • 37160 features were longer than 1000bp</span>
 <span class="co">#&gt; • 676 features had a maximal UMI count less than 3</span>
 <span class="co">#&gt; ✔ Removed 46380 peaks out of 107829 (43%). The object is left with 61449 peaks.</span></code></pre></div>
 <p>Identify outliers using coverage density:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="reference/plot_peak_coverage_density.html">plot_peak_coverage_density</a></span><span class="op">(</span><span class="va">atac_sc</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">250</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></code></pre></div>
 <p><img src="reference/figures/README-plot-peak-density-1.png" width="100%"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/filter_features.html">filter_features</a></span><span class="op">(</span><span class="va">atac_sc</span>, max_peak_density <span class="op">=</span> <span class="fl">250</span><span class="op">)</span>
 <span class="co">#&gt; • 107 features had a peak density of more than 250 UMIs per 100bp</span>
 <span class="co">#&gt; ! Adding to previous ignore policy (46380 peaks).</span>
@@ -133,7 +151,7 @@
 <div class="section level3">
 <h3 id="project-rna-metacells">Project RNA metacells<a class="anchor" aria-label="anchor" href="#project-rna-metacells"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 6 × 2</span>
@@ -145,7 +163,7 @@
 <span class="co">#&gt; 4 AAACAGCCAGGATAAC-1       24</span>
 <span class="co">#&gt; 5 AAACAGCCAGTTTACG-1       32</span>
 <span class="co">#&gt; 6 AAACATGCAAGGTCCT-1       30</span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/project_atac_on_mc.html">project_atac_on_mc</a></span><span class="op">(</span><span class="va">atac_sc</span>, <span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span>
 <span class="co">#&gt; ℹ 3198 cells (out of 11909) do not have a metacell and have been removed.</span>
 <span class="co">#&gt; • Setting egc cell size to 67733 (the 0.1 quantile of metacell sizes)</span>
@@ -163,7 +181,7 @@
 <span class="co">#&gt;   • `@egc`: a numeric matrix which contains normalized metacell accessibility.</span>
 <span class="co">#&gt;   • `@fp`: a matrix showing for each peak (row) the relative enrichment of umis</span>
 <span class="co">#&gt;   in log2 scale.</span></code></pre></div>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">atac_mc</span>
 <span class="co">#&gt; &lt;McATAC&gt; object with 97 metacells and 61342 ATAC peaks from hg38.</span>
 <span class="co">#&gt; id: "PBMC"</span>
@@ -181,7 +199,7 @@
 <div class="section level3">
 <h3 id="add-metadata">Add metadata<a class="anchor" aria-label="anchor" href="#add-metadata"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mcmd</span><span class="op">)</span>
 <span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/add_mc_metadata.html">add_mc_metadata</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="va">mcmd</span><span class="op">)</span></code></pre></div>
 </div>
@@ -189,14 +207,14 @@
 <div class="section level2">
 <h2 id="import-rna-expression-data">Import RNA expression data<a class="anchor" aria-label="anchor" href="#import-rna-expression-data"></a>
 </h2>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">rna_mc_mat</span><span class="op">)</span>
 <span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/add_mc_rna.html">add_mc_rna</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="va">rna_mc_mat</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="reference/plot_atac_rna.html">plot_atac_rna</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="st">"GZMK"</span><span class="op">)</span>
 <span class="co">#&gt; → The gene "GZMK" has 2 alternative promoters.</span></code></pre></div>
 <p><img src="reference/figures/README-atac-rna-scatter-1-1.png" width="100%"></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="reference/plot_atac_rna_markers.html">plot_atac_rna_markers</a></span><span class="op">(</span><span class="va">atac_mc</span><span class="op">)</span>
 <span class="co">#&gt; → removing 7543 genes with no RNA expression in any metacell.</span>
 <span class="co">#&gt; → removing 23451 genes with no RNA expression (log2) of above -13 in any metacell.</span>
