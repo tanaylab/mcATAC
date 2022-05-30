@@ -49,6 +49,7 @@ add_metadata <- function(obj, metadata, metadata_id_field) {
 get_cell_type_colors <- function(metadata) {
     metadata %>%
         distinct(cell_type, color) %>%
+        select(cell_type, color) %>%
         deframe()
 }
 

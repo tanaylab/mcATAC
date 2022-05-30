@@ -18,12 +18,13 @@ plot_tracks_at_locus(
   row_order = NULL,
   gene_annot = TRUE,
   name = NULL,
+  rna_vals = NULL,
   annotation_row = NULL,
   annotation_col = NULL,
   annotation_colors = NULL,
   silent = FALSE,
   scale_bar_length = NULL,
-  rna_legc_eps = 0.00001,
+  rna_legc_eps = 1e-05,
   colors = colorRampPalette(c("white", "darkblue", "red"))(100),
   ...
 )
@@ -55,6 +56,8 @@ RNA expression values (if an RNA metacell object is attached)}
 \item{gene_annot}{(optional) whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory}
 
 \item{name}{(optional; default - 'ATAC signal') name to give the legend of the heatmap}
+
+\item{rna_vals}{(optional) RNA expression values to plot (overrides RNA expression extracted from \code{atac})}
 
 \item{annotation_row}{pheatmap-format annotation}
 
