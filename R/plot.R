@@ -488,6 +488,13 @@ plot_tracks_at_locus <- function(tracks = NULL,
                 cli_alert_info("No appropriate metacell annotation provided for ordering tracks. Need either {.var atac@metadata$cell_type} or {.var annotation_row$cell_type}. Tracks will not be ordered.")
                 row_order <- 1:length(tracks)
             }
+        } else {
+            if (has_name(annotation_row, "cell_type")) {
+                row_order <- order(annotation_row[,"cell_type"])
+            } else {
+                cli_alert_warning("{.var annotation_row} provided but there is no field {.field cell_type}. Ordering by 1:length({.var tracks}).")
+                row_order <- 1:length(tracks)
+            }
         }
     } else if (!order_rows && is.null(row_order)) {
         row_order <- 1:length(tracks)
@@ -527,7 +534,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
             if (is.null(annotation_colors)) {
                 cli_abort("Must specify {.var annotation_colors} if {.var annotation_row} is specified.")
             }
-            ct_ha <- ComplexHeatmap::rowAnnotation(cell_type = unlist(annotation_row[row_order, ]), col = annotation_colors)
+            ct_ha <- ComplexHeatmap::rowAnnotation(cell_type = annotation_row[row_order,], col = annotation_colors)
         } else {
             ct_ha <- ComplexHeatmap::rowAnnotation(cell_type = ComplexHeatmap::anno_empty())
         }

@@ -83,7 +83,7 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
             mc_size_eps_q <- adata$uns[["mc_size_eps_q"]]
         } else {
             mc_size_eps_q <- 0.1
-            cli_alert_warning("h5ad file doesn't have the {.field mc_size_eps_q} at the {.file uns} section. Using the default: {.val {mc_size_eps_q}")
+            cli_alert_warning("h5ad file doesn't have the {.field mc_size_eps_q} at the {.file uns} section. Using the default: {.val {mc_size_eps_q}}")
         }
 
         if (!is.null(adata$uns[["cell_to_metacell"]])) {
