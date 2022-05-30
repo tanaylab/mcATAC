@@ -371,6 +371,7 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 #' @param chromosomes (optional) which set of chromosomes to use; mainly used to filter out contigs by default
 #' @param rna_legc_eps (optional) what regularization value to add to mc_rna@e_gc when calculating log
 #' @param name (optional; default - 'ATAC signal') name to give the legend of the heatmap
+#' @param rna_vals (optional) RNA expression values to plot (overrides RNA expression extracted from \code{atac})
 #' @param gene_annot (optional) whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory
 #' @param silent (optional) whether to print generated plot
 #' @param annotation_row pheatmap-format annotation
@@ -630,10 +631,11 @@ make_gene_annot <- function(intervals, iterator, num_bins) {
         genes_ha <- list(labels = NULL, label_coords = NULL, exon_coords = NULL)
     } else {
         refgene <- tgutil::fread(file_path, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
-        rg_here <- dplyr::filter(refgene, chrom == as.character(intervals$chrom), 
-                                        ((txStart >= intervals$start) & (txStart <= intervals$end)) | 
-                                        ((txEnd >= intervals$start) &  (txEnd <= intervals$end))
-                                )
+        rg_here <- dplyr::filter(
+            refgene, chrom == as.character(intervals$chrom),
+            ((txStart >= intervals$start) & (txStart <= intervals$end)) |
+                ((txEnd >= intervals$start) & (txEnd <= intervals$end))
+        )
         if (nrow(rg_here) > 0) {
             gbins <- giterator.intervals(intervals = intervals, iterator = iterator)
             exons_df <- rg_here %>%
