@@ -84,11 +84,7 @@ generate_pheatmap_annotation <- function(clust_vec, feature_type = NULL, feature
         feature_annotation <- "annotation"
     }
     cts <- unique(clust_vec)
-
     color_key <- tibble(!!feature_type := cts, color = chameleon::distinct_colors(length(cts))$name)
-    # %>%
-    #             rename(color_key, !!feature_type := name)
-    print(head(color_key))
     col_annot <- clust_vec %>%
         enframe(feature_type, feature_annotation) %>%
         column_to_rownames(feature_type)
