@@ -1,4 +1,61 @@
+#' Create an ScATAC,McATAC object from matrix and peaks
+#'
+#' @param mat a matrix/sparse matrix of counts
+#' @param peaks an intervals set where each row corresponds to a row in \code{mat}. Can contain
+#' an additional column named 'peak_name' with peak names, in which case the rownames of \code{mat}
+#' are expected to equal to this column.
+#' @param class should the output object be a ScATAC or McATAC
+#' @inheritParams import_from_10x
+#' @inheritParams project_atac_on_mc
+#'
+#' @examples
+#' \dontrun{
+#' atac_sc <- import_from_matrix(mat, peaks, genome = "hg38")
+#' atac_mc <- import_from_matrix(mat, peaks, genome = "hg38", class = "McATAC")
+#' }
+#'
+#' @export
+import_from_matrix <- function(mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, class = "ScATAC", rm_zero_peaks = TRUE, tad_based = TRUE, zero_based = FALSE, mc_size_eps_q = 0.1) {
+    if (nrow(peaks) != nrow(mat)) {
+        cli_abort("Number of rows in peaks and matrix do not match")
+    }
+    atac_mat <- mat
 
+    if (rm_zero_peaks) {
+        non_zero_peaks <- Matrix::rowSums(atac_mat) > 0
+        if (sum(!non_zero_peaks) > 0) {
+            cli_alert_info("Removed {.val {sum(!non_zero_peaks)}} all-zero peaks")
+        }
+    } else {
+        non_zero_peaks <- rep(TRUE, nrow(atac_mat))
+    }
+
+    peaks <- peaks[non_zero_peaks, ]
+    atac_mat <- atac_mat[non_zero_peaks, ]
+
+    if (!zero_based) {
+        peaks <- peaks %>%
+            mutate(start = start - 1, end = end - 1)
+    }
+
+    if (is.null(rownames(atac_mat)) || !has_name(peaks, "peak_name")) {
+        peaks <- peaks %>%
+            mutate(peak_name = misha.ext::convert_misha_intervals_to_10x_peak_names(.))
+        rownames(atac_mat) <- peaks$peak_name
+    }
+
+    if (class == "ScATAC") {
+        res <- new("ScATAC", atac_mat, peaks, genome = genome, id = id, description = description, metadata = metadata, tad_based = tad_based)
+        cli_alert_success("successfully imported to an ScATAC object with {.val {ncol(res@mat)}} cells and {.val {nrow(res@mat)}} ATAC peaks")
+    } else if (class == "McATAC") {
+        res <- new("McATAC", mat = atac_mat, peaks = peaks, genome = genome, metadata = metadata, cell_to_metacell = NULL, mc_size_eps_q = mc_size_eps_q, id = id, description = description, tad_based = tad_based)
+        cli_alert_success("Created a new McATAC object with {.val {ncol(res@mat)}} metacells and {.val {nrow(res@mat)}} ATAC peaks.")
+    } else {
+        cli_abort("{.field class} should be either ScATAC or McATAC")
+    }
+
+    return(res)
+}
 
 #' Create an ScATAC,McATAC object from an h5ad file
 #'
@@ -83,7 +140,7 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
             mc_size_eps_q <- adata$uns[["mc_size_eps_q"]]
         } else {
             mc_size_eps_q <- 0.1
-            cli_alert_warning("h5ad file doesn't have the {.field mc_size_eps_q} at the {.file uns} section. Using the default: {.val {mc_size_eps_q}")
+            cli_alert_warning("h5ad file doesn't have the {.field mc_size_eps_q} at the {.file uns} section. Using the default: {.val {mc_size_eps_q}}")
         }
 
         if (!is.null(adata$uns[["cell_to_metacell"]])) {

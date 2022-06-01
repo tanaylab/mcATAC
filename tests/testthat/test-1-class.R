@@ -10,6 +10,29 @@ test_that("import from 10x works", {
     expect_equal(atac_sc@path, normalizePath(file.path(raw_dir, "matrix.mtx")), ignore_attr = TRUE)
 })
 
+test_that("import from matrix works", {
+    mat <- atac_sc@mat
+    peaks <- atac_sc@peaks %>%
+        select(chrom, start, end) %>%
+        as.data.frame()
+
+    atac_sc1 <- import_from_matrix(mat, peaks, "hg38")
+    expect_true(mean(abs(mat - atac_sc1@mat)) <= 1e-9)
+    expect_equal(peaks, atac_sc1@peaks %>% select(chrom, start, end) %>% as.data.frame())
+
+    # mcATAC
+    atac_mc1 <- import_from_matrix(atac_mc@mat, atac_mc@peaks, atac_mc@genome, class = "McATAC", id = atac_mc@id, description = atac_mc@description, metadata = atac_mc@metadata)
+    expect_true(mean(abs(atac_mc@mat - atac_mc1@mat)) <= 1e-9)
+    expect_true(mean(abs(atac_mc@egc - atac_mc1@egc)) <= 1e-9)
+    expect_true(mean(abs(atac_mc@fp - atac_mc1@fp)) <= 1e-9)
+    expect_equal(atac_mc@peaks, atac_mc1@peaks, ignore_attr = TRUE)
+    expect_equal(atac_mc@mc_size_eps_q, atac_mc1@mc_size_eps_q)
+    expect_equal(atac_mc@genome, atac_mc1@genome)
+    expect_equal(atac_mc@metadata, atac_mc1@metadata, ignore_attr = TRUE)
+    expect_equal(atac_mc@tad_based, atac_mc1@tad_based)
+    expect_equal(atac_mc@description, atac_mc1@description)
+})
+
 test_that("projection works", {
     expect_equal(class(atac_mc), "McATAC", ignore_attr = TRUE)
     expect_equal(nrow(atac_mc@mat), 107687)
