@@ -16,8 +16,8 @@ test_that("import from matrix works", {
         select(chrom, start, end) %>%
         as.data.frame()
 
-    atac_sc1 <- import_from_matrix(mat, peaks, "hg38")
-    expect_true(mean(abs(mat - atac_sc1@mat)) <= 1e-9)
+    atac_sc1 <- import_from_matrix(mat, peaks, "hg38", id = atac_sc@id, rm_zero_peaks = FALSE)
+    expect_true(sum(abs(mat - atac_sc1@mat)) <= 1e-9)
     expect_equal(peaks, atac_sc1@peaks %>% select(chrom, start, end) %>% as.data.frame())
 
     # mcATAC
