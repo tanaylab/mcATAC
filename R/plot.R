@@ -490,7 +490,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
             }
         } else {
             if (has_name(annotation_row, "cell_type")) {
-                row_order <- order(annotation_row[,"cell_type"])
+                row_order <- order(annotation_row[, "cell_type"])
             } else {
                 cli_alert_warning("{.var annotation_row} provided but there is no field {.field cell_type}. Ordering by 1:length({.var tracks}).")
                 row_order <- 1:length(tracks)
@@ -534,7 +534,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
             if (is.null(annotation_colors)) {
                 cli_abort("Must specify {.var annotation_colors} if {.var annotation_row} is specified.")
             }
-            ct_ha <- ComplexHeatmap::rowAnnotation(cell_type = annotation_row[row_order,], col = annotation_colors)
+            ct_ha <- ComplexHeatmap::rowAnnotation(cell_type = annotation_row[row_order, ], col = annotation_colors)
         } else {
             ct_ha <- ComplexHeatmap::rowAnnotation(cell_type = ComplexHeatmap::anno_empty())
         }
@@ -583,18 +583,17 @@ plot_tracks_at_locus <- function(tracks = NULL,
         col = list("scale_bar" = setNames(c("white", "black"), c(0, 1)))
     )
     if (gintervals.exists("intervs.global.tad_names")) {
-        tads_df <- gintervals.load("intervs.global.tad_names")
-        tads_here <- gintervals.neighbors(tads_df, intervals, maxdist = 0, mindist = 0, maxneighbors = 100)
+        tads_here <- gintervals.neighbors("intervs.global.tad_names", intervals, maxdist = 0, mindist = 0, maxneighbors = 100)
         num_bins <- ncol(mat_n)
         tad_name_vec <- rep("", num_bins)
         if (nrow(tads_here) > 1) {
-            bins_borders <- round((unlist(tads_here[,2:3]) - intervals$start)/iterator)
+            bins_borders <- round((unlist(tads_here[, 2:3]) - intervals$start) / iterator)
             bins_borders <- sort(unique(bins_borders[bins_borders > 0 & bins_borders <= num_bins]))
             labels_locs <- round(zoo::rollmean(c(0, bins_borders, num_bins), k = 2))
             tad_name_vec[bins_borders] <- "X"
             tad_name_vec[labels_locs] <- tads_here$tad_name
         } else {
-            tad_name_vec[round(length(tad_name_vec)/2)] <- tads_here$tad_name
+            tad_name_vec[round(length(tad_name_vec) / 2)] <- tads_here$tad_name
         }
         tad_annot <- ComplexHeatmap::anno_text(tad_name_vec, rot = 0, gp = grid::gpar(fontsize = 10))
     } else {
@@ -613,7 +612,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
             exon_annots <- ComplexHeatmap::anno_empty()
         }
         top_ha <- ComplexHeatmap::columnAnnotation(
-            tads = tad_annot, 
+            tads = tad_annot,
             peaks = peaks_ha,
             genes = gene_name_annots,
             exons = exon_annots,
@@ -628,9 +627,10 @@ plot_tracks_at_locus <- function(tracks = NULL,
     } else {
         gene_annots <- ComplexHeatmap::anno_empty()
         top_ha <- ComplexHeatmap::columnAnnotation(
-            tads = tad_annot, 
-            peaks = peaks_ha, 
-            genes = gene_annots)
+            tads = tad_annot,
+            peaks = peaks_ha,
+            genes = gene_annots
+        )
     }
     ch <- ComplexHeatmap::Heatmap(mat_n[row_order, ],
         name = name,
