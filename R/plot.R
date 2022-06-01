@@ -582,6 +582,24 @@ plot_tracks_at_locus <- function(tracks = NULL,
         show_legend = FALSE,
         col = list("scale_bar" = setNames(c("white", "black"), c(0, 1)))
     )
+    if (gintervals.exists("intervs.global.tad_names")) {
+        tads_df <- gintervals.load("intervs.global.tad_names")
+        tads_here <- gintervals.neighbors(tads_df, intervals, maxdist = 0, mindist = 0, maxneighbors = 100)
+        num_bins <- ncol(mat_n)
+        tad_name_vec <- rep("", num_bins)
+        if (nrow(tads_here) > 1) {
+            bins_borders <- round((unlist(tads_here[,2:3]) - intervals$start)/iterator)
+            bins_borders <- sort(unique(bins_borders[bins_borders > 0 & bins_borders <= num_bins]))
+            labels_locs <- round(zoo::rollmean(c(0, bins_borders, num_bins), k = 2))
+            tad_name_vec[bins_borders] <- "X"
+            tad_name_vec[labels_locs] <- tads_here$tad_name
+        } else {
+            tad_name_vec[round(length(tad_name_vec)/2)] <- tads_here$tad_name
+        }
+        tad_annot <- ComplexHeatmap::anno_text(tad_name_vec, rot = 0, gp = grid::gpar(fontsize = 10))
+    } else {
+        tad_annot <- ComplexHeatmap::anno_empty()
+    }
     if (gene_annot) {
         gene_annots <- make_gene_annot(intervals, iterator, ncol(mat_n))
         if (!is.null(gene_annots[["labels"]]) && !is.null(gene_annots[["label_coords"]])) {
@@ -595,10 +613,12 @@ plot_tracks_at_locus <- function(tracks = NULL,
             exon_annots <- ComplexHeatmap::anno_empty()
         }
         top_ha <- ComplexHeatmap::columnAnnotation(
+            tads = tad_annot, 
             peaks = peaks_ha,
             genes = gene_name_annots,
             exons = exon_annots,
             col = list(
+                tads = "black",
                 peaks = setNames(c("white", "red"), c(0, 1)),
                 genes = "black",
                 exons = setNames(c("white", "black"), c(0, 1))
@@ -607,7 +627,10 @@ plot_tracks_at_locus <- function(tracks = NULL,
         )
     } else {
         gene_annots <- ComplexHeatmap::anno_empty()
-        top_ha <- ComplexHeatmap::columnAnnotation(peaks = peaks_ha, genes = gene_annots)
+        top_ha <- ComplexHeatmap::columnAnnotation(
+            tads = tad_annot, 
+            peaks = peaks_ha, 
+            genes = gene_annots)
     }
     ch <- ComplexHeatmap::Heatmap(mat_n[row_order, ],
         name = name,
