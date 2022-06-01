@@ -176,7 +176,7 @@ export_to_h5ad(atac_mc, "pbmc_data/atac_mc.h5ad", compression = "gzip")
 
 
 ## Plot per-metacell tracks around some gene/interval
-```{r plot_tracks_at_locus}
+```{r plot_tracks_at_locus, eval = FALSE}
 library(metacell)
 scdb_init("scdb")
 mc_rna = scdb_mc('rna_w_color_key')
@@ -233,7 +233,7 @@ head(motif_mat)
 
 ## Extract motif energies from random genomic background
 
-```{r random_genome, , eval = FALSE}
+```{r random_genome, eval = FALSE}
 misha.ext::gset_genome("hg38")
 rg = gen_random_genome_peak_motif_matrix(num_peaks = 1e+4,
                                           bp_from_chrom_edge_to_avoid = 1e+6, 
