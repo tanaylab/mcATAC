@@ -9,7 +9,7 @@ write_sc_counts_from_bam(
   out_dir,
   cell_names,
   genome = NULL,
-  bin_size = 50000000,
+  bin_size = 5e+07,
   id = "",
   description = "",
   min_mapq = NULL,
