@@ -101,6 +101,10 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
         metadata <- NULL
     }
 
+    if (!is.null(metadata) && !is.null(rownames(metadata))) {
+        colnames(mat) <- rownames(metadata)
+    }
+
     if (is.null(class)) {
         if (!is.null(adata$uns[["class"]])) {
             class <- adata$uns[["class"]]
