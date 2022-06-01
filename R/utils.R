@@ -75,7 +75,7 @@ save_pheatmap <- function(x, filename, dev = png, width = 2000, height = 2000, r
 #'     feature_type = "peak", feature_annotation = "cluster"
 #' )
 #' }
-#' #' @export
+#' @export
 generate_pheatmap_annotation <- function(clust_vec, feature_type = NULL, feature_annotation = NULL) {
     if (is.null(feature_type)) {
         feature_type <- "type"

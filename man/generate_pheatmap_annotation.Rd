@@ -44,5 +44,4 @@ peak_cl_phm_annot <- generate_pheatmap_annotation(peak_clusters,
     feature_type = "peak", feature_annotation = "cluster"
 )
 }
-#' @export
 }
