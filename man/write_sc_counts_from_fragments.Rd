@@ -9,7 +9,7 @@ write_sc_counts_from_fragments(
   out_dir,
   cell_names,
   genome = NULL,
-  bin_size = 50000000,
+  bin_size = 5e+07,
   overwrite = FALSE,
   id = "",
   description = "",
