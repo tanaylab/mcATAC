@@ -54,7 +54,27 @@ save_pheatmap <- function(x, filename, dev = png, width = 2000, height = 2000, r
 #' @param feature_type (optional) type of the feature that was clustered
 #' @param feature_name (optional) name of the feature that was clustered
 #' @return 2-element list containing a pheatmap-compatible dataframe and a list containing a named vector
-
+#' @examples
+#' \dontrun{
+#'
+#' ## generate metacell cluster/cell type annotation
+#' metacell_clusters <- gen_atac_mc_clust(atac_mc, use_prior_annot = FALSE, k = 8)
+#' mc_cl_phm_annot <- generate_pheatmap_annotation(metacell_clusters,
+#'     feature_type = "metacell", feature_annotation = "cluster"
+#' )
+#'
+#' metacell_clusters_by_annotation <- gen_atac_mc_clust(atac_mc, use_prior_annot = TRUE)
+#' mc_cl_phm_annot <- generate_pheatmap_annotation(metacell_clusters,
+#'     feature_type = "metacell", feature_annotation = "cell_type"
+#' )
+#'
+#'
+#' ## generate peak cluster annotation
+#' peak_clusters <- gen_atac_peak_clust(atac_mc, k = 16)
+#' peak_cl_phm_annot <- generate_pheatmap_annotation(peak_clusters,
+#'     feature_type = "peak", feature_annotation = "cluster"
+#' )
+#' }
 #' @export
 generate_pheatmap_annotation <- function(clust_vec, feature_type = NULL, feature_annotation = NULL) {
     if (is.null(feature_type)) {
@@ -64,9 +84,7 @@ generate_pheatmap_annotation <- function(clust_vec, feature_type = NULL, feature
         feature_annotation <- "annotation"
     }
     cts <- unique(clust_vec)
-
-    color_key <- tibble(name = cts, color = chameleon::distinct_colors(length(cts))$name) %>%
-        rename(!!feature_annotation := name)
+    color_key <- tibble(!!feature_annotation := cts, color = chameleon::distinct_colors(length(cts))$name)
     col_annot <- clust_vec %>%
         enframe(feature_type, feature_annotation) %>%
         column_to_rownames(feature_type)

@@ -23,3 +23,25 @@ generate_pheatmap_annotation(
 \description{
 Generate a generic pheatmap-compatible annotation when clustering unannotated data and plotting with pheatmap
 }
+\examples{
+\dontrun{
+
+## generate metacell cluster/cell type annotation
+metacell_clusters <- gen_atac_mc_clust(atac_mc, use_prior_annot = FALSE, k = 8)
+mc_cl_phm_annot <- generate_pheatmap_annotation(metacell_clusters,
+    feature_type = "metacell", feature_annotation = "cluster"
+)
+
+metacell_clusters_by_annotation <- gen_atac_mc_clust(atac_mc, use_prior_annot = TRUE)
+mc_cl_phm_annot <- generate_pheatmap_annotation(metacell_clusters,
+    feature_type = "metacell", feature_annotation = "cell_type"
+)
+
+
+## generate peak cluster annotation
+peak_clusters <- gen_atac_peak_clust(atac_mc, k = 16)
+peak_cl_phm_annot <- generate_pheatmap_annotation(peak_clusters,
+    feature_type = "peak", feature_annotation = "cluster"
+)
+}
+}
