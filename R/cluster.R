@@ -76,7 +76,7 @@ gen_atac_mc_clust <- function(atac_mc, use_prior_annot = TRUE, k = NULL, annot =
             cli_abort("Must choose k if clustering with use_prior_annot == FALSE")
         }
     } else {
-        assert_that(!is.null(atac_mc@metadata), any(grepl(colnames(atac_mc@metadata) == annot)),
+        assert_that(!is.null(atac_mc@metadata), any(grepl(annot, colnames(atac_mc@metadata))),
             msg = 'There is no metadata or the field "{annot}" does not exist in it.'
         )
         return(deframe(atac_mc@metadata %>% select(metacell, !!annot)))
