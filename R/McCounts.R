@@ -159,7 +159,7 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
         misha.ext::gintervals.neighbors1(intervs) %>%
         # although mat@i is 0-based, R indices are 1-based (hence the +1)
         mutate(ind = start - bin$start + 1)
-    browser()
+
     group <- factor(mat_intervs$peak_name, levels = intervs$peak_name)
     mat_f <- mat[mat_intervs$ind, metacells]
     res <- t(sparse_matrix_tapply_sum(t(mat_f), group))
