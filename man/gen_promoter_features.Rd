@@ -19,6 +19,8 @@ gen_promoter_features(
 
 \item{downstream}{bp downstread from tss}
 
+\item{tss_intervals}{name of the intervals set with the TSS}
+
 \item{id_field}{the field in \code{tss_intervals} containing the gene names. Default: "geneSymbol"}
 }
 \value{

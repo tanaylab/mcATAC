@@ -24,7 +24,7 @@ plot_tracks_at_locus(
   annotation_colors = NULL,
   silent = FALSE,
   scale_bar_length = NULL,
-  rna_legc_eps = 1e-05,
+  rna_legc_eps = 0.00001,
   smooth_mcs = 1,
   smooth_bins = 1,
   colors = c("white", "lightblue", "blue", "darkred", "yellow"),
@@ -78,7 +78,7 @@ RNA expression values (if an RNA metacell object is attached)}
 
 \item{colors}{(optional) vector of colors out of which the shades of the heatmap will be generated}
 
-\item{color_breaks}{defining the absolute breaks of the colors. If null this will be determined as uniform distribution with clipping on the 99 percentile of the smoothed value distribution.}
+\item{color_breaks}{(optional) defining the absolute breaks of the colors. If NULL - this will be determined as uniform distribution with clipping on the 99 percentile of the smoothed value distribution.}
 }
 \value{
 a ComplexHeatmap figure

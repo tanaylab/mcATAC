@@ -13,6 +13,7 @@ Imports:
     cli,
     dplyr,
     ggplot2,
+    circlize,
     scales,
     glue,
     igraph,
@@ -43,7 +44,7 @@ Imports:
     parallel,
     plyr,
     yaml,
-	 zoo
+	zoo
 Suggests: 
     testthat (>= 3.0.0),
     metacell,
