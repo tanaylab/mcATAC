@@ -366,6 +366,7 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 #' RNA expression values (if an RNA metacell object is attached)
 #' @param order_rows whether to order the rows by \code{cell_type} annotation
 #' @param row_order an explicit ordering of rows/tracks to use
+#' @param log_transform transfrom the data to log2(1 + x). Default: TRUE
 #' @param gene_feature (optional; default - "exon") whether to use the exon or tss as features of the gene on which to center the plot
 #' @param track_regex (optional) regular expression for matching tracks to plot
 #' @param chromosomes (optional) which set of chromosomes to use; mainly used to filter out contigs by default
@@ -428,6 +429,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
                                  atac = NULL,
                                  order_rows = FALSE,
                                  row_order = NULL,
+                                 log_transform = TRUE,
                                  gene_annot = TRUE,
                                  name = NULL,
                                  rna_vals = NULL,
@@ -559,7 +561,10 @@ plot_tracks_at_locus <- function(tracks = NULL,
     mat_n <- t(misha.ext::intervs_to_mat(mc_gene_vals))
     mat_n[is.na(mat_n)] <- 0
     mat_n <- mat_n[row_order, ]
-    mat_n <- log2(1 + mat_n)
+    if (log_transform) {
+        mat_n <- log2(1 + mat_n)
+    }
+
     if (smooth_bins != 1) {
         cli_alert("smooth bins with {.val {smooth_bins}}")
         mat_n <- t(apply(mat_n, 1, zoo::rollmean, smooth_bins, fill = "extend"))

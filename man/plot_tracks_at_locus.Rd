@@ -16,6 +16,7 @@ plot_tracks_at_locus(
   atac = NULL,
   order_rows = FALSE,
   row_order = NULL,
+  log_transform = TRUE,
   gene_annot = TRUE,
   name = NULL,
   rna_vals = NULL,
@@ -55,6 +56,8 @@ RNA expression values (if an RNA metacell object is attached)}
 \item{order_rows}{whether to order the rows by \code{cell_type} annotation}
 
 \item{row_order}{an explicit ordering of rows/tracks to use}
+
+\item{log_transform}{transfrom the data to log2(1 + x). Default: TRUE}
 
 \item{gene_annot}{(optional) whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory}
 
