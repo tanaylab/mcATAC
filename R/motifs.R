@@ -96,12 +96,9 @@ generate_motif_pssm_matrix <- function(atac = NULL,
     trks_motifs <- res
     if (length(trks_motifs) >= 1e+2) {
         divs <- 1:4
-        trk_inds <- unlist(do.call("c", lapply(divs, function(i) {
-            ifelse(as.numeric(i) != max(divs),
-                return(rep.int(x = i, times = ceiling(length(trks_motifs) / length(divs)))),
-                return(rep.int(x = i, times = floor(length(trks_motifs) / length(divs))))
-            )
-        })))
+        chunk_size <- ceiling(length(trks_motifs) / max(divs))
+        trk_inds <- sapply(divs, rep, chunk_size)
+        trk_inds <- trk_inds[1:length(trks_motifs)]
         df_list <- lapply(sort(unique(trk_inds)), function(u) {
             gextract(trks_motifs[trk_inds == u],
                 intervals = peaks,
