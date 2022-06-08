@@ -17,12 +17,6 @@ bp (default: 100)}
 \item{...}{
   Arguments passed on to \code{\link[scattermore:geom_scattermore]{scattermore::geom_scattermore}}
   \describe{
-    \item{\code{mapping}}{passed to \code{\link[ggplot2:layer]{ggplot2::layer()}}}
-    \item{\code{data}}{passed to \code{\link[ggplot2:layer]{ggplot2::layer()}}}
-    \item{\code{stat}}{passed to \code{\link[ggplot2:layer]{ggplot2::layer()}}}
-    \item{\code{position}}{passed to \code{\link[ggplot2:layer]{ggplot2::layer()}}}
-    \item{\code{inherit.aes}}{passed to \code{\link[ggplot2:layer]{ggplot2::layer()}}}
-    \item{\code{show.legend}}{passed to \code{\link[ggplot2:layer]{ggplot2::layer()}}}
     \item{\code{na.rm}}{Remove NA values, just as with \code{\link[ggplot2:geom_point]{ggplot2::geom_point()}}.}
     \item{\code{interpolate}}{Default FALSE, passed to \code{\link[grid:grid.raster]{grid::rasterGrob()}}.}
     \item{\code{pixels}}{Vector with X and Y resolution of the raster, default \code{c(512,512)}.}
