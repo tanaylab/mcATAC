@@ -29,7 +29,7 @@ plot_tracks_at_locus(
   smooth_bins = 1,
   colors = c("white", "lightblue", "blue", "darkred", "yellow"),
   color_breaks = NULL,
-  ...
+  use_raster = FALSE
 )
 }
 \arguments{
@@ -79,6 +79,8 @@ RNA expression values (if an RNA metacell object is attached)}
 \item{colors}{(optional) vector of colors out of which the shades of the heatmap will be generated}
 
 \item{color_breaks}{(optional) defining the absolute breaks of the colors. If NULL - this will be determined as uniform distribution with clipping on the 99 percentile of the smoothed value distribution.}
+
+\item{use_raster}{Whether render the heatmap body as a raster image. It helps to reduce file size when the matrix is huge. If number of rows or columns is more than 2000, it is by default turned on. Note if \code{cell_fun} is set, \code{use_raster} is enforced to be \code{FALSE}.}
 }
 \value{
 a ComplexHeatmap figure

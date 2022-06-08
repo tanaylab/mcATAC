@@ -441,7 +441,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
                                  smooth_bins = 1,
                                  colors = c("white", "lightblue", "blue", "darkred", "yellow"),
                                  color_breaks = NULL,
-                                 ...) {
+                                 use_raster = FALSE) {
     if (is.null(tracks)) {
         if (is.null(track_regex)) {
             cli_abort("Must specify either {.var tracks} or {.var track_regex")
@@ -659,7 +659,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
     col_pal <- circlize::colorRamp2(colors = colors, breaks = color_breaks)
     ch <- ComplexHeatmap::Heatmap(mat_n,
         name = name,
-        use_raster = F,
+        use_raster = use_raster,
         top_annotation = top_ha,
         left_annotation = ct_ha,
         right_annotation = rna_ha,
