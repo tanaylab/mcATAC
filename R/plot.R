@@ -381,7 +381,7 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 #' @param smooth_bins number of genomic bins for smoothing window (default 1)
 
 #' @param colors (optional) vector of colors out of which the shades of the heatmap will be generated
-#' @param color_breaks defining the absolute breaks of the colors. If null this will be determined as uniform distribution with clipping on the 99 percentile of the smoothed value distribution.
+#' @param color_breaks (optional) defining the absolute breaks of the colors. If NULL - this will be determined as uniform distribution with clipping on the 99 percentile of the smoothed value distribution.
 #'
 #' @inheritParams ComplexHeatmap::Heatmap
 #'
@@ -559,12 +559,14 @@ plot_tracks_at_locus <- function(tracks = NULL,
     mat_n <- t(misha.ext::intervs_to_mat(mc_gene_vals))
     mat_n[is.na(mat_n)] <- 0
     mat_n <- mat_n[row_order, ]
+    mat_n <- log2(1 + mat_n)
     if (smooth_bins != 1) {
-		  cli_alert("smooth bins with {.val {smooth_bins}}")
-        mat_n <- t(apply(log2(1 + mat_n), 1, zoo::rollmean, smooth_bins, fill = "extend"))
+        cli_alert("smooth bins with {.val {smooth_bins}}")
+        mat_n <- t(apply(mat_n, 1, zoo::rollmean, smooth_bins, fill = "extend"))
     }
     if (smooth_mcs != 1) {
-        mat_n <- apply(mat_n, 2, zoo::rollmean, smooth_mcs, fill= "extend")
+        cli_alert("smooth mcs with {.val {smooth_mcs}}")
+        mat_n <- apply(mat_n, 2, zoo::rollmean, smooth_mcs, fill = "extend")
     }
     if (gene_annot) {
         gene_annots <- make_gene_annot(intervals, iterator, ncol(mat_n))
