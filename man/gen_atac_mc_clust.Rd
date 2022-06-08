@@ -38,11 +38,11 @@ the first column can contain id for each observation (if id_column is TRUE).}
     \item{\code{verbose}}{display algorithm messages}
     \item{\code{keep_log}}{keep algorithm messages in 'log' field}
     \item{\code{id_column}}{\code{df}'s first column contains the observation id}
-    \item{\code{reorder_func}}{function to reorder the clusters. operates on each center and orders by the result. e.g. \code{reorder_func = mean} would calculate the mean of each center and then would reorder the clusters accordingly. If \code{reorder_func = hclust} the centers would be ordered by hclust of the euclidean distance of the correlation matrix, i.e. \code{hclust(dist(cor(t(centers))))}
+    \item{\code{reorder_func}}{function to reorder the clusters. operates on each center and orders by the result. e.g. \code{reorder_func = mean} would calculate the mean of each center and then would reorder the clusters accordingly. If \code{reorder_func = hclust} the centers would be ordered by hclust of the euclidian distance of the corelation matrix, i.e. \code{hclust(dist(cor(t(centers))))}
 if NULL, no reordering would be done.}
     \item{\code{hclust_intra_clusters}}{run hierarchical clustering within each cluster and return an ordering of the observations.}
     \item{\code{seed}}{seed for the c++ random number generator}
-    \item{\code{parallel}}{cluster every cluster parallelly (if hclust_intra_clusters is true)}
+    \item{\code{parallel}}{cluster every cluster parallely (if hclust_intra_clusters is true)}
   }}
 }
 \value{

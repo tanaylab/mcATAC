@@ -360,7 +360,7 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 #' @param tracks (optional) all tracks to plot
 #' @param gene (optional) which gene to plot around; if no gene is found as a whole, partial matches are searched for
 #' @param intervals (optional) what genomic interval to plot
-#' @param iterator (optional; default - 10) misha iterator, determines the resolution at which the data is extracted and plotted
+#' @param iterator (optional; default - 50) misha iterator, determines the resolution at which the data is extracted and plotted
 #' @param extend (optional; default - 0) how much to extend \code{intervals} by on each side
 #' @param atac (optional) McATAC object from which to extract peaks in locus, and possibly \cr
 #' RNA expression values (if an RNA metacell object is attached)
@@ -377,8 +377,11 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 #' @param annotation_row pheatmap-format annotation
 #' @param annotation_col pheatmap-format annotation
 #' @param annotation_colors pheatmap-format annotation
+#' @param smooth_mcs number of mc's for smoothign window (Default 1)
+#' @param smooth_bins number of genomic bins for smoothing window (default 1)
 
-#' @param colors (optional) colorRampPalette vector of colors for scaling colors in heatmap
+#' @param colors (optional) vector of colors out of which the shades of the heatmap will be generated
+#' @param color_breaks defining the absolute breaks of the colors. If null this will be determined as uniform distribution with clipping on the 99 percentile of the smoothed value distribution.
 #'
 #' @inheritParams ComplexHeatmap::Heatmap
 #'
@@ -415,7 +418,7 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 plot_tracks_at_locus <- function(tracks = NULL,
                                  gene = NULL,
                                  intervals = NULL,
-                                 iterator = 100,
+                                 iterator = 50,
                                  extend = 0,
                                  gene_feature = "exon",
                                  track_regex = NULL,
@@ -434,7 +437,10 @@ plot_tracks_at_locus <- function(tracks = NULL,
                                  silent = FALSE,
                                  scale_bar_length = NULL,
                                  rna_legc_eps = 1e-5,
-                                 colors = colorRampPalette(c("white", "darkblue", "red"))(100),
+                                 smooth_mcs = 1,
+                                 smooth_bins = 1,
+                                 colors = c("white", "lightblue", "blue", "darkred", "yellow"),
+                                 color_breaks = NULL,
                                  ...) {
     if (is.null(tracks)) {
         if (is.null(track_regex)) {
@@ -552,6 +558,14 @@ plot_tracks_at_locus <- function(tracks = NULL,
         select(-intervalID)
     mat_n <- t(misha.ext::intervs_to_mat(mc_gene_vals))
     mat_n[is.na(mat_n)] <- 0
+    mat_n <- mat_n[row_order, ]
+    if (smooth_bins != 1) {
+		  cli_alert("smooth bins with {.val {smooth_bins}}")
+        mat_n <- t(apply(log2(1 + mat_n), 1, zoo::rollmean, smooth_bins, fill = "extend"))
+    }
+    if (smooth_mcs != 1) {
+        mat_n <- apply(mat_n, 2, zoo::rollmean, smooth_mcs, fill= "extend")
+    }
     if (gene_annot) {
         gene_annots <- make_gene_annot(intervals, iterator, ncol(mat_n))
     } else {
@@ -632,14 +646,23 @@ plot_tracks_at_locus <- function(tracks = NULL,
             genes = gene_annots
         )
     }
-    ch <- ComplexHeatmap::Heatmap(mat_n[row_order, ],
+
+    if (is.null(color_breaks)) {
+        color_breaks <- seq(0, quantile(mat_n, 0.995), l = length(colors))
+    }
+    if (length(color_breaks) != length(colors)) {
+        cli_abort("Color breaks should be a vector with length that equal the length of the colors vector")
+    }
+
+    col_pal <- circlize::colorRamp2(colors = colors, breaks = color_breaks)
+    ch <- ComplexHeatmap::Heatmap(mat_n,
         name = name,
         use_raster = F,
         top_annotation = top_ha,
         left_annotation = ct_ha,
         right_annotation = rna_ha,
         bottom_annotation = bottom_ha,
-        col = colors,
+        col = col_pal,
         cluster_rows = F,
         cluster_columns = F,
         show_row_names = F,

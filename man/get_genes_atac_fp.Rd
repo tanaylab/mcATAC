@@ -20,8 +20,7 @@ get_genes_atac_fp(
 
 \item{rm_zeros}{remove genes with no RNA expression in any metacell. Default: TRUE}
 
-\item{spearman}{if 'TRUE' Spearman correlation is computed, otherwise
-Pearson}
+\item{spearman}{if 'TRUE' Spearman correlation is computed, otherwise Pearson}
 
 \item{pairwise.complete.obs}{see below}
 

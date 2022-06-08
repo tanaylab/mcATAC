@@ -42,7 +42,8 @@ Imports:
     tglkmeans,
     parallel,
     plyr,
-    yaml
+    yaml,
+	 zoo
 Suggests: 
     testthat (>= 3.0.0),
     metacell,
