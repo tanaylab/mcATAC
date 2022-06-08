@@ -97,7 +97,7 @@ generate_motif_pssm_matrix <- function(atac = NULL,
     if (length(trks_motifs) >= 1e+2) {
         divs <- 1:4
         chunk_size <- ceiling(length(trks_motifs) / max(divs))
-        trk_inds <- trk_inds <- sapply(divs, rep, chunk_size)
+        trk_inds <- sapply(divs, rep, chunk_size)
         trk_inds <- trk_inds[1:length(trks_motifs)]
         df_list <- lapply(sort(unique(trk_inds)), function(u) {
             gextract(trks_motifs[trk_inds == u],
