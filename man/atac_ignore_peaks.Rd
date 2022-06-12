@@ -14,7 +14,7 @@ atac_ignore_peaks(atac, ig_peaks, reset = FALSE)
 \item{reset}{rest the current ignore policy if exists. When set to \code{TRUE}, the current ignore policy will be removed, otherwise the new ignore policy will be appended to the current one.}
 }
 \value{
-
+an ScATAC or McATAC object with the new ignore policy.
 }
 \description{
 Given a list of peaks to ignore, this will remove the given peaks from the {.code ignore_peaks} and {.code ignore_pmat} slots. Note that the matrix and peaks would be reordered.

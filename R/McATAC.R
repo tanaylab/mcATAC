@@ -310,7 +310,7 @@ setMethod(
 #' @param ig_peaks a PeakIntervals object, or vector of peak names to ignore
 #' @param reset rest the current ignore policy if exists. When set to \code{TRUE}, the current ignore policy will be removed, otherwise the new ignore policy will be appended to the current one.
 #'
-#' @return
+#' @return an ScATAC or McATAC object with the new ignore policy.
 #' @examples
 #' \dontrun{
 #' max_peak_length <= 1000
@@ -382,7 +382,8 @@ atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
 #' @param atac an ScATAC object
 #' @param ig_cells a vector of cell names (10X barcodes) to removes
 #'
-#' @return
+#' @return an scATAC object with the given cells removed.
+#'
 #' @examples
 #' \dontrun{
 #' cs <- Matrix::colSums(atac_sc@mat)

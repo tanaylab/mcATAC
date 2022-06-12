@@ -29,5 +29,4 @@ func <- function() {
 }
 tmp <- func()
 gtrack.exists(tmp) # returns FALSE
-
 }

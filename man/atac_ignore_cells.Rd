@@ -12,7 +12,7 @@ atac_ignore_cells(atac, ig_cells)
 \item{ig_cells}{a vector of cell names (10X barcodes) to removes}
 }
 \value{
-
+an scATAC object with the given cells removed.
 }
 \description{
 This function removes a given list of cells from the {.code mat} slot.

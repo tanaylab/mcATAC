@@ -8,7 +8,7 @@ plot_tracks_at_locus(
   tracks = NULL,
   gene = NULL,
   intervals = NULL,
-  iterator = 100,
+  iterator = 50,
   extend = 0,
   gene_feature = "exon",
   track_regex = NULL,
@@ -16,6 +16,7 @@ plot_tracks_at_locus(
   atac = NULL,
   order_rows = FALSE,
   row_order = NULL,
+  log_transform = TRUE,
   gene_annot = TRUE,
   name = NULL,
   rna_vals = NULL,
@@ -24,9 +25,12 @@ plot_tracks_at_locus(
   annotation_colors = NULL,
   silent = FALSE,
   scale_bar_length = NULL,
-  rna_legc_eps = 1e-05,
-  colors = colorRampPalette(c("white", "darkblue", "red"))(100),
-  ...
+  rna_legc_eps = 0.00001,
+  smooth_mcs = 1,
+  smooth_bins = 1,
+  colors = c("white", "lightblue", "blue", "darkred", "yellow"),
+  color_breaks = NULL,
+  use_raster = FALSE
 )
 }
 \arguments{
@@ -36,7 +40,7 @@ plot_tracks_at_locus(
 
 \item{intervals}{(optional) what genomic interval to plot}
 
-\item{iterator}{(optional; default - 10) misha iterator, determines the resolution at which the data is extracted and plotted}
+\item{iterator}{(optional; default - 50) misha iterator, determines the resolution at which the data is extracted and plotted}
 
 \item{extend}{(optional; default - 0) how much to extend \code{intervals} by on each side}
 
@@ -52,6 +56,8 @@ RNA expression values (if an RNA metacell object is attached)}
 \item{order_rows}{whether to order the rows by \code{cell_type} annotation}
 
 \item{row_order}{an explicit ordering of rows/tracks to use}
+
+\item{log_transform}{transfrom the data to log2(1 + x). Default: TRUE}
 
 \item{gene_annot}{(optional) whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory}
 
@@ -69,7 +75,15 @@ RNA expression values (if an RNA metacell object is attached)}
 
 \item{rna_legc_eps}{(optional) what regularization value to add to mc_rna@e_gc when calculating log}
 
-\item{colors}{(optional) colorRampPalette vector of colors for scaling colors in heatmap}
+\item{smooth_mcs}{number of mc's for smoothign window (Default 1)}
+
+\item{smooth_bins}{number of genomic bins for smoothing window (default 1)}
+
+\item{colors}{(optional) vector of colors out of which the shades of the heatmap will be generated}
+
+\item{color_breaks}{(optional) defining the absolute breaks of the colors. If NULL - this will be determined as uniform distribution with clipping on the 99 percentile of the smoothed value distribution.}
+
+\item{use_raster}{Whether render the heatmap body as a raster image. It helps to reduce file size when the matrix is huge. If number of rows or columns is more than 2000, it is by default turned on. Note if \code{cell_fun} is set, \code{use_raster} is enforced to be \code{FALSE}.}
 }
 \value{
 a ComplexHeatmap figure
