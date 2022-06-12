@@ -207,6 +207,40 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
     return(mc_atac)
 }
 
+#' Extract summary statistics per cell for a set of intervals
+#'
+#' @param scc a ScCounts object
+#' @param intervals an intervals set. Can have a column called "peak_name" with the peak name.
+#' @param cells a vector of cell names to include. Default: all cells.
+#'
+#' @return a sparse matrix where rows are the intervals, columns are the cells, and values are the counts summed. If the intervals have a column called "peak_name", the rows will be the peak names, otherwise the rows will be of the form "{chr}_{start}_{end}"
+#'
+#' @examples
+#' \dontrun{
+#' scc_extract(scc, gintervals(1, 0, 100))
+#' }
+#'
+#' @export
+scc_extract <- function(scc, intervals, cells = NULL) {
+    assert_atac_object(scc, class = "ScCounts")
+    cells <- cells %||% scc@cell_names
+    cells <- as.character(cells)
+
+    if (!has_name(intervals, "peak_name")) {
+        intervals <- intervals %>% mutate(peak_name = paste0(intervals$chrom, "_", intervals$start, "_", intervals$end))
+    }
+
+    matrices <- plyr::alply(scc@genomic_bins, 1, function(bin) {
+        return(
+            summarise_bin(scc@data[[bin$name]], bin, intervals, cells)
+        )
+    }, .parallel = getOption("mcatac.parallel"))
+
+    mat <- Reduce("+", matrices)
+
+    return(mat)
+}
+
 #' Return the total coverage of each metacell in an McCounts object
 #'
 #' @param mc_counts a McCounts object
@@ -222,7 +256,6 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
 #'
 #' @export
 mcc_metacell_total_cov <- function(mc_counts, metacells = NULL) {
-    assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
 
@@ -249,7 +282,6 @@ mcc_metacell_total_cov <- function(mc_counts, metacells = NULL) {
 #'
 #' @export
 mcc_marginal <- function(mc_counts, metacells = NULL) {
-    assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
 
