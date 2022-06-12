@@ -14,5 +14,4 @@ Tests if mcATAC has the following dependencies: "grep", "awk", "zcat", "sed", "s
 }
 \examples{
 check_dependencies()
-
 }

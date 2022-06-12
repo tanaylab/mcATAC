@@ -130,8 +130,8 @@ generate_mc_annotation <- function(atac_mc, mc_clust = NULL, k = 10) {
 #' @param x a dgCMatrix sparse matrix
 #' @param index a factor of the same length as the columns of x (would be coerced to a factor by \code{as.factor})
 #'
-#' @return A sparse dgCMatrix matrix of length(index) X nrow(x) size. Each ‘[i,j]’ element
-#'    represents the ‘sum(x[i,which(index==levels(index)[j])])’.
+#' @return A sparse dgCMatrix matrix of length(index) X nrow(x) size. Each <U+2018>[i,j]<U+2019> element
+#'    represents the <U+2018>sum(x[i,which(index==levels(index)[j])])<U+2019>.
 #'
 #'
 #'
@@ -205,7 +205,6 @@ overwrite_file <- function(file, overwrite) {
 #' @examples
 #' bin_exists("echo")
 #' bin_exists("tabix")
-#'
 #' @noRd
 bin_exists <- function(command) {
     code <- suppressWarnings(system2("which", command, stdout = FALSE, stderr = FALSE))
@@ -220,7 +219,6 @@ bin_exists <- function(command) {
 #'
 #' @examples
 #' check_dependencies()
-#'
 #' @export
 check_dependencies <- function() {
     deps <- c("grep", "awk", "zcat", "sed", "sort", "head", "tail", "wc", "uniq")
@@ -335,7 +333,6 @@ set_parallel <- function(thread_num = max(1, round(parallel::detectCores() * 0.8
 #' }
 #' tmp <- func()
 #' gtrack.exists(tmp) # returns FALSE
-#'
 #' @export
 temp_track_name <- function(prefix = "", envir = parent.frame()) {
     temp_track <- paste0(prefix, "tmp_", stringi::stri_rand_strings(1, 10))

@@ -36,8 +36,8 @@ plot_rna_markers(atac_mc, n_genes = 100, force_cell_type = TRUE, ...)
     \item{\code{row_names}}{The names that will be used as the Y-axis labels.
 A NULL (the defualt) indicates that the original matrix rownames are used.
 A FALSE indicates that no Y-axis labels should be displayed.}
-    \item{\code{col_names_orient}}{Orientation of the X-axis label}
     \item{\code{plot_right}}{Whether to put the Y-axis labels at the right side of the heatmap (as well as at the left hand side)}
+    \item{\code{col_names_orient}}{Orientation of the X-axis label}
   }}
 }
 \description{
