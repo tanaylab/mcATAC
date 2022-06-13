@@ -15,7 +15,8 @@ exists - the function will return coordinate based names.}
 \item{promoters}{are the peaks promoters? When true, the peak names (which are gene names) are returned.}
 }
 \value{
-the field called 'peak_name' if exists in \code{peaks}, or a tad based peak name if \code{tad_based=TRUE} and the coordinates seperated by an underscore otherwise.
+the field called 'peak_name' if exists in \code{peaks}, or a tad based peak name if \code{tad_based=TRUE} and the coordinates in
+the form of "{chrom}:{start}-{end}" otherwise.
 }
 \description{
 Return the names of PeakIntervals
