@@ -213,7 +213,7 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
 #' @param intervals an intervals set. Can have a column called "peak_name" with the peak name.
 #' @param cells a vector of cell names to include. Default: all cells.
 #'
-#' @return a sparse matrix where rows are the intervals, columns are the cells, and values are the counts summed. If the intervals have a column called "peak_name", the rows will be the peak names, otherwise the rows will be of the form "{chr}_{start}_{end}"
+#' @return a sparse matrix where rows are the intervals, columns are the cells, and values are the counts summed. If the intervals have a column called "peak_name", the rows will be the peak names, otherwise the rows will be of the form "{chr}:{start}_{end}"
 #'
 #' @examples
 #' \dontrun{
@@ -227,7 +227,7 @@ scc_extract <- function(scc, intervals, cells = NULL) {
     cells <- as.character(cells)
 
     if (!has_name(intervals, "peak_name")) {
-        intervals <- intervals %>% mutate(peak_name = paste0(intervals$chrom, "_", intervals$start, "_", intervals$end))
+        intervals <- intervals %>% mutate(peak_name = peak_names(., tad_based = FALSE))
     }
 
     matrices <- plyr::alply(scc@genomic_bins, 1, function(bin) {
