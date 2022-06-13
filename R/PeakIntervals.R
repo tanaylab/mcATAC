@@ -78,7 +78,8 @@ validate_peaks <- function(peaks) {
 #' exists - the function will return coordinate based names.
 #' @param promoters are the peaks promoters? When true, the peak names (which are gene names) are returned.
 #'
-#' @return the field called 'peak_name' if exists in \code{peaks}, or a tad based peak name if \code{tad_based=TRUE} and the coordinates seperated by an underscore otherwise.
+#' @return the field called 'peak_name' if exists in \code{peaks}, or a tad based peak name if \code{tad_based=TRUE} and the coordinates in
+#' the form of "{chrom}:{start}-{end}" otherwise.
 #'
 #' @examples
 #' \dontrun{
