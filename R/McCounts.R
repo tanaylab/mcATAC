@@ -132,7 +132,9 @@ mcc_read <- function(path, id = NULL, description = NULL, verbose = TRUE) {
 summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
     metacells <- metacells %||% colnames(mat)
     intervs <- as.data.frame(intervs)
-
+    if (!has_name(intervs, "peak_name")) {
+        cli_abort("The {.var intervs} must have a column called {.field peak_name}")
+    }
     # find the coordinates that overlap with the intervals (note that we assume mat@i is zero based, as in the standard 'dgCMatrix' implementation)
     mat_intervs <- tibble(chrom = bin$chrom, start = unique(mat@i) + bin$start, end = start + 1) %>%
         gintervals.intersect(intervs)
@@ -191,7 +193,9 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
     assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
-
+    if (!has_name(peaks, "peak_name")) {
+        cli_abort("The {.var peaks} must have a column called {.field peak_name}")
+    }
     matrices <- plyr::alply(mc_counts@genomic_bins, 1, function(bin) {
         return(
             summarise_bin(mc_counts@data[[bin$name]], bin, peaks, metacells)
@@ -199,7 +203,7 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
     }, .parallel = getOption("mcatac.parallel"))
 
     mat <- Reduce("+", matrices)
-
+    
     mc_atac <- new("McATAC", mat = mat, peaks = peaks, genome = mc_counts@genome, id = mc_counts@id, description = mc_counts@description, metadata = metadata, cell_to_metacell = mc_counts@cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = mc_counts@path)
 
     cli_alert_success("Created a new McATAC object with {.val {ncol(mc_atac@mat)}} metacells and {.val {nrow(mc_atac@mat)}} ATAC peaks.")
