@@ -144,7 +144,7 @@ get_rna_fp <- function(atac_mc, genes = NULL, rm_zeros = TRUE, epsilon = 1e-5) {
 #' change over the median (\code{minimal_relative_expression}), and then ranks the fold change of genes within each metacell. The markers
 #' are then the genes with the highest rank, up to \code{n_genes} genes.
 #'
-#' @param n_genes maximal number of genes to return. Default: 1000
+#' @param n_genes maximal number of genes to return. Default: 100
 #' @param minimal_max_log_fraction take only genes with at least one value
 #' (in log fraction units - normalized egc) above this threshold
 #' @param minimal_relative_log_fraction take only genes with at least one value with relative
