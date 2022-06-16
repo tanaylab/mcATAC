@@ -203,7 +203,7 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
     }, .parallel = getOption("mcatac.parallel"))
 
     mat <- Reduce("+", matrices)
-    
+
     mc_atac <- new("McATAC", mat = mat, peaks = peaks, genome = mc_counts@genome, id = mc_counts@id, description = mc_counts@description, metadata = metadata, cell_to_metacell = mc_counts@cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = mc_counts@path)
 
     cli_alert_success("Created a new McATAC object with {.val {ncol(mc_atac@mat)}} metacells and {.val {nrow(mc_atac@mat)}} ATAC peaks.")
