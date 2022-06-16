@@ -357,6 +357,10 @@ atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
     atac@ignore_peaks <- semi_join(atac@peaks, ig_peaks, by = cn)
     atac@ignore_pmat <- atac@mat[atac@peaks$temp_intID %in% atac@ignore_peaks$temp_intID, ]
     atac@mat <- atac@mat[atac@peaks$temp_intID %in% good_peaks$temp_intID, ]
+    if (class(atac) == "McATAC") {
+        atac@egc <- atac@egc[atac@peaks$temp_intID %in% good_peaks$temp_intID, ]
+        atac@fp <- atac@fp[atac@peaks$temp_intID %in% good_peaks$temp_intID, ]
+    }
     atac@peaks <- good_peaks %>%
         select(any_of(cn), everything()) %>%
         select(-temp_intID)
@@ -371,6 +375,7 @@ atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
     } else {
         cli_alert_success("Removed {.val {n_cur_ig}} peaks out of {.val {n_tot_peaks}} {.field ({scales::percent(n_cur_ig/n_tot_peaks)})}. The object is left with {.val {n_good_peaks}} peaks {.field ({scales::percent(n_removed_peaks/n_tot_peaks)})}.")
     }
+
 
     return(atac)
 }

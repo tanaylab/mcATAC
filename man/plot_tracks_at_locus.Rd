@@ -25,7 +25,7 @@ plot_tracks_at_locus(
   annotation_colors = NULL,
   silent = FALSE,
   scale_bar_length = NULL,
-  rna_legc_eps = 0.00001,
+  rna_legc_eps = 1e-05,
   smooth_mcs = 1,
   smooth_bins = 1,
   colors = c("white", "lightblue", "blue", "darkred", "yellow"),
