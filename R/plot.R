@@ -146,6 +146,9 @@ plot_atac_rna <- function(atac_mc, gene, atac_promoter = gene, mc_rna = NULL, pe
 #' }
 #' @export
 plot_atac_atac_cor <- function(atac_mc, sp_f = TRUE) {
+    if ("matrix" %!in% class(atac_mc@mat)) {
+        atac_mc@mat <- as.matrix(atac_mc@mat)
+    }
     if (all(!grepl("cell_type", colnames(atac_mc@metadata)))) {
         if (all(!grepl("cluster_k_", colnames(atac_mc@peaks)))) {
             k <- round(ncol(atac_mc@mat) / 10)
