@@ -339,3 +339,38 @@ temp_track_name <- function(prefix = "", envir = parent.frame()) {
     withr::defer(gtrack.rm(temp_track, force = TRUE), envir = envir)
     return(temp_track)
 }
+
+
+
+#' Infer order of metacell track names by metacell number
+#
+#' @param tracks the tracks to order
+#' @param track_name_prefix prefix string to remove when extracting metacell numbers
+#'
+#' @return order of tracks by metacell number
+#'
+#' @examples
+#' track_order <- infer_track_order(tracks)
+#' @export
+infer_track_order <- function(tracks, track_name_prefix = NULL) {
+    mc_nums <- as.numeric(gsub("mc", "", unlist(stringr::str_extract_all(string = tracks, pattern = "mc\\d*$"))))
+    track_name_prefix_infer <- unique(unlist(purrr::map(stringr::str_split(string = tracks, pattern = "\\."), 1)))
+    if (is.null(track_name_prefix) && (length(track_name_prefix_infer) > 1)) {
+        cli_abort("{.var track_name_prefix} not specified and prefixes {.val {track_name_prefix_infer}} detected. Make sure there are only tracks from one dataset in {.var tracks}.")
+    }
+    return(order(mc_nums))
+}
+
+#' Order metacell tracks by metacell number
+#
+#' @param tracks the tracks to order
+#' @param track_name_prefix prefix string to remove when extracting metacell numbers
+#' @return tracks ordered by metacell number
+#'
+#' @examples
+#' tracks_ordered <- order_tracks(tracks)
+#' @export
+order_tracks <- function(tracks, track_name_prefix = NULL) {
+    ord <- infer_track_order(tracks, track_name_prefix)
+    return(tracks[ord])
+}
