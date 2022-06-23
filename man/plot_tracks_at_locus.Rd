@@ -34,7 +34,7 @@ plot_tracks_at_locus(
 )
 }
 \arguments{
-\item{tracks}{(optional) all tracks to plot}
+\item{tracks}{(optional) all tracks to plot; if not specified by \code{order_rows} or \code{row_order}, will be ordered by metacell number}
 
 \item{gene}{(optional) which gene to plot around; if no gene is found as a whole, partial matches are searched for}
 

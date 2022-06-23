@@ -360,7 +360,7 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 #' which an RNA metacell object is attached (see the function \code{add_mc_rna})
 #'
 #'
-#' @param tracks (optional) all tracks to plot
+#' @param tracks (optional) all tracks to plot; if not specified by \code{order_rows} or \code{row_order}, will be ordered by metacell number
 #' @param gene (optional) which gene to plot around; if no gene is found as a whole, partial matches are searched for
 #' @param intervals (optional) what genomic interval to plot
 #' @param iterator (optional; default - 50) misha iterator, determines the resolution at which the data is extracted and plotted
