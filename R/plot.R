@@ -508,7 +508,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
             }
         }
     } else if (!order_rows && is.null(row_order)) {
-        row_order <- 1:length(tracks)
+        row_order <- infer_track_order(tracks)
     } else {
         row_order <- row_order
     }
