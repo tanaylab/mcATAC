@@ -70,7 +70,7 @@ Depends:
     R (>= 3.5)
 LazyData: true
 Collate: 
-    'McATAC.R'
+    'McATACPeaks.R'
     'ScCounts.R'
     'McCounts.R'
     'PeakIntervals.R'
