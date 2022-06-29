@@ -1,9 +1,9 @@
-#' Plot a heatmap of marker genes fold change over metacells given an McATAC object
+#' Plot a heatmap of marker genes fold change over metacells given an McATACPeaks object
 #'
 #' @description This is a thin wrapper around plot_rna_markers_mat which computes the marker matrix and uses the correct
-#' metadata fields in the McATAC object.
+#' metadata fields in the McATACPeaks object.
 #'
-#' @param atac_mc a McATAC object with RNA expression (using \code{add_mc_rna})
+#' @param atac_mc a McATACPeaks object with RNA expression (using \code{add_mc_rna})
 #' @inheritParams get_rna_markers
 #' @inheritParams get_rna_marker_matrix
 #' @inheritDotParams plot_rna_markers_mat

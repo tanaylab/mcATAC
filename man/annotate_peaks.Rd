@@ -7,7 +7,7 @@
 annotate_peaks(atac)
 }
 \arguments{
-\item{atac}{a McATAC or ScATAC object}
+\item{atac}{a McATACPeaks or ScATACPeaks object}
 }
 \value{
 the original \code{atac} object, with the peaks annotated using \code{annotate_intervals}

@@ -8,7 +8,7 @@
 #' \item{cov_density: }{The number of UMIs the number of UMIs per \code{scale} bp.}
 #' }
 #'
-#' @param atac an ScATAC or McATAC object
+#' @param atac an ScATACPeaks or McATACPeaks object
 #' @param scale for the 'cov_density' field, calculate the number of UMIs per \code{scale}
 #' bp (default: 100)
 #'
@@ -36,13 +36,13 @@ get_peak_coverage_stats <- function(atac, scale = 100) {
 #' Filter features by summary statistics
 #'
 #' @description Remove ATAC peaks with low coverage, or that are too long etc.
-#' @param atac_sc the ScATAC object to analyze
+#' @param atac_sc the ScATACPeaks object to analyze
 #' @param minimal_max_umi (optional) threshold on minimum maximal coverage - i.e. remove all peaks that DON'T have a cell with at least \code{abs_cov_thresh} UMIs
 #' @param min_peak_length (optional) remove all peaks that are less than \code{min_cov_thresh} base-pairs long
 #' @param max_peak_length (optional) remove all peaks that are more than \code{min_cov_thresh} base-pairs long
 #' @param max_peak_density (optional) remove all peaks that have more than \code{max_peak_density} UMIs per 100bp
 #'
-#' @return atac_sc - the filtered ScATAC object
+#' @return atac_sc - the filtered ScATACPeaks object
 #' @examples
 #' \dontrun{
 #' ## quantiles of peak lengths before filtering
@@ -105,7 +105,7 @@ filter_features <- function(atac_sc, minimal_max_umi = NULL, min_peak_length = N
 
 #' Plot the distribution of the peak length
 #'
-#' @param atac an ScATAC or McATAC object
+#' @param atac an ScATACPeaks or McATACPeaks object
 #'
 #' @return a ggplot object with the distribution of peak length
 #'
@@ -134,7 +134,7 @@ plot_peak_length_distribution <- function(atac) {
 
 #' Plot the coverage distribution of the peaks
 #'
-#' @param atac an ScATAC or McATAC object
+#' @param atac an ScATACPeaks or McATACPeaks object
 #'
 #' @return a ggplot object with the distribution of peak coverage
 #'
@@ -162,7 +162,7 @@ plot_peak_coverage_distribution <- function(atac) {
 
 #' Plot the maximal per-cell coverage distribution of the peaks
 #'
-#' @param atac an ScATAC or McATAC object
+#' @param atac an ScATACPeaks or McATACPeaks object
 #'
 #' @return a ggplot object with the distribution of maximal per-cell coverage for each peak
 #'
@@ -225,10 +225,10 @@ plot_peak_coverage_density <- function(atac, scale = 100, pointsize = 1.5, ...) 
     return(gg)
 }
 
-#' Find dynamic peaks in McATAC matrix
+#' Find dynamic peaks in McATACPeaks matrix
 #'
 #' @description This function identifies "dynamic" peaks, i.e. those that have high expression only in a subset of the cells. They are identified by overdispersion in the coefficient of variation (std.dev./mean) per quantiles.
-#' @param atac_mc the McATAC object to analyze
+#' @param atac_mc the McATACPeaks object to analyze
 #' @param method (optional) either 'bmq' (default) or 'gmm'; 'bmq' (binned-mean quantiles) bins the log-mean of all peaks (averaged across metacells) and
 #'   selects all peaks with a coefficient of variation above some quantile in each bin. More controlled
 #'  'gmm' fits a Gaussian mixture model to the log10(COV) vs. log10(mean) distribution,
@@ -303,7 +303,7 @@ identify_dynamic_peaks <- function(atac_mc, method = "bmq", plot = TRUE, mean_th
 #'
 #' @description Identify peaks in the data which overlap (or are adjacent to?) regions blacklisted by ENCODE as having universally high DNAse HS or ChIP signal (basically mapping artifacts)
 #' See https://doi.org/10.1038/s41598-019-45839-z for more details
-#' @param atac (optional) an ScATAC or McATAC object
+#' @param atac (optional) an ScATACPeaks or McATACPeaks object
 #' @param peaks (optional) the intervals set to check
 #' @param genome (optional, required if checking peaks directly) the genome of the peaks
 #' @param max_dist_to_blacklist_region (optional) distance to nearest blacklist region which still qualifies for being blacklisted
@@ -326,7 +326,7 @@ find_blacklist_overlaps <- function(atac = NULL, peaks = NULL, genome = NULL, ma
         peaks <- atac@peaks
         genome <- atac@genome
     } else if (is.null(peaks)) {
-        cli_abort("Must specify either ScATAC, McATAC or peaks")
+        cli_abort("Must specify either ScATACPeaks, McATACPeaks or peaks")
     } else if (!is.null(peaks) && is.null(genome)) {
         cli_abort("Must specify genome if analyzing peaks directly")
     }

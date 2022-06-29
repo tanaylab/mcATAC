@@ -27,7 +27,7 @@ write_sparse_matrix_from_bam(
 
 \item{region}{intervals set to filter. See samtools docs \url{http://www.htslib.org/doc/samtools-view.html} for details}
 
-\item{genome}{genome name (e.g. hg19). Will be inferred from the ScATAC object if provided}
+\item{genome}{genome name (e.g. hg19). Will be inferred from the ScATACPeaks object if provided}
 
 \item{min_mapq}{minimal mapping quality (optional)}
 

@@ -7,7 +7,7 @@
 plot_peak_coverage_distribution(atac)
 }
 \arguments{
-\item{atac}{an ScATAC or McATAC object}
+\item{atac}{an ScATACPeaks or McATACPeaks object}
 }
 \value{
 a ggplot object with the distribution of peak coverage
