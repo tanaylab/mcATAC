@@ -13,7 +13,7 @@ gen_promoter_features(
 )
 }
 \arguments{
-\item{atac}{a McATAC or ScATAC object}
+\item{atac}{a McATACPeaks or ScATACPeaks object}
 
 \item{upstream}{bp upstream to TSS}
 
@@ -24,7 +24,7 @@ gen_promoter_features(
 \item{id_field}{the field in \code{tss_intervals} containing the gene names. Default: "geneSymbol"}
 }
 \value{
-the McATAC or ScATAC object with new peaks which are a sum of the peaks within the defined promoters. The rownames of the \code{atac@mat} and the field 'peak_name' in \code{atac@peaks} would contain the name of the promoter (from \code{id_field}).
+the McATACPeaks or ScATACPeaks object with new peaks which are a sum of the peaks within the defined promoters. The rownames of the \code{atac@mat} and the field 'peak_name' in \code{atac@peaks} would contain the name of the promoter (from \code{id_field}).
 Note that previous peak metadata and previous ignored peaks are dropped.
 }
 \description{

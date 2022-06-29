@@ -2,7 +2,7 @@
 % Please edit documentation in R/import-peaks.R
 \name{import_from_10x}
 \alias{import_from_10x}
-\title{Create an ScATAC object from 10x directory}
+\title{Create an ScATACPeaks object from 10x directory}
 \usage{
 import_from_10x(
   dir,
@@ -41,10 +41,10 @@ For more details see: https://support.10xgenomics.com/single-cell-multiome-atac-
 \item{zero_based}{are the coordinates of the features 0-based? Note that when this is FALSE (default) the coordinates of the created object would be different from the ones in \code{features_fn} by 1 bp.}
 }
 \value{
-an ScATAC object
+an ScATACPeaks object
 }
 \description{
-Create an ScATAC object from 10x directory
+Create an ScATACPeaks object from 10x directory
 }
 \examples{
 \dontrun{

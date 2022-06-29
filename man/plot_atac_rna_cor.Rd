@@ -7,7 +7,7 @@
 plot_atac_rna_cor(atac_mc, rna_mat, gene_field = NULL, tss_dist = 500)
 }
 \arguments{
-\item{atac_mc}{McATAC object}
+\item{atac_mc}{McATACPeaks object}
 
 \item{rna_mat}{an RNA metacell count matrix, where metacells are in columns and genes are in rows}
 

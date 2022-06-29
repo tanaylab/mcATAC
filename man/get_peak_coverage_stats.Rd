@@ -7,7 +7,7 @@
 get_peak_coverage_stats(atac, scale = 100)
 }
 \arguments{
-\item{atac}{an ScATAC or McATAC object}
+\item{atac}{an ScATACPeaks or McATACPeaks object}
 
 \item{scale}{for the 'cov_density' field, calculate the number of UMIs per \code{scale}
 bp (default: 100)}

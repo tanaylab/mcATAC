@@ -49,12 +49,12 @@ atac_sc <- import_from_10x("pbmc_data", genome = "hg38", id = "PBMC", descriptio
 #> ℹ Removed 107861 ATAC peaks which were all zero
 #> ℹ 107861 ATAC peaks
 #> ! removed 32 peaks from the following chromosome(s) which are missing from hg38: 'KI270727.1, GL000194.1, GL000205.2, GL000195.1, GL000219.1, KI270734.1, KI270721.1, KI270726.1, KI270713.1'
-#> ✔ successfully imported to an ScATAC object with 11909 cells and 107829 ATAC peaks
+#> ✔ successfully imported to an ScATACPeaks object with 11909 cells and 107829 ATAC peaks
 ```
 
 ``` r
 atac_sc
-#> <ScATAC> object with 11909 cells and 107829 ATAC peaks from hg38.
+#> <ScATACPeaks> object with 11909 cells and 107829 ATAC peaks from hg38.
 #> id: "PBMC"
 #> description: "PBMC from a healthy donor - granulocytes removed through cell
 #> sorting (10k)"
@@ -130,9 +130,9 @@ head(cell_to_metacell_pbmc_example)
 atac_mc <- project_atac_on_mc(atac_sc, cell_to_metacell_pbmc_example)
 #> ℹ 3198 cells (out of 11909) do not have a metacell and have been removed.
 #> • Setting egc cell size to 67733 (the 0.1 quantile of metacell sizes)
-#> ✔ Created a new McATAC object with 97 metacells and 61342 ATAC peaks.
+#> ✔ Created a new McATACPeaks object with 97 metacells and 61342 ATAC peaks.
 atac_mc
-#> <McATAC> object with 97 metacells and 61342 ATAC peaks from hg38.
+#> <McATACPeaks> object with 97 metacells and 61342 ATAC peaks from hg38.
 #> id: "PBMC"
 #> description: "PBMC from a healthy donor - granulocytes removed through cell
 #> sorting (10k)"
@@ -148,7 +148,7 @@ atac_mc
 
 ``` r
 atac_mc
-#> <McATAC> object with 97 metacells and 61342 ATAC peaks from hg38.
+#> <McATACPeaks> object with 97 metacells and 61342 ATAC peaks from hg38.
 #> id: "PBMC"
 #> description: "PBMC from a healthy donor - granulocytes removed through cell
 #> sorting (10k)"

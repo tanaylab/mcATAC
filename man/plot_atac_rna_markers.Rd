@@ -14,9 +14,9 @@ plot_atac_rna_markers(
 )
 }
 \arguments{
-\item{atac_mc}{a McATAC object with RNA expression (using \code{add_mc_rna})}
+\item{atac_mc}{a McATACPeaks object with RNA expression (using \code{add_mc_rna})}
 
-\item{n_genes}{maximal number of genes to return. Default: 1000}
+\item{n_genes}{maximal number of genes to return. Default: 100}
 
 \item{force_cell_type}{do not split cell types when ordering the metacells. Default: TRUE}
 
@@ -44,8 +44,8 @@ genes / peaks with longer names.}
     \item{\code{annotation_title}}{title for cell type annotation. Default: "Cell type"}
     \item{\code{top_annotation_title}}{title for top cell type annotation. Default: "Cell type"}
     \item{\code{title}}{title for the plot}
-    \item{\code{col_names_orient}}{Orientation of the X-axis label}
     \item{\code{plot_right}}{Whether to put the Y-axis labels at the right side of the heatmap (as well as at the left hand side)}
+    \item{\code{col_names_orient}}{Orientation of the X-axis label}
   }}
 }
 \value{

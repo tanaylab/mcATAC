@@ -2,18 +2,18 @@
 % Please edit documentation in R/metadata.R
 \name{has_cell_type_colors}
 \alias{has_cell_type_colors}
-\title{Does the McATAC object contain cell type color annotation}
+\title{Does the McATACPeaks object contain cell type color annotation}
 \usage{
 has_cell_type_colors(atac_mc)
 }
 \arguments{
-\item{atac_mc}{an McATAC object}
+\item{atac_mc}{an McATACPeaks object}
 }
 \value{
-TRUE if the McATAC object contains cell type color annotation, FALSE otherwise
+TRUE if the McATACPeaks object contains cell type color annotation, FALSE otherwise
 }
 \description{
-Does the McATAC object contain cell type color annotation
+Does the McATACPeaks object contain cell type color annotation
 }
 \examples{
 \dontrun{

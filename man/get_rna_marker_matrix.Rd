@@ -9,12 +9,12 @@ get_rna_marker_matrix(
   markers = NULL,
   force_cell_type = TRUE,
   rm_zeros = TRUE,
-  epsilon = 1e-05,
+  epsilon = 0.00001,
   ...
 )
 }
 \arguments{
-\item{atac_mc}{a McATAC object with RNA expression (using \code{add_mc_rna})}
+\item{atac_mc}{a McATACPeaks object with RNA expression (using \code{add_mc_rna})}
 
 \item{markers}{a list of marker genes. If NULL - the function uses \code{get_rna_markers} with default parameters which can be overridden
 using the ellipsis \code{...}.}
@@ -28,7 +28,7 @@ using the ellipsis \code{...}.}
 \item{...}{
   Arguments passed on to \code{\link[=get_rna_markers]{get_rna_markers}}
   \describe{
-    \item{\code{n_genes}}{maximal number of genes to return. Default: 1000}
+    \item{\code{n_genes}}{maximal number of genes to return. Default: 100}
     \item{\code{minimal_max_log_fraction}}{take only genes with at least one value
 (in log fraction units - normalized egc) above this threshold}
     \item{\code{minimal_relative_log_fraction}}{take only genes with at least one value with relative

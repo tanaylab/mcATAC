@@ -1,7 +1,7 @@
 
 #' Cluster atac peaks based on atac distributions
 #'
-#' @param atac_mc a McATAC object
+#' @param atac_mc a McATACPeaks object
 #' @param k number of clusters; must be specified if \code{clustering_algoritm = 'kmeans'}
 #' @param clustering_algoritm (optional) either "kmeans" or "louvain"
 #' @param cluster_on (optional; default - fp) which matrix (\code{mat}/\code{fp}/\code{egc})to cluster on
@@ -46,8 +46,8 @@ gen_atac_peak_clust <- function(atac_mc, k = NULL, clustering_algoritm = "kmeans
 
 #' Cluster metacells based on atac profiles using the k-means algorithm
 #'
-#' @param atac_mc - an McATAC object
-#' @param use_prior_annot (optional) when TRUE - use the metacell annotation to generate metacell clusters. Clusters would be generated based on a categorical field \code{annot} from the \code{metadata} slot in the McATAC object.
+#' @param atac_mc - an McATACPeaks object
+#' @param use_prior_annot (optional) when TRUE - use the metacell annotation to generate metacell clusters. Clusters would be generated based on a categorical field \code{annot} from the \code{metadata} slot in the McATACPeaks object.
 #' @param k - (optional, when \code{use_prior_annot == F}) number of clusters to generate
 #' @param annot - name of the field to use when \code{use_prior_annot == T}.
 #'
@@ -83,9 +83,9 @@ gen_atac_mc_clust <- function(atac_mc, use_prior_annot = TRUE, k = NULL, annot =
     }
 }
 
-#' Subset peaks of an McATAC object
+#' Subset peaks of an McATACPeaks object
 #'
-#' @param atac_mc - an McATAC object
+#' @param atac_mc - an McATACPeaks object
 #' @param peak_set - a subset of peaks of \code{atac_mc@peaks} to keep
 #' @return the atac_mc object only with the peaks of interest (not saved in the "ignore_..." slots)
 #' @examples
@@ -110,9 +110,9 @@ subset_peaks <- function(atac_mc, peak_set) {
     return(atac_mc)
 }
 
-#' Subset McATAC by certain clusters
+#' Subset McATACPeaks by certain clusters
 #'
-#' @param atac_mc - an McATAC object
+#' @param atac_mc - an McATACPeaks object
 #' @param cluster_membership - which cluster each peak is a member of
 #' @param clusters_to_keep - a vector of clusters to keep (or exclude, if \code{reverse == TRUE})
 #' @param reverse (optional) - a logical/flag whether to keep (default - TRUE) or remove the clusters in \code{clusters_to_keep}

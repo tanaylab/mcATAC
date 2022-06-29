@@ -3,7 +3,7 @@
 #' This function calculates aggregated log-PSSM energies (as derived by the misha package's \code{create_pssm_energy} module) for a set of peaks
 #' (default - all peaks in the dataset) and for a set of motifs (default - all available)
 #'
-#' @param atac - an ScATAC/McATAC or PeakIntervals object
+#' @param atac - an ScATACPeaks/McATACPeaks or PeakIntervals object
 #' @param peak_width (optional) - size of region around peak centers to extract motif energies for
 #' @param pssm_path (optional) - path to directory containing misha-formatted pssm files (e.g. \code{motifs.key} and \code{motifs.data})
 #' @param datasets_of_interest (optional) - names of pssm datasets ([name].key-[name].data file combinations) to calculate PSSM values for
@@ -166,7 +166,7 @@ gen_random_genome_peak_motif_matrix <- function(num_peaks = 1e+5,
 #' The option \code{alternative == "less"}, checks the null hypothesis that the foreground distribution is not less than the
 #' background distribution (applicable when looking for motif enrichment; for anti-enrichment, \code{alternative == 'greater'},
 #' see ks.test documentation for further details)
-#' @param pssm_fg motif energies calculated for a certain set of motifs on a PeakIntervals/ScATAC/McATAC object
+#' @param pssm_fg motif energies calculated for a certain set of motifs on a PeakIntervals/ScATACPeaks/McATACPeaks object
 #' @param pssm_bg a background set of intervals (e.g. random genome, all ENCODE enhancers etc.) that include all/subset of the motifs (columns) in pssm_fg
 #' @param fg_clustering a vector of cluster assignments for the foreground peaks (e.g. from \code{gen_atac_peak_clust})
 #' @param parallel (optional) - whether to use parallelize computations
@@ -208,17 +208,17 @@ calculate_d_stats <- function(pssm_fg, pssm_bg, fg_clustering = NULL, parallel =
 
 #' Utility function for validating parameter combinations for PSSM extraction
 #'
-#' @param atac - an ScATAC/McATAC or PeakIntervals object
+#' @param atac - an ScATACPeaks/McATACPeaks or PeakIntervals object
 #' @return the relevant peak set (from ATAC object if specified, else \code{peak_set})
 #' @noRd
 get_peaks_for_pssm <- function(atac) {
     cl <- class(atac)
-    if (any(c("ScATAC", "McATAC") %in% cl[[1]])) {
+    if (any(c("ScATACPeaks", "McATACPeaks") %in% cl[[1]])) {
         peaks <- atac@peaks
     } else if ("PeakIntervals" %in% cl[[1]]) {
         peaks <- atac
     } else {
-        cli_abort("Class of {.var atac} is not recognized (should be either ScATAC, McATAC or PeakIntervals object).")
+        cli_abort("Class of {.var atac} is not recognized (should be either ScATACPeaks, McATACPeaks or PeakIntervals object).")
     }
     return(peaks)
 }

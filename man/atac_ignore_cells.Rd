@@ -7,7 +7,7 @@
 atac_ignore_cells(atac, ig_cells)
 }
 \arguments{
-\item{atac}{an ScATAC object}
+\item{atac}{an ScATACPeaks object}
 
 \item{ig_cells}{a vector of cell names (10X barcodes) to removes}
 }
