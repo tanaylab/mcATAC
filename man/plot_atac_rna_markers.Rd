@@ -16,7 +16,7 @@ plot_atac_rna_markers(
 \arguments{
 \item{atac_mc}{a McATAC object with RNA expression (using \code{add_mc_rna})}
 
-\item{n_genes}{maximal number of genes to return. Default: 1000}
+\item{n_genes}{maximal number of genes to return. Default: 100}
 
 \item{force_cell_type}{do not split cell types when ordering the metacells. Default: TRUE}
 

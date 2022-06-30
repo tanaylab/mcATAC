@@ -332,7 +332,7 @@ rna_atac_cor_knn <- function(atac_mc, k = 1, genes = NULL, rm_zeros = TRUE, spea
     assert_atac_object(atac_mc, "McATAC")
 
     rna_mat <- get_rna_egc(atac_mc, genes = genes, rm_zeros = rm_zeros)
-    
+
     if ("matrix" %!in% class(atac_mc@mat)) {
         atac_mc@mat <- as.matrix(atac_mc@mat)
     }
