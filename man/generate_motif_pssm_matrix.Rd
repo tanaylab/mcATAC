@@ -17,7 +17,7 @@ generate_motif_pssm_matrix(
 }
 \arguments{
 \item{atac}{\itemize{
-\item an ScATACPeaks/McATACPeaks or PeakIntervals object
+\item an ScPeaks/McPeaks or PeakIntervals object
 }}
 
 \item{peak_width}{(optional) - size of region around peak centers to extract motif energies for}

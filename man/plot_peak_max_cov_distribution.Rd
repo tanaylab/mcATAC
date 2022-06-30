@@ -7,7 +7,7 @@
 plot_peak_max_cov_distribution(atac)
 }
 \arguments{
-\item{atac}{an ScATACPeaks or McATACPeaks object}
+\item{atac}{an ScPeaks or McPeaks object}
 }
 \value{
 a ggplot object with the distribution of maximal per-cell coverage for each peak

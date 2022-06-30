@@ -13,7 +13,7 @@ filter_features(
 )
 }
 \arguments{
-\item{atac_sc}{the ScATACPeaks object to analyze}
+\item{atac_sc}{the ScPeaks object to analyze}
 
 \item{minimal_max_umi}{(optional) threshold on minimum maximal coverage - i.e. remove all peaks that DON'T have a cell with at least \code{abs_cov_thresh} UMIs}
 
@@ -24,7 +24,7 @@ filter_features(
 \item{max_peak_density}{(optional) remove all peaks that have more than \code{max_peak_density} UMIs per 100bp}
 }
 \value{
-atac_sc - the filtered ScATACPeaks object
+atac_sc - the filtered ScPeaks object
 }
 \description{
 Remove ATAC peaks with low coverage, or that are too long etc.

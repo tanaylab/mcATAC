@@ -169,9 +169,9 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
     return(res)
 }
 
-#' Create an McATACPeaks object from an McCounts object
+#' Create an McPeaks object from an McCounts object
 #'
-#' @description given an McCounts object and peaks, summarise the counts over the peaks and return a McATACPeaks object
+#' @description given an McCounts object and peaks, summarise the counts over the peaks and return a McPeaks object
 #'
 #' @param mc_counts a McCounts object
 #' @param peaks a data frame with the peak intervals (chrom, start, end) and a column called "peak_name"
@@ -179,7 +179,7 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
 #'
 #' @inheritParams project_atac_on_mc
 #'
-#' @return a McATACPeaks object
+#' @return a McPeaks object
 #'
 #' @examples
 #' \dontrun{
@@ -204,9 +204,9 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
 
     mat <- Reduce("+", matrices)
 
-    mc_atac <- new("McATACPeaks", mat = mat, peaks = peaks, genome = mc_counts@genome, id = mc_counts@id, description = mc_counts@description, metadata = metadata, cell_to_metacell = mc_counts@cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = mc_counts@path)
+    mc_atac <- new("McPeaks", mat = mat, peaks = peaks, genome = mc_counts@genome, id = mc_counts@id, description = mc_counts@description, metadata = metadata, cell_to_metacell = mc_counts@cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = mc_counts@path)
 
-    cli_alert_success("Created a new McATACPeaks object with {.val {ncol(mc_atac@mat)}} metacells and {.val {nrow(mc_atac@mat)}} ATAC peaks.")
+    cli_alert_success("Created a new McPeaks object with {.val {ncol(mc_atac@mat)}} metacells and {.val {nrow(mc_atac@mat)}} ATAC peaks.")
 
     return(mc_atac)
 }

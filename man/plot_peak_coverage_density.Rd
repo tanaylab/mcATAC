@@ -7,7 +7,7 @@
 plot_peak_coverage_density(atac, scale = 100, pointsize = 1.5, ...)
 }
 \arguments{
-\item{atac}{an ScATACPeaks or McATACPeaks object}
+\item{atac}{an ScPeaks or McPeaks object}
 
 \item{scale}{for the 'cov_density' field, calculate the number of UMIs per \code{scale}
 bp (default: 100)}

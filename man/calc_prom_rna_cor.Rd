@@ -14,7 +14,7 @@ calc_prom_rna_cor(
 )
 }
 \arguments{
-\item{atac_mc}{a McATACPeaks object with promoters (using \code{gen_promoter_features}) and RNA expression (using \code{add_mc_rna})}
+\item{atac_mc}{a McPeaks object with promoters (using \code{gen_promoter_features}) and RNA expression (using \code{add_mc_rna})}
 
 \item{genes}{list of genes to match. Default (NULL): all genes}
 

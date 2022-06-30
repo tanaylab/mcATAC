@@ -1,5 +1,5 @@
 test_that("import from 10x works", {
-    expect_equal(class(atac_sc), "ScATACPeaks", ignore_attr = TRUE)
+    expect_equal(class(atac_sc), "ScPeaks", ignore_attr = TRUE)
     expect_equal(nrow(atac_sc@mat), 107829)
     expect_equal(ncol(atac_sc@mat), 11909)
     expect_equal(colnames(atac_sc@peaks), c("chrom", "start", "end", "peak_name"))
@@ -21,7 +21,7 @@ test_that("import from matrix works", {
     expect_equal(peaks, atac_sc1@peaks %>% select(chrom, start, end) %>% as.data.frame())
 
     # mcATAC
-    atac_mc1 <- import_from_matrix(atac_mc@mat, atac_mc@peaks, atac_mc@genome, class = "McATACPeaks", id = atac_mc@id, description = atac_mc@description, metadata = atac_mc@metadata)
+    atac_mc1 <- import_from_matrix(atac_mc@mat, atac_mc@peaks, atac_mc@genome, class = "McPeaks", id = atac_mc@id, description = atac_mc@description, metadata = atac_mc@metadata)
     expect_true(mean(abs(atac_mc@mat - atac_mc1@mat)) <= 1e-9)
     expect_true(mean(abs(atac_mc@egc - atac_mc1@egc)) <= 1e-9)
     expect_true(mean(abs(atac_mc@fp - atac_mc1@fp)) <= 1e-9)
@@ -34,7 +34,7 @@ test_that("import from matrix works", {
 })
 
 test_that("projection works", {
-    expect_equal(class(atac_mc), "McATACPeaks", ignore_attr = TRUE)
+    expect_equal(class(atac_mc), "McPeaks", ignore_attr = TRUE)
     expect_equal(nrow(atac_mc@mat), 107687)
     expect_equal(ncol(atac_mc@mat), length(unique(cell_to_metacell_pbmc_example$metacell)))
     expect_setequal(colnames(atac_mc@mat), cell_to_metacell_pbmc_example$metacell)

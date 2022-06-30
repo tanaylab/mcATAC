@@ -2,7 +2,7 @@
 % Please edit documentation in R/import-peaks.R
 \name{import_from_matrix}
 \alias{import_from_matrix}
-\title{Create an ScATACPeaks,McATACPeaks object from matrix and peaks}
+\title{Create an ScPeaks,McPeaks object from matrix and peaks}
 \usage{
 import_from_matrix(
   mat,
@@ -11,7 +11,7 @@ import_from_matrix(
   id = NULL,
   description = NULL,
   metadata = NULL,
-  class = "ScATACPeaks",
+  class = "ScPeaks",
   rm_zero_peaks = TRUE,
   tad_based = TRUE,
   zero_based = FALSE,
@@ -33,7 +33,7 @@ are expected to equal to this column.}
 
 \item{metadata}{(Optional) data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.}
 
-\item{class}{should the output object be a ScATACPeaks or McATACPeaks}
+\item{class}{should the output object be a ScPeaks or McPeaks}
 
 \item{rm_zero_peaks}{remove peaks without any reads (all-zero peaks). Default: TRUE}
 
@@ -45,12 +45,12 @@ are expected to equal to this column.}
 the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quantile of metacell sizes.}
 }
 \description{
-Create an ScATACPeaks,McATACPeaks object from matrix and peaks
+Create an ScPeaks,McPeaks object from matrix and peaks
 }
 \examples{
 \dontrun{
 atac_sc <- import_from_matrix(mat, peaks, genome = "hg38")
-atac_mc <- import_from_matrix(mat, peaks, genome = "hg38", class = "McATACPeaks")
+atac_mc <- import_from_matrix(mat, peaks, genome = "hg38", class = "McPeaks")
 }
 
 }

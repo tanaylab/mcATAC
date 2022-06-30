@@ -17,7 +17,7 @@ plot_atac_peak_map(
 )
 }
 \arguments{
-\item{atac_mc}{McATACPeaks object}
+\item{atac_mc}{McPeaks object}
 
 \item{atac_mc_clust}{output of \code{gen_atac_mc_clust} (for meaningful visuals, make sure this is ordered by cluster)}
 

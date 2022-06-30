@@ -85,13 +85,13 @@ mcc_to_tracks(mc_counts, "pbmc_mc", overwrite = TRUE)
 We can then use the tracks we created to identify peaks on the metacell level. We think it is more robust than looking only at the marginal of all the data (as the cell ranger does), or than trying to identify peaks on the single cell level which is very sparse. 
 
 ```{r identify-peaks}
-# identify peaks on the metacell level. In the meantime - a placeholder using the ScATACPeaks peaks
+# identify peaks on the metacell level. In the meantime - a placeholder using the ScPeaks peaks
 peaks <- atac_sc@peaks
 ```
 
-## Create a McATACPeaks object from McCounts object 
+## Create a McPeaks object from McCounts object 
 
-After we have indentified the peaks, we can create a `McATACPeaks` object from the `McCounts` object that we have created.
+After we have indentified the peaks, we can create a `McPeaks` object from the `McCounts` object that we have created.
 
 ```{r mc-atac}
 atac_mc <- mcc_to_mcatac(mc_counts, peaks)

@@ -2,17 +2,17 @@
 % Please edit documentation in R/rna.R
 \name{add_mc_rna}
 \alias{add_mc_rna}
-\title{Add per-metacell gene expression data to an McATACPeaks object}
+\title{Add per-metacell gene expression data to an McPeaks object}
 \usage{
 add_mc_rna(atac_mc, mc_rna)
 }
 \arguments{
-\item{atac_mc}{an McATACPeaks object}
+\item{atac_mc}{an McPeaks object}
 
 \item{mc_rna}{a \code{metacell1} 'mc' object or a \code{metacells} metacell UMI matrix (a matrix where each row is a gene and each column is a metacell)}
 }
 \description{
-Add per-metacell gene expression data to an McATACPeaks object
+Add per-metacell gene expression data to an McPeaks object
 }
 \examples{
 \dontrun{

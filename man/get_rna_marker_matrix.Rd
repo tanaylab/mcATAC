@@ -14,7 +14,7 @@ get_rna_marker_matrix(
 )
 }
 \arguments{
-\item{atac_mc}{a McATACPeaks object with RNA expression (using \code{add_mc_rna})}
+\item{atac_mc}{a McPeaks object with RNA expression (using \code{add_mc_rna})}
 
 \item{markers}{a list of marker genes. If NULL - the function uses \code{get_rna_markers} with default parameters which can be overridden
 using the ellipsis \code{...}.}

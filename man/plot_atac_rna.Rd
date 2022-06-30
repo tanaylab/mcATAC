@@ -18,7 +18,7 @@ plot_atac_rna(
 )
 }
 \arguments{
-\item{atac_mc}{a McATACPeaks object}
+\item{atac_mc}{a McPeaks object}
 
 \item{gene}{name of the gene to plot}
 

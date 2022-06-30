@@ -2,12 +2,12 @@
 % Please edit documentation in R/plot-markers.R
 \name{plot_rna_markers}
 \alias{plot_rna_markers}
-\title{Plot a heatmap of marker genes fold change over metacells given an McATACPeaks object}
+\title{Plot a heatmap of marker genes fold change over metacells given an McPeaks object}
 \usage{
 plot_rna_markers(atac_mc, n_genes = 100, force_cell_type = TRUE, ...)
 }
 \arguments{
-\item{atac_mc}{a McATACPeaks object with RNA expression (using \code{add_mc_rna})}
+\item{atac_mc}{a McPeaks object with RNA expression (using \code{add_mc_rna})}
 
 \item{n_genes}{maximal number of genes to return. Default: 100}
 
@@ -42,7 +42,7 @@ A FALSE indicates that no Y-axis labels should be displayed.}
 }
 \description{
 This is a thin wrapper around plot_rna_markers_mat which computes the marker matrix and uses the correct
-metadata fields in the McATACPeaks object.
+metadata fields in the McPeaks object.
 }
 \examples{
 \dontrun{

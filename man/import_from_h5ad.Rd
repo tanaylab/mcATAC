@@ -2,7 +2,7 @@
 % Please edit documentation in R/import-peaks.R
 \name{import_from_h5ad}
 \alias{import_from_h5ad}
-\title{Create an ScATACPeaks,McATACPeaks object from an h5ad file}
+\title{Create an ScPeaks,McPeaks object from an h5ad file}
 \usage{
 import_from_h5ad(
   file,
@@ -16,8 +16,8 @@ import_from_h5ad(
 \arguments{
 \item{file}{name of an h5ad file with ATAC data}
 
-\item{class}{is the file storing ScATACPeaks or McATACPeaks. If NULL - the class would be determined by the 'class' field in the 'uns' part
-of the h5ad file, if exists and otherwise the class would be McATACPeaks.}
+\item{class}{is the file storing ScPeaks or McPeaks. If NULL - the class would be determined by the 'class' field in the 'uns' part
+of the h5ad file, if exists and otherwise the class would be McPeaks.}
 
 \item{genome}{genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10". If NULL - the assembly would be determined by the 'genome' field in the 'uns' part of the h5ad file.}
 
@@ -29,7 +29,7 @@ h5ad file, and if this doesn't exist - a random id would be assigned.}
 \item{tad_based}{whether to name peaks based on TADs if possible (when an intervals set named "intervs.global.tad_names" exists). When FALSE - peaks are named based on their coordinates. if NULL - the value would be determined by the 'tad_based' field in the 'uns' part of the h5ad file, and if this doesn't exist - the value would be TRUE.}
 }
 \value{
-an ScATACPeaks/McATACPeaks object
+an ScPeaks/McPeaks object
 }
 \description{
 Reads an ATAC object from an h5ad file. Peak data is taken from the 'X' section and metadata is taken from 'obs'.

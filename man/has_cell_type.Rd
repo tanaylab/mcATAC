@@ -2,18 +2,18 @@
 % Please edit documentation in R/metadata.R
 \name{has_cell_type}
 \alias{has_cell_type}
-\title{Does the McATACPeaks object contain per-metacell cell type annotation}
+\title{Does the McPeaks object contain per-metacell cell type annotation}
 \usage{
 has_cell_type(atac_mc)
 }
 \arguments{
-\item{atac_mc}{an McATACPeaks object}
+\item{atac_mc}{an McPeaks object}
 }
 \value{
-TRUE if the McATACPeaks object contains per-metacell cell type annotation, FALSE otherwise
+TRUE if the McPeaks object contains per-metacell cell type annotation, FALSE otherwise
 }
 \description{
-Does the McATACPeaks object contain per-metacell cell type annotation
+Does the McPeaks object contain per-metacell cell type annotation
 }
 \examples{
 \dontrun{
