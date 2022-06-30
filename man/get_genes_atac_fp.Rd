@@ -14,7 +14,7 @@ get_genes_atac_fp(
 )
 }
 \arguments{
-\item{atac_mc}{a McPeaks object}
+\item{atac_mc}{a McPeaks/McTracks object}
 
 \item{genes}{a list of genes.}
 

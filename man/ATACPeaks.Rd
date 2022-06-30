@@ -22,6 +22,8 @@ metacell size. Accessibility is normalized by peak length.}
 
 \item{\code{mc_size_eps_q}}{quantile of MC size (in UMIs) to scale the number of UMIs per metacell. See \code{project_atac_on_mc}}
 
-\item{\code{rna_egc}}{normalized gene expression per gene per metacell (optional). Can be created using \code{add_mc_rna}}
+\item{\code{cell_to_metacell}}{a data frame with a column called 'metacell' and a column called 'cell_id'}
+
+\item{\code{metacells}}{a vector of metacells IDs.}
 }}
 

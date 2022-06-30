@@ -7,7 +7,7 @@
 has_rna(atac_mc)
 }
 \arguments{
-\item{atac_mc}{an McPeaks object}
+\item{atac_mc}{an McPeaks/McTracks object}
 }
 \value{
 TRUE if the McPeaks object contains per-metacell gene expression data, FALSE otherwise

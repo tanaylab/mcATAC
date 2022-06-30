@@ -339,3 +339,36 @@ temp_track_name <- function(prefix = "", envir = parent.frame()) {
     withr::defer(gtrack.rm(temp_track, force = TRUE), envir = envir)
     return(temp_track)
 }
+
+
+#' Return the total coverage of a track
+#'
+#' @description This function computes the total coverage of a track, and
+#' adds it as an attribute to the track. If the attribute was pre-computed
+#' before, it is returned. Set the \code{overwrite} parameter to TRUE to recompute the coverage.
+#'
+#' @param track track name
+#' @param attr_name attribute name. Default is "total_cov", please do not change this unless you know what you are doing.
+#' @param overwrite overwrite existing attribute (logical)
+#'
+#' @return Total coverage of the track.
+#'
+#' @examples
+#' \dontrun{
+#' add_track_total_coverage("track1")
+#' }
+#'
+#' @export
+get_track_total_coverage <- function(track, attr_name = "total_cov", overwrite = FALSE) {
+    if (!gtrack.exists(track)) {
+        cli_abort("Track {.val {track}} does not exist.")
+    }
+    if (gtrack.attr.get(track, attr_name) != "") {
+        if (!overwrite) {
+            return(as.numeric(gtrack.attr.get(track, attr_name)))
+        }
+    }
+    tot_cov <- gsummary(track)[[5]]
+    gtrack.attr.set(track, attr_name, tot_cov)
+    return(tot_cov)
+}

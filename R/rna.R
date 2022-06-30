@@ -1,6 +1,6 @@
 #' Add per-metacell gene expression data to an McPeaks object
 #'
-#' @param atac_mc an McPeaks object
+#' @param atac_mc an McPeaks/McTracks object
 #' @param mc_rna a \code{metacell1} 'mc' object or a \code{metacells} metacell UMI matrix (a matrix where each row is a gene and each column is a metacell)
 #'
 #' @examples
@@ -13,7 +13,7 @@
 #'
 #' @export
 add_mc_rna <- function(atac_mc, mc_rna) {
-    assert_atac_object(atac_mc, class = "McPeaks")
+    assert_atac_object(atac_mc, class = "ATAC")
 
     if ("tgMCCov" %in% class(mc_rna)) {
         egc <- mc_rna@e_gc
@@ -23,17 +23,17 @@ add_mc_rna <- function(atac_mc, mc_rna) {
         cli_abort("mc_rna must be a tgMCCov object (from the metacell package) or a matrix.")
     }
 
-    rna_mc_not_in_atac <- colnames(egc)[colnames(egc) %!in% colnames(atac_mc@mat)]
+    rna_mc_not_in_atac <- colnames(egc)[colnames(egc) %!in% atac_mc@metacells]
     if (length(rna_mc_not_in_atac) > 0) {
         cli_warn("{.field mc_rna} contains {.field {length(rna_mc_not_in_atac)}} metacells not present in the McPeaks object: {.val {rna_mc_not_in_atac}}")
     }
 
-    atac_mc_not_in_rna <- colnames(atac_mc@mat)[colnames(atac_mc@mat) %!in% colnames(egc)]
+    atac_mc_not_in_rna <- atac_mc@metacells[atac_mc@metacells %!in% colnames(egc)]
     if (length(atac_mc_not_in_rna) > 0) {
         cli_warn("McPeaks object contains {.field {length(atac_mc_not_in_rna)}} metacells not present in {.field mc_rna}: {.val {atac_mc_not_in_rna}}")
     }
 
-    both_mcs <- intersect(colnames(atac_mc@mat), colnames(egc))
+    both_mcs <- intersect(atac_mc@metacells, colnames(egc))
     if (length(both_mcs) == 0) {
         cli_abort("No metacells in common between the McPeaks object and {.field mc_rna}.")
     }
@@ -44,7 +44,7 @@ add_mc_rna <- function(atac_mc, mc_rna) {
 
 #' Does the McPeaks object contain per-metacell gene expression data?
 #'
-#' @param atac_mc an McPeaks object
+#' @param atac_mc an McPeaks/McTracks object
 #'
 #' @return TRUE if the McPeaks object contains per-metacell gene expression data, FALSE otherwise
 #'
@@ -63,7 +63,7 @@ has_rna <- function(atac_mc) {
 #'
 #' @description Get RNA expression data, normalized by the total RNA expression in each metacell.
 #'
-#' @param atac_mc a McPeaks object with RNA expression (using \code{add_mc_rna})
+#' @param atac_mc a McPeaks/McTracks object with RNA expression (using \code{add_mc_rna})
 #' @param genes list of genes to match. Default (NULL): all genes
 #' @param rm_zeros remove genes with no RNA expression in any metacell. Default: TRUE
 #' @param epsilon regularization factor added to the log normalized expression
@@ -79,7 +79,7 @@ has_rna <- function(atac_mc) {
 #'
 #' @export
 get_rna_egc <- function(atac_mc, genes = NULL, rm_zeros = TRUE, epsilon = 1e-5) {
-    validate_atac_object(atac_mc)
+    validate_atac_peaks_object(atac_mc)
     if (!has_rna(atac_mc)) {
         cli_abort("{.val {atac_mc}} does not contain RNA.")
     }
@@ -198,7 +198,7 @@ get_rna_markers <- function(atac_mc, n_genes = 100, minimal_max_log_fraction = -
 
 #' Get enrichment matrix for marker genes
 #'
-#' @param atac_mc a McPeaks object with RNA expression (using \code{add_mc_rna})
+#' @param atac_mc a McPeaks/McTracks object with RNA expression (using \code{add_mc_rna})
 #' @param markers a list of marker genes. If NULL - the function uses \code{get_rna_markers} with default parameters which can be overridden
 #' using the ellipsis \code{...}.
 #' @param force_cell_type do not split cell types when ordering the metacells. Default: TRUE
@@ -308,7 +308,7 @@ order_marker_matrix <- function(mat, metacell_types = NULL) {
 
 #' Match every gene with the k ATAC peaks most correlated to it
 #'
-#' @param atac_mc a McPeaks object with RNA expression (using \code{add_mc_rna})
+#' @param atac_mc a McPeaks/McTracks object with RNA expression (using \code{add_mc_rna})
 #' @param k number of peaks to match for each gene. Default: 1
 #'
 #' @return a tibble with the following columns:
@@ -329,7 +329,7 @@ order_marker_matrix <- function(mat, metacell_types = NULL) {
 #' @inheritParams tgstat::tgs_cor_knn
 #' @export
 rna_atac_cor_knn <- function(atac_mc, k = 1, genes = NULL, rm_zeros = TRUE, spearman = TRUE, pairwise.complete.obs = TRUE) {
-    assert_atac_object(atac_mc, "McPeaks")
+    assert_atac_object(atac_mc, "ATAC")
 
     rna_mat <- get_rna_egc(atac_mc, genes = genes, rm_zeros = rm_zeros)
 
@@ -350,7 +350,7 @@ rna_atac_cor_knn <- function(atac_mc, k = 1, genes = NULL, rm_zeros = TRUE, spea
 #' @description
 #' This function returns a relative fold change matrix of ATAC peaks for a list of genes matched using \code{rna_atac_cor_knn}.
 #'
-#' @param atac_mc a McPeaks object
+#' @param atac_mc a McPeaks/McTracks object
 #' @param genes a list of genes.
 #' @param metacell select only a subset of the metacells.
 #'
@@ -365,7 +365,7 @@ rna_atac_cor_knn <- function(atac_mc, k = 1, genes = NULL, rm_zeros = TRUE, spea
 #'
 #' @export
 get_genes_atac_fp <- function(atac_mc, genes = NULL, metacells = NULL, rm_zeros = TRUE, spearman = TRUE, pairwise.complete.obs = TRUE) {
-    assert_atac_object(atac_mc, "McPeaks")
+    assert_atac_object(atac_mc, "ATAC")
     knn_df <- rna_atac_cor_knn(atac_mc, genes = genes, rm_zeros = rm_zeros, spearman = spearman, pairwise.complete.obs = pairwise.complete.obs)
 
     atac_fp <- atac_mc@fp[knn_df$peak, ]

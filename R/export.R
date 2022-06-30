@@ -15,7 +15,7 @@
 #' @inheritDotParams anndata::write_h5ad
 #' @export
 export_to_h5ad <- function(object, out_file, ...) {
-    validate_atac_object(object)
+    validate_atac_peaks_object(object)
 
     mat <- object@mat
     mat <- t(mat)

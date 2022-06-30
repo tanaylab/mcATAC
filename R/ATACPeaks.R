@@ -32,13 +32,15 @@ setMethod(
     "initialize",
     signature = "ATACPeaks",
     definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, path = "", tad_based = TRUE, rename = TRUE) {
-        .Object <- make_atac_object(.Object, mat, peaks, genome, id, description, path = path, tad_based = tad_based, rename = rename)
-        validate_atac_object(.Object)
+        .Object <- make_atac_peaks_object(.Object, mat, peaks, genome, id, description, path = path, tad_based = tad_based, rename = rename)
+        validate_atac_peaks_object(.Object)
         return(.Object)
     }
 )
 
-make_atac_object <- function(obj, mat, peaks, genome, id, description, path, metadata, metadata_id_field, tad_based, rename = TRUE) {
+make_atac_peaks_object <- function(obj, mat, peaks, genome, id, description, path, metadata, metadata_id_field, tad_based, rename = TRUE) {
+    obj <- make_atac_object(obj, genome, id, description, path)
+
     if (nrow(mat) != nrow(peaks)) {
         cli_abort("Number of peaks is not equal to the matrix rows.")
     }
@@ -47,35 +49,20 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, path, met
     if (!is.null(rownames(mat)) && has_name(peaks, "peak_name")) {
         mat <- mat[peaks$peak_name, ] # filter out peaks that do not exists in peak intervals
     }
-    gset_genome(genome)
+
     if (rename || !has_name(peaks, "peak_name")) {
         peaks <- peaks %>% select(-any_of("peak_name"))
         peaks$peak_name <- peak_names(peaks, tad_based = tad_based)
     }
     rownames(mat) <- peaks$peak_name
 
-    if (is.null(id)) {
-        id <- gsub(" ", "_", randomNames::randomNames(n = 1, name.order = "first.last", name.sep = "_"))
-        cli_alert("No id was given, setting id to {.field {id}}")
-    }
-
-    description <- description %||% ""
-
-    if (path != "") {
-        path <- as.character(normalizePath(path))
-    }
-
-    obj@id <- id
-    obj@description <- description
-    obj@path <- path
     obj@mat <- mat
     obj@peaks <- peaks
-    obj@genome <- genome
     obj@ignore_peaks <- subset(peaks, subset = rep(FALSE, nrow(peaks)))
     obj@ignore_pmat <- methods::as(matrix(0, nrow = 0, ncol = ncol(obj@mat)), "dgCMatrix")
     obj@promoters <- FALSE
     obj@tad_based <- tad_based
-    validate_atac_object(obj)
+    validate_atac_peaks_object(obj)
     return(obj)
 }
 
@@ -84,7 +71,7 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, path, met
 #' @param obj an McPeaks or ScPeaks object
 #'
 #' @noRd
-validate_atac_object <- function(obj) {
+validate_atac_peaks_object <- function(obj) {
     validate_atac_object_params(obj@mat, obj@peaks, obj@genome, obj@promoters)
 }
 
@@ -127,7 +114,8 @@ validate_atac_object_params <- function(mat, peaks, genome, promoters = FALSE) {
 #' metacell size. Accessibility is normalized by peak length.
 #' @slot fp a matrix showing for each peak (row) the relative enrichment of umis in log2 scale, i.e. \eqn{log2((1 + egc) / median(1 + egc))}
 #' @slot mc_size_eps_q quantile of MC size (in UMIs) to scale the number of UMIs per metacell. See \code{project_atac_on_mc}
-#' @slot rna_egc normalized gene expression per gene per metacell (optional). Can be created using \code{add_mc_rna}
+#' @slot cell_to_metacell a data frame with a column called 'metacell' and a column called 'cell_id'
+#' @slot metacells a vector of metacells IDs.
 #'
 #' @rdname ATACPeaks
 #' @exportClass McPeaks
@@ -138,7 +126,7 @@ McPeaks <- setClass(
         fp = "any_matrix",
         mc_size_eps_q = "numeric",
         cell_to_metacell = "data.frame_or_null",
-        rna_egc = "any_matrix"
+        metacells = "character"
     ),
     contains = "ATACPeaks"
 )
@@ -167,11 +155,12 @@ setMethod(
     "initialize",
     signature = "McPeaks",
     definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, cell_to_metacell = NULL, mc_size_eps_q = 0.1, path = "", tad_based = TRUE) {
-        .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based, rename = FALSE)
-        validate_atac_object(.Object)
+        .Object <- make_atac_peaks_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based, rename = FALSE)
+        validate_atac_peaks_object(.Object)
         .Object <- add_metadata(.Object, metadata, "metacell")
         .Object@egc <- calc_mc_egc(.Object, mc_size_eps_q)
         .Object@fp <- calc_mc_fp(.Object)
+        .Object@metacells <- colnames(.Object@mat)
         .Object@mc_size_eps_q <- mc_size_eps_q
         .Object@rna_egc <- matrix(0, nrow = 0, ncol = ncol(.Object@mat), dimnames = list(NULL, colnames(.Object@mat)))
         .Object@cell_to_metacell <- cell_to_metacell
@@ -203,11 +192,11 @@ setMethod(
     "show",
     signature = "McPeaks",
     definition = function(object) {
-        print_atac_object(object, "McPeaks", "metacell", "metacell")
+        print_atac_peaks_object(object, "McPeaks", "metacell", "metacell")
     }
 )
 
-print_atac_object <- function(object, object_type, column_type, md_column) {
+print_atac_peaks_object <- function(object, object_type, column_type, md_column) {
     cli::cli_text("{.cls {object_type}} object with {.val {ncol(object@mat)}} {column_type}s and {.val {nrow(object@mat)}} ATAC peaks from {.field {object@genome}}.")
     if (object@id != "") {
         cli::cli_text(c("id: {.val {object@id}}"))
@@ -274,8 +263,8 @@ setMethod(
     "initialize",
     signature = "ScPeaks",
     definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, path = "", tad_based = TRUE) {
-        .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based)
-        validate_atac_object(.Object)
+        .Object <- make_atac_peaks_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based)
+        validate_atac_peaks_object(.Object)
         .Object <- add_metadata(.Object, metadata, "cell_id")
         return(.Object)
     }
@@ -287,7 +276,7 @@ setMethod(
     "show",
     signature = "ScPeaks",
     definition = function(object) {
-        print_atac_object(object, "ScPeaks", "cell", "cell_id")
+        print_atac_peaks_object(object, "ScPeaks", "cell", "cell_id")
     }
 )
 

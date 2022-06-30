@@ -23,5 +23,7 @@ ATACTracks classes hold pointers to tracks that hold the data at higher resoluti
 \item{\code{metadata}}{data frame with a column called 'metacell' and additional metacell annotations for McATAC, or 'cell_id' and per-cell annotations for ScATAC. The constructor can also include or the name of a delimited file which contains such annotations.}
 
 \item{\code{path}}{original path from which the object was loaded (optional)}
+
+\item{\code{rna_egc}}{normalized gene expression per gene per metacell (optional). Can be created using \code{add_mc_rna}}
 }}
 

@@ -409,7 +409,7 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL) {
 #' @param normalize Normalize each metacell by the sum of its counts.
 #'
 #'
-#' @return None.
+#' @return An McTracks object with the new tracks.
 #'
 #' @examples
 #' \dontrun{
@@ -478,6 +478,9 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
     gdb.reload()
 
     cli_alert_success("Created {length(metacells)} tracks at {track_prefix}")
+
+    mct <- mct_create(genome = mc_counts@genome, track_prefix = track_prefix, metacells = metacells, id = mc_counts@id, description = mc_counts@description, path = mc_counts@path, metadata = mc_counts@metadata)
+    return(mct)
 }
 
 #' Create a track with smoothed marginal counts from a McCounts object
