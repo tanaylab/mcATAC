@@ -3,7 +3,9 @@ mct <- mct_create(
     track_prefix = "mcatac_test",
     id = "pbmc",
     description = "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)",
-    metadata = mcmd
+    metadata = mcmd,
+    resolution = 20,
+    window_size = 10
 )
 
 

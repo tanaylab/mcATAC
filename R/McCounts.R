@@ -479,7 +479,7 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
 
     cli_alert_success("Created {length(metacells)} tracks at {track_prefix}")
 
-    mct <- mct_create(genome = mc_counts@genome, track_prefix = track_prefix, metacells = metacells, id = mc_counts@id, description = mc_counts@description, path = mc_counts@path, metadata = mc_counts@metadata)
+    mct <- mct_create(genome = mc_counts@genome, track_prefix = track_prefix, metacells = metacells, id = mc_counts@id, description = mc_counts@description, path = mc_counts@path, metadata = mc_counts@metadata, resolution = resolution, window_size = window_size)
     return(mct)
 }
 

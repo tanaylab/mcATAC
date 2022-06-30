@@ -4,10 +4,15 @@
 #' @description ATACTracks is a shallow object holding ATAC data over cells/metacells. Minimally it should include a vector of track names which hold the names of the tracks with the ATAC data.
 #' McTracks extend the ATACTracks object by adding metadata and additional slots.
 #'
+#' @slot tracks vector of track names with the ATAC data.
+#' @slot total_cov vector with total coverage of the tracks.
+#' @slot marginal_track name of a track with marginal coverage.
 #' @slot id an identifier for the object, e.g. "pbmc".
 #' @slot description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
 #' @slot genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
 #' @slot metadata data frame with a column called 'metacell' and additional metacell annotations. The constructor can also include or the name of a delimited file which contains such annotations.
+#' @slot resolution the resolution of the tracks.
+#' @slot window_size The size of the window used to smooth the counts in each track. If no smoothing was done - this should be equal to resolution/2
 #'
 #' @exportClass ATACTracks
 ATACTracks <- setClass(
@@ -15,7 +20,9 @@ ATACTracks <- setClass(
     slots = c(
         tracks = "character",
         total_cov = "numeric",
-        marginal_track = "character_or_null"
+        marginal_track = "character_or_null",
+        resolution = "numeric",
+        window_size = "numeric"
     ),
     contains = c("ATAC", "VIRTUAL")
 )
@@ -23,13 +30,13 @@ ATACTracks <- setClass(
 setMethod(
     "initialize",
     signature = "ATACTracks",
-    definition = function(.Object, tracks, genome, id = NULL, description = NULL, path = "", marginal_track = NULL) {
-        .Object <- make_atac_peaks_object(.Object, tracks, genome, id, description, path = path, marginal_track = marginal_track)
+    definition = function(.Object, tracks, genome, id = NULL, description = NULL, path = "", marginal_track = NULL, resolution = NULL, window_size = resolution / 2) {
+        .Object <- make_atac_peaks_object(.Object, tracks, genome, id, description, path = path, marginal_track = marginal_track, resolution = resolution, window_size = window_size)
         return(.Object)
     }
 )
 
-make_atac_tracks_object <- function(obj, tracks, genome, id, description, path = "", total_cov = NULL, marginal_track = NULL) {
+make_atac_tracks_object <- function(obj, tracks, genome, id, description, path = "", total_cov = NULL, marginal_track = NULL, resolution = NULL, window_size = resolution / 2) {
     obj <- make_atac_object(obj, genome, id, description, path)
 
     walk(tracks, ~ {
@@ -42,9 +49,19 @@ make_atac_tracks_object <- function(obj, tracks, genome, id, description, path =
         total_cov <- plyr::laply(tracks, get_track_total_coverage, .parallel = getOption("mcatac.parallel"))
     }
 
+    if (is.null(resolution)) {
+        resolution <- gtrack.info(tracks[1])$bin.size
+    }
+
+    if (is.null(window_size)) {
+        window_size <- resolution
+    }
+
     obj@tracks <- tracks
     obj@total_cov <- total_cov
     obj@marginal_track <- marginal_track
+    obj@resolution <- resolution
+    obj@window_size <- window_size
     return(obj)
 }
 
@@ -63,7 +80,7 @@ McTracks <- setClass(
 setMethod(
     "initialize",
     signature = "McTracks",
-    definition = function(.Object, tracks, genome, metacells = NULL, id = NULL, description = NULL, path = "", marginal_track = NULL) {
+    definition = function(.Object, tracks, genome, metacells = NULL, id = NULL, description = NULL, path = "", marginal_track = NULL, resolution = NULL, window_size = resolution / 2) {
         if (is.null(metacells)) {
             mc_nums <- stringr::str_extract_all(string = tracks, pattern = "mc\\d*$") %>%
                 unlist() %>%
@@ -76,7 +93,7 @@ setMethod(
                 cli_abort("Number of tracks and metacells must be equal")
             }
         }
-        .Object <- make_atac_tracks_object(.Object, tracks, genome, id, description, path = path, marginal_track = marginal_track)
+        .Object <- make_atac_tracks_object(.Object, tracks, genome, id, description, path = path, marginal_track = marginal_track, resolution = resolution, window_size = window_size)
         .Object@metacells <- as.character(metacells)
 
         return(.Object)
@@ -97,6 +114,8 @@ setMethod(
 #' @param path path to a directory containing the raw data. Usually inherited from the counts object.
 #' @param description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
 #' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
+#' @param resolution the resolution of the tracks.
+#' @param window_size The size of the window used to smooth the counts in each track. If no smoothing was done - this should be equal to resolution / 2.
 #'
 #' @return a McTracks object.
 #'
@@ -106,7 +125,7 @@ setMethod(
 #' }
 #'
 #' @export
-mct_create <- function(genome, tracks = NULL, track_prefix = NULL, metacells = NULL, marginal_track = NULL, id = NULL, description = NULL, path = NULL, metadata = NULL) {
+mct_create <- function(genome, tracks = NULL, track_prefix = NULL, metacells = NULL, marginal_track = NULL, id = NULL, description = NULL, path = NULL, metadata = NULL, resolution = NULL, window_size = resolution / 2) {
     if (is.null(tracks)) {
         if (is.null(track_prefix)) {
             cli_abort("Either {.field tracks} or {.field track_prefix} must be provided")
@@ -123,7 +142,10 @@ mct_create <- function(genome, tracks = NULL, track_prefix = NULL, metacells = N
 
     path <- path %||% ""
 
-    return(new("McTracks", tracks = tracks, genome = genome, metacells = metacells, id = id, description = description, path = path, marginal_track = marginal_track))
+    res <- new("McTracks", tracks = tracks, genome = genome, metacells = metacells, id = id, description = description, path = path, marginal_track = marginal_track, resolution = resolution, window_size = window_size)
+
+    cli_alert_success("Created a new McTracks object with {.val {length(res@metacells)}} metacells.")
+    return(res)
 }
 
 #' @export
@@ -147,6 +169,8 @@ print_atac_tracks_object <- function(object, object_type, column_type, md_column
     if (object@path != "") {
         cli::cli_text(c("Loaded from: {.file {object@path}}"))
     }
+    cli::cli_text(c("resolution: {.val {object@resolution}}"))
+    cli::cli_text(c("window_size: {.val {object@window_size}}"))
 
     cli::cli_text("Slots include:")
     cli_ul(c("{.code @tracks}: a vector with track names"))
@@ -166,6 +190,6 @@ print_atac_tracks_object <- function(object, object_type, column_type, md_column
     }
     cli::cli_text("Tracks (only first are shown):")
     walk(object@tracks[1:min(5, length(object@tracks))], function(x) {
-        cli_ul(c("{.value {x}}"))
+        cli_ul(c("{.val {x}}"))
     })
 }

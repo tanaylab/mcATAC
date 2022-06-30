@@ -12,6 +12,12 @@ McTracks extend the ATACTracks object by adding metadata and additional slots.
 \section{Slots}{
 
 \describe{
+\item{\code{tracks}}{vector of track names with the ATAC data.}
+
+\item{\code{total_cov}}{vector with total coverage of the tracks.}
+
+\item{\code{marginal_track}}{name of a track with marginal coverage.}
+
 \item{\code{id}}{an identifier for the object, e.g. "pbmc".}
 
 \item{\code{description}}{description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"}
@@ -19,5 +25,9 @@ McTracks extend the ATACTracks object by adding metadata and additional slots.
 \item{\code{genome}}{genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"}
 
 \item{\code{metadata}}{data frame with a column called 'metacell' and additional metacell annotations. The constructor can also include or the name of a delimited file which contains such annotations.}
+
+\item{\code{resolution}}{the resolution of the tracks.}
+
+\item{\code{window_size}}{The size of the window used to smooth the counts in each track. If no smoothing was done - this should be equal to resolution/2}
 }}
 

@@ -13,7 +13,9 @@ mct_create(
   id = NULL,
   description = NULL,
   path = NULL,
-  metadata = NULL
+  metadata = NULL,
+  resolution = NULL,
+  window_size = resolution/2
 )
 }
 \arguments{
@@ -35,6 +37,10 @@ a track named "{track_prefix}.marginal" exists, it will be used as the marginal 
 \item{path}{path to a directory containing the raw data. Usually inherited from the counts object.}
 
 \item{metadata}{data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.}
+
+\item{resolution}{the resolution of the tracks.}
+
+\item{window_size}{The size of the window used to smooth the counts in each track. If no smoothing was done - this should be equal to resolution / 2.}
 }
 \value{
 a McTracks object.
