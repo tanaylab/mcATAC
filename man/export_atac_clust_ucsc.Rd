@@ -13,7 +13,7 @@ export_atac_clust_ucsc(
 )
 }
 \arguments{
-\item{atac_mc}{McATACPeaks object}
+\item{atac_mc}{McPeaks object}
 
 \item{track_prefix}{prefix for generated misha tracks.}
 

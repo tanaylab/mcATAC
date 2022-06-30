@@ -2,13 +2,13 @@
 % Please edit documentation in R/cluster.R
 \name{subset_peaks}
 \alias{subset_peaks}
-\title{Subset peaks of an McATACPeaks object}
+\title{Subset peaks of an McPeaks object}
 \usage{
 subset_peaks(atac_mc, peak_set)
 }
 \arguments{
 \item{atac_mc}{\itemize{
-\item an McATACPeaks object
+\item an McPeaks object
 }}
 
 \item{peak_set}{\itemize{
@@ -19,7 +19,7 @@ subset_peaks(atac_mc, peak_set)
 the atac_mc object only with the peaks of interest (not saved in the "ignore_..." slots)
 }
 \description{
-Subset peaks of an McATACPeaks object
+Subset peaks of an McPeaks object
 }
 \examples{
 \dontrun{

@@ -3,10 +3,10 @@
 #'
 #' @description Select only peaks that are close to a gene promoter. In case of alternative promoters or multiple peaks close to the same promoter, the reads from all the peaks and promoters are summed.
 #'
-#' @param atac a McATACPeaks or ScATACPeaks object
+#' @param atac a McPeaks or ScPeaks object
 #' @param id_field the field in \code{tss_intervals} containing the gene names. Default: "geneSymbol"
 #'
-#' @return the McATACPeaks or ScATACPeaks object with new peaks which are a sum of the peaks within the defined promoters. The rownames of the \code{atac@mat} and the field 'peak_name' in \code{atac@peaks} would contain the name of the promoter (from \code{id_field}).
+#' @return the McPeaks or ScPeaks object with new peaks which are a sum of the peaks within the defined promoters. The rownames of the \code{atac@mat} and the field 'peak_name' in \code{atac@peaks} would contain the name of the promoter (from \code{id_field}).
 #' Note that previous peak metadata and previous ignored peaks are dropped.
 #'
 #' @inheritParams misha.ext::get_promoters
@@ -58,7 +58,7 @@ gen_promoter_features <- function(atac, upstream = 500, downstream = 50, tss_int
 
 #' Calculate the cross-correlation between promoter accessibility and RNA expression
 #'
-#' @param atac_mc a McATACPeaks object with promoters (using \code{gen_promoter_features}) and RNA expression (using \code{add_mc_rna})
+#' @param atac_mc a McPeaks object with promoters (using \code{gen_promoter_features}) and RNA expression (using \code{add_mc_rna})
 #' @param match_genes calculate correlation only between genes and promoters which have both accesability and RNA expression.
 #' Matching is done based on name. Default: FALSE
 #'
@@ -69,7 +69,7 @@ gen_promoter_features <- function(atac, upstream = 500, downstream = 50, tss_int
 #'
 #' @export
 calc_prom_rna_cor <- function(atac_mc, genes = NULL, rm_zeros = TRUE, match_genes = FALSE, spearman = FALSE, pairwise.complete.obs = TRUE) {
-    assert_atac_object(atac_mc, "McATACPeaks")
+    assert_atac_object(atac_mc, "McPeaks")
     if (!atac_mc@promoters) {
         cli_abort("{.val {atac_mc}} does not contain promoters.")
     }

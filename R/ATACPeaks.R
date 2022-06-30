@@ -1,20 +1,15 @@
-setClassUnion("any_matrix", c("sparseMatrix", "matrix"))
-setClassUnion("data.frame_or_null", c("data.frame", "NULL"))
-
-setOldClass("PeakIntervals")
-
 #' ATACPeaks objects
 #'
 #'
-#' @description ATACPeaks is a shallow object holding ATAC data over cells/metacells. Minimally it should include a count matrix of peaks over cells/metacells, \code{PeakIntervals} which hold the coordinates of the peaks and the id of the genome assembly of the peaks. ScATACPeaks and
-#' McATACPeaks extend the ATACPeaks object by adding metadata and additional slots.
+#' @description ATACPeaks is a shallow object holding ATAC data over cells/metacells. Minimally it should include a count matrix of peaks over cells/metacells, \code{PeakIntervals} which hold the coordinates of the peaks and the id of the genome assembly of the peaks. ScPeaks and
+#' McPeaks extend the ATACPeaks object by adding metadata and additional slots.
 #'
 #' @slot id an identifier for the object, e.g. "pbmc".
 #' @slot description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
 #' @slot mat a numeric matrix where rows are peaks and columns are cells/metacells. Can be a sparse matrix.
 #' @slot peaks misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).
 #' @slot genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10"
-#' @slot metadata data frame with a column called 'metacell' and additional metacell annotations for McATACPeaks, or 'cell_id' and per-cell annotatoins for ScATACPeaks. The constructor can also include or the name of a delimited file which contains such annotations.
+#' @slot metadata data frame with a column called 'metacell' and additional metacell annotations for McPeaks, or 'cell_id' and per-cell annotations for ScPeaks. The constructor can also include or the name of a delimited file which contains such annotations.
 #' @slot path original path from which the object was loaded (optional)
 #' @slot promoters are the peaks promoters (optional). When peaks are promoters the peak name would be the gene name instead of coordinates.
 #' @slot tad_based are the peaks named based on TADs.
@@ -23,19 +18,14 @@ setOldClass("PeakIntervals")
 ATACPeaks <- setClass(
     "ATACPeaks",
     slots = c(
-        id = "character",
-        description = "character",
         mat = "any_matrix",
         peaks = "PeakIntervals",
-        genome = "character",
-        metadata = "data.frame_or_null",
         ignore_peaks = "PeakIntervals",
         ignore_pmat = "dgCMatrix",
-        path = "character",
         promoters = "logical",
         tad_based = "logical"
     ),
-    contains = "VIRTUAL"
+    contains = c("ATAC", "VIRTUAL")
 )
 
 setMethod(
@@ -89,9 +79,9 @@ make_atac_object <- function(obj, mat, peaks, genome, id, description, path, met
     return(obj)
 }
 
-#' Validate a McATACPeaks or ScATACPeaks object
+#' Validate a McPeaks or ScPeaks object
 #'
-#' @param obj an McATACPeaks or ScATACPeaks object
+#' @param obj an McPeaks or ScPeaks object
 #'
 #' @noRd
 validate_atac_object <- function(obj) {
@@ -129,7 +119,7 @@ validate_atac_object_params <- function(mat, peaks, genome, promoters = FALSE) {
 
 
 
-#' McATACPeaks
+#' McPeaks
 #'
 #' An ATACPeaks object with data over metacells
 #'
@@ -140,9 +130,9 @@ validate_atac_object_params <- function(mat, peaks, genome, promoters = FALSE) {
 #' @slot rna_egc normalized gene expression per gene per metacell (optional). Can be created using \code{add_mc_rna}
 #'
 #' @rdname ATACPeaks
-#' @exportClass McATACPeaks
-McATACPeaks <- setClass(
-    "McATACPeaks",
+#' @exportClass McPeaks
+McPeaks <- setClass(
+    "McPeaks",
     slots = c(
         egc = "any_matrix",
         fp = "any_matrix",
@@ -154,7 +144,7 @@ McATACPeaks <- setClass(
 )
 
 
-#' Construct a new McATACPeaks object
+#' Construct a new McPeaks object
 #'
 #' @param mat a numeric matrix where rows are peaks and columns are metacells. Can be a sparse matrix.
 #' @param peaks misha intervals set. Can contain a field named 'peak_name' with a unique name per peak. Both the names and intervals should be unique (a peak cannot appear more than once).
@@ -167,7 +157,7 @@ McATACPeaks <- setClass(
 #' @param path path from which the object was loaded (optional)
 #' @param tad_based whether the peak names are TAD-based
 #'
-#' @description McATACPeaks is a shallow object holding ATAC data over metacells.
+#' @description McPeaks is a shallow object holding ATAC data over metacells.
 #' Minimally it should include a count matrix of peaks over metacells, and \code{PeakIntervals} which hold the coordinates
 #' of the peaks.
 #'
@@ -175,7 +165,7 @@ McATACPeaks <- setClass(
 #' @export
 setMethod(
     "initialize",
-    signature = "McATACPeaks",
+    signature = "McPeaks",
     definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, cell_to_metacell = NULL, mc_size_eps_q = 0.1, path = "", tad_based = TRUE) {
         .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based, rename = FALSE)
         validate_atac_object(.Object)
@@ -211,9 +201,9 @@ calc_mc_fp <- function(mcatac) {
 #' @noRd
 setMethod(
     "show",
-    signature = "McATACPeaks",
+    signature = "McPeaks",
     definition = function(object) {
-        print_atac_object(object, "McATACPeaks", "metacell", "metacell")
+        print_atac_object(object, "McPeaks", "metacell", "metacell")
     }
 )
 
@@ -235,7 +225,7 @@ print_atac_object <- function(object, object_type, column_type, md_column) {
     cli_ul(c("{.code @mat}: a numeric matrix where rows are peaks and columns are {column_type}s. Can be a sparse matrix."))
     cli_ul(c("{.code @peaks}: a misha intervals set with the peak definitions."))
     cli_ul(c("{.code @genome}: genome assembly of the peaks"))
-    if (object_type == "McATACPeaks") {
+    if (object_type == "McPeaks") {
         cli_ul(c("{.code @egc}: a numeric matrix which contains normalized metacell accessibility."))
         cli_ul(c("{.code @fp}: a matrix showing for each peak (row) the relative enrichment of umis in log2 scale."))
         if (has_rna(object)) {
@@ -251,19 +241,19 @@ print_atac_object <- function(object, object_type, column_type, md_column) {
 }
 
 
-#' ScATACPeaks
+#' ScPeaks
 #'
 #' An ATACPeaks object with data over cells
 #'
 #' @rdname ATACPeaks
-#' @exportClass ScATACPeaks
-ScATACPeaks <- setClass(
-    "ScATACPeaks",
+#' @exportClass ScPeaks
+ScPeaks <- setClass(
+    "ScPeaks",
     contains = "ATACPeaks"
 )
 
 
-#' Construct a new ScATACPeaks object
+#' Construct a new ScPeaks object
 #'
 #' @param id an identifier for the object, e.g. "pbmc".
 #' @param description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
@@ -274,7 +264,7 @@ ScATACPeaks <- setClass(
 #' @param path path from which the object was loaded (optional)
 #' @param tad_based wether the peak names are TAD-based
 #'
-#' @description ScATACPeaks is a shallow object holding ATAC data over cells.
+#' @description ScPeaks is a shallow object holding ATAC data over cells.
 #' Minimally it should include a count matrix of peaks over cells, and \code{PeakIntervals} which hold the coordinates
 #' of the peaks.
 #'
@@ -282,7 +272,7 @@ ScATACPeaks <- setClass(
 #' @export
 setMethod(
     "initialize",
-    signature = "ScATACPeaks",
+    signature = "ScPeaks",
     definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, path = "", tad_based = TRUE) {
         .Object <- make_atac_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based)
         validate_atac_object(.Object)
@@ -295,9 +285,9 @@ setMethod(
 #' @noRd
 setMethod(
     "show",
-    signature = "ScATACPeaks",
+    signature = "ScPeaks",
     definition = function(object) {
-        print_atac_object(object, "ScATACPeaks", "cell", "cell_id")
+        print_atac_object(object, "ScPeaks", "cell", "cell_id")
     }
 )
 
@@ -306,11 +296,11 @@ setMethod(
 #'
 #' Given a list of peaks to ignore, this will remove the given peaks from the {.code ignore_peaks} and {.code ignore_pmat} slots. Note that the matrix and peaks would be reordered.
 #'
-#' @param atac an ScATACPeaks or McATACPeaks object
+#' @param atac an ScPeaks or McPeaks object
 #' @param ig_peaks a PeakIntervals object, or vector of peak names to ignore
 #' @param reset rest the current ignore policy if exists. When set to \code{TRUE}, the current ignore policy will be removed, otherwise the new ignore policy will be appended to the current one.
 #'
-#' @return an ScATACPeaks or McATACPeaks object with the new ignore policy.
+#' @return an ScPeaks or McPeaks object with the new ignore policy.
 #' @examples
 #' \dontrun{
 #' max_peak_length <= 1000
@@ -357,7 +347,7 @@ atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
     atac@ignore_peaks <- semi_join(atac@peaks, ig_peaks, by = cn)
     atac@ignore_pmat <- atac@mat[atac@peaks$temp_intID %in% atac@ignore_peaks$temp_intID, ]
     atac@mat <- atac@mat[atac@peaks$temp_intID %in% good_peaks$temp_intID, ]
-    if (class(atac) == "McATACPeaks") {
+    if (class(atac) == "McPeaks") {
         atac@egc <- atac@egc[atac@peaks$temp_intID %in% good_peaks$temp_intID, ]
         atac@fp <- atac@fp[atac@peaks$temp_intID %in% good_peaks$temp_intID, ]
     }
@@ -384,7 +374,7 @@ atac_ignore_peaks <- function(atac, ig_peaks, reset = FALSE) {
 #'
 #' This function removes a given list of cells from the {.code mat} slot.
 #'
-#' @param atac an ScATACPeaks object
+#' @param atac an ScPeaks object
 #' @param ig_cells a vector of cell names (10X barcodes) to removes
 #'
 #' @return an scATAC object with the given cells removed.

@@ -14,7 +14,7 @@ gen_atac_peak_clust(
 )
 }
 \arguments{
-\item{atac_mc}{a McATACPeaks object}
+\item{atac_mc}{a McPeaks object}
 
 \item{k}{number of clusters; must be specified if \code{clustering_algoritm = 'kmeans'}}
 

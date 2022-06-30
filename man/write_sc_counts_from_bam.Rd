@@ -27,7 +27,7 @@ write_sc_counts_from_bam(
 
 \item{cell_names}{a vector with the cell names or an ATAC object}
 
-\item{genome}{genome name (e.g. hg19). Will be inferred from the ScATACPeaks object if provided}
+\item{genome}{genome name (e.g. hg19). Will be inferred from the ScPeaks object if provided}
 
 \item{bin_size}{Size of the genomic bins to use (in bp). Each chromsome will be chunked into bins with size which is
 smaller than this value. Default is 50Mb.}

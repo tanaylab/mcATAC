@@ -15,14 +15,11 @@
 ScCounts <- setClass(
     "ScCounts",
     slots = c(
-        id = "character",
-        description = "character",
         data = "list",
-        genome = "character",
         cell_names = "character",
-        genomic_bins = "data.frame",
-        path = "character"
-    )
+        genomic_bins = "data.frame"
+    ),
+    contains = "ATAC"
 )
 
 setMethod(
@@ -111,7 +108,7 @@ print_counts_object <- function(object, object_type, column_type) {
     cli_ul(c("{.code @genome}: genome assembly."))
 }
 
-#' Write a counts object to a file.
+#' Write a counts object to a file
 #'
 #' @param object a counts object (ScCounts or McCounts)
 #' @param out_dir the output directory

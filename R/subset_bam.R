@@ -70,7 +70,7 @@ generate_wigs_from_bams <- function(bam_folder_path,
 
 #' Utility function to write metacell names to files
 #'
-#' @param mcatac an McATACPeaks object (from which to get metacell assignments)
+#' @param mcatac an McPeaks object (from which to get metacell assignments)
 #' @param c2mc_path (optional) path to write out metacell assignments to
 #'
 write_metacell_cell_names <- function(mcatac, c2mc_path = NULL) {

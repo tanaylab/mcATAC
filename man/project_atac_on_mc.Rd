@@ -4,7 +4,7 @@
 \alias{project_atac_on_mc}
 \alias{project_atac_on_mc_from_metacell1}
 \alias{project_atac_on_mc_from_h5ad}
-\title{Given metacells (usually from RNA data), project ATAC counts to get a McATACPeaks object}
+\title{Given metacells (usually from RNA data), project ATAC counts to get a McPeaks object}
 \usage{
 project_atac_on_mc(
   atac,
@@ -37,14 +37,14 @@ project_atac_on_mc_from_h5ad(
 )
 }
 \arguments{
-\item{atac}{an ScATACPeaks object}
+\item{atac}{an ScPeaks object}
 
 \item{cell_to_metacell}{a data frame with a column named "cell_id" with cell id and another column named "metacell" with the metacell the cell is
 part of.}
 
 \item{metadata}{(optional) per-metacell metadata. A data frame with a column called 'metacell' and additional metacell annotations.}
 
-\item{min_int_frac}{(optional) minimal expected fraction of intersection of barcodes (cell names) in ScATACPeaks}
+\item{min_int_frac}{(optional) minimal expected fraction of intersection of barcodes (cell names) in ScPeaks}
 
 \item{mc_size_eps_q}{(optional) quantile of MC size (in UMIs) to scale the number of UMIs per metacell. \eqn{egc_ij} would then be
 the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quantile of metacell sizes.}
@@ -64,10 +64,10 @@ the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quan
 \item{h5ad_file}{name of an h5ad file which is the output of 'metacells' python package.}
 }
 \value{
-an McATACPeaks object
+an McPeaks object
 }
 \description{
-Given cell to metacell association, summarise atac counts to generate a McATACPeaks object.
+Given cell to metacell association, summarise atac counts to generate a McPeaks object.
 \code{project_atac_on_mc_from_metacell1} projects given a metacell1 'mc' object, while \code{project_atac_on_mc_from_h5ad}
 uses the output of the 'metacells' python package (metacell2).
 }

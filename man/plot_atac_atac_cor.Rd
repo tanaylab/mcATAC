@@ -7,7 +7,7 @@
 plot_atac_atac_cor(atac_mc, sp_f = TRUE)
 }
 \arguments{
-\item{atac_mc}{McATACPeaks object}
+\item{atac_mc}{McPeaks object}
 
 \item{sp_f}{whether to use Spearman correlation (default) or Pearson}
 }

@@ -1,7 +1,7 @@
 
-#' Add per-metacell metadata to an McATACPeaks object
+#' Add per-metacell metadata to an McPeaks object
 #'
-#' @param atac_mc an McATACPeaks object
+#' @param atac_mc an McPeaks object
 #' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
 #'
 #' @examples
@@ -53,11 +53,11 @@ get_cell_type_colors <- function(metadata) {
         deframe()
 }
 
-#' Does the McATACPeaks object contain per-metacell cell type annotation
+#' Does the McPeaks object contain per-metacell cell type annotation
 #'
-#' @param atac_mc an McATACPeaks object
+#' @param atac_mc an McPeaks object
 #'
-#' @return TRUE if the McATACPeaks object contains per-metacell cell type annotation, FALSE otherwise
+#' @return TRUE if the McPeaks object contains per-metacell cell type annotation, FALSE otherwise
 #'
 #' @examples
 #' \dontrun{
@@ -70,11 +70,11 @@ has_cell_type <- function(atac_mc) {
     return(!is.null(atac_mc@metadata) && !is.null(atac_mc@metadata$cell_type))
 }
 
-#' Does the McATACPeaks object contain cell type color annotation
+#' Does the McPeaks object contain cell type color annotation
 #'
-#' @param atac_mc an McATACPeaks object
+#' @param atac_mc an McPeaks object
 #'
-#' @return TRUE if the McATACPeaks object contains cell type color annotation, FALSE otherwise
+#' @return TRUE if the McPeaks object contains cell type color annotation, FALSE otherwise
 #'
 #' @examples
 #' \dontrun{

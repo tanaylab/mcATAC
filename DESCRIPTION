@@ -71,7 +71,9 @@ Depends:
     misha
 LazyData: true
 Collate: 
-    'McATACPeaks.R'
+    'ATAC.R'
+    'ATACPeaks.R'
+    'ATACTracks.R'
     'ScCounts.R'
     'McCounts.R'
     'PeakIntervals.R'

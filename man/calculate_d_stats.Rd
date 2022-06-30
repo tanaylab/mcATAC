@@ -14,7 +14,7 @@ calculate_d_stats(
 )
 }
 \arguments{
-\item{pssm_fg}{motif energies calculated for a certain set of motifs on a PeakIntervals/ScATACPeaks/McATACPeaks object}
+\item{pssm_fg}{motif energies calculated for a certain set of motifs on a PeakIntervals/ScPeaks/McPeaks object}
 
 \item{pssm_bg}{a background set of intervals (e.g. random genome, all ENCODE enhancers etc.) that include all/subset of the motifs (columns) in pssm_fg}
 
