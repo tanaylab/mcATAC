@@ -32,8 +32,16 @@ add_metadata <- function(obj, metadata, metadata_id_field) {
 
         metadata <- as_tibble(metadata)
 
+        if (methods::is(obj, "ATACPeaks")) {
+            cell_names <- olnames(obj@mat)
+        } else if (methods::is(obj, "ScCounts")) {
+            cell_names <- obj@cell_names
+        } else if (methods::is(obj, "McTracks")) {
+            cell_names <- obj@metacells
+        }
+
         # make sure that all cells/metacells exist within the matrix
-        missing_cells <- metadata[[metadata_id_field]] %!in% colnames(obj@mat)
+        missing_cells <- metadata[[metadata_id_field]] %!in% cell_names
         if (any(missing_cells)) {
             missing_cells <- paste(unique(metadata[[metadata_id_field]][missing_cells]), collapse = ", ")
             cli_abort("The following {metadata_id_field}s are missing from {.field mat} colnames: {.val {missing_cells}}")

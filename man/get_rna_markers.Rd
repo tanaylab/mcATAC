@@ -16,7 +16,7 @@ get_rna_markers(
 )
 }
 \arguments{
-\item{atac_mc}{a McPeaks object with RNA expression (using \code{add_mc_rna})}
+\item{atac_mc}{a McPeaks/McTracks object with RNA expression (using \code{add_mc_rna})}
 
 \item{n_genes}{maximal number of genes to return. Default: 100}
 

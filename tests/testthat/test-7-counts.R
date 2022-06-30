@@ -126,3 +126,12 @@ test_that("create_smoothed_track_from_dataframe works", {
         left_join(a)
     expect_equal(df1 %>% na.omit() %>% filter(v1 != v2) %>% nrow(), 0)
 })
+
+# A heavy test - uncomment to run
+# test_that("mcc_to_tracks works", {
+#     mct <- mcc_to_tracks(mc_counts, "mcatac_test", overwrite = TRUE, resolution = 20, window_size = 10)
+#     expect_equal(mc_counts@cell_names,mct@metacells)
+#     expect_true(all(gtrack.exists(mct@tracks)))
+#     expect_equal(mc_counts@genome, mct@genome)
+#     expect_equal(gsummary(mct@tracks[6])[[5]], mct@total_cov[6])
+# })

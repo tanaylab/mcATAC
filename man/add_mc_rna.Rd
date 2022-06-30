@@ -7,7 +7,7 @@
 add_mc_rna(atac_mc, mc_rna)
 }
 \arguments{
-\item{atac_mc}{an McPeaks object}
+\item{atac_mc}{an McPeaks/McTracks object}
 
 \item{mc_rna}{a \code{metacell1} 'mc' object or a \code{metacells} metacell UMI matrix (a matrix where each row is a gene and each column is a metacell)}
 }
