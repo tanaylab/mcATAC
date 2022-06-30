@@ -33,7 +33,7 @@ add_metadata <- function(obj, metadata, metadata_id_field) {
         metadata <- as_tibble(metadata)
 
         if (methods::is(obj, "ATACPeaks")) {
-            cell_names <- olnames(obj@mat)
+            cell_names <- colnames(obj@mat)
         } else if (methods::is(obj, "ScCounts")) {
             cell_names <- obj@cell_names
         } else if (methods::is(obj, "McTracks")) {
@@ -74,7 +74,7 @@ get_cell_type_colors <- function(metadata) {
 #'
 #' @export
 has_cell_type <- function(atac_mc) {
-    assert_atac_object(atac_mc)
+    assert_atac_object(atac_mc, class = "ATAC")
     return(!is.null(atac_mc@metadata) && !is.null(atac_mc@metadata$cell_type))
 }
 
@@ -91,6 +91,6 @@ has_cell_type <- function(atac_mc) {
 #'
 #' @export
 has_cell_type_colors <- function(atac_mc) {
-    assert_atac_object(atac_mc)
+    assert_atac_object(atac_mc, class = "ATAC")
     return(has_cell_type(atac_mc) && !is.null(atac_mc@metadata$color))
 }
