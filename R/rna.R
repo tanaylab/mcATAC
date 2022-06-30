@@ -79,7 +79,6 @@ has_rna <- function(atac_mc) {
 #'
 #' @export
 get_rna_egc <- function(atac_mc, genes = NULL, rm_zeros = TRUE, epsilon = 1e-5) {
-    validate_atac_peaks_object(atac_mc)
     if (!has_rna(atac_mc)) {
         cli_abort("{.val {atac_mc}} does not contain RNA.")
     }
