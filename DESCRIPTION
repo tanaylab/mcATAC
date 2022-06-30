@@ -73,6 +73,7 @@ LazyData: true
 Collate: 
     'ATAC.R'
     'ATACPeaks.R'
+    'ATACTracks-cache.R'
     'ATACTracks.R'
     'ScCounts.R'
     'McCounts.R'
