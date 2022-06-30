@@ -31,7 +31,7 @@ setMethod(
     "initialize",
     signature = "ATACTracks",
     definition = function(.Object, tracks, genome, id = NULL, description = NULL, path = "", marginal_track = NULL, resolution = NULL, window_size = resolution / 2) {
-        .Object <- make_atac_peaks_object(.Object, tracks, genome, id, description, path = path, marginal_track = marginal_track, resolution = resolution, window_size = window_size)
+        .Object <- make_atac_tracks_object(.Object, tracks, genome, id, description, path = path, marginal_track = marginal_track, resolution = resolution, window_size = window_size)
         return(.Object)
     }
 )
