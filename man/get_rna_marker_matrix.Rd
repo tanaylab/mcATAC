@@ -28,7 +28,7 @@ using the ellipsis \code{...}.}
 \item{...}{
   Arguments passed on to \code{\link[=get_rna_markers]{get_rna_markers}}
   \describe{
-    \item{\code{n_genes}}{maximal number of genes to return. Default: 1000}
+    \item{\code{n_genes}}{maximal number of genes to return. Default: 100}
     \item{\code{minimal_max_log_fraction}}{take only genes with at least one value
 (in log fraction units - normalized egc) above this threshold}
     \item{\code{minimal_relative_log_fraction}}{take only genes with at least one value with relative
