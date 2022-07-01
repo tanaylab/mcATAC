@@ -31,14 +31,14 @@ ATACPeaks <- setClass(
 setMethod(
     "initialize",
     signature = "ATACPeaks",
-    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, path = "", tad_based = TRUE, rename = TRUE) {
-        .Object <- make_atac_peaks_object(.Object, mat, peaks, genome, id, description, path = path, tad_based = tad_based, rename = rename)
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, path = "", tad_based = TRUE, rename = TRUE, order = NULL) {
+        .Object <- make_atac_peaks_object(.Object, mat, peaks, genome, id, description, path = path, tad_based = tad_based, rename = rename, order = order)
         validate_atac_peaks_object(.Object)
         return(.Object)
     }
 )
 
-make_atac_peaks_object <- function(obj, mat, peaks, genome, id, description, path, metadata, metadata_id_field, tad_based, rename = TRUE) {
+make_atac_peaks_object <- function(obj, mat, peaks, genome, id, description, path, metadata, metadata_id_field, tad_based, rename = TRUE, order = NULL) {
     obj <- make_atac_object(obj, genome, id, description, path)
 
     if (nrow(mat) != nrow(peaks)) {
@@ -56,12 +56,24 @@ make_atac_peaks_object <- function(obj, mat, peaks, genome, id, description, pat
     }
     rownames(mat) <- peaks$peak_name
 
+    if (is.null(order)) {
+        order <- 1:ncol(mat)
+    } else {
+        if (length(order) != ncol(mat)) {
+            cli_abort("Number of columns in the matrix is not equal to the length of the order vector.")
+        }
+        if (any(order < 1) || any(order > ncol(mat))) {
+            cli_abort("Order vector contains values outside the range of the matrix columns.")
+        }
+    }
+
     obj@mat <- mat
     obj@peaks <- peaks
     obj@ignore_peaks <- subset(peaks, subset = rep(FALSE, nrow(peaks)))
     obj@ignore_pmat <- methods::as(matrix(0, nrow = 0, ncol = ncol(obj@mat)), "dgCMatrix")
     obj@promoters <- FALSE
     obj@tad_based <- tad_based
+    obj@order <- order
     validate_atac_peaks_object(obj)
     return(obj)
 }
@@ -144,6 +156,7 @@ McPeaks <- setClass(
 #' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
 #' @param path path from which the object was loaded (optional)
 #' @param tad_based whether the peak names are TAD-based
+#' @param order a vector with the order of the metacells. If not provided, the metacells are ordered by their order in the matrix.
 #'
 #' @description McPeaks is a shallow object holding ATAC data over metacells.
 #' Minimally it should include a count matrix of peaks over metacells, and \code{PeakIntervals} which hold the coordinates
@@ -154,8 +167,8 @@ McPeaks <- setClass(
 setMethod(
     "initialize",
     signature = "McPeaks",
-    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, cell_to_metacell = NULL, mc_size_eps_q = 0.1, path = "", tad_based = TRUE) {
-        .Object <- make_atac_peaks_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based, rename = FALSE)
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, cell_to_metacell = NULL, mc_size_eps_q = 0.1, path = "", tad_based = TRUE, order = NULL) {
+        .Object <- make_atac_peaks_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based, rename = FALSE, order = order)
         validate_atac_peaks_object(.Object)
         .Object <- add_metadata(.Object, metadata, "metacell")
         .Object@egc <- calc_mc_egc(.Object, mc_size_eps_q)
@@ -252,6 +265,7 @@ ScPeaks <- setClass(
 #' @param metadata data frame with a column called 'cell_id' and additional per-cell annotations, or the name of a delimited file which contains such annotations.
 #' @param path path from which the object was loaded (optional)
 #' @param tad_based wether the peak names are TAD-based
+#' @param order order of the cells. If not provided, the order of the cells in the matrix is used.
 #'
 #' @description ScPeaks is a shallow object holding ATAC data over cells.
 #' Minimally it should include a count matrix of peaks over cells, and \code{PeakIntervals} which hold the coordinates
@@ -262,8 +276,8 @@ ScPeaks <- setClass(
 setMethod(
     "initialize",
     signature = "ScPeaks",
-    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, path = "", tad_based = TRUE) {
-        .Object <- make_atac_peaks_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based)
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, path = "", tad_based = TRUE, order = NULL) {
+        .Object <- make_atac_peaks_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based, order = order)
         validate_atac_peaks_object(.Object)
         .Object <- add_metadata(.Object, metadata, "cell_id")
         return(.Object)

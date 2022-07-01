@@ -13,7 +13,8 @@
   description = NULL,
   metadata = NULL,
   path = "",
-  tad_based = TRUE
+  tad_based = TRUE,
+  order = NULL
 )
 }
 \arguments{
@@ -32,6 +33,8 @@
 \item{path}{path from which the object was loaded (optional)}
 
 \item{tad_based}{wether the peak names are TAD-based}
+
+\item{order}{order of the cells. If not provided, the order of the cells in the matrix is used.}
 }
 \description{
 ScPeaks is a shallow object holding ATAC data over cells.

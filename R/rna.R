@@ -305,6 +305,21 @@ order_marker_matrix <- function(mat, metacell_types = NULL) {
     return(mat)
 }
 
+#' Order metacells by RNA marker clustering
+#'
+#' @description order the metacells using the RNA marker clustering. See \code{get_rna_marker_matrix} for more information.
+#'
+#' @inheritParams get_rna_marker_matrix
+#' @export
+mc_order_by_rna <- function(atac_mc, markers = NULL, force_cell_type = TRUE, rm_zeros = TRUE, epsilon = 1e-5, ...) {
+    markers_mat <- get_rna_marker_matrix(atac_mc, markers = markers, force_cell_type = force_cell_type, rm_zeros = rm_zeros, epsilon = epsilon, ...)
+    ord <- order(match(atac_mc@metacells, colnames(markers_mat)))
+    assertthat::assert_that(all(atac_mc@metacells[ord] == colnames(markers_mat)))
+    atac_mc <- mc_order(atac_mc, ord)
+    cli_alert_success("Reordered metacells based on markers matrix.")
+    return(atac_mc)
+}
+
 #' Match every gene with the k ATAC peaks most correlated to it
 #'
 #' @param atac_mc a McPeaks/McTracks object with RNA expression (using \code{add_mc_rna})
