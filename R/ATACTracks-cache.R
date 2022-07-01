@@ -9,16 +9,37 @@
 #'
 #' @noRd
 intervs_key <- function(mct, intervals, downsample = FALSE, downsample_n = NULL) {
-    key_int <- paste(intervals$chrom, intervals$start, intervals$end, sep = "_")
-    key_tracks <- paste(mct@tracks, sep = "_")
-    key <- paste0("tracks:", key_tracks, ";intervs:", key_int)
-    key <- digest::digest(key, algo = "md5")
-    if (downsample) {
-        if (is.null(downsample_n)) {
-            cli_abort("{.field downsample_n} must be provided in order to cache a downsampled matrix")
-        }
-        key <- paste0("downsample__{downsample_n}:", key)
+    if (downsample && is.null(downsample_n)) {
+        cli_abort("{.field downsample_n} must be provided in order to cache a downsampled matrix")
     }
+
+    params <- list(
+        tracks = mct@tracks,
+        intervals = intervals,
+        downsample = downsample,
+        downsample_n = downsample_n
+    )
+
+    if (!downsample) {
+        params[["downsample_n"]] <- NULL
+        params[["downsample"]] <- NULL
+    }
+
+    return(cache_key(params))
+}
+
+#' Generate mcATAC cache key
+#'
+#' @param params a named list of parameters to be used in the key. Values should be coercible to strings.
+#' Elements with NULL values will be ignored.
+#'
+#' @return a key for mcATAC cache
+#'
+#' @noRd
+cache_key <- function(params) {
+    params <- params %>% purrr::discard(is.null)
+    keys <- purrr::imap_chr(params, function(val, key) paste0(key, ":", digest::digest(paste(as.character(val), collapse = "_"), algo = "md5")))
+    key <- paste(keys, collapse = ";")
     return(key)
 }
 
@@ -88,7 +109,7 @@ mct_cache_region <- function(mct, intervals, downsample = TRUE, downsample_n = N
 mct_get_mat <- function(mct, intervals, downsample = FALSE, downsample_n = NULL, force = FALSE, seed = NULL) {
     if (downsample && is.null(downsample_n)) {
         downsample_n <- round(quantile(mct@total_cov, 0.05))
-        cli_alert_info("Using 5% of the total coverage as the downsample threshold: {.value {downsample_n}}")
+        cli_alert_info("Using 5% of the total coverage as the downsample threshold: {.val {downsample_n}}")
     }
 
     if (force || !mct_has_region(mct, intervals, downsample, downsample_n)) {
