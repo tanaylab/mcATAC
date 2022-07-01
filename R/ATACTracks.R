@@ -30,13 +30,13 @@ ATACTracks <- setClass(
 setMethod(
     "initialize",
     signature = "ATACTracks",
-    definition = function(.Object, tracks, genome, id = NULL, description = NULL, path = "", marginal_track = NULL, resolution = NULL, window_size = resolution / 2) {
-        .Object <- make_atac_tracks_object(.Object, tracks, genome, id, description, path = path, marginal_track = marginal_track, resolution = resolution, window_size = window_size)
+    definition = function(.Object, tracks, genome, id = NULL, description = NULL, path = "", marginal_track = NULL, resolution = NULL, window_size = resolution / 2, order = NULL) {
+        .Object <- make_atac_tracks_object(.Object, tracks, genome, id, description, path = path, marginal_track = marginal_track, resolution = resolution, window_size = window_size, order = order)
         return(.Object)
     }
 )
 
-make_atac_tracks_object <- function(obj, tracks, genome, id, description, path = "", total_cov = NULL, marginal_track = NULL, resolution = NULL, window_size = resolution / 2) {
+make_atac_tracks_object <- function(obj, tracks, genome, id, description, path = "", total_cov = NULL, marginal_track = NULL, resolution = NULL, window_size = resolution / 2, order = NULL) {
     obj <- make_atac_object(obj, genome, id, description, path)
 
     walk(tracks, ~ {
@@ -57,11 +57,23 @@ make_atac_tracks_object <- function(obj, tracks, genome, id, description, path =
         window_size <- resolution
     }
 
+    if (is.null(order)) {
+        order <- 1:length(tracks)
+    } else {
+        if (length(order) != length(tracks)) {
+            cli_abort("Number of columns in the matrix is not equal to the number of tracks.")
+        }
+        if (any(order < 1) || any(order > length(tracks))) {
+            cli_abort("Order vector contains values outside the range of the tracks.")
+        }
+    }
+
     obj@tracks <- tracks
     obj@total_cov <- total_cov
     obj@marginal_track <- marginal_track
     obj@resolution <- resolution
     obj@window_size <- window_size
+    obj@order <- order
     return(obj)
 }
 
@@ -80,7 +92,7 @@ McTracks <- setClass(
 setMethod(
     "initialize",
     signature = "McTracks",
-    definition = function(.Object, tracks, genome, metacells = NULL, id = NULL, description = NULL, path = "", marginal_track = NULL, resolution = NULL, window_size = resolution / 2) {
+    definition = function(.Object, tracks, genome, metacells = NULL, id = NULL, description = NULL, path = "", marginal_track = NULL, resolution = NULL, window_size = resolution / 2, order = NULL) {
         if (is.null(metacells)) {
             mc_nums <- stringr::str_extract_all(string = tracks, pattern = "mc\\d*$") %>%
                 unlist() %>%
@@ -93,7 +105,7 @@ setMethod(
                 cli_abort("Number of tracks and metacells must be equal")
             }
         }
-        .Object <- make_atac_tracks_object(.Object, tracks, genome, id, description, path = path, marginal_track = marginal_track, resolution = resolution, window_size = window_size)
+        .Object <- make_atac_tracks_object(.Object, tracks, genome, id, description, path = path, marginal_track = marginal_track, resolution = resolution, window_size = window_size, order = order)
         .Object@metacells <- as.character(metacells)
 
         return(.Object)
@@ -116,6 +128,7 @@ setMethod(
 #' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
 #' @param resolution the resolution of the tracks.
 #' @param window_size The size of the window used to smooth the counts in each track. If no smoothing was done - this should be equal to resolution / 2.
+#' @param order the order of the tracks in the object. If not provided, the tracks are ordered according to the metacell number.
 #'
 #' @return a McTracks object.
 #'
@@ -125,7 +138,7 @@ setMethod(
 #' }
 #'
 #' @export
-mct_create <- function(genome, tracks = NULL, track_prefix = NULL, metacells = NULL, marginal_track = NULL, id = NULL, description = NULL, path = NULL, metadata = NULL, resolution = NULL, window_size = resolution / 2) {
+mct_create <- function(genome, tracks = NULL, track_prefix = NULL, metacells = NULL, marginal_track = NULL, id = NULL, description = NULL, path = NULL, metadata = NULL, resolution = NULL, window_size = resolution / 2, order = NULL) {
     if (is.null(tracks)) {
         if (is.null(track_prefix)) {
             cli_abort("Either {.field tracks} or {.field track_prefix} must be provided")
@@ -142,7 +155,7 @@ mct_create <- function(genome, tracks = NULL, track_prefix = NULL, metacells = N
 
     path <- path %||% ""
 
-    res <- new("McTracks", tracks = tracks, genome = genome, metacells = metacells, id = id, description = description, path = path, marginal_track = marginal_track, resolution = resolution, window_size = window_size)
+    res <- new("McTracks", tracks = tracks, genome = genome, metacells = metacells, id = id, description = description, path = path, marginal_track = marginal_track, resolution = resolution, window_size = window_size, order = order)
 
     cli_alert_success("Created a new McTracks object with {.val {length(res@metacells)}} metacells.")
     return(res)

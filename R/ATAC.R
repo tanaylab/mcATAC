@@ -18,6 +18,7 @@ setOldClass("PeakIntervals")
 #' @slot metadata data frame with a column called 'metacell' and additional metacell annotations for McATAC, or 'cell_id' and per-cell annotations for ScATAC. The constructor can also include or the name of a delimited file which contains such annotations.
 #' @slot path original path from which the object was loaded (optional)
 #' @slot rna_egc normalized gene expression per gene per metacell (optional). Can be created using \code{add_mc_rna}
+#' @slot order of the cells/metacells in the data (optional).
 #'
 #' @exportClass ATAC
 ATAC <- setClass(
@@ -28,7 +29,8 @@ ATAC <- setClass(
         genome = "character",
         metadata = "data.frame_or_null",
         path = "character",
-        rna_egc = "any_matrix"
+        rna_egc = "any_matrix",
+        order = "numeric"
     ),
     contains = "VIRTUAL"
 )
@@ -36,13 +38,13 @@ ATAC <- setClass(
 setMethod(
     "initialize",
     signature = "ATAC",
-    definition = function(.Object, genome, id = NULL, description = NULL, path = "") {
-        .Object <- make_atac_object(.Object, genome, id, description, path = path)
+    definition = function(.Object, genome, id = NULL, description = NULL, path = "", order = numeric(0)) {
+        .Object <- make_atac_object(.Object, genome, id, description, path = path, order = numeric(0))
         return(.Object)
     }
 )
 
-make_atac_object <- function(obj, genome, id, description, path = "") {
+make_atac_object <- function(obj, genome, id, description, path = "", order = numeric(0)) {
     gset_genome(genome)
 
     if (is.null(id)) {
@@ -59,5 +61,28 @@ make_atac_object <- function(obj, genome, id, description, path = "") {
     obj@description <- description
     obj@genome <- genome
     obj@path <- path
+    obj@order <- order
+    return(obj)
+}
+
+#' Order the metacells in an MC object
+#'
+#' @param obj an McPeaks or McTracks object
+#' @param order a vector of integers with the order of the metacells.
+#'
+#' @examples
+#' \dontrun{
+#' atac_mc <- mc_order(atac_mc, rev(1:length(atac_mc@metacells)))
+#' }
+#'
+#' @export
+mc_order <- function(obj, order) {
+    if (length(order) != length(obj@metacells)) {
+        cli_abort("Number of metacells is not equal to the length of the order vector.")
+    }
+    if (any(order < 1) || any(order > length(obj@metacells))) {
+        cli_abort("Order vector contains values outside the range of the number of metacells.")
+    }
+    obj@order <- order
     return(obj)
 }

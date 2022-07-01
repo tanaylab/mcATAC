@@ -15,7 +15,8 @@ mct_create(
   path = NULL,
   metadata = NULL,
   resolution = NULL,
-  window_size = resolution/2
+  window_size = resolution/2,
+  order = NULL
 )
 }
 \arguments{
@@ -41,6 +42,8 @@ a track named "{track_prefix}.marginal" exists, it will be used as the marginal 
 \item{resolution}{the resolution of the tracks.}
 
 \item{window_size}{The size of the window used to smooth the counts in each track. If no smoothing was done - this should be equal to resolution / 2.}
+
+\item{order}{the order of the tracks in the object. If not provided, the tracks are ordered according to the metacell number.}
 }
 \value{
 a McTracks object.
