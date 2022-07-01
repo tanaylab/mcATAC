@@ -13,6 +13,8 @@ intervs_key <- function(mct, intervals, downsample = FALSE, downsample_n = NULL)
         cli_abort("{.field downsample_n} must be provided in order to cache a downsampled matrix")
     }
 
+    intervals <- intervals %>% mutate(chrom = as.character(chrom))
+
     params <- list(
         tracks = mct@tracks,
         intervals = intervals,
@@ -20,25 +22,41 @@ intervs_key <- function(mct, intervals, downsample = FALSE, downsample_n = NULL)
         downsample_n = downsample_n
     )
 
+    hash <- c(TRUE, FALSE, FALSE, FALSE)
+
     if (!downsample) {
         params[["downsample_n"]] <- NULL
         params[["downsample"]] <- NULL
+        hash <- hash[1:2]
     }
 
-    return(cache_key(params))
+    return(paste0("region;", cache_key(params, hash)))
 }
 
 #' Generate mcATAC cache key
 #'
 #' @param params a named list of parameters to be used in the key. Values should be coercible to strings.
 #' Elements with NULL values will be ignored.
+#' @param hash a logical vector the length of \code{params} without NULL elements indicating which elements should be hashed (optional).
 #'
 #' @return a key for mcATAC cache
 #'
 #' @noRd
-cache_key <- function(params) {
+cache_key <- function(params, hash = NULL) {
     params <- params %>% purrr::discard(is.null)
-    keys <- purrr::imap_chr(params, function(val, key) paste0(key, ":", digest::digest(paste(as.character(val), collapse = "_"), algo = "md5")))
+    if (is.null(hash)) {
+        hash <- rep(TRUE, length(params))
+    }
+    keys <- purrr::pmap_chr(
+        list(params, names(params), hash), function(val, name, do_hash) {
+            key <- paste(as.character(val), collapse = "_")
+            if (do_hash) {
+                key <- digest::digest(key, algo = "md5")
+            }
+            key <- paste0(name, ":", key)
+        }
+    )
+
     key <- paste(keys, collapse = ";")
     return(key)
 }
@@ -61,6 +79,65 @@ mct_cache_mat <- function(mct, mat, intervals, downsample = FALSE, downsample_n 
 #' @export
 clean_cache <- function() {
     rm(list = ls(envir = .mcatac_cache__), envir = .mcatac_cache__)
+}
+
+#' List the ATAC track matrix cache
+#'
+#' @return a vector with all the cache keys.
+#'
+#' @noRd
+ls_cache <- function(...) {
+    ls(envir = .mcatac_cache__, ...)
+}
+
+#' List the cached regions of an McTracks object
+#'
+#' @param mct a McTracks object
+#'
+#' @return an intervals set with additional "downsample" and "downsample_n" fields, representing the intervals matrices that are currently cached.
+#'
+#' @examples
+#' \dontrun{
+#' mct_ls_cached_regions(mct)
+#' }
+#'
+#' @export
+mct_ls_cached_regions <- function(mct) {
+    tracks_hash <- paste(as.character(mct@tracks), collapse = "_") %>% digest::digest(algo = "md5")
+    prefix <- glue("^region;tracks:{tracks_hash}")
+    cache_keys <- ls_cache(pattern = prefix)
+    cache <- gsub(prefix, "", cache_keys)
+    cache <- gsub("^;", "", cache)
+
+    if (length(cache) == 0) {
+        return(data.frame(chrom = character(0), start = numeric(0), end = numeric(0), downsample = logical(0), downsample_n = numeric(0)))
+    }
+
+    # This ugly code parses the cache key to extract the intervals
+    all_intervals <- stringr::str_split(cache, pattern = ";") %>%
+        map(~ map(stringr::str_split(.x, pattern = ":"), function(y) {
+            l <- list()
+            l[[y[1]]] <- y[2]
+            l
+        })) %>%
+        map(as.data.frame) %>%
+        purrr::map_dfr(~.x) %>%
+        tidyr::separate(intervals, c("chrom", "start", "end"), sep = "_") %>%
+        mutate(start = as.numeric(start), end = as.numeric(end))
+
+
+    if (!has_name(all_intervals, "downsample")) {
+        all_intervals <- all_intervals %>% mutate(downsample = FALSE)
+    }
+    if (!has_name(all_intervals, "downsample_n")) {
+        all_intervals <- all_intervals %>% mutate(downsample_n = NA)
+    }
+
+    all_intervals <- all_intervals %>%
+        mutate(downsample = as.logical(downsample), downsample_n = as.numeric(downsample_n)) %>%
+        tidyr::replace_na(replace = list(downsample = FALSE))
+
+    return(all_intervals)
 }
 
 mct_cache_region <- function(mct, intervals, downsample = TRUE, downsample_n = NULL, force = FALSE, seed = NULL) {
