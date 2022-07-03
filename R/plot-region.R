@@ -45,7 +45,7 @@ mct_plot_region <- function(mct, intervals, downsample = TRUE, downsample_n = NU
 #' @param colors color pallette for the ATAC signal
 #' @param intervals the plotted intervals (optional)
 #'
-#'
+#' @export
 plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold", "gold"), intervals = NULL) {
     mat_smooth <- apply(mat, 2, zoo::rollsum, 20, fill = "extend")
 
