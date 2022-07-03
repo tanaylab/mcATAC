@@ -139,6 +139,7 @@ setMethod(
 #'
 #' @export
 mct_create <- function(genome, tracks = NULL, track_prefix = NULL, metacells = NULL, marginal_track = NULL, id = NULL, description = NULL, path = NULL, metadata = NULL, resolution = NULL, window_size = resolution / 2, order = NULL) {
+    gset_genome(genome)
     if (is.null(tracks)) {
         if (is.null(track_prefix)) {
             cli_abort("Either {.field tracks} or {.field track_prefix} must be provided")
