@@ -1,5 +1,5 @@
 
-#' Plot a genomic region region
+#' Plot a genomic region
 #'
 #' @param mct an McTracks object.
 #' @param intervals an intervals set with the genomic region to plot (a data frame with a single line). Note that if the start or end coordinates are not divisible by the resolution, the region will be extended to the next resolution interval.
@@ -38,7 +38,7 @@ mct_plot_region <- function(mct, intervals, downsample = TRUE, downsample_n = NU
     plot_region_mat(mat, mc_colors, colors = colors, intervals = intervals)
 }
 
-#' Plot a region of the metacells given a matrix
+#' Plot a genomic region given a matrix
 #'
 #' @param mat a matrix where rows are coordinates and columns are metacells
 #' @param mc_colors a vector of colors for the metacells (optional)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot-region.R
 \name{mct_plot_region}
 \alias{mct_plot_region}
-\title{Plot a genomic region region}
+\title{Plot a genomic region}
 \usage{
 mct_plot_region(
   mct,
@@ -30,7 +30,7 @@ mct_plot_region(
 None. The plot is displayed in a new device.
 }
 \description{
-Plot a genomic region region
+Plot a genomic region
 }
 \examples{
 \dontrun{
