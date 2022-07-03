@@ -91,6 +91,7 @@ Collate:
     'motifs.R'
     'peak_calling.R'
     'plot-markers.R'
+    'plot-region.R'
     'plot.R'
     'project_on_mc.R'
     'promoters.R'
