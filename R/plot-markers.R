@@ -72,7 +72,8 @@ plot_atac_rna_markers <- function(atac_mc, n_genes = 100, force_cell_type = TRUE
     }
 
     if (has_cell_type_colors(atac_mc)) {
-        cell_type_colors <- atac_mc@metadata %>% distinct(cell_type, color)
+        cell_type_colors <- atac_mc@metadata %>% distinct(cell_type, color) %>% 
+                                relocate(cell_type, .before = color)
     } else {
         cell_type_colors <- NULL
     }
