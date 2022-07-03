@@ -16,16 +16,16 @@ mct_get_mat(
 \arguments{
 \item{mct}{a McTrack object}
 
+\item{intervals}{an intervals set. Note that if the start or end coordinates are not divisible by the resolution, the region will be extended to the next resolution interval.}
+
 \item{downsample}{return a downsampled matrix. See description.}
 
-\item{downsample_n}{total coverage goal. See description. Default: lower 5\% percentile of the total coverage)}
+\item{downsample_n}{total coverage goal. See description. Default: lower 5th percentile of the total coverage)}
 
 \item{force}{force the computation of the matrix. If FALSE, the matrix is
 retrieved from the cache if it exists.}
 
 \item{seed}{random seed for the downsampling.}
-
-\item{intervlas}{an intervals set}
 }
 \value{
 a matrix where rows are genomic coordinates in the resolution
