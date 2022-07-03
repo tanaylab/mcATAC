@@ -25,7 +25,7 @@ add_mc_rna <- function(atac_mc, mc_rna) {
 
     rna_mc_not_in_atac <- colnames(egc)[colnames(egc) %!in% atac_mc@metacells]
     if (length(rna_mc_not_in_atac) > 0) {
-        cli_warn("{.field mc_rna} contains {.field {length(rna_mc_not_in_atac)}} metacells not present in the McPeaks object: {.val {rna_mc_not_in_atac}}")
+        cli_warn("{.field mc_rna} contains {.field {length(rna_mc_not_in_atac)}} metacells not present in the object: {.val {rna_mc_not_in_atac}}")
     }
 
     atac_mc_not_in_rna <- atac_mc@metacells[atac_mc@metacells %!in% colnames(egc)]

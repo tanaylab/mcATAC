@@ -178,7 +178,7 @@ mct_cache_region <- function(mct, intervals) {
 #'
 #'
 #' @param mct a McTrack object
-#' @param intervals an intervals set. Note that if the start or end coordinates are not divisible by the resolution, the region will be extended to the next resolution interval.
+#' @param intervals an intervals set with a single interval. Note that if the start or end coordinates are not divisible by the resolution, the region will be extended to the next resolution interval.
 #' @param downsample return a downsampled matrix. See description.
 #' @param downsample_n total coverage goal. See description. Default: lower 5th percentile of the total coverage)
 #' @param force force the computation of the matrix. If FALSE, the matrix is
