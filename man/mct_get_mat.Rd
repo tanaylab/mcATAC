@@ -16,7 +16,7 @@ mct_get_mat(
 \arguments{
 \item{mct}{a McTrack object}
 
-\item{intervals}{an intervals set. Note that if the start or end coordinates are not divisible by the resolution, the region will be extended to the next resolution interval.}
+\item{intervals}{an intervals set with a single interval. Note that if the start or end coordinates are not divisible by the resolution, the region will be extended to the next resolution interval.}
 
 \item{downsample}{return a downsampled matrix. See description.}
 
