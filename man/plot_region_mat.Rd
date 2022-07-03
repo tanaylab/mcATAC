@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot-region.R
 \name{plot_region_mat}
 \alias{plot_region_mat}
-\title{Plot a region of the metacells given a matrix}
+\title{Plot a genomic region given a matrix}
 \usage{
 plot_region_mat(
   mat,
@@ -21,5 +21,5 @@ plot_region_mat(
 \item{intervals}{the plotted intervals (optional)}
 }
 \description{
-Plot a region of the metacells given a matrix
+Plot a genomic region given a matrix
 }
