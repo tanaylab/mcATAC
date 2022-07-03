@@ -13,7 +13,9 @@ intervs_key <- function(mct, intervals, downsample = FALSE, downsample_n = NULL)
         cli_abort("{.field downsample_n} must be provided in order to cache a downsampled matrix")
     }
 
-    intervals <- intervals %>% mutate(chrom = as.character(chrom))
+    intervals <- intervals %>%
+        mutate(chrom = as.character(chrom), start = as.numeric(start), end = as.numeric(end)) %>%
+        select(chrom, start, end)
 
     params <- list(
         tracks = mct@tracks,
@@ -22,7 +24,12 @@ intervs_key <- function(mct, intervals, downsample = FALSE, downsample_n = NULL)
         downsample_n = downsample_n
     )
 
-    hash <- c(TRUE, FALSE, FALSE, FALSE)
+    hash <- c(
+        tracks = TRUE,
+        intervals = FALSE,
+        downsample = FALSE,
+        downsample_n = FALSE
+    )
 
     if (!downsample) {
         params[["downsample_n"]] <- NULL
@@ -35,9 +42,12 @@ intervs_key <- function(mct, intervals, downsample = FALSE, downsample_n = NULL)
 
 #' Generate mcATAC cache key
 #'
+#' @description The generated key is of the form: "{name}:{value};" for all elements of the list.
+#'
 #' @param params a named list of parameters to be used in the key. Values should be coercible to strings.
 #' Elements with NULL values will be ignored.
-#' @param hash a logical vector the length of \code{params} without NULL elements indicating which elements should be hashed (optional).
+#' @param hash a logical vector the length of \code{params} where names are the parameter names and values indicate if the element should be hashed prior to
+#' insertion to the key.
 #'
 #' @return a key for mcATAC cache
 #'
@@ -48,9 +58,9 @@ cache_key <- function(params, hash = NULL) {
         hash <- rep(TRUE, length(params))
     }
     keys <- purrr::pmap_chr(
-        list(params, names(params), hash), function(val, name, do_hash) {
+        list(params, names(params)), function(val, name) {
             key <- paste(as.character(val), collapse = "_")
-            if (do_hash) {
+            if (hash[name]) {
                 key <- digest::digest(key, algo = "md5")
             }
             key <- paste0(name, ":", key)
@@ -74,10 +84,10 @@ mct_cache_mat <- function(mct, mat, intervals, downsample = FALSE, downsample_n 
 #' @return None.
 #'
 #' @examples
-#' clean_cache()
+#' clear_cache()
 #'
 #' @export
-clean_cache <- function() {
+clear_cache <- function() {
     rm(list = ls(envir = .mcatac_cache__), envir = .mcatac_cache__)
 }
 
@@ -140,27 +150,23 @@ mct_ls_cached_regions <- function(mct) {
     return(all_intervals)
 }
 
-mct_cache_region <- function(mct, intervals, downsample = TRUE, downsample_n = NULL, force = FALSE, seed = NULL) {
-    if (force || !mct_has_region(mct, intervals, FALSE)) {
-        cli_alert("Extracting region")
-        mat <- gextract(mct@tracks, intervals, colnames = mct@metacells, iterator = mct@resolution) %>%
-            misha.ext::intervs_to_mat(remove_intervalID = TRUE)
-        mat[is.na(mat)] <- 0
-        mct_cache_mat(mct, mat, intervals, FALSE)
-    }
+mct_cache_region_ds <- function(mct, intervals, mat, downsample_n, seed) {
+    ds_mat <- downsamp_region(mat, mct@total_cov, downsample_n, seed = seed)
 
-    if (downsample) {
-        if (force || !mct_has_region(mct, intervals, downsample = TRUE, downsample_n = downsample_n)) {
-            mat <- .mcatac_cache__[[intervs_key(mct, intervals, FALSE)]]
+    removed_metacells <- setdiff(colnames(mat), colnames(ds_mat))
+    cli_alert_warning("{.value {length(removed_metacells)}} metacells were removed from the downsampled matrix")
 
-            ds_mat <- downsamp_region(mat, mct@total_cov, downsample_n, seed = seed)
+    mct_cache_mat(mct, ds_mat, intervals, TRUE, downsample_n)
+}
 
-            removed_metacells <- setdiff(colnames(mat), colnames(ds_mat))
-            cli_alert_warning("{.value {length(removed_metacells)}} metacells were removed from the downsampled matrix")
-
-            mct_cache_mat(mct, ds_mat, intervals, TRUE, downsample_n)
-        }
-    }
+mct_cache_region <- function(mct, intervals) {
+    intervals <- intervals[1, ]
+    cli_alert("Extracting region {.val {intervals$chrom}}:{.val {intervals$start}}-{.val {intervals$end}}")
+    mat <- gextract(mct@tracks, intervals, colnames = mct@metacells, iterator = mct@resolution) %>%
+        misha.ext::intervs_to_mat(remove_intervalID = TRUE)
+    mat[is.na(mat)] <- 0
+    mct_cache_mat(mct, mat, intervals, FALSE)
+    invisible(mat)
 }
 
 #' Get an ATAC matrix from a McTracks object
@@ -172,9 +178,9 @@ mct_cache_region <- function(mct, intervals, downsample = TRUE, downsample_n = N
 #'
 #'
 #' @param mct a McTrack object
-#' @param intervlas an intervals set
+#' @param intervals an intervals set. Note that if the start or end coordinates are not divisible by the resolution, the region will be extended to the next resolution interval.
 #' @param downsample return a downsampled matrix. See description.
-#' @param downsample_n total coverage goal. See description. Default: lower 5% percentile of the total coverage)
+#' @param downsample_n total coverage goal. See description. Default: lower 5th percentile of the total coverage)
 #' @param force force the computation of the matrix. If FALSE, the matrix is
 #' retrieved from the cache if it exists.
 #' @param seed random seed for the downsampling.
@@ -186,16 +192,51 @@ mct_cache_region <- function(mct, intervals, downsample = TRUE, downsample_n = N
 mct_get_mat <- function(mct, intervals, downsample = FALSE, downsample_n = NULL, force = FALSE, seed = NULL) {
     if (downsample && is.null(downsample_n)) {
         downsample_n <- round(quantile(mct@total_cov, 0.05))
-        cli_alert_info("Using 5% of the total coverage as the downsample threshold: {.val {downsample_n}}")
+        cli_alert_info("Using 5th percentile of the total coverage as the downsample threshold: {.val {downsample_n}}")
     }
 
-    if (force || !mct_has_region(mct, intervals, downsample, downsample_n)) {
-        mct_cache_region(mct, intervals, downsample, downsample_n, seed = seed)
+    intervals <- intervals %>%
+        mutate(start = floor(start / mct@resolution) * mct@resolution, end = ceiling(end / mct@resolution) * mct@resolution) %>%
+        gintervals.force_range()
+
+    if (!force) {
+        # if intervals are already cached as a full region - return it
+        if (mct_has_region(mct, intervals, downsample = downsample, downsample_n = downsample_n)) {
+            mat <- .mcatac_cache__[[intervs_key(mct, intervals, downsample = downsample, downsample_n = downsample_n)]]
+            return(mat)
+        }
+
+        # check if intervals are within a cached region
+        cached_regs <- mct_ls_cached_regions(mct)
+        if (downsample) {
+            cached_regs <- cached_regs %>% filter(downsample, downsample_n == !!downsample_n)
+        }
+        nei_regs <- intervals %>%
+            gintervals.neighbors1(cached_regs) %>%
+            filter(dist == 0) %>%
+            filter(start >= cached_regs$start, end <= cached_regs$end)
+
+        # If intervals are within a region - return the sub-matrix
+        if (nrow(nei_regs) > 0) {
+            region <- nei_regs %>%
+                slice(1) %>%
+                select(chrom = chrom1, start = start1, end = end1, downsample = downsample, downsample_n = downsample_n)
+            full_mat <- .mcatac_cache__[[intervs_key(mct, region %>% select(chrom, start, end), downsample = downsample, downsample_n = downsample_n)]]
+            region_l <- region$end - region$start
+            sbin <- (intervals$start - region$start) %/% mct@resolution
+            ebin <- nrow(full_mat) - (region$end - intervals$end) %/% mct@resolution
+            mat <- full_mat[sbin:ebin, ]
+            return(mat)
+        }
     }
 
-    return(.mcatac_cache__[[intervs_key(mct, intervals, downsample, downsample_n)]])
+    # Create the matrices and cache them
+    mat <- mct_cache_region(mct, intervals)
+    if (downsample) {
+        mat <- mct_cache_region_ds(mct, intervals, mat, downsample_n, seed = seed)
+    }
+    return(mat)
 }
-
 
 #' Downsample a region matrix relative to a total coverage goal
 #'
