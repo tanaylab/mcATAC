@@ -7,16 +7,20 @@
 mct_plot_region(
   mct,
   intervals,
+  detect_dac = FALSE,
   downsample = TRUE,
   downsample_n = NULL,
   metacells = NULL,
-  colors = c("white", "gray", "black", "gold", "gold")
+  colors = c("white", "gray", "black", "gold", "gold"),
+  ...
 )
 }
 \arguments{
 \item{mct}{an McTracks object.}
 
 \item{intervals}{an intervals set with the genomic region to plot (a data frame with a single line). Note that if the start or end coordinates are not divisible by the resolution, the region will be extended to the next resolution interval.}
+
+\item{detect_dac}{mark regions with differential accessibility (DAC)}
 
 \item{downsample}{return a downsampled matrix. See description.}
 
@@ -25,6 +29,16 @@ mct_plot_region(
 \item{metacells}{a vector of metacells to plot. If NULL, all metacells will be plotted.}
 
 \item{colors}{color pallette for the ATAC signal}
+
+\item{...}{
+  Arguments passed on to \code{\link[=mct_diff_access_on_hc]{mct_diff_access_on_hc}}
+  \describe{
+    \item{\code{mat}}{a matrix where rows are coordinates and columns are metacells}
+    \item{\code{hc}}{an hclust object with the order of the metacells}
+    \item{\code{sz_frac_for_peak}}{maximal fraction of metacells in a peak}
+    \item{\code{peak_lf_thresh1,peak_lf_thresh2,trough_lf_thresh1,trough_lf_thresh2}}{thresholds for the log fold change of the peaks and troughs}
+    \item{\code{u_reg}}{regularization factor}
+  }}
 }
 \value{
 None. The plot is displayed in a new device.

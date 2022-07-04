@@ -8,7 +8,9 @@ plot_region_mat(
   mat,
   mc_colors = NULL,
   colors = c("white", "gray", "black", "gold", "gold"),
-  intervals = NULL
+  intervals = NULL,
+  dac_mat = NULL,
+  n_pixels = 1000
 )
 }
 \arguments{
@@ -19,6 +21,10 @@ plot_region_mat(
 \item{colors}{color pallette for the ATAC signal}
 
 \item{intervals}{the plotted intervals (optional)}
+
+\item{dac_mat}{a matrix with the differential accessibility (DAC) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.}
+
+\item{n_pixels}{number of pixels in the plot}
 }
 \description{
 Plot a genomic region given a matrix

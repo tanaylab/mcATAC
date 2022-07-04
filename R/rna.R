@@ -236,6 +236,8 @@ get_rna_marker_matrix <- function(atac_mc, markers = NULL, force_cell_type = TRU
     return(log2(rna_fp))
 }
 
+
+
 order_marker_matrix <- function(mat, metacell_types = NULL) {
     g_ncover <- rowSums(abs(mat) > 1, na.rm = TRUE)
     main_mark <- names(g_ncover)[which.max(g_ncover)]
@@ -266,7 +268,7 @@ order_marker_matrix <- function(mat, metacell_types = NULL) {
         mat[main_mark, ] - mat[second_mark, ],
         agglo.FUN = mean
     )
-    ord <- as.hclust(d)$order
+    ord <- stats::as.hclust(d)$order
 
     if (any(zero_mcs)) {
         mc_order <- c(colnames(mat)[ord], colnames(mat_zero))
@@ -308,14 +310,23 @@ order_marker_matrix <- function(mat, metacell_types = NULL) {
 #' Order metacells by RNA marker clustering
 #'
 #' @description order the metacells using the RNA marker clustering. See \code{get_rna_marker_matrix} for more information.
+#' When \code{force_cell_type} is TRUE and \code{atac_mc@metadata} has a field named "cell_type", the columns are only ordered only within each
+#' cell type. Note that in this case, the MC object doesn't have an 'hclust' object and therefore some algorithms which rely on it wouldn't be available.
 #'
 #' @inheritParams get_rna_marker_matrix
 #' @export
 mc_order_by_rna <- function(atac_mc, markers = NULL, force_cell_type = TRUE, rm_zeros = TRUE, epsilon = 1e-5, ...) {
     markers_mat <- get_rna_marker_matrix(atac_mc, markers = markers, force_cell_type = force_cell_type, rm_zeros = rm_zeros, epsilon = epsilon, ...)
-    ord <- order(match(atac_mc@metacells, colnames(markers_mat)))
-    assertthat::assert_that(all(atac_mc@metacells[ord] == colnames(markers_mat)))
-    atac_mc <- mc_order(atac_mc, ord)
+    markers_mat <- markers_mat[, atac_mc@metacells, drop = FALSE]
+    if (force_cell_type && has_cell_type(atac_mc)) {
+        ord <- order(match(atac_mc@metacells, colnames(markers_mat)))
+        atac_mc <- mc_order(atac_mc, ord)
+    } else {
+        hc <- stats::hclust(tgs_dist(tgs_cor(markers_mat, pairwise.complete.obs = TRUE)), method = "ward.D2")
+        ord <- hc$order
+        atac_mc <- mc_order(atac_mc, hc)
+    }
+
     cli_alert_success("Reordered metacells based on markers matrix.")
     return(atac_mc)
 }

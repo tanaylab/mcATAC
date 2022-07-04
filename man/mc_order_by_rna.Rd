@@ -27,4 +27,6 @@ using the ellipsis \code{...}.}
 }
 \description{
 order the metacells using the RNA marker clustering. See \code{get_rna_marker_matrix} for more information.
+When \code{force_cell_type} is TRUE and \code{atac_mc@metadata} has a field named "cell_type", the columns are only ordered only within each
+cell type. Note that in this case, the MC object doesn't have an 'hclust' object and therefore some algorithms which rely on it wouldn't be available.
 }
