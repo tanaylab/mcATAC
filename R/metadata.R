@@ -44,7 +44,7 @@ add_metadata <- function(obj, metadata, metadata_id_field) {
         missing_cells <- metadata[[metadata_id_field]] %!in% cell_names
         if (any(missing_cells)) {
             missing_cells <- paste(unique(metadata[[metadata_id_field]][missing_cells]), collapse = ", ")
-            cli_abort("The following {metadata_id_field}s are missing from {.field mat} colnames: {.val {missing_cells}}")
+            cli_warn("The following {metadata_id_field}s are missing from {.field mat} colnames: {.val {missing_cells}}")
         }
     }
 
