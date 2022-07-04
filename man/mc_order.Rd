@@ -9,7 +9,7 @@ mc_order(obj, order)
 \arguments{
 \item{obj}{an McPeaks or McTracks object}
 
-\item{order}{a vector of integers with the order of the metacells.}
+\item{order}{a vector of integers with the order of the metacells, or an hclust object with such order.}
 }
 \description{
 Order the metacells in an MC object
