@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot-region.R
 \name{mct_diff_access_on_hc}
 \alias{mct_diff_access_on_hc}
-\title{Return a mask matrix with differential accessibility (DAC)}
+\title{Return a mask matrix with differential cluster accessibility (DCA)}
 \usage{
 mct_diff_access_on_hc(
   mat,
@@ -27,9 +27,9 @@ mct_diff_access_on_hc(
 \item{peak_lf_thresh1, peak_lf_thresh2, trough_lf_thresh1, trough_lf_thresh2}{thresholds for the log fold change of the peaks and troughs}
 }
 \value{
-a matrix the same dimensions of \code{mat}, with a mask of differential accessibility (DAC). A value of 1 means the log fold change was above
+a matrix the same dimensions of \code{mat}, with a mask of differential cluster accessibility (DCA). A value of 1 means the log fold change was above
 \code{peak_lf_thresh1}, and a value of 2 means the log fold change was above \code{peak_lf_thresh2}. The same with -1 and -2 for troughs.
 }
 \description{
-Return a mask matrix with differential accessibility (DAC)
+Return a mask matrix with differential cluster accessibility (DCA)
 }

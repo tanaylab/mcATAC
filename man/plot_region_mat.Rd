@@ -9,7 +9,7 @@ plot_region_mat(
   mc_colors = NULL,
   colors = c("white", "gray", "black", "gold", "gold"),
   intervals = NULL,
-  dac_mat = NULL,
+  dca_mat = NULL,
   n_pixels = 1000
 )
 }
@@ -22,9 +22,9 @@ plot_region_mat(
 
 \item{intervals}{the plotted intervals (optional)}
 
-\item{dac_mat}{a matrix with the differential accessibility (DAC) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.}
+\item{dca_mat}{a matrix with the differential cluster accessibility (DCA) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.}
 
-\item{n_pixels}{number of pixels in the plot. The DAC regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)}.}
+\item{n_pixels}{number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)}.}
 }
 \description{
 Plot a genomic region given a matrix
