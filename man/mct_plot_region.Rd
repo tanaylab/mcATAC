@@ -12,6 +12,8 @@ mct_plot_region(
   downsample_n = NULL,
   metacells = NULL,
   colors = c("white", "gray", "black", "gold", "gold"),
+  hc = NULL,
+  force_cell_type = TRUE,
   ...
 )
 }
@@ -30,11 +32,14 @@ mct_plot_region(
 
 \item{colors}{color pallette for the ATAC signal}
 
+\item{hc}{an hclust object to use for the hierarchical clustering of the metacells. If NULL, metacells will be clustered using \code{mc_hclust_rna}.}
+
+\item{force_cell_type}{do not split cell types when ordering the metacells. Default: TRUE}
+
 \item{...}{
   Arguments passed on to \code{\link[=mct_diff_access_on_hc]{mct_diff_access_on_hc}}
   \describe{
     \item{\code{mat}}{a matrix where rows are coordinates and columns are metacells}
-    \item{\code{hc}}{an hclust object with the order of the metacells}
     \item{\code{sz_frac_for_peak}}{maximal fraction of metacells in a peak}
     \item{\code{peak_lf_thresh1,peak_lf_thresh2,trough_lf_thresh1,trough_lf_thresh2}}{thresholds for the log fold change of the peaks and troughs}
     \item{\code{u_reg}}{regularization factor}

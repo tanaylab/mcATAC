@@ -24,9 +24,15 @@ using the ellipsis \code{...}.}
 \item{rm_zeros}{remove genes with no RNA expression in any metacell. Default: TRUE}
 
 \item{epsilon}{regularization factor added to the log normalized expression}
+
+\item{...}{
+  Arguments passed on to \code{\link[=get_rna_marker_matrix]{get_rna_marker_matrix}}
+  \describe{
+    \item{\code{}}{}
+  }}
 }
 \description{
 order the metacells using the RNA marker clustering. See \code{get_rna_marker_matrix} for more information.
 When \code{force_cell_type} is TRUE and \code{atac_mc@metadata} has a field named "cell_type", the columns are only ordered only within each
-cell type. Note that in this case, the MC object doesn't have an 'hclust' object and therefore some algorithms which rely on it wouldn't be available.
+cell type.
 }

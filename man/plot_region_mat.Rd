@@ -24,7 +24,7 @@ plot_region_mat(
 
 \item{dac_mat}{a matrix with the differential accessibility (DAC) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.}
 
-\item{n_pixels}{number of pixels in the plot}
+\item{n_pixels}{number of pixels in the plot. This is needed in order to extended the boxes marking the DAC regions.}
 }
 \description{
 Plot a genomic region given a matrix

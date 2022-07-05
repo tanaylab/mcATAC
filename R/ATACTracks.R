@@ -57,15 +57,9 @@ make_atac_tracks_object <- function(obj, tracks, genome, id, description, path =
         window_size <- resolution
     }
 
-    hc <- NULL
-
     if (is.null(order)) {
         order <- 1:length(tracks)
     } else {
-        if ("hclust" %in% class(order)) {
-            hc <- order
-            order <- hc$order
-        }
         if (length(order) != length(tracks)) {
             cli_abort("Number of columns in the matrix is not equal to the number of tracks.")
         }
@@ -80,9 +74,6 @@ make_atac_tracks_object <- function(obj, tracks, genome, id, description, path =
     obj@resolution <- resolution
     obj@window_size <- window_size
     obj@order <- order
-    if (!is.null(hc)) {
-        obj@hc <- hc
-    }
     return(obj)
 }
 
@@ -137,7 +128,7 @@ setMethod(
 #' @param metadata data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.
 #' @param resolution the resolution of the tracks.
 #' @param window_size The size of the window used to smooth the counts in each track. If no smoothing was done - this should be equal to resolution / 2.
-#' @param order the order of the tracks in the object, can be an hclust objet. If not provided, the tracks are ordered according to the metacell number.
+#' @param order the order of the tracks in the object. If not provided, the tracks are ordered according to the metacell number.
 #'
 #' @return a McTracks object.
 #'
@@ -232,6 +223,6 @@ mct_subset_metacells <- function(mct, metacells) {
         mct@metadata <- tibble(metacell = metacells) %>%
             left_join(mct@metadata, by = "metacell")
     }
-    # TODO: invalidate the hclust object
+
     return(mct)
 }

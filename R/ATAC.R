@@ -3,7 +3,6 @@ setClassUnion("data.frame_or_null", c("data.frame", "NULL"))
 setClassUnion("character_or_null", c("character", "NULL"))
 
 setOldClass("PeakIntervals")
-setOldClass("hclust")
 
 #' ATAC objects
 #'
@@ -20,7 +19,6 @@ setOldClass("hclust")
 #' @slot path original path from which the object was loaded (optional)
 #' @slot rna_egc normalized gene expression per gene per metacell (optional). Can be created using \code{add_mc_rna}
 #' @slot order order of the cells/metacells in the data (optional).
-#' @slot hc hierarchical clustering of the cells/metacells (optional).
 #'
 #' @exportClass ATAC
 ATAC <- setClass(
@@ -32,8 +30,7 @@ ATAC <- setClass(
         metadata = "data.frame_or_null",
         path = "character",
         rna_egc = "any_matrix",
-        order = "numeric",
-        hc = "hclust"
+        order = "numeric"
     ),
     contains = "VIRTUAL"
 )
@@ -41,13 +38,13 @@ ATAC <- setClass(
 setMethod(
     "initialize",
     signature = "ATAC",
-    definition = function(.Object, genome, id = NULL, description = NULL, path = "", order = numeric(0), hc = NULL) {
-        .Object <- make_atac_object(.Object, genome, id, description, path = path, order = order, hc = NULL)
+    definition = function(.Object, genome, id = NULL, description = NULL, path = "", order = numeric(0)) {
+        .Object <- make_atac_object(.Object, genome, id, description, path = path, order = order)
         return(.Object)
     }
 )
 
-make_atac_object <- function(obj, genome, id, description, path = "", order = numeric(0), hc = NULL) {
+make_atac_object <- function(obj, genome, id, description, path = "", order = numeric(0)) {
     gset_genome(genome)
 
     if (is.null(id)) {
@@ -65,16 +62,13 @@ make_atac_object <- function(obj, genome, id, description, path = "", order = nu
     obj@genome <- genome
     obj@path <- path
     obj@order <- order
-    if (!is.null(hc)) {
-        obj@hc <- hc
-    }
     return(obj)
 }
 
 #' Order the metacells in an MC object
 #'
 #' @param obj an McPeaks or McTracks object
-#' @param order a vector of integers with the order of the metacells, or an hclust object with such order.
+#' @param order a vector of integers with the order of the metacells
 #'
 #' @examples
 #' \dontrun{
@@ -83,11 +77,6 @@ make_atac_object <- function(obj, genome, id, description, path = "", order = nu
 #'
 #' @export
 mc_order <- function(obj, order) {
-    hc <- NULL
-    if ("hclust" %in% class(order)) {
-        hc <- order
-        order <- hc$order
-    }
     if (length(order) != length(obj@metacells)) {
         cli_abort("Number of metacells is not equal to the length of the order vector.")
     }
@@ -95,12 +84,5 @@ mc_order <- function(obj, order) {
         cli_abort("Order vector contains values outside the range of the number of metacells.")
     }
     obj@order <- order
-    if (!is.null(hc)) {
-        obj@hc <- hc
-    }
     return(obj)
-}
-
-mc_has_hclust <- function(obj) {
-    return(length(obj@hc) > 1)
 }

@@ -27,7 +27,5 @@ ATACTracks classes hold pointers to tracks that hold the data at higher resoluti
 \item{\code{rna_egc}}{normalized gene expression per gene per metacell (optional). Can be created using \code{add_mc_rna}}
 
 \item{\code{order}}{order of the cells/metacells in the data (optional).}
-
-\item{\code{hc}}{hierarchical clustering of the cells/metacells (optional).}
 }}
 
