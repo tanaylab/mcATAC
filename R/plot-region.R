@@ -21,7 +21,7 @@
 #' }
 #'
 #' @export
-mct_plot_region <- function(mct, intervals, detect_dac = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold", "gold"), hc = NULL, force_cell_type = TRUE, ...) {
+mct_plot_region <- function(mct, intervals, detect_dac = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold", "gold"), hc = NULL, force_cell_type = TRUE, n_pixels = 1000, ...) {
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
         if (any(metacells %!in% mct@metacells)) {
@@ -53,7 +53,7 @@ mct_plot_region <- function(mct, intervals, detect_dac = FALSE, downsample = TRU
         mc_colors <- NULL
     }
 
-    plot_region_mat(mat, mc_colors, colors = colors, intervals = intervals, dac_mat = dac_mat)
+    plot_region_mat(mat, mc_colors, colors = colors, intervals = intervals, dac_mat = dac_mat, n_pixels = n_pixels)
 }
 
 #' Plot a genomic region given a matrix
@@ -63,7 +63,7 @@ mct_plot_region <- function(mct, intervals, detect_dac = FALSE, downsample = TRU
 #' @param colors color pallette for the ATAC signal
 #' @param intervals the plotted intervals (optional)
 #' @param dac_mat a matrix with the differential accessibility (DAC) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.
-#' @param n_pixels number of pixels in the plot. This is needed in order to extended the boxes marking the DAC regions.
+#' @param n_pixels number of pixels in the plot. The DAC regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)}.
 #'
 #' @export
 plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold", "gold"), intervals = NULL, dac_mat = NULL, n_pixels = 1000) {
@@ -82,10 +82,10 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 
     if (!is.null(dac_mat)) {
         n_peak_smooth <- ceiling(2 * nrow(mat) / n_pixels)
-        cli_alert_info("smoothing DAC matrix with {.val {n_peak_smooth}} bins")
+        cli_alert_info("Extending DACs with {.val {n_peak_smooth}} bins. This can be tweaked using the {.field n_pixels} paramater.")
         dac_mat[dac_mat == 0] <- -100
         dac_mat <- dac_mat + 3
-        dac_mat <- apply(dac_mat, 2, zoo::rollmax, n_peak_smooth, fill = "extend")
+        dac_mat <- apply(dac_mat, 2, RcppRoll::roll_max, n_peak_smooth, fill = c(-97, -97, -97))
         dac_mat <- dac_mat - 3
         dac_mat[dac_mat == -100] <- 0
         dac_cols <- c(rgb(0, 0, 1, 0.4), rgb(0, 0, 1, 0.15), rgb(0, 0, 0, 0), rgb(1, 0, 0, 0.15), rgb(1, 0, 0, 0.4))

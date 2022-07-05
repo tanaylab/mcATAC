@@ -14,6 +14,7 @@ mct_plot_region(
   colors = c("white", "gray", "black", "gold", "gold"),
   hc = NULL,
   force_cell_type = TRUE,
+  n_pixels = 1000,
   ...
 )
 }
@@ -35,6 +36,8 @@ mct_plot_region(
 \item{hc}{an hclust object to use for the hierarchical clustering of the metacells. If NULL, metacells will be clustered using \code{mc_hclust_rna}.}
 
 \item{force_cell_type}{do not split cell types when ordering the metacells. Default: TRUE}
+
+\item{n_pixels}{number of pixels in the plot. The DAC regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)}.}
 
 \item{...}{
   Arguments passed on to \code{\link[=mct_diff_access_on_hc]{mct_diff_access_on_hc}}
