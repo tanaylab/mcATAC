@@ -42,6 +42,7 @@ Imports:
     scattermore,
     grDevices,
     cowplot,
+    RcppRoll,
     chameleon,
     tglkmeans,
     parallel,
