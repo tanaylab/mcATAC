@@ -106,8 +106,11 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 #' \code{peak_lf_thresh1}, and a value of 2 means the log fold change was above \code{peak_lf_thresh2}. The same with -1 and -2 for troughs.
 #'
 #' @export
-mct_diff_access_on_hc <- function(mat, hc, sz_frac_for_peak = 0.25, u_reg = 4, peak_lf_thresh1 = 1, peak_lf_thresh2 = 2, trough_lf_thresh1 = -1,
-                                  trough_lf_thresh2 = -2) {
+mct_diff_access_on_hc <- function(mat, hc, sz_frac_for_peak = 0.25, u_reg = 4, peak_lf_thresh1 = 1, peak_lf_thresh2 = 2, trough_lf_thresh1 = -1, trough_lf_thresh2 = -2) {
+    if (length(hc$order) != ncol(mat)) {
+        cli_abort("The number of metacells in the matrix and the hclust object do not match.")
+    }
+
     dca_mat1 <- matrix(0, nrow = nrow(mat), ncol = ncol(mat))
     dca_mat2 <- matrix(0, nrow = nrow(mat), ncol = ncol(mat))
 
