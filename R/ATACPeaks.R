@@ -56,15 +56,9 @@ make_atac_peaks_object <- function(obj, mat, peaks, genome, id, description, pat
     }
     rownames(mat) <- peaks$peak_name
 
-    hc <- NULL
-
     if (is.null(order)) {
         order <- 1:ncol(mat)
     } else {
-        if ("hclust" %in% class(order)) {
-            hc <- order
-            order <- hc$order
-        }
         if (length(order) != ncol(mat)) {
             cli_abort("Number of columns in the matrix is not equal to the length of the order vector.")
         }
@@ -74,7 +68,6 @@ make_atac_peaks_object <- function(obj, mat, peaks, genome, id, description, pat
     }
 
 
-
     obj@mat <- mat
     obj@peaks <- peaks
     obj@ignore_peaks <- subset(peaks, subset = rep(FALSE, nrow(peaks)))
@@ -82,9 +75,6 @@ make_atac_peaks_object <- function(obj, mat, peaks, genome, id, description, pat
     obj@promoters <- FALSE
     obj@tad_based <- tad_based
     obj@order <- order
-    if (!is.null(hc)) {
-        obj@hc <- hc
-    }
     validate_atac_peaks_object(obj)
     return(obj)
 }

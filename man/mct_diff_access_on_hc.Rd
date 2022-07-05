@@ -9,10 +9,10 @@ mct_diff_access_on_hc(
   hc,
   sz_frac_for_peak = 0.25,
   u_reg = 4,
-  peak_lf_thresh1 = 2,
-  trough_lf_thresh1 = -2,
-  peak_lf_thresh2 = 3,
-  trough_lf_thresh2 = -3
+  peak_lf_thresh1 = 1,
+  peak_lf_thresh2 = 2,
+  trough_lf_thresh1 = -1,
+  trough_lf_thresh2 = -2
 )
 }
 \arguments{

@@ -236,9 +236,13 @@ get_rna_marker_matrix <- function(atac_mc, markers = NULL, force_cell_type = TRU
     return(log2(rna_fp))
 }
 
-
-
-order_marker_matrix <- function(mat, metacell_types = NULL) {
+#' Reorder an hclust dendrogram by gene markers (see \code{get_rna_marker_matrix})
+#'
+#' @param mat a matrix with log2 normalized counts of gene expression for each marker gene (rows) and metacell (columns)
+#' @param hc an hclust object with clustering of the metacells
+#'
+#' @noRd
+order_hclust_by_gmarks <- function(mat, hc) {
     g_ncover <- rowSums(abs(mat) > 1, na.rm = TRUE)
     main_mark <- names(g_ncover)[which.max(g_ncover)]
     f <- mat[main_mark, , drop = FALSE] < 0.25
@@ -248,8 +252,21 @@ order_marker_matrix <- function(mat, metacell_types = NULL) {
         g_score <- -tgs_cor(t(mat), t(mat[main_mark, , drop = FALSE]))[, 1]
     }
     second_mark <- names(g_score)[which.max(g_score)]
+
     cli_alert_info("Ordering metacells based on {.file {main_mark}} vs {.file {second_mark}}")
 
+    d <- stats::reorder(
+        stats::as.dendrogram(hc),
+        mat[main_mark, ] - mat[second_mark, ],
+        agglo.FUN = mean
+    )
+
+    return(as.hclust(d))
+}
+
+
+
+order_marker_matrix <- function(mat, metacell_types = NULL) {
     zero_mcs <- colSums(abs(mat) > 0) < 2
     if (any(zero_mcs)) {
         mat_all <- mat
@@ -263,12 +280,8 @@ order_marker_matrix <- function(mat, metacell_types = NULL) {
 
     hc <- stats::hclust(tgs_dist(tgs_cor(mat, pairwise.complete.obs = TRUE)), method = "ward.D2")
 
-    d <- stats::reorder(
-        stats::as.dendrogram(hc),
-        mat[main_mark, ] - mat[second_mark, ],
-        agglo.FUN = mean
-    )
-    ord <- stats::as.hclust(d)$order
+    hc <- order_hclust_by_gmarks(mat, hc)
+    ord <- hc$order
 
     if (any(zero_mcs)) {
         mc_order <- c(colnames(mat)[ord], colnames(mat_zero))
@@ -311,24 +324,82 @@ order_marker_matrix <- function(mat, metacell_types = NULL) {
 #'
 #' @description order the metacells using the RNA marker clustering. See \code{get_rna_marker_matrix} for more information.
 #' When \code{force_cell_type} is TRUE and \code{atac_mc@metadata} has a field named "cell_type", the columns are only ordered only within each
-#' cell type. Note that in this case, the MC object doesn't have an 'hclust' object and therefore some algorithms which rely on it wouldn't be available.
+#' cell type.
 #'
 #' @inheritParams get_rna_marker_matrix
+#' @inheritDotParams get_rna_marker_matrix
 #' @export
 mc_order_by_rna <- function(atac_mc, markers = NULL, force_cell_type = TRUE, rm_zeros = TRUE, epsilon = 1e-5, ...) {
     markers_mat <- get_rna_marker_matrix(atac_mc, markers = markers, force_cell_type = force_cell_type, rm_zeros = rm_zeros, epsilon = epsilon, ...)
-    markers_mat <- markers_mat[, atac_mc@metacells, drop = FALSE]
-    if (force_cell_type && has_cell_type(atac_mc)) {
-        ord <- order(match(atac_mc@metacells, colnames(markers_mat)))
-        atac_mc <- mc_order(atac_mc, ord)
-    } else {
-        hc <- stats::hclust(tgs_dist(tgs_cor(markers_mat, pairwise.complete.obs = TRUE)), method = "ward.D2")
-        ord <- hc$order
-        atac_mc <- mc_order(atac_mc, hc)
-    }
+    markers_mat <- markers_mat[, intersect(colnames(markers_mat), atac_mc@metacells), drop = FALSE]
+    ord <- order(match(atac_mc@metacells, colnames(markers_mat)))
+    atac_mc <- mc_order(atac_mc, ord)
 
     cli_alert_success("Reordered metacells based on markers matrix.")
     return(atac_mc)
+}
+
+#' Hierarchical clustering of metacells using RNA markers
+#'
+#' @description create an 'hclust' object using the RNA marker matrix. When \code{force_cell_type} is TRUE and \code{atac_mc@metadata} has a field named "cell_type" the clustering is done
+#'
+#' @return an 'hclust' object with the hierarchical clustering of the metacells. Note that the order of the metacells within the 'hclust' object
+#' is not necessarily the same as the order of the metacells in the input metacells object. Use the 'labels' slot in order to infer it (see examples).
+#'
+#' @examples
+#' \dontrun{
+#' mat <- get_rna_marker_matrix(atac_mc)
+#' hc <- mc_hclust_rna(atac_mc)
+#' mat <- mat[, hc$labels[hc$order], drop = FALSE]
+#' gene_ord <- order(apply(mat, 1, which.max))
+#' mat <- mat[gene_ord, , drop = FALSE]
+#' plot_rna_markers_mat(mat, atac_mc@metadata, atac_mc@metadata, col_names = F)
+#' }
+#'
+#' @inheritParams get_rna_marker_matrix
+#' @inheritDotParams get_rna_markers
+#'
+#' @export
+mc_hclust_rna <- function(atac_mc, markers = NULL, force_cell_type = TRUE, rm_zeros = TRUE, epsilon = 1e-5, ...) {
+    if (is.null(markers)) {
+        markers <- get_rna_markers(atac_mc, ...)
+    }
+    markers_mat <- get_rna_fp(atac_mc, genes = markers, rm_zeros = rm_zeros, epsilon = epsilon)
+    markers_mat <- markers_mat[, intersect(atac_mc@metacells, colnames(markers_mat)), drop = FALSE]
+
+    if (force_cell_type && has_cell_type(atac_mc)) {
+        mc_types <- tibble(metacell = colnames(markers_mat)) %>%
+            left_join(atac_mc@metadata %>% distinct(metacell, cell_type) %>% mutate(metacell = as.character(metacell)), by = "metacell") %>%
+            deframe()
+        types_mat <- t(tgs_matrix_tapply(markers_mat, mc_types, mean, na.rm = TRUE))
+        hc_types <- stats::hclust(tgs_dist(tgs_cor(types_mat, pairwise.complete.obs = TRUE)), method = "ward.D2")
+        hc_intra <- plyr::llply(colnames(types_mat)[hc_types$ord], function(type) {
+            metacells <- colnames(markers_mat)[mc_types == type]
+            m <- markers_mat[, metacells, drop = FALSE]
+            # if the cell type has only a single metacell (singelton)
+            if (ncol(m) < 2) {
+                # we fake a matrix with an additional column which would be removed afterwards
+                temp_m <- cbind(m, rep(1, nrow(m)))
+                colnames(temp_m) <- c(colnames(m), paste0(colnames(m)[1], "temp"))
+                hc <- stats::hclust(tgs_dist(t(temp_m)), method = "ward.D2")
+            } else {
+                hc <- stats::hclust(tgs_dist(tgs_cor(m, pairwise.complete.obs = TRUE)), method = "ward.D2")
+            }
+            dend <- as.dendrogram(hc)
+            return(dend)
+        })
+        dend_m <- ComplexHeatmap::merge_dendrogram(as.dendrogram(hc_types), hc_intra)
+        hc <- as.hclust(dend_m)
+
+        # remove the singelton leaves
+        hc <- dendextend::prune(hc, grep("temp$", hc$labels, value = TRUE))
+    } else {
+        hc <- stats::hclust(tgs_dist(tgs_cor(markers_mat, pairwise.complete.obs = TRUE)), method = "ward.D2")
+    }
+
+    hc <- order_hclust_by_gmarks(markers_mat, hc)
+
+    return(hc)
 }
 
 #' Match every gene with the k ATAC peaks most correlated to it
