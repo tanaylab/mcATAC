@@ -4,7 +4,7 @@
 #' @param mct an McTracks object.
 #' @param intervals an intervals set with the genomic region to plot (a data frame with a single line). Note that if the start or end coordinates are not divisible by the resolution, the region will be extended to the next resolution interval.
 #' @param metacells a vector of metacells to plot. If NULL, all metacells will be plotted.
-#' @param detect_dac mark regions with differential accessibility (DAC)
+#' @param detect_dca mark regions with differential cluster accessibility (DCA)
 #' @param hc an hclust object to use for the hierarchical clustering of the metacells. If NULL, metacells will be clustered using \code{mc_hclust_rna}.
 #'
 #' @inheritDotParams mct_diff_access_on_hc
@@ -21,7 +21,7 @@
 #' }
 #'
 #' @export
-mct_plot_region <- function(mct, intervals, detect_dac = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold", "gold"), hc = NULL, force_cell_type = TRUE, n_pixels = 1000, ...) {
+mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold", "gold"), hc = NULL, force_cell_type = TRUE, n_pixels = 1000, ...) {
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
         if (any(metacells %!in% mct@metacells)) {
@@ -32,15 +32,15 @@ mct_plot_region <- function(mct, intervals, detect_dac = FALSE, downsample = TRU
 
     mat <- raw_mat[, intersect(mct@metacells[mct@order], colnames(raw_mat)), drop = FALSE]
 
-    dac_mat <- NULL
-    if (detect_dac) {
+    dca_mat <- NULL
+    if (detect_dca) {
         if (is.null(hc)) {
             mct <- mct_subset_metacells(mct, colnames(mat))
             hc <- mc_hclust_rna(mct, force_cell_type = force_cell_type)
         }
         mat <- mat[, hc$label]
-        dac_mat <- mct_diff_access_on_hc(mat, hc = hc, ...)
-        dac_mat <- dac_mat[, hc$order, drop = FALSE]
+        dca_mat <- mct_diff_access_on_hc(mat, hc = hc, ...)
+        dca_mat <- dca_mat[, hc$order, drop = FALSE]
         mat <- mat[, hc$order, drop = FALSE]
     }
 
@@ -53,7 +53,7 @@ mct_plot_region <- function(mct, intervals, detect_dac = FALSE, downsample = TRU
         mc_colors <- NULL
     }
 
-    plot_region_mat(mat, mc_colors, colors = colors, intervals = intervals, dac_mat = dac_mat, n_pixels = n_pixels)
+    plot_region_mat(mat, mc_colors, colors = colors, intervals = intervals, dca_mat = dca_mat, n_pixels = n_pixels)
 }
 
 #' Plot a genomic region given a matrix
@@ -62,12 +62,12 @@ mct_plot_region <- function(mct, intervals, detect_dac = FALSE, downsample = TRU
 #' @param mc_colors a vector of colors for the metacells (optional)
 #' @param colors color pallette for the ATAC signal
 #' @param intervals the plotted intervals (optional)
-#' @param dac_mat a matrix with the differential accessibility (DAC) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.
-#' @param n_pixels number of pixels in the plot. The DAC regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)}.
+#' @param dca_mat a matrix with the differential cluster accessibility (DCA) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.
+#' @param n_pixels number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)}.
 #'
 #' @export
-plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold", "gold"), intervals = NULL, dac_mat = NULL, n_pixels = 1000) {
-    mat_smooth <- apply(mat, 2, zoo::rollsum, 20, fill = "extend")
+plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold", "gold"), intervals = NULL, dca_mat = NULL, n_pixels = 1000) {
+    mat_smooth <- RcppRoll::roll_sum(mat, n = 20, fill = c(0, 0, 0))
 
     layout(matrix(1:2, nrow = 1), w = c(1, 20))
     par(mar = c(4, 1, 2, 0))
@@ -80,21 +80,21 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
         axis(1, at = seq(0, 1, l = 11), round(seq(intervals$start[1], intervals$end[1], l = 11) / 1e+6, 3), las = 2)
     }
 
-    if (!is.null(dac_mat)) {
+    if (!is.null(dca_mat)) {
         n_peak_smooth <- ceiling(2 * nrow(mat) / n_pixels)
-        cli_alert_info("Extending DACs with {.val {n_peak_smooth}} bins. This can be tweaked using the {.field n_pixels} paramater.")
-        dac_mat[dac_mat == 0] <- -100
-        dac_mat <- dac_mat + 3
-        dac_mat <- apply(dac_mat, 2, RcppRoll::roll_max, n_peak_smooth, fill = c(-97, -97, -97))
-        dac_mat <- dac_mat - 3
-        dac_mat[dac_mat == -100] <- 0
-        dac_cols <- c(rgb(0, 0, 1, 0.4), rgb(0, 0, 1, 0.15), rgb(0, 0, 0, 0), rgb(1, 0, 0, 0.15), rgb(1, 0, 0, 0.4))
-        image(dac_mat, col = dac_cols, add = TRUE, breaks = c(-3, -1.5, -0.5, 0.5, 1.5, 3))
+        cli_alert_info("Extending DCAs with {.val {n_peak_smooth}} bins. This can be tweaked using the {.field n_pixels} paramater.")
+        dca_mat[dca_mat == 0] <- -100
+        dca_mat <- dca_mat + 3
+        dca_mat <- RcppRoll::roll_max(dca_mat, n = n_peak_smooth, fill = c(-97, -97, -97))
+        dca_mat <- dca_mat - 3
+        dca_mat[dca_mat == -100] <- 0
+        dca_cols <- c(rgb(0, 0, 1, 0.4), rgb(0, 0, 1, 0.15), rgb(0, 0, 0, 0), rgb(1, 0, 0, 0.15), rgb(1, 0, 0, 0.4))
+        image(dca_mat, col = dca_cols, add = TRUE, breaks = c(-3, -1.5, -0.5, 0.5, 1.5, 3))
     }
 }
 
 
-#' Return a mask matrix with differential accessibility (DAC)
+#' Return a mask matrix with differential cluster accessibility (DCA)
 #'
 #' @param mat a matrix where rows are coordinates and columns are metacells
 #' @param hc an hclust object with the order of the metacells
@@ -102,14 +102,14 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 #' @param peak_lf_thresh1,peak_lf_thresh2,trough_lf_thresh1,trough_lf_thresh2 thresholds for the log fold change of the peaks and troughs
 #' @param u_reg regularization factor
 #'
-#' @return a matrix the same dimensions of \code{mat}, with a mask of differential accessibility (DAC). A value of 1 means the log fold change was above
+#' @return a matrix the same dimensions of \code{mat}, with a mask of differential cluster accessibility (DCA). A value of 1 means the log fold change was above
 #' \code{peak_lf_thresh1}, and a value of 2 means the log fold change was above \code{peak_lf_thresh2}. The same with -1 and -2 for troughs.
 #'
 #' @export
 mct_diff_access_on_hc <- function(mat, hc, sz_frac_for_peak = 0.25, u_reg = 4, peak_lf_thresh1 = 1, peak_lf_thresh2 = 2, trough_lf_thresh1 = -1,
                                   trough_lf_thresh2 = -2) {
-    dac_mat1 <- matrix(0, nrow = nrow(mat), ncol = ncol(mat))
-    dac_mat2 <- matrix(0, nrow = nrow(mat), ncol = ncol(mat))
+    dca_mat1 <- matrix(0, nrow = nrow(mat), ncol = ncol(mat))
+    dca_mat2 <- matrix(0, nrow = nrow(mat), ncol = ncol(mat))
 
     stat_total <- rowSums(mat, na.rm = T)
     n_mc <- ncol(mat)
@@ -151,21 +151,21 @@ mct_diff_access_on_hc <- function(mat, hc, sz_frac_for_peak = 0.25, u_reg = 4, p
         lf <- log2((reg + stat / sz) / (reg + back_stat / back_sz))
         if (sz < sz_frac_for_peak * n_mc) {
             if (sum(lf > peak_lf_thresh1) > 0) {
-                dac_mat1[lf > peak_lf_thresh1, nodes] <- 1
+                dca_mat1[lf > peak_lf_thresh1, nodes] <- 1
             }
             if (sum(lf > peak_lf_thresh2) > 0) {
-                dac_mat2[lf > peak_lf_thresh2, nodes] <- 2
+                dca_mat2[lf > peak_lf_thresh2, nodes] <- 2
             }
             if (sum(lf < trough_lf_thresh1) > 0) {
-                dac_mat1[lf < trough_lf_thresh1, nodes] <- -1
+                dca_mat1[lf < trough_lf_thresh1, nodes] <- -1
             }
             if (sum(lf < trough_lf_thresh2) > 0) {
-                dac_mat2[lf < trough_lf_thresh2, nodes] <- -2
+                dca_mat2[lf < trough_lf_thresh2, nodes] <- -2
             }
         }
     }
-    dac_mat2[dac_mat2 == 0] <- dac_mat1[dac_mat2 == 0]
-    colnames(dac_mat2) <- colnames(mat)
-    rownames(dac_mat2) <- rownames(mat)
-    return(dac_mat2)
+    dca_mat2[dca_mat2 == 0] <- dca_mat1[dca_mat2 == 0]
+    colnames(dca_mat2) <- colnames(mat)
+    rownames(dca_mat2) <- rownames(mat)
+    return(dca_mat2)
 }

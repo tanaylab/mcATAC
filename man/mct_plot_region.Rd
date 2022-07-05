@@ -7,7 +7,7 @@
 mct_plot_region(
   mct,
   intervals,
-  detect_dac = FALSE,
+  detect_dca = FALSE,
   downsample = TRUE,
   downsample_n = NULL,
   metacells = NULL,
@@ -23,7 +23,7 @@ mct_plot_region(
 
 \item{intervals}{an intervals set with the genomic region to plot (a data frame with a single line). Note that if the start or end coordinates are not divisible by the resolution, the region will be extended to the next resolution interval.}
 
-\item{detect_dac}{mark regions with differential accessibility (DAC)}
+\item{detect_dca}{mark regions with differential cluster accessibility (DCA)}
 
 \item{downsample}{return a downsampled matrix. See description.}
 
@@ -37,7 +37,7 @@ mct_plot_region(
 
 \item{force_cell_type}{do not split cell types when ordering the metacells. Default: TRUE}
 
-\item{n_pixels}{number of pixels in the plot. The DAC regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)}.}
+\item{n_pixels}{number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)}.}
 
 \item{...}{
   Arguments passed on to \code{\link[=mct_diff_access_on_hc]{mct_diff_access_on_hc}}
