@@ -38,6 +38,12 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
             mct <- mct_subset_metacells(mct, colnames(mat))
             hc <- mc_hclust_rna(mct, force_cell_type = force_cell_type)
         }
+        if (any(hc$label %!in% colnames(mat))) {
+            missing_mcs <- setdiff(hc$label, colnames(mat))
+            cli_warn("The following metacells are present in the hclust object, but are missing in the matrix (this is probably due to downsampling): {.val {missing_mcs}}")
+            hc <- dendextend::prune(hc, missing_mcs)
+        }
+
         mat <- mat[, hc$label]
         dca_mat <- mct_diff_access_on_hc(mat, hc = hc, ...)
         dca_mat <- dca_mat[, hc$order, drop = FALSE]
@@ -98,7 +104,7 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 #'
 #' @param mat a matrix where rows are coordinates and columns are metacells
 #' @param hc an hclust object with the order of the metacells
-#' @param sz_frac_for_peak maximal fraction of metacells in a peak
+#' @param sz_frac_for_peak maximal fraction of metacells in a peak or trough. Default is 0.25.
 #' @param peak_lf_thresh1,peak_lf_thresh2,trough_lf_thresh1,trough_lf_thresh2 thresholds for the log fold change of the peaks and troughs
 #' @param u_reg regularization factor
 #'

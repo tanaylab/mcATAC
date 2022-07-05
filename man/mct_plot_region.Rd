@@ -43,7 +43,7 @@ mct_plot_region(
   Arguments passed on to \code{\link[=mct_diff_access_on_hc]{mct_diff_access_on_hc}}
   \describe{
     \item{\code{mat}}{a matrix where rows are coordinates and columns are metacells}
-    \item{\code{sz_frac_for_peak}}{maximal fraction of metacells in a peak}
+    \item{\code{sz_frac_for_peak}}{maximal fraction of metacells in a peak or trough. Default is 0.25.}
     \item{\code{peak_lf_thresh1,peak_lf_thresh2,trough_lf_thresh1,trough_lf_thresh2}}{thresholds for the log fold change of the peaks and troughs}
     \item{\code{u_reg}}{regularization factor}
   }}

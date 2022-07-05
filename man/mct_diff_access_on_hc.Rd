@@ -20,7 +20,7 @@ mct_diff_access_on_hc(
 
 \item{hc}{an hclust object with the order of the metacells}
 
-\item{sz_frac_for_peak}{maximal fraction of metacells in a peak}
+\item{sz_frac_for_peak}{maximal fraction of metacells in a peak or trough. Default is 0.25.}
 
 \item{u_reg}{regularization factor}
 
