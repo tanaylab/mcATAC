@@ -5,7 +5,7 @@
 #' @param intervals an intervals set with the genomic region to plot (a data frame with a single line). Note that if the start or end coordinates are not divisible by the resolution, the region will be extended to the next resolution interval.
 #' @param metacells a vector of metacells to plot. If NULL, all metacells will be plotted.
 #' @param detect_dca mark regions with differential cluster accessibility (DCA)
-#' @param hc an hclust object to use for the hierarchical clustering of the metacells. If NULL, metacells will be clustered using \code{mc_hclust_rna}.
+#' @param hc an hclust object to use for the hierarchical clustering of the metacells when \code{detect_dcs=TRUE}. If NULL, metacells will be clustered using \code{mc_hclust_rna}.
 #'
 #' @inheritDotParams mct_diff_access_on_hc
 #' @inheritParams mct_get_mat
@@ -21,7 +21,7 @@
 #' }
 #'
 #' @export
-mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold", "gold"), hc = NULL, force_cell_type = TRUE, n_pixels = 1000, ...) {
+mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold", "gold"), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 20, n_pixels = 1000, ...) {
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
         if (any(metacells %!in% mct@metacells)) {
@@ -59,7 +59,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
         mc_colors <- NULL
     }
 
-    plot_region_mat(mat, mc_colors, colors = colors, intervals = intervals, dca_mat = dca_mat, n_pixels = n_pixels)
+    plot_region_mat(mat, mc_colors, colors = colors, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels)
 }
 
 #' Plot a genomic region given a matrix
@@ -68,18 +68,40 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 #' @param mc_colors a vector of colors for the metacells (optional)
 #' @param colors color pallette for the ATAC signal
 #' @param intervals the plotted intervals (optional)
+#' @param resolution the resolution of the plotted intervals (optional)
 #' @param dca_mat a matrix with the differential cluster accessibility (DCA) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.
+#' @param n_smooth number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell. Default is 20.
 #' @param n_pixels number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)}.
+#' @param gene_annot (optional) whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory.
 #'
 #' @export
-plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold", "gold"), intervals = NULL, dca_mat = NULL, n_pixels = 1000) {
-    mat_smooth <- RcppRoll::roll_sum(mat, n = 20, fill = c(0, 0, 0))
+plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold", "gold"), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 20, n_pixels = 1000, gene_annot = FALSE) {
+    mat_smooth <- RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
 
-    layout(matrix(1:2, nrow = 1), w = c(1, 20))
-    par(mar = c(4, 1, 2, 0))
+    if (gene_annot) {
+        if (is.null(intervals) || is.null(resolution)) {
+            cli_abort("If gene annotations are requested, intervals and resolution must be specified")
+        }
+        layout(cbind(c(0, 0, 3), c(1, 2, 4)), widths = c(1, 20), heights = c(3, 1, 15))
+
+        par(mar = c(0, 0, 2, 2))
+        plot_tss_strip(intervals)
+
+        par(mar = c(0, 0, 0, 2))
+        gene_annots <- make_gene_annot(intervals, resolution)
+        image(as.matrix(gene_annots[["exon_coords"]], nrow = 1), col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
+        top_mar <- 0
+        left_mar <- 2
+    } else {
+        layout(matrix(1:2, nrow = 1), w = c(1, 20))
+        top_mar <- 2
+        left_mar <- 1
+    }
+
+    par(mar = c(4, left_mar, top_mar, 0))
     image(t(as.matrix(1:length(mc_colors), nrow = 1)), col = mc_colors, yaxt = "n", xaxt = "n")
 
-    par(mar = c(4, 0, 2, 2))
+    par(mar = c(4, 0, top_mar, 2))
     shades <- colorRampPalette(colors)(1000)
     image(mat_smooth, col = shades, yaxt = "n", xaxt = "n")
     if (!is.null(intervals)) {
@@ -89,14 +111,59 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
     if (!is.null(dca_mat)) {
         n_peak_smooth <- ceiling(2 * nrow(mat) / n_pixels)
         cli_alert_info("Extending DCAs with {.val {n_peak_smooth}} bins. This can be tweaked using the {.field n_pixels} paramater.")
-        dca_mat[dca_mat == 0] <- -100
-        dca_mat <- dca_mat + 3
-        dca_mat <- RcppRoll::roll_max(dca_mat, n = n_peak_smooth, fill = c(-97, -97, -97))
-        dca_mat <- dca_mat - 3
-        dca_mat[dca_mat == -100] <- 0
+        dca_mat <- extend_dca_mat(dca_mat, n_peak_smooth)
         dca_cols <- c(rgb(0, 0, 1, 0.4), rgb(0, 0, 1, 0.15), rgb(0, 0, 0, 0), rgb(1, 0, 0, 0.15), rgb(1, 0, 0, 0.4))
         image(dca_mat, col = dca_cols, add = TRUE, breaks = c(-3, -1.5, -0.5, 0.5, 1.5, 3))
     }
+}
+
+plot_tss_strip <- function(intervals) {
+    plot( # empty plot
+        x = intervals$start:intervals$end,
+        y = c(0, rep(1, intervals$end - intervals$start)),
+        ann = FALSE,
+        bty = "n",
+        type = "n",
+        xaxt = "n",
+        yaxt = "n"
+    )
+
+    tss_df <- gintervals.neighbors1("intervs.global.tss", intervals) %>%
+        filter(dist == 0) %>%
+        arrange(chrom, start, end, strand, geneSymbol) %>%
+        distinct(geneSymbol, strand, .keep_all = TRUE) %>%
+        select(chrom, tss = start, strand, gene = geneSymbol)
+    if (nrow(tss_df) > 0) {
+        text(x = tss_df$tss, y = rep(0.45, length(tss_df$tss)), labels = tss_df$gene, las = 1, cex = 1)
+        line_len <- (intervals$end - intervals$start) * 0.01
+        plus_tss <- tss_df %>%
+            filter(strand == 1) %>%
+            pull(tss)
+        minus_tss <- tss_df %>%
+            filter(strand == -1) %>%
+            pull(tss)
+
+        segments(x0 = tss_df$tss, x1 = tss_df$tss, y0 = 0, y1 = 0.3)
+        if (length(plus_tss) > 0) {
+            arrows(x0 = plus_tss, x1 = plus_tss + line_len, y0 = 0.3, y1 = 0.3, length = 0.05)
+        }
+
+        if (length(minus_tss) > 0) {
+            arrows(x0 = minus_tss, x1 = minus_tss - line_len, y0 = 0.3, y1 = 0.3, length = 0.05)
+        }
+    }
+}
+
+#' Extend a DCA matrix with rolling maximum
+#'
+#' @noRd
+extend_dca_mat <- function(dca_mat, n_peak_smooth) {
+    dca_mat[dca_mat == 0] <- -100
+    dca_mat <- dca_mat + 3
+    dca_mat <- RcppRoll::roll_max(dca_mat, n = n_peak_smooth, fill = c(-97, -97, -97))
+    dca_mat <- dca_mat - 3
+    dca_mat[dca_mat == -100] <- 0
+    return(dca_mat)
 }
 
 
