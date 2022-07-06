@@ -17,9 +17,12 @@
 #'
 #' @examples
 #' \dontrun{
-#' intervs <- gintervals(5, 54974252, 55074253) #'
+#' intervs <- gintervals(5, 54974252, 55074253)
 #' mct_plot_region(mct, intervs, gene_annot = TRUE)
 #' mct_plot_region(mct, intervs, detect_dca = TRUE, gene_annot = TRUE)
+#'
+#' get_gene_promoter("GZMK", downstream = 1e5, upstream = 1e5, unify = TRUE) %>%
+#'     mct_plot_region(mct, intervs, detect_dca = TRUE, gene_annot = TRUE)
 #'
 #' intervs %>%
 #'     gintervals.zoom_in(4) %>%

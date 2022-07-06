@@ -214,7 +214,7 @@ mct_get_mat <- function(mct, intervals, downsample = FALSE, downsample_n = NULL,
         nei_regs <- intervals %>%
             gintervals.neighbors1(cached_regs) %>%
             filter(dist == 0) %>%
-            filter(start >= cached_regs$start, end <= cached_regs$end)
+            filter(start >= start1, end <= end1)
 
         # If intervals are within a region - return the sub-matrix
         if (nrow(nei_regs) > 0) {
