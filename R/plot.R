@@ -684,10 +684,9 @@ plot_tracks_at_locus <- function(tracks = NULL,
 
 #' @param intervals what genomic interval to generate gene annotations for
 #' @param iterator misha iterator of the associated matrix
-#' @param num_bins the number of bins needed to plot (haven't figured out yet how misha parametrizes the bin number)
 #' @return gene annotations: a binary vector for exon locations and associated text labels for starts and ends of transcripts
 #' @noRd
-make_gene_annot <- function(intervals, iterator, num_bins) {
+make_gene_annot <- function(intervals, iterator) {
     file_path <- file.path(dirname(GROOT), "annots", "refGene.txt")
     if (!file.exists(file_path)) {
         cli_alert_warning("Gene annotations do not exist in the appropriate location ({.val {file_path}}). Not annotating genes...")
@@ -699,6 +698,7 @@ make_gene_annot <- function(intervals, iterator, num_bins) {
             ((txStart >= intervals$start) & (txStart <= intervals$end)) |
                 ((txEnd >= intervals$start) & (txEnd <= intervals$end))
         )
+
         if (nrow(rg_here) > 0) {
             gbins <- giterator.intervals(intervals = intervals, iterator = iterator)
             exons_df <- rg_here %>%
