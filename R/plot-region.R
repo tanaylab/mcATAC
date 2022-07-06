@@ -17,7 +17,22 @@
 #'
 #' @examples
 #' \dontrun{
-#' mct_plot_region(mct, intervals = data.frame(chr = "chr5", start = 54974252, end = 55074253))
+#' intervs <- gintervals(5, 54974252, 55074253) #'
+#' mct_plot_region(mct, intervs, gene_annot = TRUE)
+#' mct_plot_region(mct, intervs, detect_dca = TRUE, gene_annot = TRUE)
+#'
+#' intervs %>%
+#'     gintervals.zoom_in(4) %>%
+#'     mct_plot_region(mct, ., detect_dca = TRUE, gene_annot = TRUE)
+#' intervs %>%
+#'     gintervals.zoom_out(2) %>%
+#'     mct_plot_region(mct, ., detect_dca = TRUE, gene_annot = TRUE)
+#' intervs %>%
+#'     gintervals.shift_left(1e5) %>%
+#'     mct_plot_region(mct, ., detect_dca = TRUE, gene_annot = TRUE)
+#' intervs %>%
+#'     gintervals.shift_right(1e5) %>%
+#'     mct_plot_region(mct, ., detect_dca = TRUE, gene_annot = TRUE)
 #' }
 #'
 #' @export
