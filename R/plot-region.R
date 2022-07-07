@@ -100,7 +100,7 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
         if (is.null(intervals) || is.null(resolution)) {
             cli_abort("If gene annotations are requested, intervals and resolution must be specified")
         }
-        layout(cbind(c(0, 0, 3), c(1, 2, 4)), widths = c(1, 20), heights = c(3, 1, 15))
+        layout(cbind(c(0, 0, 3), c(1, 2, 4)), widths = c(1, 20), heights = c(3, 0.5, 15))
 
         par(mar = c(0, 0, 2, 2))
         plot_tss_strip(intervals)
@@ -138,7 +138,7 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 plot_tss_strip <- function(intervals) {
     plot( # empty plot
         x = intervals$start:intervals$end,
-        y = c(0, rep(1, intervals$end - intervals$start)),
+        y = c(0, rep(0.7, intervals$end - intervals$start)),
         ann = FALSE,
         bty = "n",
         type = "n",
