@@ -53,6 +53,7 @@ gintervals.zoom_out <- function(intervals, zoom) {
             new_end = midpoint + round(new_l / 2)
         ) %>%
         select(chrom, start = new_start, end = new_end) %>%
+        as.data.frame() %>%
         gintervals.force_range()
 
     intervals <- intervals %>%
@@ -83,6 +84,7 @@ gintervals.shift_left <- function(intervals, shift) {
             new_end = end - shift
         ) %>%
         select(chrom, start = new_start, end = new_end) %>%
+        as.data.frame() %>%
         gintervals.force_range()
 
     intervals <- intervals %>%
@@ -113,6 +115,7 @@ gintervals.shift_right <- function(intervals, shift) {
             new_end = end + shift
         ) %>%
         select(chrom, start = new_start, end = new_end) %>%
+        as.data.frame() %>%
         gintervals.force_range()
 
     intervals <- intervals %>%
@@ -142,6 +145,7 @@ gintervals.extend_left <- function(intervals, ext) {
             new_start = start - ext
         ) %>%
         select(chrom, start = new_start, end) %>%
+        as.data.frame() %>%
         gintervals.force_range()
 
     intervals <- intervals %>%
@@ -170,6 +174,7 @@ gintervals.extend_right <- function(intervals, ext) {
             new_end = end + ext
         ) %>%
         select(chrom, start, end = new_end) %>%
+        as.data.frame() %>%
         gintervals.force_range()
 
     intervals <- intervals %>%

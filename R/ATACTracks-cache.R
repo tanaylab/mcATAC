@@ -196,6 +196,7 @@ mct_get_mat <- function(mct, intervals, downsample = FALSE, downsample_n = NULL,
     }
 
     intervals <- intervals %>%
+        as.data.frame() %>%
         mutate(start = floor(start / mct@resolution) * mct@resolution, end = ceiling(end / mct@resolution) * mct@resolution) %>%
         gintervals.force_range()
 
