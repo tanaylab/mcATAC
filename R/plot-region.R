@@ -152,7 +152,7 @@ plot_tss_strip <- function(intervals) {
         distinct(geneSymbol, strand, .keep_all = TRUE) %>%
         select(chrom, tss = start, strand, gene = geneSymbol)
     if (nrow(tss_df) > 0) {
-        text(x = tss_df$tss, y = rep(0.45, length(tss_df$tss)), labels = tss_df$gene, las = 1, cex = 1)
+        text(x = tss_df$tss, y = rep(0.35, length(tss_df$tss)), labels = tss_df$gene, las = 1, cex = 1)
         line_len <- (intervals$end - intervals$start) * 0.01
         plus_tss <- tss_df %>%
             filter(strand == 1) %>%
@@ -161,13 +161,13 @@ plot_tss_strip <- function(intervals) {
             filter(strand == -1) %>%
             pull(tss)
 
-        segments(x0 = tss_df$tss, x1 = tss_df$tss, y0 = 0, y1 = 0.3)
+        segments(x0 = tss_df$tss, x1 = tss_df$tss, y0 = 0, y1 = 0.2)
         if (length(plus_tss) > 0) {
-            arrows(x0 = plus_tss, x1 = plus_tss + line_len, y0 = 0.3, y1 = 0.3, length = 0.05)
+            arrows(x0 = plus_tss, x1 = plus_tss + line_len, y0 = 0.2, y1 = 0.2, length = 0.05)
         }
 
         if (length(minus_tss) > 0) {
-            arrows(x0 = minus_tss, x1 = minus_tss - line_len, y0 = 0.3, y1 = 0.3, length = 0.05)
+            arrows(x0 = minus_tss, x1 = minus_tss - line_len, y0 = 0.2, y1 = 0.2, length = 0.05)
         }
     }
 }
