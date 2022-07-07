@@ -577,7 +577,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
         mat_n <- apply(mat_n, 2, zoo::rollmean, smooth_mcs, fill = "extend")
     }
     if (gene_annot) {
-        gene_annots <- make_gene_annot(intervals, iterator, ncol(mat_n))
+        gene_annots <- make_gene_annot(intervals, iterator)
     } else {
         gene_annots <- ComplexHeatmap::anno_empty()
     }
@@ -624,7 +624,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
         tad_annot <- ComplexHeatmap::anno_empty()
     }
     if (gene_annot) {
-        gene_annots <- make_gene_annot(intervals, iterator, ncol(mat_n))
+        gene_annots <- make_gene_annot(intervals, iterator)
         if (!is.null(gene_annots[["labels"]]) && !is.null(gene_annots[["label_coords"]])) {
             gene_name_annots <- ComplexHeatmap::anno_mark(
                 labels = gene_annots[["labels"]],
