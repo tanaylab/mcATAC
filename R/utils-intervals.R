@@ -123,6 +123,62 @@ gintervals.shift_right <- function(intervals, shift) {
     return(intervals)
 }
 
+#' Extend the coordinates of an intervals set to the left.
+#'
+#' @param intervals An intervals set.
+#' @param ext number of bp to extend to the left.
+#'
+#' @examples
+#' gdb.init_examples()
+#' gintervals(1, 50, 150) %>% gintervals.extend_left(20)
+#'
+#' @return A new intervals set where the start coordinates are \code{start - ext}. Note that the intervals remain bounded by the chromosome boundaries.
+#'
+#' @export
+gintervals.extend_left <- function(intervals, ext) {
+    clean_intervs <- intervals %>% select(chrom, start, end)
+    clean_intervs <- clean_intervs %>%
+        mutate(
+            new_start = start - ext
+        ) %>%
+        select(chrom, start = new_start, end) %>%
+        gintervals.force_range()
+
+    intervals <- intervals %>%
+        mutate(
+            start = clean_intervs$start
+        )
+    return(intervals)
+}
+
+#' Extend the coordinates of an intervals set to the right.
+#'
+#' @param intervals An intervals set.
+#' @param ext number of bp to extend to the right.
+#'
+#' @examples
+#' gdb.init_examples()
+#' gintervals(1, 50, 150) %>% gintervals.extend_right(20)
+#'
+#' @return A new intervals set where the end coordinates are \code{end + ext}. Note that the intervals remain bounded by the chromosome boundaries.
+#'
+#' @export
+gintervals.extend_right <- function(intervals, ext) {
+    clean_intervs <- intervals %>% select(chrom, start, end)
+    clean_intervs <- clean_intervs %>%
+        mutate(
+            new_end = end + ext
+        ) %>%
+        select(chrom, start, end = new_end) %>%
+        gintervals.force_range()
+
+    intervals <- intervals %>%
+        mutate(
+            end = clean_intervs$end
+        )
+    return(intervals)
+}
+
 #' Get an intervals set of a gene promoter.
 #'
 #' @param name The name of the gene ("name2" in UCSC files).
