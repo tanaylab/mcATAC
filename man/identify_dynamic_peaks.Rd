@@ -2,7 +2,7 @@
 % Please edit documentation in R/feature_selection.R
 \name{identify_dynamic_peaks}
 \alias{identify_dynamic_peaks}
-\title{Find dynamic peaks in McATAC matrix}
+\title{Find dynamic peaks in McPeaks matrix}
 \usage{
 identify_dynamic_peaks(
   atac_mc,
@@ -15,7 +15,7 @@ identify_dynamic_peaks(
 )
 }
 \arguments{
-\item{atac_mc}{the McATAC object to analyze}
+\item{atac_mc}{the McPeaks object to analyze}
 
 \item{method}{(optional) either 'bmq' (default) or 'gmm'; 'bmq' (binned-mean quantiles) bins the log-mean of all peaks (averaged across metacells) and
 selects all peaks with a coefficient of variation above some quantile in each bin. More controlled

@@ -1,7 +1,7 @@
-#' Write a McATAC or ScATAC object to an h5ad file
+#' Write a McPeaks or ScPeaks object to an h5ad file
 #'
 #'
-#' @param object McATAC or ScATAC object
+#' @param object McPeaks or ScPeaks object
 #' @param out_file name of the output file
 #'
 #' @return None.
@@ -15,7 +15,7 @@
 #' @inheritDotParams anndata::write_h5ad
 #' @export
 export_to_h5ad <- function(object, out_file, ...) {
-    validate_atac_object(object)
+    validate_atac_peaks_object(object)
 
     mat <- object@mat
     mat <- t(mat)
@@ -55,7 +55,7 @@ export_to_h5ad <- function(object, out_file, ...) {
         }
     }
 
-    if (uns$class == "McATAC" && has_rna(object)) {
+    if (uns$class == "McPeaks" && has_rna(object)) {
         uns[["rna_egc"]] <- object@rna_egc
         uns[["rna_mcs"]] <- colnames(object@rna_egc)
         uns[["rna_gene_names"]] <- rownames(object@rna_egc)
@@ -81,7 +81,7 @@ export_to_h5ad <- function(object, out_file, ...) {
 
 #' Generate a ucsc genome browser file for each metacell cluster
 #'
-#' @param atac_mc McATAC object
+#' @param atac_mc McPeaks object
 #' @param track_prefix prefix for generated misha tracks.
 #' @param output_dir (optional) name of the directory to write files to
 #' @param clust_vec (optional) a vector of length #metacells representing an annotation/clustering (can be output of \code{gen_atac_mc_clust})
@@ -114,7 +114,7 @@ export_atac_clust_ucsc <- function(atac_mc, track_prefix, output_dir = getwd(), 
 #' @description generate a track for each metacell cluster, of the form \code{track_prefix.name}, where names
 #' are given at \code{clust_names}
 #'
-#' @param atac_mc a McATAC object
+#' @param atac_mc a McPeaks object
 #' @param clust_vec (optional) a vector of length #metacells representing an annotation/clustering (can be output of \code{gen_atac_mc_clust})
 #' @param track_prefix prefix for generated misha tracks. The clusters would be of the form: "{track_prefix}.clust"
 #' @param description (optional) description for tracks (can be a \code{glue}-formatted expression)
@@ -189,7 +189,7 @@ write_cluster_misha_track <- function(cl, atac_mc_mat_clust, track_prefix, peaks
 
 #' Prepare peak clusters for export
 #'
-#' @param atac_mc McATAC object
+#' @param atac_mc McPeaks object
 #' @param clust_vec (optional) a vector of length #metacells representing an annotation/clustering (can be output of \code{gen_atac_mc_clust})
 #' @param normalization (optional) normalization method, either 'none', 'lfcom' (log2 fold-change over median), 'zs' (Z-scores)
 #' @param eps_q if \code{normalization == 'lfcom'}, use quantile \code{eps_q} (default = 0.05) for regularizing log expression

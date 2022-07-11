@@ -2,7 +2,7 @@
 % Please edit documentation in R/cluster.R
 \name{subset_peak_clusters}
 \alias{subset_peak_clusters}
-\title{Subset McATAC by certain clusters}
+\title{Subset McPeaks by certain clusters}
 \usage{
 subset_peak_clusters(
   atac_mc,
@@ -13,7 +13,7 @@ subset_peak_clusters(
 }
 \arguments{
 \item{atac_mc}{\itemize{
-\item an McATAC object
+\item an McPeaks object
 }}
 
 \item{cluster_membership}{\itemize{
@@ -30,7 +30,7 @@ subset_peak_clusters(
 the atac_mc object only with the clusters (peaks) of interest (not saved in the "ignore_..." slots)
 }
 \description{
-Subset McATAC by certain clusters
+Subset McPeaks by certain clusters
 }
 \examples{
 \dontrun{

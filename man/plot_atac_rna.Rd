@@ -12,13 +12,13 @@ plot_atac_rna(
   peak = NULL,
   max_dist_to_promoter_peak = 500,
   normalize_atac = TRUE,
-  eps_rna = 1e-05,
+  eps_rna = 0.00001,
   tss_intervals = "intervs.global.tss",
   plot_object_id = TRUE
 )
 }
 \arguments{
-\item{atac_mc}{a McATAC object}
+\item{atac_mc}{a McPeaks object}
 
 \item{gene}{name of the gene to plot}
 

@@ -2,12 +2,12 @@
 % Please edit documentation in R/export.R
 \name{export_to_h5ad}
 \alias{export_to_h5ad}
-\title{Write a McATAC or ScATAC object to an h5ad file}
+\title{Write a McPeaks or ScPeaks object to an h5ad file}
 \usage{
 export_to_h5ad(object, out_file, ...)
 }
 \arguments{
-\item{object}{McATAC or ScATAC object}
+\item{object}{McPeaks or ScPeaks object}
 
 \item{out_file}{name of the output file}
 
@@ -26,7 +26,7 @@ Options are \code{"gzip"}, \code{"lzf"} or \code{NULL}.}
 None.
 }
 \description{
-Write a McATAC or ScATAC object to an h5ad file
+Write a McPeaks or ScPeaks object to an h5ad file
 }
 \examples{
 \dontrun{

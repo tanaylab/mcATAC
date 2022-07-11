@@ -2,7 +2,7 @@
 % Please edit documentation in R/McCounts.R
 \name{mcc_to_mcatac}
 \alias{mcc_to_mcatac}
-\title{Create an McATAC object from an McCounts object}
+\title{Create an McPeaks object from an McCounts object}
 \usage{
 mcc_to_mcatac(
   mc_counts,
@@ -25,10 +25,10 @@ mcc_to_mcatac(
 the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quantile of metacell sizes.}
 }
 \value{
-a McATAC object
+a McPeaks object
 }
 \description{
-given an McCounts object and peaks, summarise the counts over the peaks and return a McATAC object
+given an McCounts object and peaks, summarise the counts over the peaks and return a McPeaks object
 }
 \examples{
 \dontrun{

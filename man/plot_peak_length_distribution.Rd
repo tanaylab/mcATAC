@@ -7,7 +7,7 @@
 plot_peak_length_distribution(atac)
 }
 \arguments{
-\item{atac}{an ScATAC or McATAC object}
+\item{atac}{an ScPeaks or McPeaks object}
 }
 \value{
 a ggplot object with the distribution of peak length

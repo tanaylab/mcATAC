@@ -4,10 +4,10 @@
 \alias{get_rna_fp}
 \title{Get enrichment of normalized counts of gene expression over the median}
 \usage{
-get_rna_fp(atac_mc, genes = NULL, rm_zeros = TRUE, epsilon = 1e-05)
+get_rna_fp(atac_mc, genes = NULL, rm_zeros = TRUE, epsilon = 0.00001)
 }
 \arguments{
-\item{atac_mc}{a McATAC object with RNA expression (using \code{add_mc_rna})}
+\item{atac_mc}{a McPeaks/McTracks object with RNA expression (using \code{add_mc_rna})}
 
 \item{genes}{list of genes to match. Default (NULL): all genes}
 

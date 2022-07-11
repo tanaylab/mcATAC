@@ -2,17 +2,17 @@
 % Please edit documentation in R/metadata.R
 \name{add_mc_metadata}
 \alias{add_mc_metadata}
-\title{Add per-metacell metadata to an McATAC object}
+\title{Add per-metacell metadata to an McPeaks object}
 \usage{
 add_mc_metadata(atac_mc, metadata)
 }
 \arguments{
-\item{atac_mc}{an McATAC object}
+\item{atac_mc}{an McPeaks object}
 
 \item{metadata}{data frame with a column called 'metacell' and additional metacell annotations, or the name of a delimited file which contains such annotations.}
 }
 \description{
-Add per-metacell metadata to an McATAC object
+Add per-metacell metadata to an McPeaks object
 }
 \examples{
 \dontrun{

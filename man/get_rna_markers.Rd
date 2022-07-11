@@ -12,11 +12,11 @@ get_rna_markers(
   fold_change_reg = 0.1,
   genes = NULL,
   rm_zeros = TRUE,
-  epsilon = 1e-05
+  epsilon = 0.00001
 )
 }
 \arguments{
-\item{atac_mc}{a McATAC object with RNA expression (using \code{add_mc_rna})}
+\item{atac_mc}{a McPeaks/McTracks object with RNA expression (using \code{add_mc_rna})}
 
 \item{n_genes}{maximal number of genes to return. Default: 100}
 

@@ -14,10 +14,10 @@ gen_atac_mc_clust(
 }
 \arguments{
 \item{atac_mc}{\itemize{
-\item an McATAC object
+\item an McPeaks object
 }}
 
-\item{use_prior_annot}{(optional) when TRUE - use the metacell annotation to generate metacell clusters. Clusters would be generated based on a categorical field \code{annot} from the \code{metadata} slot in the McATAC object.}
+\item{use_prior_annot}{(optional) when TRUE - use the metacell annotation to generate metacell clusters. Clusters would be generated based on a categorical field \code{annot} from the \code{metadata} slot in the McPeaks object.}
 
 \item{k}{\itemize{
 \item (optional, when \code{use_prior_annot == F}) number of clusters to generate

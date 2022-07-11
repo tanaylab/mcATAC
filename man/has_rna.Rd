@@ -2,18 +2,18 @@
 % Please edit documentation in R/rna.R
 \name{has_rna}
 \alias{has_rna}
-\title{Does the McATAC object contain per-metacell gene expression data?}
+\title{Does the McPeaks object contain per-metacell gene expression data?}
 \usage{
 has_rna(atac_mc)
 }
 \arguments{
-\item{atac_mc}{an McATAC object}
+\item{atac_mc}{an McPeaks/McTracks object}
 }
 \value{
-TRUE if the McATAC object contains per-metacell gene expression data, FALSE otherwise
+TRUE if the McPeaks object contains per-metacell gene expression data, FALSE otherwise
 }
 \description{
-Does the McATAC object contain per-metacell gene expression data?
+Does the McPeaks object contain per-metacell gene expression data?
 }
 \examples{
 \dontrun{

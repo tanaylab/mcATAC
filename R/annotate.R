@@ -2,7 +2,7 @@
 
 #' Annotate ATAC peaks
 #'
-#' @param atac a McATAC or ScATAC object
+#' @param atac a McPeaks or ScPeaks object
 #'
 #' @return the original \code{atac} object, with the peaks annotated using \code{annotate_intervals}
 #' @examples
@@ -11,8 +11,8 @@
 #' }
 #' @export
 annotate_peaks <- function(atac) {
-    if (!methods::is(atac, "ATAC")) {
-        cli_abort("{.field atac} is not an ScATAC or McATAC object. You can annotate intervals directly using the {.code annotate_intervals} function.")
+    if (!methods::is(atac, "ATACPeaks")) {
+        cli_abort("{.field atac} is not an ScPeaks or McPeaks object. You can annotate intervals directly using the {.code annotate_intervals} function.")
     }
 
     atac@peaks <- annotate_intervals(atac@peaks, atac@genome)
@@ -56,7 +56,7 @@ annotate_intervals <- function(intervals, genome,
                                tss = "intervs.global.tss",
                                exons = "intervs.global.exon") {
     if (missing(genome)) {
-        cli_abort("Please Specify genome. Look for slot '@genome' in relevant McATAC/ScATAC object.")
+        cli_abort("Please Specify genome. Look for slot '@genome' in relevant McPeaks/ScPeaks object.")
     }
     misha.ext::gset_genome(genome)
 
@@ -139,7 +139,7 @@ get_gene_body_df <- function(tss, exons) {
 #' their order on the genome (except for the first peak), i.e.: "{TAD_name}_{distance_from_TAD_start_in_kbp}.{number}".
 #' See also \code{make.unique}.
 #'
-#' @param atac a McATAC or ScATAC a PeakIntervals object or a misha intervals set
+#' @param atac a McPeaks or ScPeaks a PeakIntervals object or a misha intervals set
 #' @return the original \code{atac} object, with the field \code{peak_name} replaced by the new TAD-referenced name
 #' @examples
 #' \dontrun{
@@ -149,14 +149,14 @@ get_gene_body_df <- function(tss, exons) {
 #' @export
 name_enhancers <- function(atac, tad_names = gintervals.load("intervs.global.tad_names")) {
     cl <- class(atac)
-    if (cl[[1]] %in% c("ScATAC", "McATAC")) {
+    if (cl[[1]] %in% c("ScPeaks", "McPeaks")) {
         peaks <- atac@peaks
     } else if ("PeakIntervals" %in% cl) {
         peaks <- atac
     } else if ("data.frame" %in% cl && all(c("chrom", "start", "end") %in% colnames(atac))) {
         peaks <- atac
     } else {
-        cli_abort("Class of {.var atac} is not recognized (should be either ScATAC, McATAC, PeakIntervals object or misha intervals).")
+        cli_abort("Class of {.var atac} is not recognized (should be either ScPeaks, McPeaks, PeakIntervals object or misha intervals).")
     }
     if (has_name(peaks, "peak_original_order")) {
         cli_abort("{.field peaks} shouldn't have a field named 'peak_original_order'. Sorry about that.")
@@ -174,7 +174,7 @@ name_enhancers <- function(atac, tad_names = gintervals.load("intervs.global.tad
         select(-(chrom1:dist_diff), -peak_original_order) %>%
         PeakIntervals()
 
-    if (cl[[1]] %in% c("ScATAC", "McATAC")) {
+    if (cl[[1]] %in% c("ScPeaks", "McPeaks")) {
         atac@peaks <- peaks
     } else if (cl[[1]] == "PeakIntervals") {
         atac <- peaks

@@ -169,9 +169,9 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
     return(res)
 }
 
-#' Create an McATAC object from an McCounts object
+#' Create an McPeaks object from an McCounts object
 #'
-#' @description given an McCounts object and peaks, summarise the counts over the peaks and return a McATAC object
+#' @description given an McCounts object and peaks, summarise the counts over the peaks and return a McPeaks object
 #'
 #' @param mc_counts a McCounts object
 #' @param peaks a data frame with the peak intervals (chrom, start, end) and a column called "peak_name"
@@ -179,7 +179,7 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
 #'
 #' @inheritParams project_atac_on_mc
 #'
-#' @return a McATAC object
+#' @return a McPeaks object
 #'
 #' @examples
 #' \dontrun{
@@ -204,9 +204,9 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
 
     mat <- Reduce("+", matrices)
 
-    mc_atac <- new("McATAC", mat = mat, peaks = peaks, genome = mc_counts@genome, id = mc_counts@id, description = mc_counts@description, metadata = metadata, cell_to_metacell = mc_counts@cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = mc_counts@path)
+    mc_atac <- new("McPeaks", mat = mat, peaks = peaks, genome = mc_counts@genome, id = mc_counts@id, description = mc_counts@description, metadata = metadata, cell_to_metacell = mc_counts@cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = mc_counts@path)
 
-    cli_alert_success("Created a new McATAC object with {.val {ncol(mc_atac@mat)}} metacells and {.val {nrow(mc_atac@mat)}} ATAC peaks.")
+    cli_alert_success("Created a new McPeaks object with {.val {ncol(mc_atac@mat)}} metacells and {.val {nrow(mc_atac@mat)}} ATAC peaks.")
 
     return(mc_atac)
 }
@@ -409,7 +409,7 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL) {
 #' @param normalize Normalize each metacell by the sum of its counts.
 #'
 #'
-#' @return None.
+#' @return An McTracks object with the new tracks.
 #'
 #' @examples
 #' \dontrun{
@@ -478,6 +478,9 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
     gdb.reload()
 
     cli_alert_success("Created {length(metacells)} tracks at {track_prefix}")
+
+    mct <- mct_create(genome = mc_counts@genome, track_prefix = track_prefix, metacells = metacells, id = mc_counts@id, description = mc_counts@description, path = mc_counts@path, metadata = mc_counts@metadata, resolution = resolution, window_size = window_size)
+    return(mct)
 }
 
 #' Create a track with smoothed marginal counts from a McCounts object
