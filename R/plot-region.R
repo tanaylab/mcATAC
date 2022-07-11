@@ -107,7 +107,12 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 
         par(mar = c(0, 0, 0, 2))
         gene_annots <- make_gene_annot(intervals, resolution)
-        image(as.matrix(gene_annots[["exon_coords"]], nrow = 1), col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
+        if (is.null(gene_annots[["exon_coords"]])) {
+            image(as.matrix(rep(0, ncol(mat)), nrow = 1), col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
+        } else {
+            image(as.matrix(gene_annots[["exon_coords"]], nrow = 1), col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
+        }
+
         top_mar <- 0
         left_mar <- 2
     } else {
