@@ -99,6 +99,7 @@ Collate:
     'project_on_mc.R'
     'promoters.R'
     'rna.R'
+    'shiny.R'
     'subset_bam.R'
     'utils-intervals.R'
     'utils-pipe.R'
