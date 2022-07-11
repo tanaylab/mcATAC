@@ -14,7 +14,7 @@ rna_atac_cor_knn(
 )
 }
 \arguments{
-\item{atac_mc}{a McATAC object with RNA expression (using \code{add_mc_rna})}
+\item{atac_mc}{a McPeaks/McTracks object with RNA expression (using \code{add_mc_rna})}
 
 \item{k}{number of peaks to match for each gene. Default: 1}
 

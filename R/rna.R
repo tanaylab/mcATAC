@@ -1,6 +1,6 @@
-#' Add per-metacell gene expression data to an McATAC object
+#' Add per-metacell gene expression data to an McPeaks object
 #'
-#' @param atac_mc an McATAC object
+#' @param atac_mc an McPeaks/McTracks object
 #' @param mc_rna a \code{metacell1} 'mc' object or a \code{metacells} metacell UMI matrix (a matrix where each row is a gene and each column is a metacell)
 #'
 #' @examples
@@ -13,7 +13,7 @@
 #'
 #' @export
 add_mc_rna <- function(atac_mc, mc_rna) {
-    assert_atac_object(atac_mc, class = "McATAC")
+    assert_atac_object(atac_mc, class = "ATAC")
 
     if ("tgMCCov" %in% class(mc_rna)) {
         egc <- mc_rna@e_gc
@@ -23,30 +23,30 @@ add_mc_rna <- function(atac_mc, mc_rna) {
         cli_abort("mc_rna must be a tgMCCov object (from the metacell package) or a matrix.")
     }
 
-    rna_mc_not_in_atac <- colnames(egc)[colnames(egc) %!in% colnames(atac_mc@mat)]
+    rna_mc_not_in_atac <- colnames(egc)[colnames(egc) %!in% atac_mc@metacells]
     if (length(rna_mc_not_in_atac) > 0) {
-        cli_warn("{.field mc_rna} contains {.field {length(rna_mc_not_in_atac)}} metacells not present in the McATAC object: {.val {rna_mc_not_in_atac}}")
+        cli_warn("{.field mc_rna} contains {.field {length(rna_mc_not_in_atac)}} metacells not present in the object: {.val {rna_mc_not_in_atac}}")
     }
 
-    atac_mc_not_in_rna <- colnames(atac_mc@mat)[colnames(atac_mc@mat) %!in% colnames(egc)]
+    atac_mc_not_in_rna <- atac_mc@metacells[atac_mc@metacells %!in% colnames(egc)]
     if (length(atac_mc_not_in_rna) > 0) {
-        cli_warn("McATAC object contains {.field {length(atac_mc_not_in_rna)}} metacells not present in {.field mc_rna}: {.val {atac_mc_not_in_rna}}")
+        cli_warn("McPeaks object contains {.field {length(atac_mc_not_in_rna)}} metacells not present in {.field mc_rna}: {.val {atac_mc_not_in_rna}}")
     }
 
-    both_mcs <- intersect(colnames(atac_mc@mat), colnames(egc))
+    both_mcs <- intersect(atac_mc@metacells, colnames(egc))
     if (length(both_mcs) == 0) {
-        cli_abort("No metacells in common between the McATAC object and {.field mc_rna}.")
+        cli_abort("No metacells in common between the McPeaks object and {.field mc_rna}.")
     }
 
     atac_mc@rna_egc <- egc[, both_mcs]
     return(atac_mc)
 }
 
-#' Does the McATAC object contain per-metacell gene expression data?
+#' Does the McPeaks object contain per-metacell gene expression data?
 #'
-#' @param atac_mc an McATAC object
+#' @param atac_mc an McPeaks/McTracks object
 #'
-#' @return TRUE if the McATAC object contains per-metacell gene expression data, FALSE otherwise
+#' @return TRUE if the McPeaks object contains per-metacell gene expression data, FALSE otherwise
 #'
 #' @examples
 #' \dontrun{
@@ -59,11 +59,11 @@ has_rna <- function(atac_mc) {
 }
 
 
-#' Get the normalized RNA expression matrix (egc) from a McATAC object
+#' Get the normalized RNA expression matrix (egc) from a McPeaks object
 #'
 #' @description Get RNA expression data, normalized by the total RNA expression in each metacell.
 #'
-#' @param atac_mc a McATAC object with RNA expression (using \code{add_mc_rna})
+#' @param atac_mc a McPeaks/McTracks object with RNA expression (using \code{add_mc_rna})
 #' @param genes list of genes to match. Default (NULL): all genes
 #' @param rm_zeros remove genes with no RNA expression in any metacell. Default: TRUE
 #' @param epsilon regularization factor added to the log normalized expression
@@ -79,7 +79,6 @@ has_rna <- function(atac_mc) {
 #'
 #' @export
 get_rna_egc <- function(atac_mc, genes = NULL, rm_zeros = TRUE, epsilon = 1e-5) {
-    validate_atac_object(atac_mc)
     if (!has_rna(atac_mc)) {
         cli_abort("{.val {atac_mc}} does not contain RNA.")
     }
@@ -198,7 +197,7 @@ get_rna_markers <- function(atac_mc, n_genes = 100, minimal_max_log_fraction = -
 
 #' Get enrichment matrix for marker genes
 #'
-#' @param atac_mc a McATAC object with RNA expression (using \code{add_mc_rna})
+#' @param atac_mc a McPeaks/McTracks object with RNA expression (using \code{add_mc_rna})
 #' @param markers a list of marker genes. If NULL - the function uses \code{get_rna_markers} with default parameters which can be overridden
 #' using the ellipsis \code{...}.
 #' @param force_cell_type do not split cell types when ordering the metacells. Default: TRUE
@@ -237,7 +236,13 @@ get_rna_marker_matrix <- function(atac_mc, markers = NULL, force_cell_type = TRU
     return(log2(rna_fp))
 }
 
-order_marker_matrix <- function(mat, metacell_types = NULL) {
+#' Reorder an hclust dendrogram by gene markers (see \code{get_rna_marker_matrix})
+#'
+#' @param mat a matrix with log2 normalized counts of gene expression for each marker gene (rows) and metacell (columns)
+#' @param hc an hclust object with clustering of the metacells
+#'
+#' @noRd
+order_hclust_by_gmarks <- function(mat, hc) {
     g_ncover <- rowSums(abs(mat) > 1, na.rm = TRUE)
     main_mark <- names(g_ncover)[which.max(g_ncover)]
     f <- mat[main_mark, , drop = FALSE] < 0.25
@@ -247,8 +252,21 @@ order_marker_matrix <- function(mat, metacell_types = NULL) {
         g_score <- -tgs_cor(t(mat), t(mat[main_mark, , drop = FALSE]))[, 1]
     }
     second_mark <- names(g_score)[which.max(g_score)]
+
     cli_alert_info("Ordering metacells based on {.file {main_mark}} vs {.file {second_mark}}")
 
+    d <- stats::reorder(
+        stats::as.dendrogram(hc),
+        mat[main_mark, ] - mat[second_mark, ],
+        agglo.FUN = mean
+    )
+
+    return(as.hclust(d))
+}
+
+
+
+order_marker_matrix <- function(mat, metacell_types = NULL) {
     zero_mcs <- colSums(abs(mat) > 0) < 2
     if (any(zero_mcs)) {
         mat_all <- mat
@@ -262,12 +280,8 @@ order_marker_matrix <- function(mat, metacell_types = NULL) {
 
     hc <- stats::hclust(tgs_dist(tgs_cor(mat, pairwise.complete.obs = TRUE)), method = "ward.D2")
 
-    d <- stats::reorder(
-        stats::as.dendrogram(hc),
-        mat[main_mark, ] - mat[second_mark, ],
-        agglo.FUN = mean
-    )
-    ord <- as.hclust(d)$order
+    hc <- order_hclust_by_gmarks(mat, hc)
+    ord <- hc$order
 
     if (any(zero_mcs)) {
         mc_order <- c(colnames(mat)[ord], colnames(mat_zero))
@@ -306,9 +320,91 @@ order_marker_matrix <- function(mat, metacell_types = NULL) {
     return(mat)
 }
 
+#' Order metacells by RNA marker clustering
+#'
+#' @description order the metacells using the RNA marker clustering. See \code{get_rna_marker_matrix} for more information.
+#' When \code{force_cell_type} is TRUE and \code{atac_mc@metadata} has a field named "cell_type", the columns are only ordered only within each
+#' cell type.
+#'
+#' @inheritParams get_rna_marker_matrix
+#' @inheritDotParams get_rna_marker_matrix
+#' @export
+mc_order_by_rna <- function(atac_mc, markers = NULL, force_cell_type = TRUE, rm_zeros = TRUE, epsilon = 1e-5, ...) {
+    markers_mat <- get_rna_marker_matrix(atac_mc, markers = markers, force_cell_type = force_cell_type, rm_zeros = rm_zeros, epsilon = epsilon, ...)
+    markers_mat <- markers_mat[, intersect(colnames(markers_mat), atac_mc@metacells), drop = FALSE]
+    ord <- order(match(atac_mc@metacells, colnames(markers_mat)))
+    atac_mc <- mc_order(atac_mc, ord)
+
+    cli_alert_success("Reordered metacells based on markers matrix.")
+    return(atac_mc)
+}
+
+#' Hierarchical clustering of metacells using RNA markers
+#'
+#' @description create an 'hclust' object using the RNA marker matrix. When \code{force_cell_type} is TRUE and \code{atac_mc@metadata} has a field named "cell_type" the clustering is done
+#'
+#' @return an 'hclust' object with the hierarchical clustering of the metacells. Note that the order of the metacells within the 'hclust' object
+#' is not necessarily the same as the order of the metacells in the input metacells object. Use the 'labels' slot in order to infer it (see examples).
+#'
+#' @examples
+#' \dontrun{
+#' mat <- get_rna_marker_matrix(atac_mc)
+#' hc <- mc_hclust_rna(atac_mc)
+#' mat <- mat[, hc$labels[hc$order], drop = FALSE]
+#' gene_ord <- order(apply(mat, 1, which.max))
+#' mat <- mat[gene_ord, , drop = FALSE]
+#' plot_rna_markers_mat(mat, atac_mc@metadata, atac_mc@metadata, col_names = F)
+#' }
+#'
+#' @inheritParams get_rna_marker_matrix
+#' @inheritDotParams get_rna_markers
+#'
+#' @export
+mc_hclust_rna <- function(atac_mc, markers = NULL, force_cell_type = TRUE, rm_zeros = TRUE, epsilon = 1e-5, ...) {
+    if (is.null(markers)) {
+        markers <- get_rna_markers(atac_mc, ...)
+    }
+    markers_mat <- get_rna_fp(atac_mc, genes = markers, rm_zeros = rm_zeros, epsilon = epsilon)
+    markers_mat <- markers_mat[, intersect(atac_mc@metacells, colnames(markers_mat)), drop = FALSE]
+
+    if (force_cell_type && has_cell_type(atac_mc)) {
+        mc_types <- tibble(metacell = colnames(markers_mat)) %>%
+            left_join(atac_mc@metadata %>% distinct(metacell, cell_type) %>% mutate(metacell = as.character(metacell)), by = "metacell") %>%
+            deframe()
+        types_mat <- t(tgs_matrix_tapply(markers_mat, mc_types, mean, na.rm = TRUE))
+        hc_types <- stats::hclust(tgs_dist(tgs_cor(types_mat, pairwise.complete.obs = TRUE)), method = "ward.D2")
+        hc_intra <- plyr::llply(colnames(types_mat)[hc_types$ord], function(type) {
+            metacells <- colnames(markers_mat)[mc_types == type]
+            m <- markers_mat[, metacells, drop = FALSE]
+            # if the cell type has only a single metacell (singelton)
+            if (ncol(m) < 2) {
+                # we fake a matrix with an additional column which would be removed afterwards
+                temp_m <- cbind(m, rep(1, nrow(m)))
+                colnames(temp_m) <- c(colnames(m), paste0(colnames(m)[1], "temp"))
+                hc <- stats::hclust(tgs_dist(t(temp_m)), method = "ward.D2")
+            } else {
+                hc <- stats::hclust(tgs_dist(tgs_cor(m, pairwise.complete.obs = TRUE)), method = "ward.D2")
+            }
+            dend <- as.dendrogram(hc)
+            return(dend)
+        })
+        dend_m <- ComplexHeatmap::merge_dendrogram(as.dendrogram(hc_types), hc_intra)
+        hc <- as.hclust(dend_m)
+
+        # remove the singelton leaves
+        hc <- dendextend::prune(hc, grep("temp$", hc$labels, value = TRUE))
+    } else {
+        hc <- stats::hclust(tgs_dist(tgs_cor(markers_mat, pairwise.complete.obs = TRUE)), method = "ward.D2")
+    }
+
+    hc <- order_hclust_by_gmarks(markers_mat, hc)
+
+    return(hc)
+}
+
 #' Match every gene with the k ATAC peaks most correlated to it
 #'
-#' @param atac_mc a McATAC object with RNA expression (using \code{add_mc_rna})
+#' @param atac_mc a McPeaks/McTracks object with RNA expression (using \code{add_mc_rna})
 #' @param k number of peaks to match for each gene. Default: 1
 #'
 #' @return a tibble with the following columns:
@@ -329,7 +425,7 @@ order_marker_matrix <- function(mat, metacell_types = NULL) {
 #' @inheritParams tgstat::tgs_cor_knn
 #' @export
 rna_atac_cor_knn <- function(atac_mc, k = 1, genes = NULL, rm_zeros = TRUE, spearman = TRUE, pairwise.complete.obs = TRUE) {
-    assert_atac_object(atac_mc, "McATAC")
+    assert_atac_object(atac_mc, "ATAC")
 
     rna_mat <- get_rna_egc(atac_mc, genes = genes, rm_zeros = rm_zeros)
 
@@ -350,7 +446,7 @@ rna_atac_cor_knn <- function(atac_mc, k = 1, genes = NULL, rm_zeros = TRUE, spea
 #' @description
 #' This function returns a relative fold change matrix of ATAC peaks for a list of genes matched using \code{rna_atac_cor_knn}.
 #'
-#' @param atac_mc a McATAC object
+#' @param atac_mc a McPeaks/McTracks object
 #' @param genes a list of genes.
 #' @param metacell select only a subset of the metacells.
 #'
@@ -365,7 +461,7 @@ rna_atac_cor_knn <- function(atac_mc, k = 1, genes = NULL, rm_zeros = TRUE, spea
 #'
 #' @export
 get_genes_atac_fp <- function(atac_mc, genes = NULL, metacells = NULL, rm_zeros = TRUE, spearman = TRUE, pairwise.complete.obs = TRUE) {
-    assert_atac_object(atac_mc, "McATAC")
+    assert_atac_object(atac_mc, "ATAC")
     knn_df <- rna_atac_cor_knn(atac_mc, genes = genes, rm_zeros = rm_zeros, spearman = spearman, pairwise.complete.obs = pairwise.complete.obs)
 
     atac_fp <- atac_mc@fp[knn_df$peak, ]

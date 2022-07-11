@@ -34,7 +34,7 @@ Track names will be of the form "{track_prefix}.mc{metacell}"}
 \item{normalize}{Normalize each metacell by the sum of its counts.}
 }
 \value{
-None.
+An McTracks object with the new tracks.
 }
 \description{
 This would create a sparse track of the form "{track_prefix}.mc{metacell}" for each metacell in the McCounts object. The counts are smoothed by a running sum window of size \code{window_size * 2 + 1} (default: 201).

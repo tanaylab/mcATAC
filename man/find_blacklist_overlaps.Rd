@@ -13,7 +13,7 @@ find_blacklist_overlaps(
 )
 }
 \arguments{
-\item{atac}{(optional) an ScATAC or McATAC object}
+\item{atac}{(optional) an ScPeaks or McPeaks object}
 
 \item{peaks}{(optional) the intervals set to check}
 

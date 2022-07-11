@@ -19,8 +19,8 @@ is_sparse_matrix <- function(mat) {
 
 assert_atac_object <- function(obj, param = deparse(substitute(obj)), class = NULL) {
     if (is.null(class)) {
-        if (!methods::is(obj, "ATAC")) {
-            cli_abort("{.field {param}} must be an ScATAC or McATAC object", call = parent.frame(1))
+        if (!methods::is(obj, "ATACPeaks")) {
+            cli_abort("{.field {param}} must be an ScPeaks or McPeaks object", call = parent.frame(1))
         }
     } else {
         if (!methods::is(obj, class)) {
@@ -97,7 +97,7 @@ generate_pheatmap_annotation <- function(clust_vec, feature_type = NULL, feature
 #'
 #' @description Generate a generic pheatmap-compatible annotation for metacells
 #'
-#' @param atac_mc (optional) a McATAC object to annotate
+#' @param atac_mc (optional) a McPeaks object to annotate
 #' @param mc_clust (optional) a clustering of metacells, e.g. from gen_atac_mc_clust
 #' @param k (optional) parameter for k-means clustering
 #'
@@ -111,7 +111,7 @@ generate_mc_annotation <- function(atac_mc, mc_clust = NULL, k = 10) {
             ann_colors <- list("cell_type" = setNames(unlist(atac_mc@metadata[, "color"]), unlist(atac_mc@metadata[, "cell_type"])))
             mc_annot <- list(col_annot, ann_colors)
         } else {
-            cli_alert_warning("McATAC object specified but no metacell annotation exists. Clustering metacells.")
+            cli_alert_warning("McPeaks object specified but no metacell annotation exists. Clustering metacells.")
             mc_clust <- gen_atac_mc_clust(atac_mc = atac_mc, use_prior_annot = F, k = k)
             mc_annot <- generate_pheatmap_annotation(mc_clust, feature_type = "metacell", feature_annotation = "cluster")
         }
@@ -119,7 +119,7 @@ generate_mc_annotation <- function(atac_mc, mc_clust = NULL, k = 10) {
         if (!is.null(mc_clust)) {
             mc_annot <- generate_pheatmap_annotation(mc_clust, feature_type = "metacell", feature_annotation = "cluster")
         } else {
-            cli_abort("Error: no McATAC object ({.var atac_mc}) and no metacell clustering ({.var mc_clust}) specified")
+            cli_abort("Error: no McPeaks object ({.var atac_mc}) and no metacell clustering ({.var mc_clust}) specified")
         }
     }
     return(mc_annot)
@@ -240,7 +240,7 @@ check_dependencies <- function() {
     soft_deps <- c("tabix")
     not_found <- c(not_found, purrr::map(soft_deps, ~ {
         if (!bin_exists(.x)) {
-            cli_alert_warning("Dependency {.var {.x}} not found. Note that {.var {.x}} is not required for the McATAC pipeline, but running times may be slower.")
+            cli_alert_warning("Dependency {.var {.x}} not found. Note that {.var {.x}} is not required for the McPeaks pipeline, but running times may be slower.")
             return(.x)
         } else {
             return(NULL)
@@ -341,6 +341,37 @@ temp_track_name <- function(prefix = "", envir = parent.frame()) {
 }
 
 
+#' Return the total coverage of a track
+#'
+#' @description This function computes the total coverage of a track, and
+#' adds it as an attribute to the track. If the attribute was pre-computed
+#' before, it is returned. Set the \code{overwrite} parameter to TRUE to recompute the coverage.
+#'
+#' @param track track name
+#' @param attr_name attribute name. Default is "total_cov", please do not change this unless you know what you are doing.
+#' @param overwrite overwrite existing attribute (logical)
+#'
+#' @return Total coverage of the track.
+#'
+#' @examples
+#' \dontrun{
+#' add_track_total_coverage("track1")
+#' }
+#'
+#' @export
+get_track_total_coverage <- function(track, attr_name = "total_cov", overwrite = FALSE) {
+    if (!gtrack.exists(track)) {
+        cli_abort("Track {.val {track}} does not exist.")
+    }
+    if (gtrack.attr.get(track, attr_name) != "") {
+        if (!overwrite) {
+            return(as.numeric(gtrack.attr.get(track, attr_name)))
+        }
+    }
+    tot_cov <- gsummary(track)[[5]]
+    gtrack.attr.set(track, attr_name, tot_cov)
+    return(tot_cov)
+}
 
 #' Infer order of metacell track names by metacell number
 #

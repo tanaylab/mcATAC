@@ -25,7 +25,7 @@ plot_tracks_at_locus(
   annotation_colors = NULL,
   silent = FALSE,
   scale_bar_length = NULL,
-  rna_legc_eps = 1e-05,
+  rna_legc_eps = 0.00001,
   smooth_mcs = 1,
   smooth_bins = 1,
   colors = c("white", "lightblue", "blue", "darkred", "yellow"),
@@ -50,7 +50,7 @@ plot_tracks_at_locus(
 
 \item{chromosomes}{(optional) which set of chromosomes to use; mainly used to filter out contigs by default}
 
-\item{atac}{(optional) McATAC object from which to extract peaks in locus, and possibly \cr
+\item{atac}{(optional) McPeaks object from which to extract peaks in locus, and possibly \cr
 RNA expression values (if an RNA metacell object is attached)}
 
 \item{order_rows}{whether to order the rows by \code{cell_type} annotation}
@@ -97,7 +97,7 @@ the gene features) and \code{gene_feature}, where the intervals can be centered 
 the gene (gene_feature = 'tss'). \cr
 Metacell annotations can be added using \code{annotation_row} and \code{annotation_colors} (phetamap-style annotations),
 which can/should be generated automatically by \code{generate_pheatmap_annotation}.
-RNA expression values of the \code{gene} of interest can be added by specifying an McATAC object, \code{atac}, to
+RNA expression values of the \code{gene} of interest can be added by specifying an McPeaks object, \code{atac}, to
 which an RNA metacell object is attached (see the function \code{add_mc_rna})
 }
 \examples{

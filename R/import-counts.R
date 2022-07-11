@@ -19,7 +19,7 @@
 #' @param out_file name of the output file. A ".gz" extension will be added to the file name.
 #' @param cell_names a vector with the cell names or an ATAC object
 #' @param region intervals set to filter. See samtools docs <http://www.htslib.org/doc/samtools-view.html> for details
-#' @param genome genome name (e.g. hg19). Will be inferred from the ScATAC object if provided
+#' @param genome genome name (e.g. hg19). Will be inferred from the ScPeaks object if provided
 #' @param min_mapq minimal mapping quality (optional)
 #' @param samtools_bin path to samtools executable
 #' @param samtools_opts additional options for samtools (e.g. "--subsample 0.1")
@@ -37,7 +37,7 @@
 #' @export
 write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region, genome = NULL, min_mapq = NULL, samtools_bin = "samtools", samtools_opts = NULL, num_reads = NULL, verbose = TRUE, overwrite = FALSE) {
     withr::local_options(list(scipen = 1e5))
-    if (class(cell_names) == "ScATAC") {
+    if (class(cell_names) == "ScPeaks") {
         genome <- genome %||% cell_names@genome
         cell_names <- colnames(cell_names@mat)
     }
@@ -62,7 +62,7 @@ write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region,
         cli_abort("Chromosome {.val {chrom}} not found in the genome")
     }
 
-    fixed_region <- gintervals.force_range(region)
+    fixed_region <- gintervals.force_range(as.data.frame(region))
     if (fixed_region$start != region$start || fixed_region$end != region$end) {
         cli_warn("Region {.val {region}} was adjusted to {.val {fixed_region}}")
     }
@@ -111,7 +111,7 @@ write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region,
 #'
 #' @param fragments_file path to fragments file
 #' @param out_file name of the output file. A ".gz" extension will be added to the file name.
-#' @param cell_names a vector with the cell names or an ScATAC object
+#' @param cell_names a vector with the cell names or an ScPeaks object
 #' @param region intervals set to filter.
 #' @param overwrite overwrite existing file (optional)
 #' @param verbose verbose output (optional)
@@ -128,7 +128,7 @@ write_sparse_matrix_from_bam <- function(bam_file, out_file, cell_names, region,
 #' @noRd
 write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_names, region, num_reads = NULL, genome = NULL, overwrite = FALSE, verbose = FALSE, tabix_bin = "tabix", use_tabix = FALSE) {
     withr::with_options(list(scipen = 1e5), {
-        if (class(cell_names) == "ScATAC") {
+        if (class(cell_names) == "ScPeaks") {
             genome <- genome %||% cell_names@genome
             cell_names <- colnames(cell_names@mat)
         }
@@ -150,7 +150,7 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
             cli_abort("Chromosome {.val {chrom}} not found in the genome")
         }
 
-        fixed_region <- gintervals.force_range(region)
+        fixed_region <- gintervals.force_range(as.data.frame(region))
         if (fixed_region$start != region$start || fixed_region$end != region$end) {
             cli_warn("Region {.val {region}} was adjusted to {.val {fixed_region}}. This usually means we constructing a matrix for the wrong assembly. The current genome assembly is {.val {genome}}.")
         }
@@ -207,7 +207,7 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
 #'
 #' @param fragments_file path to fragments file. Note that in order to use tabix, the file must be compressed with gzip and have a ".gz" extension.
 #' @param out_dir output directory.
-#' @param cell_names a vector with the cell names or an ScATAC object
+#' @param cell_names a vector with the cell names or an ScPeaks object
 #' @param id an identifier for the object, e.g. "pbmc".
 #' @param description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
 #' @param bin_size Size of the genomic bins to use (in bp). Each chromsome will be chunked into bins with size which is
@@ -241,7 +241,7 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
     dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
     cli_alert("Writing to {.file {out_dir}}")
 
-    if (class(cell_names) == "ScATAC") {
+    if (class(cell_names) == "ScPeaks") {
         genome <- genome %||% cell_names@genome
         cell_names <- colnames(cell_names@mat)
     }
@@ -332,7 +332,7 @@ write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, genome = NUL
     dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
     cli_alert("Writing to {.file {out_dir}}")
 
-    if (class(cell_names) == "ScATAC") {
+    if (class(cell_names) == "ScPeaks") {
         genome <- genome %||% cell_names@genome
         cell_names <- colnames(cell_names@mat)
     }

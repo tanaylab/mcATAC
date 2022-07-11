@@ -12,8 +12,10 @@ Imports:
     assertthat,
     cli,
     dplyr,
+    dendextend,
     ggplot2,
     circlize,
+    digest,
     scales,
     glue,
     igraph,
@@ -26,6 +28,7 @@ Imports:
     purrr,
     randomNames,
     rlang,
+    ComplexHeatmap,
     sparseMatrixStats,
     stringi,
     stringr,
@@ -39,6 +42,7 @@ Imports:
     scattermore,
     grDevices,
     cowplot,
+    RcppRoll,
     chameleon,
     tglkmeans,
     parallel,
@@ -67,10 +71,14 @@ URL: https://github.com/tanaylab/mcATAC
 BugReports: https://github.com/tanaylab/mcATAC/issues
 VignetteBuilder: knitr
 Depends: 
-    R (>= 3.5)
+    R (>= 3.5),
+    misha
 LazyData: true
 Collate: 
-    'McATAC.R'
+    'ATAC.R'
+    'ATACPeaks.R'
+    'ATACTracks-cache.R'
+    'ATACTracks.R'
     'ScCounts.R'
     'McCounts.R'
     'PeakIntervals.R'
@@ -86,11 +94,13 @@ Collate:
     'motifs.R'
     'peak_calling.R'
     'plot-markers.R'
+    'plot-region.R'
     'plot.R'
     'project_on_mc.R'
     'promoters.R'
     'rna.R'
     'subset_bam.R'
+    'utils-intervals.R'
     'utils-pipe.R'
     'utils.R'
     'zzz.R'

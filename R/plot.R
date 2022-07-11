@@ -1,6 +1,6 @@
 #' Plot a scatter of gene expression vs an atac profile
 #'
-#' @param atac_mc a McATAC object
+#' @param atac_mc a McPeaks object
 #' @param gene name of the gene to plot
 #' @param atac_promoter name of the promoter to plot. By default this would be the rna gene \code{gene}.
 #' @param mc_rna a \code{metacell1} 'mc' object or a \code{metacells} metacell UMI matrix (a matrix where each row is a gene and each column is a metacell). Can be NULL if \code{atac_mc} already contains the gene expression data (added by \code{add_mc_rna}).
@@ -25,10 +25,10 @@
 #' @inheritParams get_promoter_peaks
 #' @export
 plot_atac_rna <- function(atac_mc, gene, atac_promoter = gene, mc_rna = NULL, peak = NULL, max_dist_to_promoter_peak = 5e+2, normalize_atac = TRUE, eps_rna = 1e-5, tss_intervals = "intervs.global.tss", plot_object_id = TRUE) {
-    assert_atac_object(atac_mc, class = "McATAC")
+    assert_atac_object(atac_mc, class = "McPeaks")
 
     if (!has_rna(atac_mc) && is.null(mc_rna)) {
-        cli_abort("No gene expression data in the McATAC object. Use {.code add_mc_rna()} to add it or provide the {.field mc_rna} parameter.")
+        cli_abort("No gene expression data in the McPeaks object. Use {.code add_mc_rna()} to add it or provide the {.field mc_rna} parameter.")
     }
 
     if (!is.null(mc_rna)) {
@@ -47,7 +47,7 @@ plot_atac_rna <- function(atac_mc, gene, atac_promoter = gene, mc_rna = NULL, pe
         }
     } else {
         if (peak %!in% atac_mc@peaks$peak_name) {
-            cli_abort("{.val {peak}} is not a peak in the McATAC object.")
+            cli_abort("{.val {peak}} is not a peak in the McPeaks object.")
         }
         peaks <- peak
     }
@@ -134,7 +134,7 @@ plot_atac_rna <- function(atac_mc, gene, atac_promoter = gene, mc_rna = NULL, pe
 
 #' Plot a correlation matrix of ATAC metacells
 #'
-#' @param atac_mc McATAC object
+#' @param atac_mc McPeaks object
 #' @param sp_f whether to use Spearman correlation (default) or Pearson
 #'
 #' @return p a pheatmap of ATAC metacell correlations
@@ -186,7 +186,7 @@ plot_atac_atac_cor <- function(atac_mc, sp_f = TRUE) {
 #' @description use peak gene annotations to match between RNA metacells and ATAC metacells and plot
 #' a cross-correlation matrix.
 #'
-#' @param atac_mc McATAC object
+#' @param atac_mc McPeaks object
 #' @param rna_mat an RNA metacell count matrix, where metacells are in columns and genes are in rows
 #' @param gene_field (optional) either \code{closest_tss} or \code{closest_exon_gene} -- field names in \code{atac_mc@peaks} which contain gene names. If NULL - the peaks would be
 #' transformed to promoter peaks and the gene names would be taken from the promoter gene names.
@@ -257,7 +257,7 @@ plot_atac_rna_cor <- function(atac_mc, rna_mat, gene_field = NULL, tss_dist = 5e
 
 #' Plot normalized accessibility of peaks over metacells, ordered by clustering
 #'
-#' @param atac_mc McATAC object
+#' @param atac_mc McPeaks object
 #' @param atac_mc_clust output of \code{gen_atac_mc_clust} (for meaningful visuals, make sure this is ordered by cluster)
 #' @param peak_clust output of \code{gen_atac_peak_clust} or other clustering of peaks (for meaningful visuals, make sure this is ordered by cluster)
 #' @param peak_annotation (optional) a list of a named vector and a dataframe conforming to the pheatmap \code{annotation_colors} and \code{annotation_row} conventions
@@ -356,7 +356,7 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 #' the gene (gene_feature = 'tss'). \cr
 #' Metacell annotations can be added using \code{annotation_row} and \code{annotation_colors} (phetamap-style annotations),
 #' which can/should be generated automatically by \code{generate_pheatmap_annotation}.
-#' RNA expression values of the \code{gene} of interest can be added by specifying an McATAC object, \code{atac}, to
+#' RNA expression values of the \code{gene} of interest can be added by specifying an McPeaks object, \code{atac}, to
 #' which an RNA metacell object is attached (see the function \code{add_mc_rna})
 #'
 #'
@@ -365,7 +365,7 @@ plot_atac_peak_map <- function(atac_mc, atac_mc_clust = NULL, peak_clust = NULL,
 #' @param intervals (optional) what genomic interval to plot
 #' @param iterator (optional; default - 50) misha iterator, determines the resolution at which the data is extracted and plotted
 #' @param extend (optional; default - 0) how much to extend \code{intervals} by on each side
-#' @param atac (optional) McATAC object from which to extract peaks in locus, and possibly \cr
+#' @param atac (optional) McPeaks object from which to extract peaks in locus, and possibly \cr
 #' RNA expression values (if an RNA metacell object is attached)
 #' @param order_rows whether to order the rows by \code{cell_type} annotation
 #' @param row_order an explicit ordering of rows/tracks to use
@@ -577,7 +577,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
         mat_n <- apply(mat_n, 2, zoo::rollmean, smooth_mcs, fill = "extend")
     }
     if (gene_annot) {
-        gene_annots <- make_gene_annot(intervals, iterator, ncol(mat_n))
+        gene_annots <- make_gene_annot(intervals, iterator)
     } else {
         gene_annots <- ComplexHeatmap::anno_empty()
     }
@@ -624,7 +624,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
         tad_annot <- ComplexHeatmap::anno_empty()
     }
     if (gene_annot) {
-        gene_annots <- make_gene_annot(intervals, iterator, ncol(mat_n))
+        gene_annots <- make_gene_annot(intervals, iterator)
         if (!is.null(gene_annots[["labels"]]) && !is.null(gene_annots[["label_coords"]])) {
             gene_name_annots <- ComplexHeatmap::anno_mark(
                 labels = gene_annots[["labels"]],
@@ -684,10 +684,9 @@ plot_tracks_at_locus <- function(tracks = NULL,
 
 #' @param intervals what genomic interval to generate gene annotations for
 #' @param iterator misha iterator of the associated matrix
-#' @param num_bins the number of bins needed to plot (haven't figured out yet how misha parametrizes the bin number)
 #' @return gene annotations: a binary vector for exon locations and associated text labels for starts and ends of transcripts
 #' @noRd
-make_gene_annot <- function(intervals, iterator, num_bins) {
+make_gene_annot <- function(intervals, iterator) {
     file_path <- file.path(dirname(GROOT), "annots", "refGene.txt")
     if (!file.exists(file_path)) {
         cli_alert_warning("Gene annotations do not exist in the appropriate location ({.val {file_path}}). Not annotating genes...")
@@ -699,6 +698,7 @@ make_gene_annot <- function(intervals, iterator, num_bins) {
             ((txStart >= intervals$start) & (txStart <= intervals$end)) |
                 ((txEnd >= intervals$start) & (txEnd <= intervals$end))
         )
+
         if (nrow(rg_here) > 0) {
             gbins <- giterator.intervals(intervals = intervals, iterator = iterator)
             exons_df <- rg_here %>%
@@ -732,7 +732,7 @@ make_gene_annot <- function(intervals, iterator, num_bins) {
 #' @noRd
 make_peak_annotation <- function(atac, intervals, iterator, num_bins) {
     cl <- class(atac)
-    if ("ScATAC" %in% cl || "McATAC" %in% cl) {
+    if ("ScPeaks" %in% cl || "McPeaks" %in% cl) {
         peaks <- atac@peaks
     } else if ("PeakIntervals" %in% cl) {
         peaks <- atac

@@ -3,7 +3,7 @@
 \name{scc_write}
 \alias{scc_write}
 \alias{mcc_write}
-\title{Write a counts object to a file.}
+\title{Write a counts object to a file}
 \usage{
 scc_write(object, out_dir, overwrite = FALSE)
 
@@ -17,7 +17,7 @@ mcc_write(object, out_dir, overwrite = FALSE)
 \item{overwrite}{whether to overwrite existing directory}
 }
 \description{
-Write a counts object to a file.
+Write a counts object to a file
 }
 \examples{
 \dontrun{

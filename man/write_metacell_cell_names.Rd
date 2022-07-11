@@ -7,7 +7,7 @@
 write_metacell_cell_names(mcatac, c2mc_path = NULL)
 }
 \arguments{
-\item{mcatac}{an McATAC object (from which to get metacell assignments)}
+\item{mcatac}{an McPeaks object (from which to get metacell assignments)}
 
 \item{c2mc_path}{(optional) path to write out metacell assignments to}
 }

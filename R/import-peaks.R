@@ -1,21 +1,21 @@
-#' Create an ScATAC,McATAC object from matrix and peaks
+#' Create an ScPeaks,McPeaks object from matrix and peaks
 #'
 #' @param mat a matrix/sparse matrix of counts
 #' @param peaks an intervals set where each row corresponds to a row in \code{mat}. Can contain
 #' an additional column named 'peak_name' with peak names, in which case the rownames of \code{mat}
 #' are expected to equal to this column.
-#' @param class should the output object be a ScATAC or McATAC
+#' @param class should the output object be a ScPeaks or McPeaks
 #' @inheritParams import_from_10x
 #' @inheritParams project_atac_on_mc
 #'
 #' @examples
 #' \dontrun{
 #' atac_sc <- import_from_matrix(mat, peaks, genome = "hg38")
-#' atac_mc <- import_from_matrix(mat, peaks, genome = "hg38", class = "McATAC")
+#' atac_mc <- import_from_matrix(mat, peaks, genome = "hg38", class = "McPeaks")
 #' }
 #'
 #' @export
-import_from_matrix <- function(mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, class = "ScATAC", rm_zero_peaks = TRUE, tad_based = TRUE, zero_based = FALSE, mc_size_eps_q = 0.1) {
+import_from_matrix <- function(mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, class = "ScPeaks", rm_zero_peaks = TRUE, tad_based = TRUE, zero_based = FALSE, mc_size_eps_q = 0.1) {
     if (nrow(peaks) != nrow(mat)) {
         cli_abort("Number of rows in peaks and matrix do not match")
     }
@@ -44,24 +44,24 @@ import_from_matrix <- function(mat, peaks, genome, id = NULL, description = NULL
         rownames(atac_mat) <- peaks$peak_name
     }
 
-    if (class == "ScATAC") {
-        res <- new("ScATAC", atac_mat, peaks, genome = genome, id = id, description = description, metadata = metadata, tad_based = tad_based)
-        cli_alert_success("successfully imported to an ScATAC object with {.val {ncol(res@mat)}} cells and {.val {nrow(res@mat)}} ATAC peaks")
-    } else if (class == "McATAC") {
-        res <- new("McATAC", mat = atac_mat, peaks = peaks, genome = genome, metadata = metadata, cell_to_metacell = NULL, mc_size_eps_q = mc_size_eps_q, id = id, description = description, tad_based = tad_based)
-        cli_alert_success("Created a new McATAC object with {.val {ncol(res@mat)}} metacells and {.val {nrow(res@mat)}} ATAC peaks.")
+    if (class == "ScPeaks") {
+        res <- new("ScPeaks", atac_mat, peaks, genome = genome, id = id, description = description, metadata = metadata, tad_based = tad_based)
+        cli_alert_success("successfully imported to an ScPeaks object with {.val {ncol(res@mat)}} cells and {.val {nrow(res@mat)}} ATAC peaks")
+    } else if (class == "McPeaks") {
+        res <- new("McPeaks", mat = atac_mat, peaks = peaks, genome = genome, metadata = metadata, cell_to_metacell = NULL, mc_size_eps_q = mc_size_eps_q, id = id, description = description, tad_based = tad_based)
+        cli_alert_success("Created a new McPeaks object with {.val {ncol(res@mat)}} metacells and {.val {nrow(res@mat)}} ATAC peaks.")
     } else {
-        cli_abort("{.field class} should be either ScATAC or McATAC")
+        cli_abort("{.field class} should be either ScPeaks or McPeaks")
     }
 
     return(res)
 }
 
-#' Create an ScATAC,McATAC object from an h5ad file
+#' Create an ScPeaks,McPeaks object from an h5ad file
 #'
 #' @param file name of an h5ad file with ATAC data
-#' @param class is the file storing ScATAC or McATAC. If NULL - the class would be determined by the 'class' field in the 'uns' part
-#' of the h5ad file, if exists and otherwise the class would be McATAC.
+#' @param class is the file storing ScPeaks or McPeaks. If NULL - the class would be determined by the 'class' field in the 'uns' part
+#' of the h5ad file, if exists and otherwise the class would be McPeaks.
 #' @param genome genome assembly of the peaks. e.g. "hg38", "hg19", "mm9", "mm10". If NULL - the assembly would be determined by the 'genome' field in the 'uns' part of the h5ad file.
 #' @param id an identifier for the object, e.g. "pbmc". If NULL - the id would be determined by the 'id' field in the 'uns' part of the
 #' h5ad file, and if this doesn't exist - a random id would be assigned.
@@ -72,7 +72,7 @@ import_from_matrix <- function(mat, peaks, genome, id = NULL, description = NULL
 #' @description Reads an ATAC object from an h5ad file. Peak data is taken from the 'X' section and metadata is taken from 'obs'.
 #' The 'var' section can contain a special field called 'ignore' which marks peaks that should be ignored.
 #'
-#' @return an ScATAC/McATAC object
+#' @return an ScPeaks/McPeaks object
 #'
 #' @examples
 #' \dontrun{
@@ -108,12 +108,12 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
     if (is.null(class)) {
         if (!is.null(adata$uns[["class"]])) {
             class <- adata$uns[["class"]]
-            if (class %!in% c("McATAC", "ScATAC")) {
-                cli_alert_warning("Unknown class name - creating an McATAC object")
-                class <- "McATAC"
+            if (class %!in% c("McPeaks", "ScPeaks")) {
+                cli_alert_warning("Unknown class name - creating an McPeaks object")
+                class <- "McPeaks"
             }
         } else {
-            class <- "McATAC"
+            class <- "McPeaks"
         }
     }
 
@@ -139,7 +139,7 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
         description <- adata$uns[["description"]]
     }
 
-    if (class == "McATAC") {
+    if (class == "McPeaks") {
         if (!is.null(adata$uns[["mc_size_eps_q"]])) {
             mc_size_eps_q <- adata$uns[["mc_size_eps_q"]]
         } else {
@@ -153,7 +153,7 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
             cell_to_metacell <- NULL
         }
 
-        res <- new("McATAC", mat = mat, peaks = peaks, genome = genome, id = id, description = description, metadata = metadata, cell_to_metacell = cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = file, tad_based = tad_based)
+        res <- new("McPeaks", mat = mat, peaks = peaks, genome = genome, id = id, description = description, metadata = metadata, cell_to_metacell = cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = file, tad_based = tad_based)
 
         if (!is.null(adata$uns[["rna_egc"]]) && !is.null(adata$uns[["rna_mcs"]]) && !is.null(adata$uns[["rna_gene_names"]])) {
             rna_egc <- adata$uns[["rna_egc"]]
@@ -162,7 +162,7 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
             res <- add_mc_rna(res, rna_egc)
         }
     } else {
-        res <- new("ScATAC", mat, peaks, genome, id, description, metadata, path = file, tad_based = tad_based)
+        res <- new("ScPeaks", mat, peaks, genome, id, description, metadata, path = file, tad_based = tad_based)
     }
 
     if (has_name(peaks, "ignore")) {
@@ -172,7 +172,7 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
         res@ignore_peaks <- res@ignore_peaks %>% select(-ignore)
     }
 
-    if (class == "McATAC") {
+    if (class == "McPeaks") {
         cli_alert_success("Successfully loaded an {.var {class}} object with {.val {ncol(res@mat)}} metacells and {.val {nrow(res@mat)}} ATAC peaks")
     } else {
         cli_alert_success("Successfully loaded an {.var {class}} object with {.val {ncol(res@mat)}} cells and {.val {nrow(res@mat)}} ATAC peaks")
@@ -181,7 +181,7 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
     return(res)
 }
 
-#' Create an ScATAC object from 10x directory
+#' Create an ScPeaks object from 10x directory
 #'
 #'
 #' @param dir 10x directory. Should have the following files: 'matrix.mtx', 'barcodes.tsv' and 'features.tsv'.
@@ -198,7 +198,7 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
 #' @param zero_based are the coordinates of the features 0-based? Note that when this is FALSE (default) the coordinates of the created object would be different from the ones in \code{features_fn} by 1 bp.
 #'
 #'
-#' @return an ScATAC object
+#' @return an ScPeaks object
 #'
 #' @examples
 #' \dontrun{
@@ -250,8 +250,8 @@ import_from_10x <- function(dir, genome, id = NULL, description = NULL, metadata
     }
 
     cli_alert_info("{.val {nrow(atac_mat)}} ATAC peaks")
-    res <- new("ScATAC", atac_mat, atac_peaks, genome = genome, id = id, description = description, metadata = metadata, path = matrix_fn, tad_based = tad_based)
-    cli_alert_success("successfully imported to an ScATAC object with {.val {ncol(res@mat)}} cells and {.val {nrow(res@mat)}} ATAC peaks")
+    res <- new("ScPeaks", atac_mat, atac_peaks, genome = genome, id = id, description = description, metadata = metadata, path = matrix_fn, tad_based = tad_based)
+    cli_alert_success("successfully imported to an ScPeaks object with {.val {ncol(res@mat)}} cells and {.val {nrow(res@mat)}} ATAC peaks")
 
     return(res)
 }
