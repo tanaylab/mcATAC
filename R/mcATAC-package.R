@@ -5,6 +5,7 @@
 #' @import ggplot2
 #' @import tgstat
 #' @import misha
+#' @import shiny
 #' @importFrom Matrix t colSums rowSums rowMeans colMeans
 #' @importClassesFrom Matrix sparseMatrix
 #' @importFrom misha gtrack.create_sparse gintervals.load gintervals.neighbors
