@@ -12,3 +12,9 @@ run_app(mct, port = NULL, host = NULL, launch.browser = FALSE)
 \description{
 Run a shiny app for viewing the MCT object
 }
+\examples{
+\dontrun{
+run_app(mct)
+}
+
+}

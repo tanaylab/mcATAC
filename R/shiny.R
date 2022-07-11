@@ -5,11 +5,15 @@ app_ui <- function(request) {
             width: auto;
             }
             "
-
+    if (!is.null(shiny_mct@id)) {
+        title <- glue("mcATAC viewer: {shiny_mct@id}")
+    } else {
+        title <- "mcATAC viewer"
+    }
     tagList(
         fluidPage(
             tags$style(css),
-            titlePanel("mcATAC viewer"),
+            titlePanel(title),
             fluidRow(
                 column(
                     12,
@@ -37,13 +41,31 @@ app_ui <- function(request) {
                                         ),
                                         span(class = "checkbox_inline", checkboxInput("detect_dca", "Detect DCA"))
                                     ),
-                                    shinyWidgets::searchInput(
-                                        inputId = "coords",
-                                        label = "",
-                                        placeholder = "chr3:34300000-35000020",
-                                        btnSearch = icon("circle"),
-                                        btnReset = icon("remove"),
-                                        width = "100%"
+                                    fluidRow(
+                                        column(
+                                            8,
+                                            shinyWidgets::searchInput(
+                                                inputId = "coords",
+                                                label = "Enter coordinates:",
+                                                placeholder = "chrom:start-end",
+                                                btnSearch = icon("circle"),
+                                                btnReset = icon("remove"),
+                                                width = "100%"
+                                            )
+                                        ),
+                                        column(3, shinyWidgets::virtualSelectInput(
+                                            "genes",
+                                            "Select gene:",
+                                            choices = NULL,
+                                            multiple = FALSE,
+                                            search = TRUE,
+                                            inline = TRUE
+                                        )),
+                                        column(1, actionButton(
+                                            inputId = "update_gene_coord",
+                                            label = "Go to gene",
+                                            style = "margin-top: 25px; margin-bottom: 7.5px; margin-left: 1px;"
+                                        ))
                                     ),
                                     em(textOutput("current_coords", inline = TRUE))
                                 )
@@ -73,6 +95,28 @@ app_ui <- function(request) {
 app_server <- function(input, output, session) {
     intervals <- reactiveVal()
 
+    promoters <- get_promoters(upstream = 5e4, downstream = 5e4) %>%
+        mutate(
+            coords = glue("{chrom}:{start}-{end}"),
+            label = glue("{geneSymbol} ({coords})")
+        )
+
+    observe({
+        shinyWidgets::updateVirtualSelect(
+            "genes",
+            choices = shinyWidgets::prepare_choices(promoters, label, coords)
+        )
+    })
+
+    observeEvent(input$update_gene_coord, {
+        shinyWidgets::updateSearchInput(
+            session,
+            inputId = "coords",
+            value = input$genes,
+            trigger = TRUE
+        )
+    })
+
     observeEvent(input$coords_search, {
         req(input$coords)
         new_intervals <- parse_coordinate_text(input$coords)
@@ -88,7 +132,7 @@ app_server <- function(input, output, session) {
 
     output$current_coords <- renderText({
         if (is.null(intervals())) {
-            return("Please enter valid genomic coordinates (\"chrom:start-end\")")
+            return("Please enter valid genomic coordinates (e.g. \"chr3:34300000-35000020\")")
         }
         paste0(intervals()$chrom, ":", intervals()$start, "-", intervals()$end, " (", scales::comma(intervals()$end - intervals()$start), " bp)")
     })
@@ -141,7 +185,7 @@ parse_coordinate_text <- function(text) {
     coords <- stringr::str_split(text, "[:_ -]")[[1]]
     chrom <- coords[1]
     chrom <- gsub("^chrom", "", chrom)
-    chrom <- as.numeric(gsub("^chr", "", chrom))
+    chrom <- gsub("^chr", "", chrom)
     chrom_str <- paste0("chr", chrom)
     start <- as.numeric(coords[2])
     end <- as.numeric(coords[3])
@@ -166,14 +210,19 @@ parse_coordinate_text <- function(text) {
 #'
 #' @param mct MCT object
 #'
-#'
+#' @examples
+#' \dontrun{
+#' run_app(mct)
+#' }
 #'
 #' @export
 run_app <- function(mct,
                     port = NULL,
                     host = NULL,
                     launch.browser = FALSE) {
-    opt <- options(gmultitasking = FALSE)
+    library(misha)
+    library(shiny)
+    opt <- options(gmultitasking = FALSE, shiny.usecairo = TRUE)
     withr::defer(options(opt))
     shiny_mct <<- mct
     shiny::shinyApp(
