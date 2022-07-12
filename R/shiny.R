@@ -4,6 +4,8 @@ app_ui <- function(request) {
             display: inline-block;
             width: auto;
             }
+            #inline label{ display: table-cell; text-align: center; vertical-align: middle; }
+            #inline .form-group { display: table-row;}
             "
     if (!is.null(shiny_mct@id)) {
         title <- glue("mcATAC viewer: {shiny_mct@id}")
@@ -11,8 +13,9 @@ app_ui <- function(request) {
         title <- "mcATAC viewer"
     }
     tagList(
+        shinyjs::useShinyjs(), # Set up shinyjs
         fluidPage(
-            tags$style(css),
+            tags$style(type = "text/css", css),
             titlePanel(title),
             fluidRow(
                 column(
@@ -21,7 +24,7 @@ app_ui <- function(request) {
                         fluidRow(
                             align = "left",
                             column(
-                                10,
+                                11,
                                 tagList(
                                     div(
                                         tags$b("Move:"),
@@ -39,7 +42,10 @@ app_ui <- function(request) {
                                             inputIds = paste0("zoom_out_", c(1.5, 3, 10)),
                                             labels = c("1.5x", "3x", "10x")
                                         ),
-                                        span(class = "checkbox_inline", checkboxInput("detect_dca", "Detect DCA"))
+                                        span(class = "checkbox_inline", checkboxInput("detect_dca", "Detect DCA", value = TRUE)),
+                                        tags$div(numericInput("dca_peak_lf_thresh", "Peak thr:", value = 1.2, min = 0, max = 10, step = 0.1), id = "inline", style = "display:inline-block;vertical-align: middle;margin-left:50px;"),
+                                        tags$div(numericInput("dca_trough_lf_thresh", "Trough thr:", value = -1, max = 0, min = -10, step = 0.1), id = "inline", style = "display:inline-block;vertical-align: middle;"),
+                                        tags$div(numericInput("dca_sz_frac_for_peak", "Max:", value = 0.25, max = 1, min = 0, step = 0.05), id = "inline", style = "display:inline-block;vertical-align: middle;")
                                     ),
                                     fluidRow(
                                         column(
@@ -94,6 +100,13 @@ app_ui <- function(request) {
 
 app_server <- function(input, output, session) {
     intervals <- reactiveVal()
+    globals <- reactiveValues()
+
+    if (has_rna(shiny_mct) && has_cell_type(shiny_mct) && has_cell_type_colors(shiny_mct)) {
+        hc <- mc_hclust_rna(shiny_mct, force_cell_type = TRUE)
+    } else {
+        hc <- NULL
+    }
 
     promoters <- get_promoters(upstream = 5e4, downstream = 5e4) %>%
         mutate(
@@ -127,8 +140,25 @@ app_server <- function(input, output, session) {
     output$region_plot <- renderPlot({
         req(intervals())
         req(!is.null(input$detect_dca))
-        mct_plot_region(shiny_mct, intervals(), detect_dca = input$detect_dca, gene_annot = TRUE)
-    }) %>% bindCache(intervals(), input$detect_dca)
+        req(input$dca_peak_lf_thresh)
+        req(input$dca_trough_lf_thresh)
+        req(input$dca_sz_frac_for_peak)        
+        mct_plot_region(
+            shiny_mct, intervals(),
+            detect_dca = input$detect_dca,
+            gene_annot = TRUE,
+            hc = hc,
+            peak_lf_thresh1 = input$dca_peak_lf_thresh,
+            trough_lf_thresh1 = input$dca_trough_lf_thresh,
+            sz_frac_for_peak = input$dca_sz_frac_for_peak            
+        )
+    }) %>% bindCache(
+        intervals(),
+        input$detect_dca,
+        input$dca_peak_lf_thresh,
+        input$dca_trough_lf_thresh,
+        input$dca_sz_frac_for_peak        
+    )
 
     output$current_coords <- renderText({
         if (is.null(intervals())) {
@@ -174,6 +204,12 @@ app_server <- function(input, output, session) {
             ) %>%
             select(chrom, start, end)
         intervals(zoom_intervals)
+    })
+
+    observe({
+        shinyjs::toggle(id = "dca_peak_lf_thresh", condition = input$detect_dca)
+        shinyjs::toggle(id = "dca_trough_lf_thresh", condition = input$detect_dca)
+        shinyjs::toggle(id = "dca_sz_frac_for_peak", condition = input$detect_dca)
     })
 }
 
