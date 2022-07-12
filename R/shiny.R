@@ -49,7 +49,14 @@ app_ui <- function(request) {
                                     ),
                                     fluidRow(
                                         column(
-                                            8,
+                                            1,
+                                            tags$div(
+                                                actionButton("back", "", icon = icon("undo"), style = "margin-top:25px;"),
+                                                actionButton("forward", "", icon = icon("redo"), style = "margin-top:25px;margin-left:0px;")
+                                            )
+                                        ),
+                                        column(
+                                            7,
                                             shinyWidgets::searchInput(
                                                 inputId = "coords",
                                                 label = "Enter coordinates:",
@@ -130,11 +137,40 @@ app_server <- function(input, output, session) {
         )
     })
 
+    update_intervals <- function(new_intervals) {        
+        if (new_intervals$end - new_intervals$start > 1.5e6) {
+            showNotification("Region is too large")
+            req(FALSE)
+        }
+        
+        globals$history <- c(globals$history, list(new_intervals))
+        globals$history_iterator <- length(globals$history)
+        intervals(new_intervals)
+    }
+
     observeEvent(input$coords_search, {
         req(input$coords)
         new_intervals <- parse_coordinate_text(input$coords)
         req(new_intervals)
-        intervals(new_intervals)
+        update_intervals(new_intervals)
+    })
+
+    observeEvent(input$back, {
+        req(globals$history)
+        req(globals$history_iterator)
+        if (globals$history_iterator > 1) {
+            globals$history_iterator <- globals$history_iterator - 1
+            intervals(globals$history[[globals$history_iterator]])
+        }
+    })
+
+    observeEvent(input$forward, {
+        req(globals$history)
+        req(globals$history_iterator)
+        if (globals$history_iterator < length(globals$history)) {
+            globals$history_iterator <- globals$history_iterator + 1
+            intervals(globals$history[[globals$history_iterator]])
+        }
     })
 
     output$region_plot <- renderPlot({
@@ -142,7 +178,7 @@ app_server <- function(input, output, session) {
         req(!is.null(input$detect_dca))
         req(input$dca_peak_lf_thresh)
         req(input$dca_trough_lf_thresh)
-        req(input$dca_sz_frac_for_peak)        
+        req(input$dca_sz_frac_for_peak)
         mct_plot_region(
             shiny_mct, intervals(),
             detect_dca = input$detect_dca,
@@ -150,14 +186,14 @@ app_server <- function(input, output, session) {
             hc = hc,
             peak_lf_thresh1 = input$dca_peak_lf_thresh,
             trough_lf_thresh1 = input$dca_trough_lf_thresh,
-            sz_frac_for_peak = input$dca_sz_frac_for_peak            
+            sz_frac_for_peak = input$dca_sz_frac_for_peak
         )
     }) %>% bindCache(
         intervals(),
         input$detect_dca,
         input$dca_peak_lf_thresh,
         input$dca_trough_lf_thresh,
-        input$dca_sz_frac_for_peak        
+        input$dca_sz_frac_for_peak
     )
 
     output$current_coords <- renderText({
@@ -170,11 +206,11 @@ app_server <- function(input, output, session) {
     purrr::walk(c(1.5, 3, 10), ~ {
         observeEvent(input[[glue("zoom_in_{.x}")]], {
             req(intervals())
-            intervals(gintervals.zoom_in(intervals(), .x))
+            update_intervals(gintervals.zoom_in(intervals(), .x))
         })
         observeEvent(input[[glue("zoom_out_{.x}")]], {
             req(intervals())
-            intervals(gintervals.zoom_out(intervals(), .x))
+            update_intervals(gintervals.zoom_out(intervals(), .x))
         })
     })
 
@@ -182,13 +218,13 @@ app_server <- function(input, output, session) {
         observeEvent(input[[glue("shift_left_{.x}")]], {
             req(intervals())
             shift <- (intervals()$end - intervals()$start) * .x / 100
-            intervals(gintervals.shift_left(intervals(), shift))
+            update_intervals(gintervals.shift_left(intervals(), shift))
         })
 
         observeEvent(input[[glue("shift_right_{.x}")]], {
             req(intervals())
             shift <- (intervals()$end - intervals()$start) * .x / 100
-            intervals(gintervals.shift_right(intervals(), shift))
+            update_intervals(gintervals.shift_right(intervals(), shift))
         })
     })
 
@@ -203,7 +239,7 @@ app_server <- function(input, output, session) {
                 start = round(start + len * xmin)
             ) %>%
             select(chrom, start, end)
-        intervals(zoom_intervals)
+        update_intervals(zoom_intervals)
     })
 
     observe({
