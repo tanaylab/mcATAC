@@ -50,21 +50,27 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 
     mat <- raw_mat[, intersect(mct@metacells[mct@order], colnames(raw_mat)), drop = FALSE]
 
-    dca_mat <- NULL
-    if (detect_dca) {
-        if (is.null(hc)) {
-            mct <- mct_subset_metacells(mct, colnames(mat))
-            hc <- mc_hclust_rna(mct, force_cell_type = force_cell_type)
-        }
+    if (detect_dca && is.null(hc)){
+        mct <- mct_subset_metacells(mct, colnames(mat))
+        hc <- mc_hclust_rna(mct, force_cell_type = force_cell_type)
+    }
+
+    if (!is.null(hc)){
         if (any(hc$label %!in% colnames(mat))) {
             missing_mcs <- setdiff(hc$label, colnames(mat))
             cli_warn("The following metacells are present in the hclust object, but are missing in the matrix (this is probably due to downsampling): {.val {missing_mcs}}")
             hc <- dendextend::prune(hc, missing_mcs)
         }
+        mat <- mat[, hc$label]        
+    }
 
-        mat <- mat[, hc$label]
+    dca_mat <- NULL
+    if (detect_dca) {        
         dca_mat <- mct_diff_access_on_hc(mat, hc = hc, ...)
-        dca_mat <- dca_mat[, hc$order, drop = FALSE]
+        dca_mat <- dca_mat[, hc$order, drop = FALSE]        
+    }
+
+    if (!is.null(hc)) {
         mat <- mat[, hc$order, drop = FALSE]
     }
 
