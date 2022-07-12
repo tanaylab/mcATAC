@@ -5,7 +5,7 @@ Intronic peaks are within gene bodies, but not in an exon.
 Exonic peaks overlap exons. 
 Intergenic-proximal peaks are less than max_proximal away from a TSS, but not within a gene body. 
 Intergenic-distal peaks are more than min_distal away from some TSS, and less than max-distal from any TSS, and not within a gene body. 
-Desert peaks are at least max_distal from any known TSS (as defined by the tss interval set)."><title>Annotate an intervals set — annotate_intervals • mcATAC</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Annotate an intervals set — annotate_intervals"><meta property="og:description" content="ATAC peaks are classified into either 'promoter', 'intronic', 'exonic', 'ig_proximal' (intergenic-proximal), 'ig_distal' (intergenic-distal) or 'desert'. 
+Desert peaks are at least max_distal from any known TSS (as defined by the tss interval set)."><title>Annotate an intervals set — annotate_intervals • mcATAC</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Annotate an intervals set — annotate_intervals"><meta property="og:description" content="ATAC peaks are classified into either 'promoter', 'intronic', 'exonic', 'ig_proximal' (intergenic-proximal), 'ig_distal' (intergenic-distal) or 'desert'. 
 Promoter peaks are those less than min_proximal away from a TSS. 
 Intronic peaks are within gene bodies, but not in an exon. 
 Exonic peaks overlap exons. 
@@ -75,52 +75,71 @@ Desert peaks are at least <code>max_distal</code> from any known TSS (as defined
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">annotate_intervals</span><span class="op">(</span>
-  <span class="va">intervals</span>,
-  <span class="va">genome</span>,
-  min_proximal <span class="op">=</span> <span class="fl">1000</span>,
-  max_proximal <span class="op">=</span> <span class="fl">20000</span>,
-  min_distal <span class="op">=</span> <span class="va">max_proximal</span>,
-  max_distal <span class="op">=</span> <span class="fl">1000000</span>,
-  exonic_peak_dist <span class="op">=</span> <span class="fl">0</span>,
-  tss <span class="op">=</span> <span class="st">"intervs.global.tss"</span>,
-  exons <span class="op">=</span> <span class="st">"intervs.global.exon"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">annotate_intervals</span><span class="op">(</span></span>
+<span>  <span class="va">intervals</span>,</span>
+<span>  <span class="va">genome</span>,</span>
+<span>  min_proximal <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  max_proximal <span class="op">=</span> <span class="fl">20000</span>,</span>
+<span>  min_distal <span class="op">=</span> <span class="va">max_proximal</span>,</span>
+<span>  max_distal <span class="op">=</span> <span class="fl">1000000</span>,</span>
+<span>  exonic_peak_dist <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  tss <span class="op">=</span> <span class="st">"intervs.global.tss"</span>,</span>
+<span>  exons <span class="op">=</span> <span class="st">"intervs.global.exon"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>intervals</dt>
 <dd><p>the intervals set to annotate</p></dd>
+
+
 <dt>genome</dt>
 <dd><p>which genome/genomic database to use (e.g. 'mm10', 'hg19')</p></dd>
+
+
 <dt>min_proximal</dt>
 <dd><p>the minimum distance from a TSS, under which a peak is considered to be a promoter peak, and beyond (or at) which it is a proximal enhancer.</p></dd>
+
+
 <dt>max_proximal</dt>
 <dd><p>the minimum distance from a TSS, under which a peak is considered to be a proximal enhancer peak, and beyond (or at) which it is not.</p></dd>
+
+
 <dt>min_distal</dt>
 <dd><p>the minimum distance from some TSS, only above which a peak is considered to be of a distal enhancer. Usually equal to <code>max_proximal</code>, unless there is good reason</p></dd>
+
+
 <dt>max_distal</dt>
 <dd><p>the maximum distance from any TSS, under which a peak is considered to be of a distal enhancer, and above which it is a 'desert' peak.</p></dd>
+
+
 <dt>exonic_peak_dist</dt>
 <dd><p>a parameter that allows proximity (without overlap) of peaks to exons that still classifies them as exonic peaks, as active transcription usually confers accessibility in the vicinity of exons, and this might confound a possible assignment of regulatory activity to an exon.</p></dd>
+
+
 <dt>tss</dt>
 <dd><p>the TSS interval set or the name of the TSS interval set to use.</p></dd>
+
+
 <dt>exons</dt>
 <dd><p>the exons interval set or the name of the exons interval set to use.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>intervals - the input intervals set with added fields .code peak_type, .code closest_tss, .code closest_exon_gene and .code gene_body_gene.</p>
+    
+
+<p>intervals - the input intervals set with added fields .code peak_type, .code closest_tss, .code closest_exon_gene and .code gene_body_gene.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="va">my_intervals</span> <span class="op">&lt;-</span> <span class="fu">annotate_intervals</span><span class="op">(</span><span class="va">my_intervals</span>, <span class="st">"mm10"</span>, min_proximal <span class="op">=</span> <span class="fl">1e+03</span>, max_proximal <span class="op">=</span> <span class="fl">2e+04</span>, max_distal <span class="op">=</span> <span class="fl">1e+06</span>, exonic_peak_dist <span class="op">=</span> <span class="fl">5e+2</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">my_intervals</span><span class="op">$</span><span class="va">peak_type</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">my_intervals</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">toupper</a></span><span class="op">(</span><span class="va">my_intervals</span><span class="op">$</span><span class="va">closest_tss</span><span class="op">)</span> <span class="op">==</span> <span class="st">"PCNA"</span><span class="op">)</span>, <span class="op">]</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="va">my_intervals</span> <span class="op">&lt;-</span> <span class="fu">annotate_intervals</span><span class="op">(</span><span class="va">my_intervals</span>, <span class="st">"mm10"</span>, min_proximal <span class="op">=</span> <span class="fl">1e+03</span>, max_proximal <span class="op">=</span> <span class="fl">2e+04</span>, max_distal <span class="op">=</span> <span class="fl">1e+06</span>, exonic_peak_dist <span class="op">=</span> <span class="fl">5e+2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">my_intervals</span><span class="op">$</span><span class="va">peak_type</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">my_intervals</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">toupper</a></span><span class="op">(</span><span class="va">my_intervals</span><span class="op">$</span><span class="va">closest_tss</span><span class="op">)</span> <span class="op">==</span> <span class="st">"PCNA"</span><span class="op">)</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -132,7 +151,7 @@ Desert peaks are at least <code>max_distal</code> from any known TSS (as defined
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer></div>

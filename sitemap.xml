@@ -28,7 +28,16 @@
     <loc>/reference/ATAC-class.html</loc>
   </url>
   <url>
-    <loc>/reference/ATAC.html</loc>
+    <loc>/reference/ATACPeaks-class.html</loc>
+  </url>
+  <url>
+    <loc>/reference/ATACPeaks.html</loc>
+  </url>
+  <url>
+    <loc>/reference/ATACTracks-class.html</loc>
+  </url>
+  <url>
+    <loc>/reference/ATACTracks.html</loc>
   </url>
   <url>
     <loc>/reference/PeakIntervals.html</loc>
@@ -74,6 +83,9 @@
   </url>
   <url>
     <loc>/reference/check_dependencies.html</loc>
+  </url>
+  <url>
+    <loc>/reference/clear_cache.html</loc>
   </url>
   <url>
     <loc>/reference/convert_wigs_to_tracks.html</loc>
@@ -124,6 +136,9 @@
     <loc>/reference/get_available_pssms.html</loc>
   </url>
   <url>
+    <loc>/reference/get_gene_promoter.html</loc>
+  </url>
+  <url>
     <loc>/reference/get_genes_atac_fp.html</loc>
   </url>
   <url>
@@ -146,6 +161,27 @@
   </url>
   <url>
     <loc>/reference/get_rna_markers.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_track_total_coverage.html</loc>
+  </url>
+  <url>
+    <loc>/reference/gintervals.extend_left.html</loc>
+  </url>
+  <url>
+    <loc>/reference/gintervals.extend_right.html</loc>
+  </url>
+  <url>
+    <loc>/reference/gintervals.shift_left.html</loc>
+  </url>
+  <url>
+    <loc>/reference/gintervals.shift_right.html</loc>
+  </url>
+  <url>
+    <loc>/reference/gintervals.zoom_in.html</loc>
+  </url>
+  <url>
+    <loc>/reference/gintervals.zoom_out.html</loc>
   </url>
   <url>
     <loc>/reference/has_cell_type.html</loc>
@@ -175,13 +211,25 @@
     <loc>/reference/index.html</loc>
   </url>
   <url>
-    <loc>/reference/initialize-McATAC-method.html</loc>
+    <loc>/reference/infer_track_order.html</loc>
   </url>
   <url>
-    <loc>/reference/initialize-ScATAC-method.html</loc>
+    <loc>/reference/initialize-McPeaks-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/initialize-ScPeaks-method.html</loc>
   </url>
   <url>
     <loc>/reference/mcATAC-package.html</loc>
+  </url>
+  <url>
+    <loc>/reference/mc_hclust_rna.html</loc>
+  </url>
+  <url>
+    <loc>/reference/mc_order.html</loc>
+  </url>
+  <url>
+    <loc>/reference/mc_order_by_rna.html</loc>
   </url>
   <url>
     <loc>/reference/mcc_extract_to_df.html</loc>
@@ -208,10 +256,28 @@
     <loc>/reference/mcc_to_tracks.html</loc>
   </url>
   <url>
+    <loc>/reference/mct_create.html</loc>
+  </url>
+  <url>
+    <loc>/reference/mct_diff_access_on_hc.html</loc>
+  </url>
+  <url>
+    <loc>/reference/mct_get_mat.html</loc>
+  </url>
+  <url>
+    <loc>/reference/mct_ls_cached_regions.html</loc>
+  </url>
+  <url>
+    <loc>/reference/mct_plot_region.html</loc>
+  </url>
+  <url>
     <loc>/reference/merge_metacell_bams.html</loc>
   </url>
   <url>
     <loc>/reference/name_enhancers.html</loc>
+  </url>
+  <url>
+    <loc>/reference/order_tracks.html</loc>
   </url>
   <url>
     <loc>/reference/peak_names.html</loc>
@@ -250,6 +316,9 @@
     <loc>/reference/plot_peak_max_cov_distribution.html</loc>
   </url>
   <url>
+    <loc>/reference/plot_region_mat.html</loc>
+  </url>
+  <url>
     <loc>/reference/plot_rna_markers.html</loc>
   </url>
   <url>
@@ -266,6 +335,9 @@
   </url>
   <url>
     <loc>/reference/save_pheatmap.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scc_extract.html</loc>
   </url>
   <url>
     <loc>/reference/scc_project_on_mc.html</loc>

@@ -8,8 +8,8 @@
 <meta name="description" content="mcATAC">
 <title>mcATAC • mcATAC</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="mcATAC">
 <meta property="og:description" content="mcATAC">
@@ -69,7 +69,7 @@
 
 
 <script src="mcATAC_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
-  <main id="main"><div class="page-header">
+  <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>mcATAC</h1>
             
       
@@ -80,11 +80,10 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tanaylab/mcATAC" class="external-link">mcATAC</a></span><span class="op">)</span>
-<span class="co">#&gt; Loading required package: Rcpp</span>
-<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Parallelization enabled. Using <span style="color: #0000BB;">77</span> threads.</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span>
-<span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tanaylab/mcATAC" class="external-link">mcATAC</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Parallelization enabled. Using <span style="color: #0000BB;">77</span> threads.</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="download-dataset">Download dataset<a class="anchor" aria-label="anchor" href="#download-dataset"></a>
 </h2>
@@ -92,34 +91,36 @@
 <p><a href="https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k?" class="external-link">PBMC from a healthy donor - granulocytes removed through cell sorting (10k) (Filtered feature barcode matrix MEX (DIR))</a></p>
 <p>And extract it’s contents to a directory called <code>pbmc_data</code>:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="st">"pbmc_data"</span><span class="op">)</span><span class="op">)</span><span class="op">{</span>
-  <span class="fu"><a href="../reference/download_pbmc_example_data.html">download_pbmc_example_data</a></span><span class="op">(</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="st">"pbmc_data"</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/download_pbmc_example_data.html">download_pbmc_example_data</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> downloaded processed matrix</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> successfully downloaded data to <span style="color: #0000BB;">pbmc_data</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="import-atac-dataset">Import ATAC dataset<a class="anchor" aria-label="anchor" href="#import-atac-dataset"></a>
 </h2>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_from_10x.html">import_from_10x</a></span><span class="op">(</span><span class="st">"pbmc_data"</span>, genome <span class="op">=</span> <span class="st">"hg38"</span>, id <span class="op">=</span> <span class="st">"pbmc"</span>, description <span class="op">=</span> <span class="st">"PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"</span><span class="op">)</span>
-<span class="co">#&gt; • Importing matrix</span>
-<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Imported a matrix of <span style="color: #0000BB;">11909</span> cells and <span style="color: #0000BB;">144978</span> features</span>
-<span class="co">#&gt; • Importing features</span>
-<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Removed <span style="color: #0000BB;">107861</span> ATAC peaks which were all zero</span>
-<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #0000BB;">107861</span> ATAC peaks</span>
-<span class="co">#&gt; <span style="color: #BBBB00;">!</span> removed <span style="color: #00BB00;">32</span> peaks from the following chromosome(s) which are missing from <span style="color: #00BB00;">hg38</span>: <span style="color: #0000BB;">KI270727.1, GL000194.1, GL000205.2, GL000195.1, GL000219.1, KI270734.1, KI270721.1, KI270726.1, KI270713.1</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">✔</span> successfully imported to an ScATAC object with <span style="color: #0000BB;">11909</span> cells and <span style="color: #0000BB;">107829</span> ATAC peaks</span>
-<span class="va">atac_sc</span>
-<span class="co">#&gt; <span style="color: #0000BB;">&lt;ScATAC&gt;</span> object with <span style="color: #0000BB;">11909</span> cells and <span style="color: #0000BB;">107829</span> ATAC peaks from <span style="color: #00BB00;">hg38</span>.</span>
-<span class="co">#&gt; id: <span style="color: #0000BB;">"pbmc"</span></span>
-<span class="co">#&gt; description: <span style="color: #0000BB;">"PBMC from a healthy donor - granulocytes removed through cell</span></span>
-<span class="co">#&gt; <span style="color: #0000BB;">sorting (10k)"</span></span>
-<span class="co">#&gt; Loaded from:</span>
-<span class="co">#&gt; <span style="color: #0000BB;">/net/mraid14/export/tgdata/users/aviezerl/src/mcATAC/vignettes/pbmc_data/matrix.mtx.gz</span></span>
-<span class="co">#&gt; Slots include:</span>
-<span class="co">#&gt;   • `@mat`: a numeric matrix where rows are peaks and columns are cells. Can be</span>
-<span class="co">#&gt;   a sparse matrix.</span>
-<span class="co">#&gt;   • `@peaks`: a misha intervals set with the peak definitions.</span>
-<span class="co">#&gt;   • `@genome`: genome assembly of the peaks</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_from_10x.html">import_from_10x</a></span><span class="op">(</span><span class="st">"pbmc_data"</span>, genome <span class="op">=</span> <span class="st">"hg38"</span>, id <span class="op">=</span> <span class="st">"pbmc"</span>, description <span class="op">=</span> <span class="st">"PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; • Importing matrix</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Imported a matrix of <span style="color: #0000BB;">11909</span> cells and <span style="color: #0000BB;">144978</span> features</span></span>
+<span><span class="co">#&gt; • Importing features</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Removed <span style="color: #0000BB;">107861</span> ATAC peaks which were all zero</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #0000BB;">107861</span> ATAC peaks</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> removed <span style="color: #00BB00;">32</span> peaks from the following chromosome(s) which are missing from <span style="color: #00BB00;">hg38</span>: <span style="color: #0000BB;">KI270727.1, GL000194.1, GL000205.2, GL000195.1, GL000219.1, KI270734.1, KI270721.1, KI270726.1, KI270713.1</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> successfully imported to an ScATAC object with <span style="color: #0000BB;">11909</span> cells and <span style="color: #0000BB;">107829</span> ATAC peaks</span></span>
+<span><span class="va">atac_sc</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;ScATAC&gt;</span> object with <span style="color: #0000BB;">11909</span> cells and <span style="color: #0000BB;">107829</span> ATAC peaks from <span style="color: #00BB00;">hg38</span>.</span></span>
+<span><span class="co">#&gt; id: <span style="color: #0000BB;">"pbmc"</span></span></span>
+<span><span class="co">#&gt; description: <span style="color: #0000BB;">"PBMC from a healthy donor - granulocytes removed through cell</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">sorting (10k)"</span></span></span>
+<span><span class="co">#&gt; Loaded from:</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">/net/mraid14/export/tgdata/users/aviezerl/temp/mcATAC/vignettes/pbmc_data/matrix.mtx.gz</span></span></span>
+<span><span class="co">#&gt; Slots include:</span></span>
+<span><span class="co">#&gt;   • `@mat`: a numeric matrix where rows are peaks and columns are cells. Can be</span></span>
+<span><span class="co">#&gt;   a sparse matrix.</span></span>
+<span><span class="co">#&gt;   • `@peaks`: a misha intervals set with the peak definitions.</span></span>
+<span><span class="co">#&gt;   • `@genome`: genome assembly of the peaks</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="filter-peaks">Filter peaks<a class="anchor" aria-label="anchor" href="#filter-peaks"></a>
@@ -129,41 +130,41 @@
 </h3>
 <p>Plot the length distribution:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/plot_peak_length_distribution.html">plot_peak_length_distribution</a></span><span class="op">(</span><span class="va">atac_sc</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_peak_length_distribution.html">plot_peak_length_distribution</a></span><span class="op">(</span><span class="va">atac_sc</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mcATAC_files/figure-html/plot-peak-len-1.png" width="2187.5"></p>
 <p>Plot the coverage distribution:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/plot_peak_coverage_distribution.html">plot_peak_coverage_distribution</a></span><span class="op">(</span><span class="va">atac_sc</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_peak_coverage_distribution.html">plot_peak_coverage_distribution</a></span><span class="op">(</span><span class="va">atac_sc</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mcATAC_files/figure-html/plot-peak-cov-1.png" width="2187.5"></p>
 <p>Plot the distribution of the maximal number of peaks per cell for each peak:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/plot_peak_max_cov_distribution.html">plot_peak_max_cov_distribution</a></span><span class="op">(</span><span class="va">atac_sc</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_peak_max_cov_distribution.html">plot_peak_max_cov_distribution</a></span><span class="op">(</span><span class="va">atac_sc</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mcATAC_files/figure-html/plot-peak-max-cov-1.png" width="2187.5"></p>
 <p>Filter the peaks by length and coverage:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/filter_features.html">filter_features</a></span><span class="op">(</span><span class="va">atac_sc</span>, minimal_max_umi <span class="op">=</span> <span class="fl">3</span>, min_peak_length <span class="op">=</span> <span class="fl">200</span>, max_peak_length <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span>
-<span class="co">#&gt; • <span style="color: #0000BB;">8544</span> features were shorter than <span style="color: #00BB00;">200bp</span></span>
-<span class="co">#&gt; • <span style="color: #0000BB;">37160</span> features were longer than <span style="color: #00BB00;">1000bp</span></span>
-<span class="co">#&gt; • <span style="color: #0000BB;">676</span> features had a maximal UMI count less than <span style="color: #00BB00;">3</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">✔</span> Removed <span style="color: #0000BB;">46380</span> peaks out of <span style="color: #0000BB;">107829</span> <span style="color: #00BB00;">(43%)</span>. The object is left with <span style="color: #0000BB;">61449</span> peaks.</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/filter_features.html">filter_features</a></span><span class="op">(</span><span class="va">atac_sc</span>, minimal_max_umi <span class="op">=</span> <span class="fl">3</span>, min_peak_length <span class="op">=</span> <span class="fl">200</span>, max_peak_length <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="co">#&gt; • <span style="color: #0000BB;">8544</span> features were shorter than <span style="color: #00BB00;">200bp</span></span></span>
+<span><span class="co">#&gt; • <span style="color: #0000BB;">37160</span> features were longer than <span style="color: #00BB00;">1000bp</span></span></span>
+<span><span class="co">#&gt; • <span style="color: #0000BB;">676</span> features had a maximal UMI count less than <span style="color: #00BB00;">3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Removed <span style="color: #0000BB;">46380</span> peaks out of <span style="color: #0000BB;">107829</span> <span style="color: #00BB00;">(43%)</span>. The object is left with <span style="color: #0000BB;">61449</span> peaks.</span></span></code></pre></div>
 <p>Identify outliers using coverage density:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/plot_peak_coverage_density.html">plot_peak_coverage_density</a></span><span class="op">(</span><span class="va">atac_sc</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">250</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_peak_coverage_density.html">plot_peak_coverage_density</a></span><span class="op">(</span><span class="va">atac_sc</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">250</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mcATAC_files/figure-html/plot-peak-density-1.png" width="2187.5"></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/filter_features.html">filter_features</a></span><span class="op">(</span><span class="va">atac_sc</span>, max_peak_density <span class="op">=</span> <span class="fl">250</span><span class="op">)</span>
-<span class="co">#&gt; • <span style="color: #0000BB;">107</span> features had a peak density of more than <span style="color: #00BB00;">250</span> UMIs per 100bp</span>
-<span class="co">#&gt; <span style="color: #BBBB00;">!</span> Adding to previous ignore policy (<span style="color: #0000BB;">46380</span> peaks).</span>
-<span class="co">#&gt; <span style="color: #00BB00;">✔</span> Removed <span style="color: #0000BB;">107</span> peaks out of <span style="color: #0000BB;">107829</span> <span style="color: #00BB00;">(0%)</span>. The object is left with <span style="color: #0000BB;">61342</span> peaks <span style="color: #00BB00;">(43%)</span>.</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/filter_features.html">filter_features</a></span><span class="op">(</span><span class="va">atac_sc</span>, max_peak_density <span class="op">=</span> <span class="fl">250</span><span class="op">)</span></span>
+<span><span class="co">#&gt; • <span style="color: #0000BB;">107</span> features had a peak density of more than <span style="color: #00BB00;">250</span> UMIs per 100bp</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Adding to previous ignore policy (<span style="color: #0000BB;">46380</span> peaks).</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Removed <span style="color: #0000BB;">107</span> peaks out of <span style="color: #0000BB;">107829</span> <span style="color: #00BB00;">(0%)</span>. The object is left with <span style="color: #0000BB;">61342</span> peaks <span style="color: #00BB00;">(43%)</span>.</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="by-overlap-with-known-blacklist-regions">by overlap with known blacklist regions<a class="anchor" aria-label="anchor" href="#by-overlap-with-known-blacklist-regions"></a>
 </h3>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">blacklist_overlaps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_blacklist_overlaps.html">find_blacklist_overlaps</a></span><span class="op">(</span><span class="va">atac_sc</span><span class="op">)</span>
-<span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atac_ignore_peaks.html">atac_ignore_peaks</a></span><span class="op">(</span><span class="va">atac_sc</span>, <span class="va">blacklist_overlaps</span>, reset <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #BBBB00;">!</span> Adding to previous ignore policy (<span style="color: #0000BB;">46487</span> peaks).</span>
-<span class="co">#&gt; <span style="color: #00BB00;">✔</span> Removed <span style="color: #0000BB;">322</span> peaks out of <span style="color: #0000BB;">107829</span> <span style="color: #00BB00;">(0%)</span>. The object is left with <span style="color: #0000BB;">61020</span> peaks <span style="color: #00BB00;">(43%)</span>.</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">blacklist_overlaps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_blacklist_overlaps.html">find_blacklist_overlaps</a></span><span class="op">(</span><span class="va">atac_sc</span><span class="op">)</span></span>
+<span><span class="va">atac_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atac_ignore_peaks.html">atac_ignore_peaks</a></span><span class="op">(</span><span class="va">atac_sc</span>, <span class="va">blacklist_overlaps</span>, reset <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Adding to previous ignore policy (<span style="color: #0000BB;">46487</span> peaks).</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Removed <span style="color: #0000BB;">322</span> peaks out of <span style="color: #0000BB;">107829</span> <span style="color: #00BB00;">(0%)</span>. The object is left with <span style="color: #0000BB;">61020</span> peaks <span style="color: #00BB00;">(43%)</span>.</span></span></code></pre></div>
 <blockquote>
 <p>See [<a href="https://doi.org/10.1038/s41598-019-45839-z" class="external-link uri">https://doi.org/10.1038/s41598-019-45839-z</a>]</p>
 </blockquote>
@@ -173,90 +174,90 @@
 <h2 id="project-rna-metacells">Project RNA metacells<a class="anchor" aria-label="anchor" href="#project-rna-metacells"></a>
 </h2>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span>
-<span class="co">#&gt;   cell_id            metacell</span>
-<span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">1</span> AAACAGCCAATCCCTT-1       44</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">2</span> AAACAGCCAATGCGCT-1       22</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">3</span> AAACAGCCACCAACCG-1        7</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">4</span> AAACAGCCAGGATAAC-1       24</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">5</span> AAACAGCCAGTTTACG-1       32</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">6</span> AAACATGCAAGGTCCT-1       30</span>
-<span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project_atac_on_mc.html">project_atac_on_mc</a></span><span class="op">(</span><span class="va">atac_sc</span>, <span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #0000BB;">3198</span> cells (out of <span style="color: #0000BB;">11909</span>) do not have a metacell and have been removed.</span>
-<span class="co">#&gt; • Setting <span style="color: #00BB00;">egc</span> cell size to <span style="color: #0000BB;">67248.6</span> (the <span style="color: #0000BB;">0.1</span> quantile of metacell sizes)</span>
-<span class="co">#&gt; <span style="color: #00BB00;">✔</span> Created a new McATAC object with <span style="color: #0000BB;">97</span> metacells and <span style="color: #0000BB;">61020</span> ATAC peaks.</span>
-<span class="va">atac_mc</span>
-<span class="co">#&gt; <span style="color: #0000BB;">&lt;McATAC&gt;</span> object with <span style="color: #0000BB;">97</span> metacells and <span style="color: #0000BB;">61020</span> ATAC peaks from <span style="color: #00BB00;">hg38</span>.</span>
-<span class="co">#&gt; id: <span style="color: #0000BB;">"pbmc"</span></span>
-<span class="co">#&gt; description: <span style="color: #0000BB;">"PBMC from a healthy donor - granulocytes removed through cell</span></span>
-<span class="co">#&gt; <span style="color: #0000BB;">sorting (10k)"</span></span>
-<span class="co">#&gt; Slots include:</span>
-<span class="co">#&gt;   • `@mat`: a numeric matrix where rows are peaks and columns are metacells.</span>
-<span class="co">#&gt;   Can be a sparse matrix.</span>
-<span class="co">#&gt;   • `@peaks`: a misha intervals set with the peak definitions.</span>
-<span class="co">#&gt;   • `@genome`: genome assembly of the peaks</span>
-<span class="co">#&gt;   • `@egc`: a numeric matrix which contains normalized metacell accessibility.</span>
-<span class="co">#&gt;   • `@fp`: a matrix showing for each peak (row) the relative enrichment of umis</span>
-<span class="co">#&gt;   in log2 scale.</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
+<span><span class="co">#&gt;   cell_id            metacell</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> AAACAGCCAATCCCTT-1       44</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> AAACAGCCAATGCGCT-1       22</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> AAACAGCCACCAACCG-1        7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> AAACAGCCAGGATAAC-1       24</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> AAACAGCCAGTTTACG-1       32</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> AAACATGCAAGGTCCT-1       30</span></span>
+<span><span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project_atac_on_mc.html">project_atac_on_mc</a></span><span class="op">(</span><span class="va">atac_sc</span>, <span class="va">cell_to_metacell_pbmc_example</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #0000BB;">3198</span> cells (out of <span style="color: #0000BB;">11909</span>) do not have a metacell and have been removed.</span></span>
+<span><span class="co">#&gt; • Setting <span style="color: #00BB00;">egc</span> cell size to <span style="color: #0000BB;">67248.6</span> (the <span style="color: #0000BB;">0.1</span> quantile of metacell sizes)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Created a new McATAC object with <span style="color: #0000BB;">97</span> metacells and <span style="color: #0000BB;">61020</span> ATAC peaks.</span></span>
+<span><span class="va">atac_mc</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;McATAC&gt;</span> object with <span style="color: #0000BB;">97</span> metacells and <span style="color: #0000BB;">61020</span> ATAC peaks from <span style="color: #00BB00;">hg38</span>.</span></span>
+<span><span class="co">#&gt; id: <span style="color: #0000BB;">"pbmc"</span></span></span>
+<span><span class="co">#&gt; description: <span style="color: #0000BB;">"PBMC from a healthy donor - granulocytes removed through cell</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">sorting (10k)"</span></span></span>
+<span><span class="co">#&gt; Slots include:</span></span>
+<span><span class="co">#&gt;   • `@mat`: a numeric matrix where rows are peaks and columns are metacells.</span></span>
+<span><span class="co">#&gt;   Can be a sparse matrix.</span></span>
+<span><span class="co">#&gt;   • `@peaks`: a misha intervals set with the peak definitions.</span></span>
+<span><span class="co">#&gt;   • `@genome`: genome assembly of the peaks</span></span>
+<span><span class="co">#&gt;   • `@egc`: a numeric matrix which contains normalized metacell accessibility.</span></span>
+<span><span class="co">#&gt;   • `@fp`: a matrix showing for each peak (row) the relative enrichment of umis</span></span>
+<span><span class="co">#&gt;   in log2 scale.</span></span></code></pre></div>
 <p>Or using a metacell1 object:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project_atac_on_mc.html">project_atac_on_mc_from_metacell1</a></span><span class="op">(</span><span class="va">atac_sc</span>, <span class="st">"pbmc_data/scdb"</span>, <span class="st">"rna"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project_atac_on_mc.html">project_atac_on_mc_from_metacell1</a></span><span class="op">(</span><span class="va">atac_sc</span>, <span class="st">"pbmc_data/scdb"</span>, <span class="st">"rna"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="import-annotations">Import annotations<a class="anchor" aria-label="anchor" href="#import-annotations"></a>
 </h2>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mcmd</span><span class="op">)</span>
-<span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_mc_metadata.html">add_mc_metadata</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="va">mcmd</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mcmd</span><span class="op">)</span></span>
+<span><span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_mc_metadata.html">add_mc_metadata</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="va">mcmd</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="identify-dynamic-peaks">Identify dynamic peaks<a class="anchor" aria-label="anchor" href="#identify-dynamic-peaks"></a>
 </h2>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">dyn_peaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/identify_dynamic_peaks.html">identify_dynamic_peaks</a></span><span class="op">(</span><span class="va">atac_mc</span>, mean_thresh_q <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span>
-<span class="co">#&gt; • Plotting log10(mean) vs log10(sd/mean)</span>
-<span class="co">#&gt; <span style="color: #00BB00;">✔</span> Identified <span style="color: #0000BB;">14576</span> dynamic peaks (out of <span style="color: #0000BB;">61020</span>) using the <span style="color: #00BB00;">'bmq'</span> method.</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">dyn_peaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/identify_dynamic_peaks.html">identify_dynamic_peaks</a></span><span class="op">(</span><span class="va">atac_mc</span>, mean_thresh_q <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
+<span><span class="co">#&gt; • Plotting log10(mean) vs log10(sd/mean)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Identified <span style="color: #0000BB;">14576</span> dynamic peaks (out of <span style="color: #0000BB;">61020</span>) using the <span style="color: #00BB00;">'bmq'</span> method.</span></span></code></pre></div>
 <p><img src="mcATAC_files/figure-html/dynamic-peaks-1.png" width="2100"></p>
 </div>
 <div class="section level2">
 <h2 id="cluster-a-peak-set">Cluster a peak set<a class="anchor" aria-label="anchor" href="#cluster-a-peak-set"></a>
 </h2>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">peak_clust</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_atac_peak_clust.html">gen_atac_peak_clust</a></span><span class="op">(</span><span class="va">atac_mc</span>, k <span class="op">=</span> <span class="fl">30</span><span class="op">)</span>
-<span class="co">#&gt; • Clustering using <span style="color: #0000BB;">"kmeans++"</span>. k = <span style="color: #0000BB;">30</span></span>
-<span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">peak_clust</span><span class="op">)</span>
-<span class="co">#&gt; peak_clust</span>
-<span class="co">#&gt;    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16 </span>
-<span class="co">#&gt;  956  746 1434 3259 1189  922 2308 2647 1127  787 1245  530  650 1171 2741  695 </span>
-<span class="co">#&gt;   17   18   19   20   21   22   23   24   25   26   27   28   29   30 </span>
-<span class="co">#&gt;  839 1049  901 1500 2936 7299 2327 4795 5841 1955 2742 3664 1305 1460</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">peak_clust</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_atac_peak_clust.html">gen_atac_peak_clust</a></span><span class="op">(</span><span class="va">atac_mc</span>, k <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
+<span><span class="co">#&gt; • Clustering using <span style="color: #0000BB;">"kmeans++"</span>. k = <span style="color: #0000BB;">30</span></span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">peak_clust</span><span class="op">)</span></span>
+<span><span class="co">#&gt; peak_clust</span></span>
+<span><span class="co">#&gt;    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16 </span></span>
+<span><span class="co">#&gt; 2543 3936 5401 4608 2239 5358 1543 1213 1897  833 1016 2704 1096  985 1099  739 </span></span>
+<span><span class="co">#&gt;   17   18   19   20   21   22   23   24   25   26   27   28   29   30 </span></span>
+<span><span class="co">#&gt; 1532 2789 1594 3581 3293 1301  965 2005 1152 1020  754  739 1092 1993</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="plot-peaks-clustering">Plot peaks clustering<a class="anchor" aria-label="anchor" href="#plot-peaks-clustering"></a>
 </h2>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/plot_atac_peak_map.html">plot_atac_peak_map</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="va">atac_mc</span><span class="op">@</span><span class="va">metadata</span><span class="op">$</span><span class="va">cell_type</span>, <span class="va">peak_clust</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Expected time to plot is roughly <span style="color: #0000BB;">71</span>s</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_atac_peak_map.html">plot_atac_peak_map</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="va">atac_mc</span><span class="op">@</span><span class="va">metadata</span><span class="op">$</span><span class="va">cell_type</span>, <span class="va">peak_clust</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Expected time to plot is roughly <span style="color: #0000BB;">71</span>s</span></span></code></pre></div>
 <p><img src="mcATAC_files/figure-html/plot-atac-peak-map-1.png" width="2187.5"></p>
 </div>
 <div class="section level2">
 <h2 id="export-dynamic-peaks-to-ucsc-tracks">Export dynamic peaks to UCSC tracks<a class="anchor" aria-label="anchor" href="#export-dynamic-peaks-to-ucsc-tracks"></a>
 </h2>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">outdir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>
-<span class="fu"><a href="../reference/export_atac_clust_ucsc.html">export_atac_clust_ucsc</a></span><span class="op">(</span><span class="va">atac_mc</span>, track_prefix <span class="op">=</span> <span class="st">'hum_pbmc_10x'</span>, normalization <span class="op">=</span> <span class="st">'lfcom'</span>, output_dir <span class="op">=</span> <span class="va">outdir</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Using eps_q=0.05 and eps = 0.731958762886598 for regularization</span>
-<span class="co">#&gt; <span style="color: #00BB00;">✔</span> Successfully exported to ucsc. Files generated:</span>
-<span class="co">#&gt; • /tmp/Rtmp4NYK7c/hum_pbmc_10x_B.ucsc</span>
-<span class="co">#&gt; • /tmp/Rtmp4NYK7c/hum_pbmc_10x_DC.ucsc</span>
-<span class="co">#&gt; • /tmp/Rtmp4NYK7c/hum_pbmc_10x_Monocyte.ucsc</span>
-<span class="co">#&gt; • /tmp/Rtmp4NYK7c/hum_pbmc_10x_NK.ucsc</span>
-<span class="co">#&gt; • /tmp/Rtmp4NYK7c/hum_pbmc_10x_T.ucsc</span>
-<span class="co">#&gt; • /tmp/Rtmp4NYK7c/hum_pbmc_10x_T_CD8.ucsc</span>
-<span class="co">#&gt; • /tmp/Rtmp4NYK7c/hum_pbmc_10x_Undetermined.ucsc</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">outdir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/export_atac_clust_ucsc.html">export_atac_clust_ucsc</a></span><span class="op">(</span><span class="va">atac_mc</span>, track_prefix <span class="op">=</span> <span class="st">'hum_pbmc_10x'</span>, normalization <span class="op">=</span> <span class="st">'lfcom'</span>, output_dir <span class="op">=</span> <span class="va">outdir</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Using eps_q=0.05 and eps = 0.731958762886598 for regularization</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Successfully exported to ucsc. Files generated:</span></span>
+<span><span class="co">#&gt; • /tmp/Rtmpp6cuky/hum_pbmc_10x_B.ucsc</span></span>
+<span><span class="co">#&gt; • /tmp/Rtmpp6cuky/hum_pbmc_10x_DC.ucsc</span></span>
+<span><span class="co">#&gt; • /tmp/Rtmpp6cuky/hum_pbmc_10x_Monocyte.ucsc</span></span>
+<span><span class="co">#&gt; • /tmp/Rtmpp6cuky/hum_pbmc_10x_NK.ucsc</span></span>
+<span><span class="co">#&gt; • /tmp/Rtmpp6cuky/hum_pbmc_10x_T.ucsc</span></span>
+<span><span class="co">#&gt; • /tmp/Rtmpp6cuky/hum_pbmc_10x_T_CD8.ucsc</span></span>
+<span><span class="co">#&gt; • /tmp/Rtmpp6cuky/hum_pbmc_10x_Undetermined.ucsc</span></span></code></pre></div>
 <div class="figure">
 <img src="ucsc_output_example.png" title="Example of UCSC output on human PBMC data from 10X Genomics" alt=""><p class="caption">UCSC track example</p>
 </div>
@@ -265,130 +266,130 @@
 <h2 id="add-expression-data">Add expression data<a class="anchor" aria-label="anchor" href="#add-expression-data"></a>
 </h2>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">rna_mc_mat</span><span class="op">)</span>
-<span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_mc_rna.html">add_mc_rna</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="va">rna_mc_mat</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">rna_mc_mat</span><span class="op">)</span></span>
+<span><span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_mc_rna.html">add_mc_rna</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="va">rna_mc_mat</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="plot-accesability-vs-expression">Plot accesability vs expression<a class="anchor" aria-label="anchor" href="#plot-accesability-vs-expression"></a>
 </h2>
 <p>Between a gene and its promoter:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/plot_atac_rna.html">plot_atac_rna</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="st">"CD4"</span><span class="op">)</span>
-<span class="co">#&gt; → The gene <span style="color: #0000BB;">"CD4"</span> has <span style="color: #0000BB;">9</span> alternative promoters.</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_atac_rna.html">plot_atac_rna</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="st">"CD4"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; → The gene <span style="color: #0000BB;">"CD4"</span> has <span style="color: #0000BB;">9</span> alternative promoters.</span></span></code></pre></div>
 <p><img src="mcATAC_files/figure-html/atac-rna-scatter-1-1.png" width="2187.5"></p>
 <p>Between a gene and a promoter of a different gene:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/plot_atac_rna.html">plot_atac_rna</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="st">"CD4"</span>, <span class="st">"GZMK"</span><span class="op">)</span>
-<span class="co">#&gt; → The gene <span style="color: #0000BB;">"GZMK"</span> has <span style="color: #0000BB;">2</span> alternative promoters.</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_atac_rna.html">plot_atac_rna</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="st">"CD4"</span>, <span class="st">"GZMK"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; → The gene <span style="color: #0000BB;">"GZMK"</span> has <span style="color: #0000BB;">2</span> alternative promoters.</span></span></code></pre></div>
 <p><img src="mcATAC_files/figure-html/atac-rna-scatter-2-1.png" width="2187.5"></p>
 <p>Between a gene and an arbitrary peak:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/plot_atac_rna.html">plot_atac_rna</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="st">"CD4"</span>, peak <span class="op">=</span> <span class="va">atac_mc</span><span class="op">@</span><span class="va">peaks</span><span class="op">$</span><span class="va">peak_name</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_atac_rna.html">plot_atac_rna</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="st">"CD4"</span>, peak <span class="op">=</span> <span class="va">atac_mc</span><span class="op">@</span><span class="va">peaks</span><span class="op">$</span><span class="va">peak_name</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mcATAC_files/figure-html/atac-rna-scatter-3-1.png" width="2187.5"></p>
 </div>
 <div class="section level2">
 <h2 id="plot-rna-markers">Plot RNA markers<a class="anchor" aria-label="anchor" href="#plot-rna-markers"></a>
 </h2>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/plot_atac_rna_markers.html">plot_atac_rna_markers</a></span><span class="op">(</span><span class="va">atac_mc</span><span class="op">)</span>
-<span class="co">#&gt; → removing <span style="color: #00BB00;">7543</span> genes with no RNA expression in any metacell.</span>
-<span class="co">#&gt; → removing <span style="color: #0000BB;">23451</span> genes with no RNA expression (log2) of above <span style="color: #00BB00;">-13</span> in any metacell.</span>
-<span class="co">#&gt; → removing <span style="color: #0000BB;">3534</span> genes with no fold change (log2) of above <span style="color: #00BB00;">2</span> in any metacell.</span>
-<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #0000BB;">5191</span> genes left for consideration.</span>
-<span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">100</span> marker genes selected.</span>
-<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Ordering metacells based on <span style="color: #0000BB;">CA6</span> vs <span style="color: #0000BB;">LYN</span></span>
-<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Maintaining metacell order within cell types</span>
-<span class="co">#&gt; <span style="color: #00BB00;">✔</span> marker matrix of <span style="color: #0000BB;">100</span> genes x <span style="color: #0000BB;">97</span> metacells created.</span>
-<span class="co">#&gt; → Creating ATAC matrix by finding for each marker gene the ATAC peak that is most correlated to it.</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_atac_rna_markers.html">plot_atac_rna_markers</a></span><span class="op">(</span><span class="va">atac_mc</span><span class="op">)</span></span>
+<span><span class="co">#&gt; → removing <span style="color: #00BB00;">7543</span> genes with no RNA expression in any metacell.</span></span>
+<span><span class="co">#&gt; → removing <span style="color: #0000BB;">23451</span> genes with no RNA expression (log2) of above <span style="color: #00BB00;">-13</span> in any metacell.</span></span>
+<span><span class="co">#&gt; → removing <span style="color: #0000BB;">3534</span> genes with no fold change (log2) of above <span style="color: #00BB00;">2</span> in any metacell.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #0000BB;">5191</span> genes left for consideration.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">100</span> marker genes selected.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Ordering metacells based on <span style="color: #0000BB;">CA6</span> vs <span style="color: #0000BB;">LYN</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Maintaining metacell order within cell types</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> marker matrix of <span style="color: #0000BB;">100</span> genes x <span style="color: #0000BB;">97</span> metacells created.</span></span>
+<span><span class="co">#&gt; → Creating ATAC matrix by finding for each marker gene the ATAC peak that is most correlated to it.</span></span></code></pre></div>
 <p><img src="mcATAC_files/figure-html/rna-markers-1.png" width="2187.5"></p>
 </div>
 <div class="section level2">
 <h2 id="export-to-an-h5ad-file">Export to an h5ad file<a class="anchor" aria-label="anchor" href="#export-to-an-h5ad-file"></a>
 </h2>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/export_to_h5ad.html">export_to_h5ad</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="st">"pbmc_data/atac_mc.h5ad"</span>, compression <span class="op">=</span> <span class="st">"gzip"</span><span class="op">)</span>
-<span class="co"># Load using: atac_mc &lt;- import_from_h5ad("pbmc_data/atac_mc.h5ad")</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/export_to_h5ad.html">export_to_h5ad</a></span><span class="op">(</span><span class="va">atac_mc</span>, <span class="st">"pbmc_data/atac_mc.h5ad"</span>, compression <span class="op">=</span> <span class="st">"gzip"</span><span class="op">)</span></span>
+<span><span class="co"># Load using: atac_mc &lt;- import_from_h5ad("pbmc_data/atac_mc.h5ad")</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="plot-per-metacell-tracks-around-some-geneinterval">Plot per-metacell tracks around some gene/interval<a class="anchor" aria-label="anchor" href="#plot-per-metacell-tracks-around-some-geneinterval"></a>
 </h2>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tanaylab/metacell" class="external-link">metacell</a></span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/metacell/man/scdb_init.html" class="external-link">scdb_init</a></span><span class="op">(</span><span class="st">"scdb"</span><span class="op">)</span>
-<span class="va">mc_rna</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/metacell/man/scdb_mc.html" class="external-link">scdb_mc</a></span><span class="op">(</span><span class="st">'rna_w_color_key'</span><span class="op">)</span>
-<span class="va">mcmd</span> <span class="op">=</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="st">'./data/mcmd.csv'</span><span class="op">)</span>
-<span class="va">color_key</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">mcmd</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'st'</span>, <span class="st">'color'</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">color_key</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'cell_type'</span>, <span class="st">'color'</span><span class="op">)</span>
-<span class="va">col_annot</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>cell_type <span class="op">=</span> <span class="va">mcmd</span><span class="op">$</span><span class="va">st</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">col_annot</span><span class="op">)</span> <span class="op">=</span> <span class="va">mcmd</span><span class="op">$</span><span class="va">mc</span>
-<span class="va">ann_colors</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cell_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">color_key</span><span class="op">$</span><span class="va">color</span>, <span class="va">color_key</span><span class="op">$</span><span class="va">cell_type</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="../reference/plot_tracks_at_locus.html">plot_tracks_at_locus</a></span><span class="op">(</span>tracks <span class="op">=</span> <span class="va">pbmc_tracks</span>, extend <span class="op">=</span> <span class="fl">5e+4</span>,
-                gene <span class="op">=</span> <span class="st">"ATF3"</span>, 
-                mc_rna <span class="op">=</span> <span class="va">mc_rna</span>, 
-                gene_annot <span class="op">=</span> <span class="cn">T</span>, 
-                order_rows <span class="op">=</span> <span class="cn">T</span>,
-                annotation_row <span class="op">=</span> <span class="va">col_annot</span>, 
-                annotation_colors <span class="op">=</span> <span class="va">ann_colors</span><span class="op">)</span>
-
-
-<span class="co">## Make per-metacell BAMs, WIGs and tracks</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tanaylab/metacell" class="external-link">metacell</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/metacell/man/scdb_init.html" class="external-link">scdb_init</a></span><span class="op">(</span><span class="st">"scdb"</span><span class="op">)</span></span>
+<span><span class="va">mc_rna</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/metacell/man/scdb_mc.html" class="external-link">scdb_mc</a></span><span class="op">(</span><span class="st">'rna_w_color_key'</span><span class="op">)</span></span>
+<span><span class="va">mcmd</span> <span class="op">=</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="st">'./data/mcmd.csv'</span><span class="op">)</span></span>
+<span><span class="va">color_key</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">mcmd</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'st'</span>, <span class="st">'color'</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">color_key</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'cell_type'</span>, <span class="st">'color'</span><span class="op">)</span></span>
+<span><span class="va">col_annot</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>cell_type <span class="op">=</span> <span class="va">mcmd</span><span class="op">$</span><span class="va">st</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">col_annot</span><span class="op">)</span> <span class="op">=</span> <span class="va">mcmd</span><span class="op">$</span><span class="va">mc</span></span>
+<span><span class="va">ann_colors</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cell_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">color_key</span><span class="op">$</span><span class="va">color</span>, <span class="va">color_key</span><span class="op">$</span><span class="va">cell_type</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/plot_tracks_at_locus.html">plot_tracks_at_locus</a></span><span class="op">(</span>tracks <span class="op">=</span> <span class="va">pbmc_tracks</span>, extend <span class="op">=</span> <span class="fl">5e+4</span>,</span>
+<span>                gene <span class="op">=</span> <span class="st">"ATF3"</span>, </span>
+<span>                mc_rna <span class="op">=</span> <span class="va">mc_rna</span>, </span>
+<span>                gene_annot <span class="op">=</span> <span class="cn">T</span>, </span>
+<span>                order_rows <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>                annotation_row <span class="op">=</span> <span class="va">col_annot</span>, </span>
+<span>                annotation_colors <span class="op">=</span> <span class="va">ann_colors</span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span><span class="co">## Make per-metacell BAMs, WIGs and tracks</span></span></code></pre></div>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">bam_path</span> <span class="op">&lt;-</span> <span class="st">"path/to/possorted_bam.bam"</span>
-<span class="va">bam_output_folder</span> <span class="op">&lt;-</span> <span class="st">"./my_mc_bams/"</span>
-<span class="va">c2mc_folder</span> <span class="op">&lt;-</span> <span class="st">"./c2mc/"</span>
-<span class="va">wig_folder</span> <span class="op">&lt;-</span> <span class="st">"./wig_output"</span>
-<span class="va">track_name_prefix</span> <span class="op">=</span> <span class="st">"My_scATAC_project"</span>
-<span class="fu"><a href="../reference/generate_per_metacell_bams.html">generate_per_metacell_bams</a></span><span class="op">(</span>bam_path <span class="op">=</span> <span class="va">bam_path</span>, mcatac <span class="op">=</span> <span class="va">atac_mc</span>, out_dir <span class="op">=</span> <span class="va">bam_output_folder</span>, c2mc_path <span class="op">=</span> <span class="va">c2mc_folder</span><span class="op">)</span>
-<span class="fu"><a href="../reference/generate_wigs_from_bams.html">generate_wigs_from_bams</a></span><span class="op">(</span>bam_folder_path <span class="op">=</span> <span class="va">bam_output_folder</span>, track_name_prefix <span class="op">=</span> <span class="va">track_name_prefix</span>, output_path <span class="op">=</span> <span class="va">wig_folder</span>, parallel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="fu"><a href="../reference/convert_wigs_to_tracks.html">convert_wigs_to_tracks</a></span><span class="op">(</span><span class="va">wig_folder</span>, track_name_prefix <span class="op">=</span> <span class="va">track_name_prefix</span>, description <span class="op">=</span> <span class="cn">NULL</span>, parallel <span class="op">=</span> <span class="cn">TRUE</span>, force <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">bam_path</span> <span class="op">&lt;-</span> <span class="st">"path/to/possorted_bam.bam"</span></span>
+<span><span class="va">bam_output_folder</span> <span class="op">&lt;-</span> <span class="st">"./my_mc_bams/"</span></span>
+<span><span class="va">c2mc_folder</span> <span class="op">&lt;-</span> <span class="st">"./c2mc/"</span></span>
+<span><span class="va">wig_folder</span> <span class="op">&lt;-</span> <span class="st">"./wig_output"</span></span>
+<span><span class="va">track_name_prefix</span> <span class="op">=</span> <span class="st">"My_scATAC_project"</span></span>
+<span><span class="fu"><a href="../reference/generate_per_metacell_bams.html">generate_per_metacell_bams</a></span><span class="op">(</span>bam_path <span class="op">=</span> <span class="va">bam_path</span>, mcatac <span class="op">=</span> <span class="va">atac_mc</span>, out_dir <span class="op">=</span> <span class="va">bam_output_folder</span>, c2mc_path <span class="op">=</span> <span class="va">c2mc_folder</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/generate_wigs_from_bams.html">generate_wigs_from_bams</a></span><span class="op">(</span>bam_folder_path <span class="op">=</span> <span class="va">bam_output_folder</span>, track_name_prefix <span class="op">=</span> <span class="va">track_name_prefix</span>, output_path <span class="op">=</span> <span class="va">wig_folder</span>, parallel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/convert_wigs_to_tracks.html">convert_wigs_to_tracks</a></span><span class="op">(</span><span class="va">wig_folder</span>, track_name_prefix <span class="op">=</span> <span class="va">track_name_prefix</span>, description <span class="op">=</span> <span class="cn">NULL</span>, parallel <span class="op">=</span> <span class="cn">TRUE</span>, force <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="make-pseudo-bulk-atac-tracks-from-per-metacell-tracks">Make pseudo-bulk ATAC tracks from per-metacell tracks<a class="anchor" aria-label="anchor" href="#make-pseudo-bulk-atac-tracks-from-per-metacell-tracks"></a>
 </h2>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">bam_output_folder</span> <span class="op">&lt;-</span> <span class="st">"./my_mc_bams/"</span>
-<span class="va">track_name_prefix</span> <span class="op">=</span> <span class="st">"My_scATAC_project"</span>
-<span class="va">cell_type</span> <span class="op">=</span> <span class="st">"Neuron"</span>
-<span class="va">mcmd</span> <span class="op">=</span> <span class="fu">tgutil</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tgutil/man/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="st">"./data/mcmd.csv"</span><span class="op">)</span> <span class="co">## metacell metadata</span>
-<span class="fu"><a href="../reference/merge_metacell_bams.html">merge_metacell_bams</a></span><span class="op">(</span>bam_path <span class="op">=</span> <span class="va">bam_output_folder</span>, output_filename<span class="op">=</span><span class="st">"./pseudo_bulk.bam"</span>, mcs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">mcmd</span><span class="op">$</span><span class="va">cell_type</span> <span class="op">==</span> <span class="va">cell_type</span><span class="op">)</span>, parallel <span class="op">=</span> <span class="cn">T</span><span class="op">)</span>
-<span class="fu"><a href="../reference/bam_to_wig.html">bam_to_wig</a></span><span class="op">(</span>bam_path <span class="op">=</span> <span class="st">"./pseudo_bulk.bam"</span>, output_filename <span class="op">=</span> <span class="st">"./pseudo_bulk.wig"</span>, track_name_prefix <span class="op">=</span> <span class="va">track_name_prefix</span><span class="op">)</span>
-<span class="fu">make_misha_track_from_wig</span><span class="op">(</span>fp <span class="op">=</span> <span class="st">"./pseudo_bulk.wig"</span>, track_name_prefix <span class="op">=</span> <span class="va">track_name_prefix</span>, description <span class="op">=</span> <span class="fu">glue</span><span class="fu">::</span><span class="fu"><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue</a></span><span class="op">(</span><span class="st">"Pseudo-bulk track of ATAC signal from {cell_type} cells"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">bam_output_folder</span> <span class="op">&lt;-</span> <span class="st">"./my_mc_bams/"</span></span>
+<span><span class="va">track_name_prefix</span> <span class="op">=</span> <span class="st">"My_scATAC_project"</span></span>
+<span><span class="va">cell_type</span> <span class="op">=</span> <span class="st">"Neuron"</span></span>
+<span><span class="va">mcmd</span> <span class="op">=</span> <span class="fu">tgutil</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tgutil/man/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="st">"./data/mcmd.csv"</span><span class="op">)</span> <span class="co">## metacell metadata</span></span>
+<span><span class="fu"><a href="../reference/merge_metacell_bams.html">merge_metacell_bams</a></span><span class="op">(</span>bam_path <span class="op">=</span> <span class="va">bam_output_folder</span>, output_filename<span class="op">=</span><span class="st">"./pseudo_bulk.bam"</span>, mcs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">mcmd</span><span class="op">$</span><span class="va">cell_type</span> <span class="op">==</span> <span class="va">cell_type</span><span class="op">)</span>, parallel <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/bam_to_wig.html">bam_to_wig</a></span><span class="op">(</span>bam_path <span class="op">=</span> <span class="st">"./pseudo_bulk.bam"</span>, output_filename <span class="op">=</span> <span class="st">"./pseudo_bulk.wig"</span>, track_name_prefix <span class="op">=</span> <span class="va">track_name_prefix</span><span class="op">)</span></span>
+<span><span class="fu">make_misha_track_from_wig</span><span class="op">(</span>fp <span class="op">=</span> <span class="st">"./pseudo_bulk.wig"</span>, track_name_prefix <span class="op">=</span> <span class="va">track_name_prefix</span>, description <span class="op">=</span> <span class="fu">glue</span><span class="fu">::</span><span class="fu"><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue</a></span><span class="op">(</span><span class="st">"Pseudo-bulk track of ATAC signal from {cell_type} cells"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="get-available-motif-pssm-datasets-and-extract-motif-energies">Get available motif PSSM datasets and extract motif energies<a class="anchor" aria-label="anchor" href="#get-available-motif-pssm-datasets-and-extract-motif-energies"></a>
 </h2>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">misha.ext</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/misha.ext/man/gset_genome.html" class="external-link">gset_genome</a></span><span class="op">(</span><span class="st">"hg38"</span><span class="op">)</span>
-<span class="va">available_datasets</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_available_pssms.html">get_available_pssms</a></span><span class="op">(</span>return_datasets_only <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">available_datasets</span>
-<span class="va">sample_peaks</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/sample_n.html" class="external-link">sample_n</a></span><span class="op">(</span><span class="va">atac_mc</span><span class="op">@</span><span class="va">peaks</span>, <span class="fl">1e+4</span><span class="op">)</span>
-<span class="va">motif_mat</span> <span class="op">=</span> <span class="fu"><a href="../reference/generate_motif_pssm_matrix.html">generate_motif_pssm_matrix</a></span><span class="op">(</span>atac <span class="op">=</span> <span class="va">sample_peaks</span>, motif_regex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Bcl"</span>, <span class="st">"Atf"</span><span class="op">)</span>, datasets_of_interest <span class="op">=</span> <span class="st">"jaspar"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">motif_mat</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">misha.ext</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/misha.ext/man/gset_genome.html" class="external-link">gset_genome</a></span><span class="op">(</span><span class="st">"hg38"</span><span class="op">)</span></span>
+<span><span class="va">available_datasets</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_available_pssms.html">get_available_pssms</a></span><span class="op">(</span>return_datasets_only <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">available_datasets</span></span>
+<span><span class="va">sample_peaks</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/sample_n.html" class="external-link">sample_n</a></span><span class="op">(</span><span class="va">atac_mc</span><span class="op">@</span><span class="va">peaks</span>, <span class="fl">1e+4</span><span class="op">)</span></span>
+<span><span class="va">motif_mat</span> <span class="op">=</span> <span class="fu"><a href="../reference/generate_motif_pssm_matrix.html">generate_motif_pssm_matrix</a></span><span class="op">(</span>atac <span class="op">=</span> <span class="va">sample_peaks</span>, motif_regex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Bcl"</span>, <span class="st">"Atf"</span><span class="op">)</span>, datasets_of_interest <span class="op">=</span> <span class="st">"jaspar"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">motif_mat</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="extract-motif-energies-from-random-genomic-background">Extract motif energies from random genomic background<a class="anchor" aria-label="anchor" href="#extract-motif-energies-from-random-genomic-background"></a>
 </h2>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">misha.ext</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/misha.ext/man/gset_genome.html" class="external-link">gset_genome</a></span><span class="op">(</span><span class="st">"hg38"</span><span class="op">)</span>
-<span class="va">rg</span> <span class="op">=</span> <span class="fu"><a href="../reference/gen_random_genome_peak_motif_matrix.html">gen_random_genome_peak_motif_matrix</a></span><span class="op">(</span>num_peaks <span class="op">=</span> <span class="fl">1e+4</span>,
-                                          bp_from_chrom_edge_to_avoid <span class="op">=</span> <span class="fl">1e+6</span>, 
-                                          motif_regex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Bcl"</span>, <span class="st">"Atf"</span><span class="op">)</span>,
-                                          datasets_of_interest <span class="op">=</span> <span class="st">"jaspar"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rg</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">misha.ext</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/misha.ext/man/gset_genome.html" class="external-link">gset_genome</a></span><span class="op">(</span><span class="st">"hg38"</span><span class="op">)</span></span>
+<span><span class="va">rg</span> <span class="op">=</span> <span class="fu"><a href="../reference/gen_random_genome_peak_motif_matrix.html">gen_random_genome_peak_motif_matrix</a></span><span class="op">(</span>num_peaks <span class="op">=</span> <span class="fl">1e+4</span>,</span>
+<span>                                          bp_from_chrom_edge_to_avoid <span class="op">=</span> <span class="fl">1e+6</span>, </span>
+<span>                                          motif_regex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Bcl"</span>, <span class="st">"Atf"</span><span class="op">)</span>,</span>
+<span>                                          datasets_of_interest <span class="op">=</span> <span class="st">"jaspar"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rg</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="compare-kolmogorov-smirnov-statistics-on-distribution-of-motif-energies-between-peaks-of-interest-and-genomic-background">Compare Kolmogorov-Smirnov statistics on distribution of motif energies between peaks of interest and genomic background<a class="anchor" aria-label="anchor" href="#compare-kolmogorov-smirnov-statistics-on-distribution-of-motif-energies-between-peaks-of-interest-and-genomic-background"></a>
 </h2>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">misha.ext</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/misha.ext/man/gset_genome.html" class="external-link">gset_genome</a></span><span class="op">(</span><span class="st">"hg38"</span><span class="op">)</span>
-<span class="co">## all peaks</span>
-<span class="va">ks_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calculate_d_stats.html">calculate_d_stats</a></span><span class="op">(</span><span class="va">motif_mat</span>, <span class="va">rg</span>, parallel <span class="op">=</span> <span class="cn">TRUE</span>, alternative <span class="op">=</span> <span class="st">"less"</span><span class="op">)</span>  
-
-<span class="co">## by peak cluster</span>
-<span class="va">sample_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/subset_peaks.html">subset_peaks</a></span><span class="op">(</span>atac_mc <span class="op">=</span> <span class="va">atac_mc</span>, <span class="va">sample_peaks</span><span class="op">)</span>  
-<span class="va">sample_peak_clustering</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_atac_peak_clust.html">gen_atac_peak_clust</a></span><span class="op">(</span>atac_mc <span class="op">=</span> <span class="va">sample_mc</span>, k <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>  
-<span class="va">ks_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calculate_d_stats.html">calculate_d_stats</a></span><span class="op">(</span><span class="va">motif_mat</span>, <span class="va">rg</span>, parallel <span class="op">=</span> <span class="cn">TRUE</span>, fg_clustering <span class="op">=</span> <span class="va">sample_peak_clustering</span>, alternative <span class="op">=</span> <span class="st">"less"</span><span class="op">)</span>  
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ks_mat</span><span class="op">)</span>  </code></pre></div>
+<code class="sourceCode R"><span><span class="fu">misha.ext</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/misha.ext/man/gset_genome.html" class="external-link">gset_genome</a></span><span class="op">(</span><span class="st">"hg38"</span><span class="op">)</span></span>
+<span><span class="co">## all peaks</span></span>
+<span><span class="va">ks_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calculate_d_stats.html">calculate_d_stats</a></span><span class="op">(</span><span class="va">motif_mat</span>, <span class="va">rg</span>, parallel <span class="op">=</span> <span class="cn">TRUE</span>, alternative <span class="op">=</span> <span class="st">"less"</span><span class="op">)</span>  </span>
+<span></span>
+<span><span class="co">## by peak cluster</span></span>
+<span><span class="va">sample_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/subset_peaks.html">subset_peaks</a></span><span class="op">(</span>atac_mc <span class="op">=</span> <span class="va">atac_mc</span>, <span class="va">sample_peaks</span><span class="op">)</span>  </span>
+<span><span class="va">sample_peak_clustering</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_atac_peak_clust.html">gen_atac_peak_clust</a></span><span class="op">(</span>atac_mc <span class="op">=</span> <span class="va">sample_mc</span>, k <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>  </span>
+<span><span class="va">ks_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calculate_d_stats.html">calculate_d_stats</a></span><span class="op">(</span><span class="va">motif_mat</span>, <span class="va">rg</span>, parallel <span class="op">=</span> <span class="cn">TRUE</span>, fg_clustering <span class="op">=</span> <span class="va">sample_peak_clustering</span>, alternative <span class="op">=</span> <span class="st">"less"</span><span class="op">)</span>  </span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ks_mat</span><span class="op">)</span>  </span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
@@ -403,7 +404,7 @@
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer>
