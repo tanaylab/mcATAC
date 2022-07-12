@@ -50,21 +50,27 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 
     mat <- raw_mat[, intersect(mct@metacells[mct@order], colnames(raw_mat)), drop = FALSE]
 
-    dca_mat <- NULL
-    if (detect_dca) {
-        if (is.null(hc)) {
-            mct <- mct_subset_metacells(mct, colnames(mat))
-            hc <- mc_hclust_rna(mct, force_cell_type = force_cell_type)
-        }
+    if (detect_dca && is.null(hc)) {
+        mct <- mct_subset_metacells(mct, colnames(mat))
+        hc <- mc_hclust_rna(mct, force_cell_type = force_cell_type)
+    }
+
+    if (!is.null(hc)) {
         if (any(hc$label %!in% colnames(mat))) {
             missing_mcs <- setdiff(hc$label, colnames(mat))
             cli_warn("The following metacells are present in the hclust object, but are missing in the matrix (this is probably due to downsampling): {.val {missing_mcs}}")
             hc <- dendextend::prune(hc, missing_mcs)
         }
-
         mat <- mat[, hc$label]
+    }
+
+    dca_mat <- NULL
+    if (detect_dca) {
         dca_mat <- mct_diff_access_on_hc(mat, hc = hc, ...)
         dca_mat <- dca_mat[, hc$order, drop = FALSE]
+    }
+
+    if (!is.null(hc)) {
         mat <- mat[, hc$order, drop = FALSE]
     }
 
@@ -202,7 +208,7 @@ extend_dca_mat <- function(dca_mat, n_peak_smooth) {
 #' \code{peak_lf_thresh1}, and a value of 2 means the log fold change was above \code{peak_lf_thresh2}. The same with -1 and -2 for troughs.
 #'
 #' @export
-mct_diff_access_on_hc <- function(mat, hc, sz_frac_for_peak = 0.25, u_reg = 4, peak_lf_thresh1 = 1, peak_lf_thresh2 = 2, trough_lf_thresh1 = -1, trough_lf_thresh2 = -2) {
+mct_diff_access_on_hc <- function(mat, hc, sz_frac_for_peak = 0.25, u_reg = 4, peak_lf_thresh1 = 1.2, peak_lf_thresh2 = 2, trough_lf_thresh1 = -1, trough_lf_thresh2 = -2) {
     if (length(hc$order) != ncol(mat)) {
         cli_abort("The number of metacells in the matrix and the hclust object do not match.")
     }
