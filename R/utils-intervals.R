@@ -1,3 +1,35 @@
+#' Modify intervals to a new set of intervals.
+#'
+#' @param intervals original intervals
+#' @param new_intervals new intervals
+#'
+#' @return the original intervals where start and end are replaced by the start and end of the new intervals.
+#'
+#' @noRd
+modify_intervals <- function(intervals, new_intervals) {
+    clean_intervs <- new_intervals %>%
+        select(chrom, start, end) %>%
+        as.data.frame() %>%
+        gintervals.force_range()
+
+    if (is.null(clean_intervs)) {
+        cli_abort("Both start and end are outside chromosome boundaries")
+    }
+
+    if (clean_intervs$start != new_intervals$start) {
+        cli_alert_warning("Start of new interval is outside chromosome boundaries")
+    }
+
+    if (clean_intervs$end != new_intervals$end) {
+        cli_alert_warning("End of new interval is outside chromosome boundaries")
+    }
+
+    intervals <- intervals %>%
+        mutate(start = clean_intervs$start, end = clean_intervs$end)
+    return(intervals)
+}
+
+
 #' Zoom-in for an intervals set.
 #'
 #' @param intervals An intervals set.
@@ -11,23 +43,16 @@
 #'
 #' @export
 gintervals.zoom_in <- function(intervals, zoom) {
-    clean_intervs <- intervals %>% select(chrom, start, end)
-    clean_intervs <- clean_intervs %>%
+    new_intervals <- intervals %>%
         mutate(
             l = end - start,
             midpoint = start + round(l / 2),
             new_l = round(l / zoom),
-            new_start = midpoint - round(new_l / 2),
-            new_end = midpoint + round(new_l / 2)
-        ) %>%
-        select(chrom, start = new_start, end = new_end)
-
-    intervals <- intervals %>%
-        mutate(
-            start = clean_intervs$start,
-            end = clean_intervs$end
+            start = midpoint - round(new_l / 2),
+            end = midpoint + round(new_l / 2)
         )
-    return(intervals)
+
+    return(modify_intervals(intervals, new_intervals))
 }
 
 #' Zoom-out for an intervals set.
@@ -43,25 +68,16 @@ gintervals.zoom_in <- function(intervals, zoom) {
 #'
 #' @export
 gintervals.zoom_out <- function(intervals, zoom) {
-    clean_intervs <- intervals %>% select(chrom, start, end)
-    clean_intervs <- clean_intervs %>%
+    new_intervals <- intervals %>%
         mutate(
             l = end - start,
             midpoint = start + round(l / 2),
             new_l = round(l * zoom),
-            new_start = midpoint - round(new_l / 2),
-            new_end = midpoint + round(new_l / 2)
-        ) %>%
-        select(chrom, start = new_start, end = new_end) %>%
-        as.data.frame() %>%
-        gintervals.force_range()
-
-    intervals <- intervals %>%
-        mutate(
-            start = clean_intervs$start,
-            end = clean_intervs$end
+            start = midpoint - round(new_l / 2),
+            end = midpoint + round(new_l / 2)
         )
-    return(intervals)
+
+    return(modify_intervals(intervals, new_intervals))
 }
 
 #' Shift the coordinates of an intervals set to the left.
@@ -77,22 +93,13 @@ gintervals.zoom_out <- function(intervals, zoom) {
 #'
 #' @export
 gintervals.shift_left <- function(intervals, shift) {
-    clean_intervs <- intervals %>% select(chrom, start, end)
-    clean_intervs <- clean_intervs %>%
+    new_intervals <- intervals %>%
         mutate(
-            new_start = start - shift,
-            new_end = end - shift
-        ) %>%
-        select(chrom, start = new_start, end = new_end) %>%
-        as.data.frame() %>%
-        gintervals.force_range()
-
-    intervals <- intervals %>%
-        mutate(
-            start = clean_intervs$start,
-            end = clean_intervs$end
+            start = start - shift,
+            end = end - shift
         )
-    return(intervals)
+
+    return(modify_intervals(intervals, new_intervals))
 }
 
 #' Shift the coordinates of an intervals set to the right.
@@ -108,22 +115,13 @@ gintervals.shift_left <- function(intervals, shift) {
 #'
 #' @export
 gintervals.shift_right <- function(intervals, shift) {
-    clean_intervs <- intervals %>% select(chrom, start, end)
-    clean_intervs <- clean_intervs %>%
+    new_intervals <- intervals %>%
         mutate(
-            new_start = start + shift,
-            new_end = end + shift
-        ) %>%
-        select(chrom, start = new_start, end = new_end) %>%
-        as.data.frame() %>%
-        gintervals.force_range()
-
-    intervals <- intervals %>%
-        mutate(
-            start = clean_intervs$start,
-            end = clean_intervs$end
+            start = start + shift,
+            end = end + shift
         )
-    return(intervals)
+
+    return(modify_intervals(intervals, new_intervals))
 }
 
 #' Extend the coordinates of an intervals set to the left.
@@ -139,20 +137,12 @@ gintervals.shift_right <- function(intervals, shift) {
 #'
 #' @export
 gintervals.extend_left <- function(intervals, ext) {
-    clean_intervs <- intervals %>% select(chrom, start, end)
-    clean_intervs <- clean_intervs %>%
+    new_intervals <- intervals %>%
         mutate(
-            new_start = start - ext
-        ) %>%
-        select(chrom, start = new_start, end) %>%
-        as.data.frame() %>%
-        gintervals.force_range()
-
-    intervals <- intervals %>%
-        mutate(
-            start = clean_intervs$start
+            start = start - ext
         )
-    return(intervals)
+
+    return(modify_intervals(intervals, new_intervals))
 }
 
 #' Extend the coordinates of an intervals set to the right.
@@ -168,20 +158,12 @@ gintervals.extend_left <- function(intervals, ext) {
 #'
 #' @export
 gintervals.extend_right <- function(intervals, ext) {
-    clean_intervs <- intervals %>% select(chrom, start, end)
-    clean_intervs <- clean_intervs %>%
+    new_intervals <- intervals %>%
         mutate(
-            new_end = end + ext
-        ) %>%
-        select(chrom, start, end = new_end) %>%
-        as.data.frame() %>%
-        gintervals.force_range()
-
-    intervals <- intervals %>%
-        mutate(
-            end = clean_intervs$end
+            end = end + ext
         )
-    return(intervals)
+
+    return(modify_intervals(intervals, new_intervals))
 }
 
 #' Get an intervals set of a gene promoter.
