@@ -165,6 +165,7 @@ bam_to_wig <- function(bam_path, output_filename = NULL, track_name_prefix = NUL
 #'
 #' @param wig_dir path to folder containing WIG files
 #' @param track_name_prefix name to prepend to track.
+#' @param track_name_suffix name to append to track.
 #' @param description (optional) description for misha tracks
 #' @param parallel (optional) whether to use parallel computation
 #' @param force (optional) whether to force rewrite of existing misha tracks
@@ -173,12 +174,13 @@ bam_to_wig <- function(bam_path, output_filename = NULL, track_name_prefix = NUL
 #' @export
 convert_wigs_to_tracks <- function(wig_dir,
                                    track_name_prefix = NULL,
+                                   track_name_suffix = NULL
                                    description = NULL,
                                    parallel = TRUE,
                                    force = FALSE,
                                    nc = parallel::detectCores()) {
     wig_file_paths <- file.path(wig_dir, grep("\\.wig$", list.files(wig_dir), v = T))
-    track_name_suffix <- "unnorm"
+    track_name_suffix <- track_name_suffix %||% "unnorm"
     if (is.null(track_name_prefix)) {
         track_name_prefix <- basename(wig_dir)
     }

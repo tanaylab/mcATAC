@@ -115,7 +115,7 @@ app_server <- function(input, output, session) {
         hc <- NULL
     }
 
-    promoters <- get_promoters(upstream = 5e4, downstream = 5e4) %>%
+    promoters <- misha.ext::get_promoters(upstream = 5e4, downstream = 5e4) %>%
         mutate(
             coords = glue("{chrom}:{start}-{end}"),
             label = glue("{geneSymbol} ({coords})")
@@ -316,7 +316,7 @@ run_app <- function(mct,
 #'
 #' The bundle can then be deployed in shiny-server, shinyapps.io or any other environment that supports serving shiny apps.
 #'
-#' Note: when deploying to these services - make sure you have the mcATAC package installed.
+#' Note: when deploying to these services - make sure you have the mcATAC package installed with the 'Suggests' dependencies.
 #'
 #' @param mct a MCTracks object
 #' @param path Path to the bundle directory
