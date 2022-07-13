@@ -106,7 +106,6 @@ Collate:
     'promoters.R'
     'rna.R'
     'shiny.R'
-    'subset_bam.R'
     'utils-intervals.R'
     'utils-pipe.R'
     'utils.R'
