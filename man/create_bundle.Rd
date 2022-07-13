@@ -65,7 +65,7 @@ Create a minimal shiny app in \code{path} directory which would contain:
 
 The bundle can then be deployed in shiny-server, shinyapps.io or any other environment that supports serving shiny apps.
 
-Note: when deploying to these services - make sure you have the mcATAC package installed.
+Note: when deploying to these services - make sure you have the mcATAC package installed with the 'Suggests' dependencies.
 }
 \examples{
 \dontrun{

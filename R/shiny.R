@@ -188,13 +188,14 @@ app_server <- function(input, output, session) {
             trough_lf_thresh1 = input$dca_trough_lf_thresh,
             sz_frac_for_peak = input$dca_sz_frac_for_peak
         )
-    }) %>% bindCache(
-        intervals(),
-        input$detect_dca,
-        input$dca_peak_lf_thresh,
-        input$dca_trough_lf_thresh,
-        input$dca_sz_frac_for_peak
-    )
+    }) %>%
+        bindCache(
+            intervals(),
+            input$detect_dca,
+            input$dca_peak_lf_thresh,
+            input$dca_trough_lf_thresh,
+            input$dca_sz_frac_for_peak
+        )
 
     output$current_coords <- renderText({
         if (is.null(intervals())) {

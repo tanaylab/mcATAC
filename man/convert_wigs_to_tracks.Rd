@@ -7,6 +7,7 @@
 convert_wigs_to_tracks(
   wig_dir,
   track_name_prefix = NULL,
+  track_name_suffix = NULL,
   description = NULL,
   parallel = TRUE,
   force = FALSE,
@@ -17,6 +18,8 @@ convert_wigs_to_tracks(
 \item{wig_dir}{path to folder containing WIG files}
 
 \item{track_name_prefix}{name to prepend to track.}
+
+\item{track_name_suffix}{name to append to track.}
 
 \item{description}{(optional) description for misha tracks}
 
