@@ -298,6 +298,7 @@ run_app <- function(mct,
     opt <- options(gmultitasking = FALSE, shiny.usecairo = TRUE)
     withr::defer(options(opt))
     shiny_mct <<- mct
+    gset_genome(mct@genome)
     shiny::shinyApp(
         ui = app_ui,
         server = app_server,
