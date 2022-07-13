@@ -75,9 +75,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
     }
 
     if (has_cell_type(mct) && has_cell_type_colors(mct)) {
-        mc_colors <- mct@metadata %>%
-            select(metacell, color) %>%
-            tibble::deframe()
+        mc_colors <- get_metacell_colors(mct@metadata)
         mc_colors <- mc_colors[colnames(mat)]
     } else {
         mc_colors <- NULL
