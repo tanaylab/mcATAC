@@ -295,8 +295,7 @@ run_app <- function(mct,
                     launch.browser = FALSE) {
     library(misha)
     library(shiny)
-    opt <- options(gmultitasking = FALSE, shiny.usecairo = TRUE)
-    withr::defer(options(opt))
+    opt <- options(gmultitasking = FALSE, shiny.usecairo = TRUE)    
     shiny_mct <<- mct
     gset_genome(mct@genome)
     shiny::shinyApp(
