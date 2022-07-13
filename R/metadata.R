@@ -61,6 +61,13 @@ get_cell_type_colors <- function(metadata) {
         deframe()
 }
 
+get_metacell_colors <- function(metadata) {
+    metadata %>%
+        distinct(metacell, color) %>%
+        select(metacell, color) %>%
+        deframe()
+}
+
 #' Does the McPeaks object contain per-metacell cell type annotation
 #'
 #' @param atac_mc an McPeaks object
