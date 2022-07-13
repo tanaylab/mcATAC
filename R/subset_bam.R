@@ -174,7 +174,7 @@ bam_to_wig <- function(bam_path, output_filename = NULL, track_name_prefix = NUL
 #' @export
 convert_wigs_to_tracks <- function(wig_dir,
                                    track_name_prefix = NULL,
-                                   track_name_suffix = NULL
+                                   track_name_suffix = NULL,
                                    description = NULL,
                                    parallel = TRUE,
                                    force = FALSE,
