@@ -92,9 +92,9 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 #' @param intervals the plotted intervals (optional)
 #' @param resolution the resolution of the plotted intervals (optional)
 #' @param dca_mat a matrix with the differential cluster accessibility (DCA) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.
-#' @param n_smooth number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell. Default is 20.
-#' @param n_pixels number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)}.
-#' @param gene_annot (optional) whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory.
+#' @param n_smooth number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell (optional). Default is 20.
+#' @param n_pixels number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)} (optional).
+#' @param gene_annot whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory. (optional)
 #'
 #' @export
 plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold", "gold"), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 20, n_pixels = 1000, gene_annot = FALSE) {
@@ -181,13 +181,16 @@ plot_tss_strip <- function(intervals) {
     }
 }
 
-#' Extend a DCA matrix with rolling maximum
+#' Extend each DCA using a rolling maximum
+#'
+#' @description This function extends each DCA (differential cluster accesability) using a rolling maximum of size \code{n_peak_smooth} on the rows of \code{dca_mat}.
 #'
 #' @noRd
 extend_dca_mat <- function(dca_mat, n_peak_smooth) {
-    dca_mat[dca_mat == 0] <- -100
-    dca_mat <- dca_mat + 3
+    dca_mat[dca_mat == 0] <- -100 # set all 0 values to -100 to avoid problems with rolling max
+    dca_mat <- dca_mat + 3 # make all the values positive
     dca_mat <- RcppRoll::roll_max(dca_mat, n = n_peak_smooth, fill = c(-97, -97, -97))
+    # set the values back to a scale of -2 to 2
     dca_mat <- dca_mat - 3
     dca_mat[dca_mat == -100] <- 0
     return(dca_mat)
@@ -195,6 +198,11 @@ extend_dca_mat <- function(dca_mat, n_peak_smooth) {
 
 
 #' Return a mask matrix with differential cluster accessibility (DCA)
+#'
+#' @description This function detects differential cluster accessibility (DCA) for each sub-tree of a given `hclust` object with hierarchical clustering of the metacells. \cr
+#' For each coordinate (column) in the matrix, the function computes the log fold change between the subtree and the rest of the tree, and returns a mask matrix indicating whether the fold change is above or below the threshold(s). \cr
+#' In order to avoid very long DCAs, the functions limits the size of a peak/trough to a fraction of all the metacells (\code{sz_frac_for_peak}).
+#'
 #'
 #' @param mat a matrix where rows are coordinates and columns are metacells
 #' @param hc an hclust object with the order of the metacells
