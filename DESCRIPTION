@@ -54,7 +54,13 @@ Suggests:
     metacell,
     knitr,
     rmarkdown,
-    fs
+    fs,
+    shiny, 
+    shinyWidgets,
+    shinyjs,
+    shinycssloaders,
+    cli,
+    gert
 Remotes:
     tanaylab/misha,
     tanaylab/misha.ext,
