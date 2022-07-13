@@ -137,12 +137,12 @@ app_server <- function(input, output, session) {
         )
     })
 
-    update_intervals <- function(new_intervals) {        
+    update_intervals <- function(new_intervals) {
         if (new_intervals$end - new_intervals$start > 1.5e6) {
             showNotification("Region is too large")
             req(FALSE)
         }
-        
+
         globals$history <- c(globals$history, list(new_intervals))
         globals$history_iterator <- length(globals$history)
         intervals(new_intervals)
@@ -302,4 +302,96 @@ run_app <- function(mct,
         server = app_server,
         options = list(port = port, host = host, launch.browser = launch.browser)
     )
+}
+
+#' Create a bundle for the shiny app in order to run it with shiny server
+#'
+#' Generate a 'deployment ready' bundle of the shiny app
+#'
+#' Create a minimal shiny app in \code{path} directory which would contain:
+#' \itemize{
+#' \item{}{app.R file. }
+#' \item{}{mct.rds with the mct object. }
+#' }
+#'
+#' The bundle can then be deployed in shiny-server, shinyapps.io or any other environment that supports serving shiny apps.
+#'
+#' Note: when deploying to these services - make sure you have the mcATAC package installed.
+#'
+#' @param mct a MCTracks object
+#' @param path Path to the bundle directory
+#' @param overwrite overwrite bundle if already exists
+#' @param self_contained include the source code of \code{mcATAC} in the bundle
+#' and use it to run the app. Use this in order to ensure that the package would always
+#' run the same way, regardless of mcATAC changes. When this option is FALSE,
+#' the installed version of \code{mcATAC} would be loaded, which can be occasionally
+#' updated for all the \code{mcATAC} apps running from a server. By default, the code
+#' of the latest \code{mcATAC} release would be used, see \code{branch} for
+#' other options.
+#' @param branch name of the \code{mcATAC} branch to include when \code{self_contained=TRUE}. By default, the master branch would be used.
+#' @param restart add a file named 'restart.txt' to the bundle. This would force shiny-server to restart the app when updated.
+#' @param permissions change the file permissions of the bundle after creation, e.g. "777". When NULL -
+#' permissions would not be changed.
+#'
+#' @inheritDotParams gert::git_clone
+#'
+#' @examples
+#' \dontrun{
+#' create_bundle(mct, "/path/to/the/bundle/directory")
+#' }
+#'
+#' @export
+create_bundle <- function(mct, path, overwrite = FALSE, self_contained = FALSE, branch = "master", restart = overwrite, permissions = NULL, ...) {
+    bundle_dir <- path
+    if (fs::dir_exists(bundle_dir)) {
+        if (overwrite) {
+            fs::dir_delete(bundle_dir)
+            fs::dir_create(bundle_dir)
+            cli::cli_li("Removing previous bundle ({.field overwrite = TRUE})")
+        } else {
+            cli::cli_abort("{.path {bundle_dir}} already exists. Run with {.code overwrite=TRUE} to force overwriting it.")
+        }
+    } else {
+        fs::dir_create(bundle_dir)
+    }
+
+    readr::write_rds(mct, fs::path(bundle_dir, "mct.rds"))
+    fs::file_copy(system.file("app.R", package = "mcATAC"), fs::path(bundle_dir, "app.R"))
+
+    if (self_contained) {
+        cli::cli_alert("Creating a self-contained bundle")
+        code_dir <- fs::path(bundle_dir, "code")
+        if (!is.null(branch) && branch == "latest_release") {
+            gert::git_clone("git@github.com:tanaylab/mcATAC", path = code_dir, ...)
+            tag_list <- gert::git_tag_list(repo = code_dir)
+            latest_tag <- tail(tag_list, n = 1)
+            gert::git_branch_create(
+                branch = latest_tag$name,
+                ref = latest_tag$commit,
+                repo = code_dir,
+                checkout = TRUE
+            )
+            cli::cli_alert_info("Using latest release: {.file {latest_tag$name}}")
+        } else {
+            gert::git_clone("git@github.com:tanaylab/mcATAC", path = code_dir, branch = branch, ...)
+        }
+    }
+
+
+    if (restart) {
+        fs::file_touch(fs::path(bundle_dir, "restart.txt"))
+        cli::cli_li("Adding a file called {.field restart.txt}")
+    }
+
+    if (!is.null(permissions)) {
+        fs::file_chmod(c(bundle_dir, fs::dir_ls(bundle_dir, recurse = TRUE)), mode = permissions)
+        cli::cli_li("Changing permissions to {.field {permissions}}")
+    }
+
+    cli::cli_li("Bundle files:")
+    fs::dir_tree(bundle_dir)
+    cli::cat_line("")
+    cli::cli_alert_success("created a bundle at {bundle_dir}")
+    cli::cli_li("To deploy to shinyapps.io, run: {.field rsconnect::deployApp(appDir = \"{as.character(bundle_dir)}\")}")
+    cli::cli_li("To deploy to another shiny-server service, upload {.path {bundle_dir}} to the service.")
 }
