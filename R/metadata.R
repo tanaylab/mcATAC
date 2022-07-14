@@ -48,6 +48,8 @@ add_metadata <- function(obj, metadata, metadata_id_field) {
         }
     }
 
+    metadata[[metadata_id_field]] <- as.character(metadata[[metadata_id_field]])
+
     obj@metadata <- metadata
 
     return(obj)
