@@ -40,6 +40,7 @@
 #'
 #' @export
 mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold", "gold"), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 20, n_pixels = 1000, ...) {
+    gset_genome(mct@genome)
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
         if (any(metacells %!in% mct@metacells)) {

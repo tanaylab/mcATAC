@@ -7,6 +7,7 @@
 plot_marginal_coverage(
   marginal_track,
   interval,
+  window_size,
   peaks = NULL,
   expand = 1000,
   show_thresh = TRUE,
@@ -14,8 +15,8 @@ plot_marginal_coverage(
   min_umis = 8,
   genome = NULL,
   seed = 60427,
-  thresh = get_quantile_cov_thresh(marginal_track, quantile_thresh, min_umis, genome =
-    genome, seed = seed),
+  thresh = get_quantile_cov_thresh(marginal_track, quantile_thresh, min_umis,
+    window_size = window_size, genome = genome, seed = seed),
   log_scale = TRUE
 )
 }
@@ -23,6 +24,8 @@ plot_marginal_coverage(
 \item{marginal_track}{Name of the 'misha' track to plot. You can create it using \code{import_atac_marginal}.}
 
 \item{interval}{An interval to plot.}
+
+\item{window_size}{Window size to expand the marginal track values. Use the parameter you used at \code{call_peaks}.}
 
 \item{peaks}{An intervals set with the peaks to mark, e.g. output of \code{call_peaks}.}
 

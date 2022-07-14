@@ -8,6 +8,7 @@ get_quantile_cov_thresh(
   marginal_track,
   quantile_thresh,
   min_umis,
+  window_size,
   genome = NULL,
   seed = 60427
 )
@@ -18,6 +19,8 @@ get_quantile_cov_thresh(
 \item{quantile_thresh}{Quantile threshold to use.}
 
 \item{min_umis}{Minimum number of UMIs to use.}
+
+\item{window_size}{size of the window to use for the calculation of the quantile.}
 
 \item{genome}{Genome name, such as 'hg19' or 'mm10'. If NULL - the current genome is used.}
 
