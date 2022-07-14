@@ -194,7 +194,8 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
     if (!has_name(peaks, "peak_name")) {
-        cli_abort("The {.var peaks} must have a column called {.field peak_name}")
+        peaks <- peaks %>% mutate(peak_name = peak_names(.))
+        cli_alert_warning("The {.var peaks} didn't have a column called {.field peak_name}, so it was added using the {.code peak_names} function.")
     }
     matrices <- plyr::alply(mc_counts@genomic_bins, 1, function(bin) {
         return(
