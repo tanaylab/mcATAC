@@ -10,7 +10,8 @@ split_long_peaks(
   target_size = 500,
   max_peak_size = 1000,
   very_long = 5000,
-  min_peak_size = NULL
+  min_peak_size = NULL,
+  window_size = target_size
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ split_long_peaks(
 \item{very_long}{Peaks above this size would be splitted arbitrarily into smaller peaks before fitting the best offset.}
 
 \item{min_peak_size}{Peaks below this size would be discarded.}
+
+\item{window_size}{Smoothing window size (from each side of the iterator) to use of the marginal track. Default: traget_size.}
 }
 \description{
 Peaks are splitted into smaller peaks if they are longer than \code{target_size}. The splitting is done by first checking
