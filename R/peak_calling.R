@@ -119,18 +119,20 @@ get_quantile_cov_thresh <- function(marginal_track, quantile_thresh, min_umis, g
 #' }
 #'
 #' @export
-call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, split_peaks = TRUE, target_size = 500, max_peak_size = 1e3, very_long = 5e3, min_peak_size = 200, genome = NULL, seed = 60427) {
+call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, split_peaks = TRUE, target_size = 500, max_peak_size = 1e3, very_long = 5e3, min_peak_size = 200, window_size = target_size, genome = NULL, seed = 60427) {
     if (!is.null(genome)) {
         gset_genome(genome)
     }
-    thresh <- get_quantile_cov_thresh(marginal_track, quantile_thresh, min_umis, genome = genome, seed = seed)
+    gvtrack.create("vt_marginal", marginal_track, func = "sum")
+    gvtrack.iterator("vt_marginal", sshift = -window_size, eshift = window_size)
+
+    thresh <- get_quantile_cov_thresh("vt_marginal", quantile_thresh, min_umis, genome = genome, seed = seed)
     cli::cli_alert_info("Coverage threshold: {.val {round(thresh, digits=3)}}")
 
-
-    df <- gscreen(glue("{marginal_track} >= thresh"), intervals = gintervals.all())
+    df <- gscreen(glue("vt_marginal >= thresh"), intervals = gintervals.all())
 
     if (split_peaks) {
-        df <- split_long_peaks(marginal_track, peaks = df, target_size = target_size, max_peak_size = max_peak_size, very_long = very_long, min_peak_size = min_peak_size)
+        df <- split_long_peaks(marginal_track, peaks = df, target_size = target_size, max_peak_size = max_peak_size, very_long = very_long, min_peak_size = min_peak_size, window_size = window_size)
     }
 
     return(df)
@@ -240,6 +242,7 @@ split_peaks_arbitrarily <- function(peaks, max_peak_size) {
 #' @param max_peak_size Peaks above this size would be splitted into smaller peaks.
 #' @param very_long Peaks above this size would be splitted arbitrarily into smaller peaks before fitting the best offset.
 #' @param min_peak_size Peaks below this size would be discarded.
+#' @param window_size Smoothing window size (from each side of the iterator) to use of the marginal track. Default: traget_size.
 #'
 #' @examples
 #' \dontrun{
@@ -247,7 +250,7 @@ split_peaks_arbitrarily <- function(peaks, max_peak_size) {
 #' }
 #'
 #' @export
-split_long_peaks <- function(marginal_track, peaks, target_size = 500, max_peak_size = 1e3, very_long = 5e3, min_peak_size = NULL) {
+split_long_peaks <- function(marginal_track, peaks, target_size = 500, max_peak_size = 1e3, very_long = 5e3, min_peak_size = NULL, window_size = target_size) {
     if (!gtrack.exists(marginal_track)) {
         cli_abort("Track {.val {marginal_track}} does not exist")
     }
@@ -270,9 +273,13 @@ split_long_peaks <- function(marginal_track, peaks, target_size = 500, max_peak_
 
     binsize <- gtrack.info(marginal_track)$bin.size
     cli_li("Extracting {.val {marginal_track}}")
+    gvtrack.create("vt_marginal", marginal_track, func = "sum")
+    if (!is.null(window_size)) {
+        gvtrack.iterator("vt_marginal", sshift = -window_size, eshift = window_size)
+    }
     withr::with_options(list("gmax.data.size" = 1e9), {
         peaks_to_split$intervalID <- 1:nrow(peaks_to_split)
-        mar_df <- gextract(marginal_track, intervals = peaks_to_split, colnames = "cov", iterator = binsize) %>%
+        mar_df <- gextract("vt_marginal", intervals = peaks_to_split, colnames = "cov", iterator = binsize) %>%
             as_tibble()
         mar_df <- mar_df %>%
             group_by(intervalID) %>%
@@ -295,7 +302,7 @@ split_long_peaks <- function(marginal_track, peaks, target_size = 500, max_peak_
     cov_mat[cov_mat < 0] <- NA
 
     tri_cors <- tgs_cor(t(cov_mat), tri_mat, spearman = TRUE, pairwise.complete.obs = TRUE)
-
+    tri_cors[is.na(tri_cors)] <- 0
     row_best_match <- apply(tri_cors, 1, which.max)
     best_match_tri <- t(tri_mat[, row_best_match])
     rownames(best_match_tri) <- rownames(cov_mat)
