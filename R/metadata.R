@@ -15,7 +15,7 @@ add_mc_metadata <- function(atac_mc, metadata) {
     add_metadata(atac_mc, metadata, "metacell")
 }
 
-add_metadata <- function(obj, metadata, metadata_id_field) {
+add_metadata <- function(obj, metadata, metadata_id_field) {    
     if (!is.null(metadata)) {
         if (is.character(metadata)) {
             metadata <- tgutil::fread(metadata)
@@ -46,9 +46,9 @@ add_metadata <- function(obj, metadata, metadata_id_field) {
             missing_cells <- paste(unique(metadata[[metadata_id_field]][missing_cells]), collapse = ", ")
             cli_warn("The following {metadata_id_field}s are missing from {.field mat} colnames: {.val {missing_cells}}")
         }
-    }
 
-    metadata[[metadata_id_field]] <- as.character(metadata[[metadata_id_field]])
+        metadata[[metadata_id_field]] <- as.character(metadata[[metadata_id_field]])
+    }    
 
     obj@metadata <- metadata
 
