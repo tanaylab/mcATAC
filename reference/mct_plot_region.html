@@ -27,7 +27,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/peaks.html">peaks</a>
+    <a class="dropdown-item" href="../articles/analysis.html">peaks</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -113,15 +113,15 @@
 
 
 <dt>gene_annot</dt>
-<dd><p>(optional) whether to add gene annotations; these annotations rely on the existence of an <code>annots/refGene.txt</code> file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory.</p></dd>
+<dd><p>whether to add gene annotations; these annotations rely on the existence of an <code>annots/refGene.txt</code> file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory. (optional)</p></dd>
 
 
 <dt>n_smooth</dt>
-<dd><p>number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell. Default is 20.</p></dd>
+<dd><p>number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell (optional). Default is 20.</p></dd>
 
 
 <dt>n_pixels</dt>
-<dd><p>number of pixels in the plot. The DCA regions would be extended by <code>ceiling(2 * nrow(mat) / n_pixels)</code>.</p></dd>
+<dd><p>number of pixels in the plot. The DCA regions would be extended by <code>ceiling(2 * nrow(mat) / n_pixels)</code> (optional).</p></dd>
 
 
 <dt>...</dt>

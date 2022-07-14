@@ -10,13 +10,13 @@
     <loc>/LICENSE.html</loc>
   </url>
   <url>
+    <loc>/articles/analysis.html</loc>
+  </url>
+  <url>
     <loc>/articles/index.html</loc>
   </url>
   <url>
     <loc>/articles/mcATAC.html</loc>
-  </url>
-  <url>
-    <loc>/articles/peaks.html</loc>
   </url>
   <url>
     <loc>/authors.html</loc>
@@ -70,9 +70,6 @@
     <loc>/reference/bam_file_chromosomes.html</loc>
   </url>
   <url>
-    <loc>/reference/bam_to_wig.html</loc>
-  </url>
-  <url>
     <loc>/reference/calc_prom_rna_cor.html</loc>
   </url>
   <url>
@@ -88,7 +85,7 @@
     <loc>/reference/clear_cache.html</loc>
   </url>
   <url>
-    <loc>/reference/convert_wigs_to_tracks.html</loc>
+    <loc>/reference/create_bundle.html</loc>
   </url>
   <url>
     <loc>/reference/download_pbmc_example_data.html</loc>
@@ -124,13 +121,7 @@
     <loc>/reference/generate_motif_pssm_matrix.html</loc>
   </url>
   <url>
-    <loc>/reference/generate_per_metacell_bams.html</loc>
-  </url>
-  <url>
     <loc>/reference/generate_pheatmap_annotation.html</loc>
-  </url>
-  <url>
-    <loc>/reference/generate_wigs_from_bams.html</loc>
   </url>
   <url>
     <loc>/reference/get_available_pssms.html</loc>
@@ -271,9 +262,6 @@
     <loc>/reference/mct_plot_region.html</loc>
   </url>
   <url>
-    <loc>/reference/merge_metacell_bams.html</loc>
-  </url>
-  <url>
     <loc>/reference/name_enhancers.html</loc>
   </url>
   <url>
@@ -334,6 +322,9 @@
     <loc>/reference/rna_atac_cor_knn.html</loc>
   </url>
   <url>
+    <loc>/reference/run_app.html</loc>
+  </url>
+  <url>
     <loc>/reference/save_pheatmap.html</loc>
   </url>
   <url>
@@ -362,9 +353,6 @@
   </url>
   <url>
     <loc>/reference/temp_track_name.html</loc>
-  </url>
-  <url>
-    <loc>/reference/write_metacell_cell_names.html</loc>
   </url>
   <url>
     <loc>/reference/write_sc_counts_from_bam.html</loc>

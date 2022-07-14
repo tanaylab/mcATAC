@@ -27,7 +27,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/peaks.html">peaks</a>
+    <a class="dropdown-item" href="../articles/analysis.html">peaks</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -137,11 +137,6 @@
         <dd>Get chromosomes from a bam file</dd>
       </dl><dl><dt>
           
-          <code><a href="bam_to_wig.html">bam_to_wig()</a></code> 
-        </dt>
-        <dd>Convert BAM file to WIG file</dd>
-      </dl><dl><dt>
-          
           <code><a href="calc_prom_rna_cor.html">calc_prom_rna_cor()</a></code> 
         </dt>
         <dd>Calculate the cross-correlation between promoter accessibility and RNA expression</dd>
@@ -167,9 +162,9 @@
         <dd>Clear the ATAC track matrix cache</dd>
       </dl><dl><dt>
           
-          <code><a href="convert_wigs_to_tracks.html">convert_wigs_to_tracks()</a></code> 
+          <code><a href="create_bundle.html">create_bundle()</a></code> 
         </dt>
-        <dd>Convert WIG files to misha tracks</dd>
+        <dd>Create a bundle for the shiny app in order to run it with shiny server</dd>
       </dl><dl><dt>
           
           <code><a href="download_pbmc_example_data.html">download_pbmc_example_data()</a></code> 
@@ -227,19 +222,9 @@
         <dd>Generate peak-motif matrix</dd>
       </dl><dl><dt>
           
-          <code><a href="generate_per_metacell_bams.html">generate_per_metacell_bams()</a></code> 
-        </dt>
-        <dd>Subset 10X atac_possorted.bam file into per-metacell BAM files</dd>
-      </dl><dl><dt>
-          
           <code><a href="generate_pheatmap_annotation.html">generate_pheatmap_annotation()</a></code> 
         </dt>
         <dd>Function to generate generic pheatmap annotation</dd>
-      </dl><dl><dt>
-          
-          <code><a href="generate_wigs_from_bams.html">generate_wigs_from_bams()</a></code> 
-        </dt>
-        <dd>Write WIGs from BAMs</dd>
       </dl><dl><dt>
           
           <code><a href="get_available_pssms.html">get_available_pssms()</a></code> 
@@ -462,11 +447,6 @@
         <dd>Plot a genomic region</dd>
       </dl><dl><dt>
           
-          <code><a href="merge_metacell_bams.html">merge_metacell_bams()</a></code> 
-        </dt>
-        <dd>Merge BAMs by metacells</dd>
-      </dl><dl><dt>
-          
           <code><a href="name_enhancers.html">name_enhancers()</a></code> 
         </dt>
         <dd>Name ATAC peaks from TAD names</dd>
@@ -562,6 +542,11 @@
         <dd>Match every gene with the k ATAC peaks most correlated to it</dd>
       </dl><dl><dt>
           
+          <code><a href="run_app.html">run_app()</a></code> 
+        </dt>
+        <dd>Run a shiny app for viewing the MCT object</dd>
+      </dl><dl><dt>
+          
           <code><a href="save_pheatmap.html">save_pheatmap()</a></code> 
         </dt>
         <dd>Function to save pheatmaps to disk while showing them on screen</dd>
@@ -610,11 +595,6 @@
           <code><a href="temp_track_name.html">temp_track_name()</a></code> 
         </dt>
         <dd>Get a temporary track name</dd>
-      </dl><dl><dt>
-          
-          <code><a href="write_metacell_cell_names.html">write_metacell_cell_names()</a></code> 
-        </dt>
-        <dd>Utility function to write metacell names to files</dd>
       </dl><dl><dt>
           
           <code><a href="write_sc_counts_from_bam.html">write_sc_counts_from_bam()</a></code> 

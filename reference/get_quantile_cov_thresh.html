@@ -27,7 +27,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/peaks.html">peaks</a>
+    <a class="dropdown-item" href="../articles/analysis.html">peaks</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -61,6 +61,7 @@
 <span>  <span class="va">marginal_track</span>,</span>
 <span>  <span class="va">quantile_thresh</span>,</span>
 <span>  <span class="va">min_umis</span>,</span>
+<span>  <span class="va">window_size</span>,</span>
 <span>  genome <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">60427</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -78,6 +79,10 @@
 
 <dt>min_umis</dt>
 <dd><p>Minimum number of UMIs to use.</p></dd>
+
+
+<dt>window_size</dt>
+<dd><p>size of the window to use for the calculation of the quantile.</p></dd>
 
 
 <dt>genome</dt>

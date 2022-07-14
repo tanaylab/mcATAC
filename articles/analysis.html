@@ -44,7 +44,7 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/peaks.html">peaks</a>
+    <a class="dropdown-item" href="../articles/analysis.html">peaks</a>
   </div>
 </li>
       </ul>
@@ -68,20 +68,19 @@
 
 
 
-<script src="peaks_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+<script src="analysis_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>peaks</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/tanaylab/mcATAC/blob/HEAD/vignettes/peaks.Rmd" class="external-link"><code>vignettes/peaks.Rmd</code></a></small>
-      <div class="d-none name"><code>peaks.Rmd</code></div>
+      <small class="dont-index">Source: <a href="https://github.com/tanaylab/mcATAC/blob/HEAD/vignettes/analysis.Rmd" class="external-link"><code>vignettes/analysis.Rmd</code></a></small>
+      <div class="d-none name"><code>analysis.Rmd</code></div>
     </div>
 
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># library(mcATAC)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/load_all.html" class="external-link">load_all</a></span><span class="op">(</span><span class="st">"/home/aviezerl/src/mcATAC/"</span>, export_all <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tanaylab/mcATAC" class="external-link">mcATAC</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
@@ -132,23 +131,68 @@
 </h2>
 <p>We can now create a ‘misha’ track for each metacell:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/mcc_to_tracks.html">mcc_to_tracks</a></span><span class="op">(</span><span class="va">mc_counts</span>, <span class="st">"pbmc_mc"</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">mct</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mcc_to_tracks.html">mcc_to_tracks</a></span><span class="op">(</span><span class="va">mc_counts</span>, <span class="st">"pbmc_mc"</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span>, create_marginal_track <span class="op">=</span> <span class="cn">TRUE</span>, window_size <span class="op">=</span> <span class="cn">NULL</span>, resolution <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="va">mct</span></span></code></pre></div>
+<blockquote>
+<p>The window size paramter controls the smoothing of the tracks. If it set to NULL, the tracks will not be smoothed, except for the resolution.</p>
+</blockquote>
+<p>We can now use the tracks we have created to identify peaks (for ‘trans’ analysis), or to analyse the genomic regions in ‘cis’.</p>
 </div>
 <div class="section level2">
 <h2 id="identify-peaks">Identify peaks<a class="anchor" aria-label="anchor" href="#identify-peaks"></a>
 </h2>
-<p>We can then use the tracks we created to identify peaks on the metacell level. We think it is more robust than looking only at the marginal of all the data (as the cell ranger does), or than trying to identify peaks on the single cell level which is very sparse.</p>
+<p>We can now use the marginal track we created in order to identify peaks:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># identify peaks on the metacell level. In the meantime - a placeholder using the ScPeaks peaks</span></span>
-<span><span class="va">peaks</span> <span class="op">&lt;-</span> <span class="va">atac_sc</span><span class="op">@</span><span class="va">peaks</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">peaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/call_peaks.html">call_peaks</a></span><span class="op">(</span><span class="st">"pbmc_mc.marginal"</span>, quantile_thresh <span class="op">=</span> <span class="fl">0.9</span>, min_umis <span class="op">=</span> <span class="fl">8</span>, target_size <span class="op">=</span> <span class="fl">500</span>, genome <span class="op">=</span> <span class="st">"hg38"</span><span class="op">)</span></span></code></pre></div>
+<p>We can diagnose our peak calling by plotting the marginal track:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_marginal_coverage.html">plot_marginal_coverage</a></span><span class="op">(</span><span class="st">"pbmc_mc.marginal"</span>, interval <span class="op">=</span> <span class="va">peaks</span><span class="op">[</span><span class="fl">967</span>, <span class="op">]</span>, window_size <span class="op">=</span> <span class="fl">500</span>, peaks <span class="op">=</span> <span class="va">peaks</span>, expand <span class="op">=</span> <span class="fl">1e4</span>, show_thresh <span class="op">=</span> <span class="cn">TRUE</span>, quantile_thresh <span class="op">=</span> <span class="fl">0.9</span>, min_umis <span class="op">=</span> <span class="fl">8</span>, genome <span class="op">=</span> <span class="st">"hg38"</span>, log_scale <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="create-a-mcpeaks-object-from-mccounts-object">Create a McPeaks object from McCounts object<a class="anchor" aria-label="anchor" href="#create-a-mcpeaks-object-from-mccounts-object"></a>
 </h2>
 <p>After we have indentified the peaks, we can create a <code>McPeaks</code> object from the <code>McCounts</code> object that we have created.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">atac_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mcc_to_mcatac.html">mcc_to_mcatac</a></span><span class="op">(</span><span class="va">mc_counts</span>, <span class="va">peaks</span><span class="op">)</span></span>
 <span><span class="va">atac_mc</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="create-a-mctracks-object">Create a McTracks object<a class="anchor" aria-label="anchor" href="#create-a-mctracks-object"></a>
+</h2>
+<p>We already created a ‘McTracks’ object when we created the tracks from the counts object, but we can also create it without re-generating the tracks:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mct</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mct_create.html">mct_create</a></span><span class="op">(</span>genome <span class="op">=</span> <span class="st">"hg38"</span>, track_prefix <span class="op">=</span> <span class="st">"pbmc_mc"</span>, id <span class="op">=</span> <span class="va">mc_counts</span><span class="op">@</span><span class="va">id</span>, description <span class="op">=</span> <span class="va">mc_counts</span><span class="op">@</span><span class="va">description</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="add-rna-and-metadata-to-the-mctracks-object">Add RNA and metadata to the McTracks object<a class="anchor" aria-label="anchor" href="#add-rna-and-metadata-to-the-mctracks-object"></a>
+</h2>
+<p>We can now add the RNA and metadata to the McTracks object:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">rna_mc_mat</span><span class="op">)</span></span>
+<span><span class="va">mct</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_mc_rna.html">add_mc_rna</a></span><span class="op">(</span><span class="va">mct</span>, <span class="va">rna_mc_mat</span><span class="op">)</span></span></code></pre></div>
+<p>An important metadata field is the ‘cell_type’ field. In addition, a field named ‘color’ can be added with a color for each cell type.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mcmd</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mcmd</span><span class="op">)</span></span>
+<span><span class="va">mct</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_mc_metadata.html">add_mc_metadata</a></span><span class="op">(</span><span class="va">mct</span>, <span class="va">mcmd</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="plot-a-genomic-region">Plot a genomic region<a class="anchor" aria-label="anchor" href="#plot-a-genomic-region"></a>
+</h2>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/mct_plot_region.html">mct_plot_region</a></span><span class="op">(</span><span class="va">mct</span>, <span class="fu"><a href="https://rdrr.io/pkg/misha/man/gintervals.html" class="external-link">gintervals</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">54513252</span>, <span class="fl">55535253</span><span class="op">)</span>, detect_dca <span class="op">=</span> <span class="cn">TRUE</span>, gene_annot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="create-a-shiny-app">Create a shiny app<a class="anchor" aria-label="anchor" href="#create-a-shiny-app"></a>
+</h2>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/run_app.html">run_app</a></span><span class="op">(</span><span class="va">mct</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="deploy-the-shiny-app">Deploy the shiny app<a class="anchor" aria-label="anchor" href="#deploy-the-shiny-app"></a>
+</h2>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/create_bundle.html">create_bundle</a></span><span class="op">(</span><span class="va">mct</span>, path <span class="op">=</span> <span class="st">"/path/to/the/server/pbmc_app"</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span>, restart <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

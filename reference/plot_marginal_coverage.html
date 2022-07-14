@@ -27,7 +27,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/peaks.html">peaks</a>
+    <a class="dropdown-item" href="../articles/analysis.html">peaks</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -60,6 +60,7 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_marginal_coverage</span><span class="op">(</span></span>
 <span>  <span class="va">marginal_track</span>,</span>
 <span>  <span class="va">interval</span>,</span>
+<span>  <span class="va">window_size</span>,</span>
 <span>  peaks <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  expand <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  show_thresh <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -67,8 +68,8 @@
 <span>  min_umis <span class="op">=</span> <span class="fl">8</span>,</span>
 <span>  genome <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">60427</span>,</span>
-<span>  thresh <span class="op">=</span> <span class="fu"><a href="get_quantile_cov_thresh.html">get_quantile_cov_thresh</a></span><span class="op">(</span><span class="va">marginal_track</span>, <span class="va">quantile_thresh</span>, <span class="va">min_umis</span>, genome <span class="op">=</span></span>
-<span>    <span class="va">genome</span>, seed <span class="op">=</span> <span class="va">seed</span><span class="op">)</span>,</span>
+<span>  thresh <span class="op">=</span> <span class="fu"><a href="get_quantile_cov_thresh.html">get_quantile_cov_thresh</a></span><span class="op">(</span><span class="va">marginal_track</span>, <span class="va">quantile_thresh</span>, <span class="va">min_umis</span>,</span>
+<span>    window_size <span class="op">=</span> <span class="va">window_size</span>, genome <span class="op">=</span> <span class="va">genome</span>, seed <span class="op">=</span> <span class="va">seed</span><span class="op">)</span>,</span>
 <span>  log_scale <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -81,6 +82,10 @@
 
 <dt>interval</dt>
 <dd><p>An interval to plot.</p></dd>
+
+
+<dt>window_size</dt>
+<dd><p>Window size to expand the marginal track values. Use the parameter you used at <code>call_peaks</code>.</p></dd>
 
 
 <dt>peaks</dt>
