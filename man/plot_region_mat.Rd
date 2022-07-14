@@ -8,6 +8,7 @@ plot_region_mat(
   mat,
   mc_colors = NULL,
   colors = c("white", "gray", "black", "gold", "gold"),
+  color_breaks = c(0, 6, 12, 18, 24, 30),
   intervals = NULL,
   resolution = NULL,
   dca_mat = NULL,
@@ -22,6 +23,8 @@ plot_region_mat(
 \item{mc_colors}{a vector of colors for the metacells (optional)}
 
 \item{colors}{color pallette for the ATAC signal}
+
+\item{color_breaks}{a vector of breaks for the color palette}
 
 \item{intervals}{the plotted intervals (optional)}
 

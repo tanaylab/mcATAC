@@ -39,7 +39,7 @@
 #' }
 #'
 #' @export
-mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold", "gold"), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 20, n_pixels = 1000, ...) {
+mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold", "gold"), color_breaks = c(0, 6, 12, 18, 24, 30), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 20, n_pixels = 1000, ...) {
     gset_genome(mct@genome)
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
@@ -90,6 +90,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 #' @param mat a matrix where rows are coordinates and columns are metacells
 #' @param mc_colors a vector of colors for the metacells (optional)
 #' @param colors color pallette for the ATAC signal
+#' @param color_breaks a vector of breaks for the color palette
 #' @param intervals the plotted intervals (optional)
 #' @param resolution the resolution of the plotted intervals (optional)
 #' @param dca_mat a matrix with the differential cluster accessibility (DCA) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.
@@ -98,7 +99,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 #' @param gene_annot whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory. (optional)
 #'
 #' @export
-plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold", "gold"), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 20, n_pixels = 1000, gene_annot = FALSE) {
+plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold", "gold"), color_breaks = c(0, 6, 12, 18, 24, 30), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 20, n_pixels = 1000, gene_annot = FALSE) {
     mat_smooth <- RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
 
     if (gene_annot) {
@@ -131,7 +132,9 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 
     par(mar = c(4, 0, top_mar, 2))
     shades <- colorRampPalette(colors)(1000)
-    image(mat_smooth, col = shades, yaxt = "n", xaxt = "n")
+    mat_smooth[mat_smooth > color_breaks[max(color_breaks)]] <- max(color_breaks)
+    shades_breaks <- approx(color_breaks, n = 1001)$y
+    image(mat_smooth, col = shades, breaks = shades_breaks, yaxt = "n", xaxt = "n")
     if (!is.null(intervals)) {
         axis(1, at = seq(0, 1, l = 11), round(seq(intervals$start[1], intervals$end[1], l = 11) / 1e+6, 3), las = 2)
     }
