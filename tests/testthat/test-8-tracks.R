@@ -1,6 +1,6 @@
 mct <- mct_create(
     genome = "hg38",
-    track_prefix = "mcatac_test",
+    track_prefix = "pbmc_mc",
     id = "pbmc",
     description = "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)",
     metadata = mcmd,

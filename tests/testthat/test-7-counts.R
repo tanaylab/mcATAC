@@ -129,7 +129,7 @@ test_that("create_smoothed_track_from_dataframe works", {
 
 # A heavy test - uncomment to run
 # test_that("mcc_to_tracks works", {
-#     mct <- mcc_to_tracks(mc_counts, "mcatac_test", overwrite = TRUE, resolution = 20, window_size = 10)
+#     mct <- mcc_to_tracks(mc_counts, "pbmc_mc", overwrite = TRUE, resolution = 20, window_size = NULL)
 #     expect_equal(mc_counts@cell_names,mct@metacells)
 #     expect_true(all(gtrack.exists(mct@tracks)))
 #     expect_equal(mc_counts@genome, mct@genome)
