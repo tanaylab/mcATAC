@@ -79,6 +79,7 @@ bigwig_to_wig <- function(bigwig_file, wig_file, genome, wig_temp_dir = tempdir(
 #' @param marginal_track Name of the 'misha' track to call peaks from. You can create it using \code{import_atac_marginal}.
 #' @param quantile_thresh Quantile threshold to use.
 #' @param min_umis Minimum number of UMIs to use.
+#' @param window_size size of the window to use for the calculation of the quantile.
 #' @param genome Genome name, such as 'hg19' or 'mm10'. If NULL - the current genome is used.
 #' @param seed random seed for reproducibility (\code{misha::gquantiles} sometimes samples the data.
 #'
@@ -90,11 +91,14 @@ bigwig_to_wig <- function(bigwig_file, wig_file, genome, wig_temp_dir = tempdir(
 #' }
 #'
 #' @export
-get_quantile_cov_thresh <- function(marginal_track, quantile_thresh, min_umis, genome = NULL, seed = 60427) {
+get_quantile_cov_thresh <- function(marginal_track, quantile_thresh, min_umis, window_size, genome = NULL, seed = 60427) {
     if (!is.null(genome)) {
         gset_genome(genome)
     }
-    withr::with_seed(seed, thresh <- max(gquantiles(marginal_track, quantile_thresh), min_umis))
+    gvtrack.create("vt_marginal", marginal_track, func = "sum")
+    gvtrack.iterator("vt_marginal", sshift = -window_size, eshift = window_size)
+    withr::local_options(gmax.data.size = 1e9)
+    withr::with_seed(seed, thresh <- max(gquantiles("vt_marginal", quantile_thresh), min_umis))
     return(thresh)
 }
 
@@ -123,12 +127,12 @@ call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, spli
     if (!is.null(genome)) {
         gset_genome(genome)
     }
-    gvtrack.create("vt_marginal", marginal_track, func = "sum")
-    gvtrack.iterator("vt_marginal", sshift = -window_size, eshift = window_size)
 
-    thresh <- get_quantile_cov_thresh("vt_marginal", quantile_thresh, min_umis, genome = genome, seed = seed)
+    thresh <- get_quantile_cov_thresh(marginal_track, quantile_thresh, min_umis, window_size = window_size, genome = genome, seed = seed)
     cli::cli_alert_info("Coverage threshold: {.val {round(thresh, digits=3)}}")
 
+    gvtrack.create("vt_marginal", marginal_track, func = "sum")
+    gvtrack.iterator("vt_marginal", sshift = -window_size, eshift = window_size)
     df <- gscreen(glue("vt_marginal >= thresh"), intervals = gintervals.all())
 
     if (split_peaks) {
@@ -145,6 +149,7 @@ call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, spli
 #'
 #' @param marginal_track Name of the 'misha' track to plot. You can create it using \code{import_atac_marginal}.
 #' @param interval An interval to plot.
+#' @param window_size Window size to expand the marginal track values. Use the parameter you used at \code{call_peaks}.
 #' @param peaks An intervals set with the peaks to mark, e.g. output of \code{call_peaks}.
 #' @param expand Expand the plotting area by this number of bp.
 #' @param show_threshold Show the coverage threshold as a dashed line.
@@ -166,7 +171,7 @@ call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, spli
 #' }
 #'
 #' @export
-plot_marginal_coverage <- function(marginal_track, interval, peaks = NULL, expand = 1e3, show_thresh = TRUE, quantile_thresh = 0.9, min_umis = 8, genome = NULL, seed = 60427, thresh = get_quantile_cov_thresh(marginal_track, quantile_thresh, min_umis, genome = genome, seed = seed), log_scale = TRUE) {
+plot_marginal_coverage <- function(marginal_track, interval, window_size, peaks = NULL, expand = 1e3, show_thresh = TRUE, quantile_thresh = 0.9, min_umis = 8, genome = NULL, seed = 60427, thresh = get_quantile_cov_thresh(marginal_track, quantile_thresh, min_umis, window_size = window_size, genome = genome, seed = seed), log_scale = TRUE) {
     if (!is.null(genome)) {
         gset_genome(genome)
     }
@@ -181,7 +186,10 @@ plot_marginal_coverage <- function(marginal_track, interval, peaks = NULL, expan
         scope <- scope %>% slice(1)
     }
 
-    ggdata <- gextract(marginal_track, scope, colnames = "counts")
+    gvtrack.create("vt_marginal", marginal_track, func = "sum")
+    gvtrack.iterator("vt_marginal", sshift = -window_size, eshift = window_size)
+
+    ggdata <- gextract("vt_marginal", scope, colnames = "counts")
     if (!is.null(peaks)) {
         peaks_f <- peaks %>%
             mutate(intervalID = factor(1:n())) %>%
