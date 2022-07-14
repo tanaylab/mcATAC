@@ -12,6 +12,7 @@ mct_plot_region(
   downsample_n = NULL,
   metacells = NULL,
   colors = c("white", "gray", "black", "gold", "gold"),
+  color_breaks = c(0, 6, 12, 18, 24, 30),
   hc = NULL,
   force_cell_type = TRUE,
   gene_annot = FALSE,
@@ -34,6 +35,8 @@ mct_plot_region(
 \item{metacells}{a vector of metacells to plot. If NULL, all metacells will be plotted.}
 
 \item{colors}{color pallette for the ATAC signal}
+
+\item{color_breaks}{a vector of breaks for the color palette}
 
 \item{hc}{an hclust object to use for the hierarchical clustering of the metacells when \code{detect_dcs=TRUE}. If NULL, metacells will be clustered using \code{mc_hclust_rna}.}
 
