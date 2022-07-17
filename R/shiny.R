@@ -143,8 +143,14 @@ app_server <- function(input, output, session) {
             req(FALSE)
         }
 
-        globals$history <- c(globals$history, list(new_intervals))
-        globals$history_iterator <- length(globals$history)
+        if (is.null(globals$history_iterator)) {
+            globals$history <- list(new_intervals)
+            globals$history_iterator <- 1
+        } else {
+            globals$history <- c(globals$history[1:globals$history_iterator], list(new_intervals))
+            globals$history_iterator <- length(globals$history)
+        }
+
         intervals(new_intervals)
     }
 
