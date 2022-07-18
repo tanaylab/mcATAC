@@ -132,7 +132,7 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 
     par(mar = c(4, 0, top_mar, 2))
     shades <- colorRampPalette(colors)(1000)
-    mat_smooth[mat_smooth > color_breaks[max(color_breaks)]] <- max(color_breaks)
+    mat_smooth[mat_smooth > max(color_breaks)] <- max(color_breaks)
     shades_breaks <- approx(color_breaks, n = 1001)$y
     image(mat_smooth, col = shades, breaks = shades_breaks, yaxt = "n", xaxt = "n")
     if (!is.null(intervals)) {
