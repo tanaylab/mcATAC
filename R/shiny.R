@@ -42,7 +42,9 @@ app_ui <- function(request) {
                                             inputIds = paste0("zoom_out_", c(1.5, 3, 10)),
                                             labels = c("1.5x", "3x", "10x")
                                         ),
-                                        span(class = "checkbox_inline", checkboxInput("detect_dca", "Detect DCA", value = TRUE)),
+                                        shinyjs::disabled(
+                                            span(class = "checkbox_inline", checkboxInput("detect_dca", "Detect DCA", value = has_rna(shiny_mct) && has_cell_type(shiny_mct) && has_cell_type_colors(shiny_mct)))
+                                        ),
                                         tags$div(numericInput("dca_peak_lf_thresh", "Peak thr:", value = 1.2, min = 0, max = 10, step = 0.1), id = "inline", style = "display:inline-block;vertical-align: middle;margin-left:50px;"),
                                         tags$div(numericInput("dca_trough_lf_thresh", "Trough thr:", value = -1, max = 0, min = -10, step = 0.1), id = "inline", style = "display:inline-block;vertical-align: middle;"),
                                         tags$div(numericInput("dca_sz_frac_for_peak", "Max:", value = 0.25, max = 1, min = 0, step = 0.05), id = "inline", style = "display:inline-block;vertical-align: middle;")
@@ -111,6 +113,7 @@ app_server <- function(input, output, session) {
 
     if (has_rna(shiny_mct) && has_cell_type(shiny_mct) && has_cell_type_colors(shiny_mct)) {
         hc <- mc_hclust_rna(shiny_mct, force_cell_type = TRUE)
+        shinyjs::enable("detect_dca")
     } else {
         hc <- NULL
     }
@@ -181,13 +184,12 @@ app_server <- function(input, output, session) {
 
     output$region_plot <- renderPlot({
         req(intervals())
-        req(!is.null(input$detect_dca))
         req(input$dca_peak_lf_thresh)
         req(input$dca_trough_lf_thresh)
         req(input$dca_sz_frac_for_peak)
         mct_plot_region(
             shiny_mct, intervals(),
-            detect_dca = input$detect_dca,
+            detect_dca = input$detect_dca %||% FALSE,
             gene_annot = TRUE,
             hc = hc,
             peak_lf_thresh1 = input$dca_peak_lf_thresh,
