@@ -11,12 +11,12 @@ mct_plot_region(
   downsample = TRUE,
   downsample_n = NULL,
   metacells = NULL,
-  colors = c("white", "gray", "black", "gold", "gold"),
-  color_breaks = c(0, 6, 12, 18, 24, 30),
+  colors = c("white", "gray", "black", "gold"),
+  color_breaks = c(0, 6, 12, 18, 24),
   hc = NULL,
   force_cell_type = TRUE,
   gene_annot = FALSE,
-  n_smooth = 20,
+  n_smooth = 10,
   n_pixels = 1000,
   ...
 )

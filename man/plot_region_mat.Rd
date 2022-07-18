@@ -7,12 +7,12 @@
 plot_region_mat(
   mat,
   mc_colors = NULL,
-  colors = c("white", "gray", "black", "gold", "gold"),
-  color_breaks = c(0, 6, 12, 18, 24, 30),
+  colors = c("white", "gray", "black", "gold"),
+  color_breaks = c(0, 6, 12, 18, 24),
   intervals = NULL,
   resolution = NULL,
   dca_mat = NULL,
-  n_smooth = 20,
+  n_smooth = 10,
   n_pixels = 1000,
   gene_annot = FALSE
 )
