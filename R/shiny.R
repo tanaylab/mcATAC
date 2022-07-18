@@ -143,7 +143,7 @@ app_server <- function(input, output, session) {
         hc <- NULL
     }
 
-    min_val <- round(gsummary(mct@tracks[1])[[6]] * 10 / 2)
+    min_val <- round(gsummary(shiny_mct@tracks[1])[[6]] * 10 / 2)
 
     observe({
         updateNumericInput(session = session, inputId = "min_color", value = min_val)
