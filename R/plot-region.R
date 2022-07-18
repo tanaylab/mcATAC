@@ -39,7 +39,7 @@
 #' }
 #'
 #' @export
-mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold", "gold"), color_breaks = c(0, 6, 12, 18, 24, 30), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 20, n_pixels = 1000, ...) {
+mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, ...) {
     gset_genome(mct@genome)
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
@@ -85,7 +85,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
         mc_colors <- NULL
     }
 
-    plot_region_mat(mat, mc_colors, colors = colors, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels)
+    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels)
 }
 
 #' Plot a genomic region given a matrix
@@ -102,7 +102,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 #' @param gene_annot whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory. (optional)
 #'
 #' @export
-plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold", "gold"), color_breaks = c(0, 6, 12, 18, 24, 30), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 20, n_pixels = 1000, gene_annot = FALSE) {
+plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE) {
     mat_smooth <- RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
 
     if (gene_annot) {
