@@ -52,6 +52,9 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
     mat <- raw_mat[, intersect(mct@metacells[mct@order], colnames(raw_mat)), drop = FALSE]
 
     if (detect_dca && is.null(hc)) {
+        if (!has_rna(mct)) {
+            cli_abort("Cannot detect DCA without either an hclust object or RNA data.")
+        }
         mct <- mct_subset_metacells(mct, colnames(mat))
         hc <- mc_hclust_rna(mct, force_cell_type = force_cell_type)
     }
