@@ -24,7 +24,7 @@ app_ui <- function(request) {
                         fluidRow(
                             align = "left",
                             column(
-                                11,
+                                12,
                                 tagList(
                                     div(
                                         tags$b("Move:"),
@@ -58,7 +58,7 @@ app_ui <- function(request) {
                                             )
                                         ),
                                         column(
-                                            7,
+                                            6,
                                             shinyWidgets::searchInput(
                                                 inputId = "coords",
                                                 label = "Enter coordinates:",
@@ -80,9 +80,34 @@ app_ui <- function(request) {
                                             inputId = "update_gene_coord",
                                             label = "Go to gene",
                                             style = "margin-top: 25px; margin-bottom: 7.5px; margin-left: 1px;"
-                                        ))
+                                        )),
+                                        column(
+                                            1,
+                                            shinyWidgets::materialSwitch(
+                                                inputId = "show_controls",
+                                                label = "Advanced",
+                                                value = FALSE
+                                            )
+                                        )
                                     ),
-                                    em(textOutput("current_coords", inline = TRUE))
+                                    fluidRow(
+                                        column(
+                                            5,
+                                            em(textOutput("current_coords", inline = TRUE)),
+                                        ),
+                                        column(
+                                            3,
+                                            tags$div(numericInput("n_smooth", "Smooth (bp):", value = 200, min = shiny_mct@resolution, step = shiny_mct@resolution), id = "inline", style = "display:inline-block;vertical-align: middle;", width = "100%"),
+                                        ),
+                                        column(
+                                            2,
+                                            tags$div(numericInput("min_color", "Min color:", value = 6, min = 0, step = 1), id = "inline", style = "display:inline-block;vertical-align: middle;", width = "30%"),
+                                        ),
+                                        column(
+                                            2,
+                                            tags$div(numericInput("max_color", "Max color:", value = 24, min = 0, step = 1), id = "inline", style = "display:inline-block;vertical-align: middle;", width = "30%")
+                                        )
+                                    )
                                 )
                             )
                         )
@@ -117,6 +142,20 @@ app_server <- function(input, output, session) {
     } else {
         hc <- NULL
     }
+
+    min_val <- round(gsummary(mct@tracks[1])[[6]] * 10 / 2)
+
+    observe({
+        updateNumericInput(session = session, inputId = "min_color", value = min_val)
+        updateNumericInput(session = session, inputId = "max_color", value = min_val * 4)
+        updateNumericInput(session = session, inputId = "n_smooth", value = shiny_mct@resolution * 10)
+    })
+
+    observe({
+        shinyjs::toggle(id = "min_color", condition = input$show_controls)
+        shinyjs::toggle(id = "max_color", condition = input$show_controls)
+        shinyjs::toggle(id = "n_smooth", condition = input$show_controls)
+    })
 
     promoters <- misha.ext::get_promoters(upstream = 5e4, downstream = 5e4) %>%
         mutate(
@@ -187,6 +226,19 @@ app_server <- function(input, output, session) {
         req(input$dca_peak_lf_thresh)
         req(input$dca_trough_lf_thresh)
         req(input$dca_sz_frac_for_peak)
+        req(input$min_color)
+        req(input$max_color)
+        req(input$min_color < input$max_color)
+        req(input$n_smooth)
+        req(input$n_smooth >= 1)
+        color_breaks <- c(0, seq(
+            input$min_color,
+            input$max_color,
+            length.out = 4
+        ))
+
+        n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
+
         mct_plot_region(
             shiny_mct, intervals(),
             detect_dca = input$detect_dca %||% FALSE,
@@ -194,7 +246,9 @@ app_server <- function(input, output, session) {
             hc = hc,
             peak_lf_thresh1 = input$dca_peak_lf_thresh,
             trough_lf_thresh1 = input$dca_trough_lf_thresh,
-            sz_frac_for_peak = input$dca_sz_frac_for_peak
+            sz_frac_for_peak = input$dca_sz_frac_for_peak,
+            color_breaks = color_breaks,
+            n_smooth = n_smooth
         )
     }) %>%
         bindCache(
@@ -202,7 +256,10 @@ app_server <- function(input, output, session) {
             input$detect_dca,
             input$dca_peak_lf_thresh,
             input$dca_trough_lf_thresh,
-            input$dca_sz_frac_for_peak
+            input$dca_sz_frac_for_peak,
+            input$min_color,
+            input$max_color,
+            input$n_smooth
         )
 
     output$current_coords <- renderText({
@@ -252,9 +309,9 @@ app_server <- function(input, output, session) {
     })
 
     observe({
-        shinyjs::toggle(id = "dca_peak_lf_thresh", condition = input$detect_dca)
-        shinyjs::toggle(id = "dca_trough_lf_thresh", condition = input$detect_dca)
-        shinyjs::toggle(id = "dca_sz_frac_for_peak", condition = input$detect_dca)
+        shinyjs::toggle(id = "dca_peak_lf_thresh", condition = input$detect_dca && input$show_controls)
+        shinyjs::toggle(id = "dca_trough_lf_thresh", condition = input$detect_dca && input$show_controls)
+        shinyjs::toggle(id = "dca_sz_frac_for_peak", condition = input$detect_dca && input$show_controls)
     })
 }
 
