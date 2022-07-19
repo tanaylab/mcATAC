@@ -64,11 +64,12 @@
 <span>  downsample <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  downsample_n <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  metacells <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"white"</span>, <span class="st">"gray"</span>, <span class="st">"black"</span>, <span class="st">"gold"</span>, <span class="st">"gold"</span><span class="op">)</span>,</span>
+<span>  colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"white"</span>, <span class="st">"gray"</span>, <span class="st">"black"</span>, <span class="st">"gold"</span><span class="op">)</span>,</span>
+<span>  color_breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">6</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">24</span><span class="op">)</span>,</span>
 <span>  hc <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  force_cell_type <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  gene_annot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  n_smooth <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  n_smooth <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  n_pixels <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -102,6 +103,10 @@
 
 <dt>colors</dt>
 <dd><p>color pallette for the ATAC signal</p></dd>
+
+
+<dt>color_breaks</dt>
+<dd><p>a vector of breaks for the color palette</p></dd>
 
 
 <dt>hc</dt>
