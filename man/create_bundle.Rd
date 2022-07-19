@@ -7,6 +7,7 @@
 create_bundle(
   mct,
   path,
+  hc = NULL,
   overwrite = FALSE,
   self_contained = FALSE,
   branch = "master",
@@ -19,6 +20,8 @@ create_bundle(
 \item{mct}{a MCTracks object}
 
 \item{path}{Path to the bundle directory}
+
+\item{hc}{an hclust object with clustering of the metacells (optional, see \code{mct_plot_region})}
 
 \item{overwrite}{overwrite bundle if already exists}
 
