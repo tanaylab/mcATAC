@@ -3,4 +3,9 @@ if (dir.exists("code")) {
 }
 options(gmultitasking = FALSE)
 mct <- readr::read_rds("mct.rds")
-mcATAC::run_app(mct)
+if (file.exists("hc.rds")){
+    hc <- readr::read_rds("hc.rds")
+} else {
+    hc <- NULL
+}
+mcATAC::run_app(mct, hc = hc)

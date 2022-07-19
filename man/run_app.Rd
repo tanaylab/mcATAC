@@ -4,10 +4,12 @@
 \alias{run_app}
 \title{Run a shiny app for viewing the MCT object}
 \usage{
-run_app(mct, port = NULL, host = NULL, launch.browser = FALSE)
+run_app(mct, hc = NULL, port = NULL, host = NULL, launch.browser = FALSE)
 }
 \arguments{
 \item{mct}{MCT object}
+
+\item{hc}{an hclust object with clustering of the metacells (optional, see \code{mct_plot_region}}
 }
 \description{
 Run a shiny app for viewing the MCT object

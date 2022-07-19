@@ -136,14 +136,17 @@ app_server <- function(input, output, session) {
     intervals <- reactiveVal()
     globals <- reactiveValues()
 
-    if (has_rna(shiny_mct) && has_cell_type(shiny_mct) && has_cell_type_colors(shiny_mct)) {
+    if (!is.null(shiny_hc)) {
+        hc <- shiny_hc
+        shinyjs::enable("detect_dca") # Enable DCA detection
+    } else if (has_rna(shiny_mct) && has_cell_type(shiny_mct) && has_cell_type_colors(shiny_mct)) {
         hc <- mc_hclust_rna(shiny_mct, force_cell_type = TRUE)
-        shinyjs::enable("detect_dca")
+        shinyjs::enable("detect_dca") # Enable DCA detection
     } else {
         hc <- NULL
     }
 
-    min_val <- round(gsummary(shiny_mct@tracks[1])[[6]] * 10 / 2)
+    min_val <- round(gsummary(shiny_mct@tracks[1], intervals = gintervals.all()[1, ])[[6]] * 10 / 2)
 
     observe({
         updateNumericInput(session = session, inputId = "min_color", value = min_val)
@@ -347,6 +350,7 @@ parse_coordinate_text <- function(text) {
 #' Run a shiny app for viewing the MCT object
 #'
 #' @param mct MCT object
+#' @param hc an hclust object with clustering of the metacells (optional, see \code{mct_plot_region}
 #'
 #' @examples
 #' \dontrun{
@@ -355,6 +359,7 @@ parse_coordinate_text <- function(text) {
 #'
 #' @export
 run_app <- function(mct,
+                    hc = NULL,
                     port = NULL,
                     host = NULL,
                     launch.browser = FALSE) {
@@ -362,6 +367,11 @@ run_app <- function(mct,
     library(shiny)
     opt <- options(gmultitasking = FALSE, shiny.usecairo = TRUE)
     shiny_mct <<- mct
+    if (!is.null(hc)) {
+        shiny_hc <<- hc
+    } else {
+        shiny_hc <<- NULL
+    }
     gset_genome(mct@genome)
     shiny::shinyApp(
         ui = app_ui,
@@ -386,6 +396,7 @@ run_app <- function(mct,
 #'
 #' @param mct a MCTracks object
 #' @param path Path to the bundle directory
+#' @param hc an hclust object with clustering of the metacells (optional, see \code{mct_plot_region})
 #' @param overwrite overwrite bundle if already exists
 #' @param self_contained include the source code of \code{mcATAC} in the bundle
 #' and use it to run the app. Use this in order to ensure that the package would always
@@ -407,7 +418,7 @@ run_app <- function(mct,
 #' }
 #'
 #' @export
-create_bundle <- function(mct, path, overwrite = FALSE, self_contained = FALSE, branch = "master", restart = overwrite, permissions = NULL, ...) {
+create_bundle <- function(mct, path, hc = NULL, overwrite = FALSE, self_contained = FALSE, branch = "master", restart = overwrite, permissions = NULL, ...) {
     bundle_dir <- path
     if (fs::dir_exists(bundle_dir)) {
         if (overwrite) {
@@ -422,6 +433,9 @@ create_bundle <- function(mct, path, overwrite = FALSE, self_contained = FALSE, 
     }
 
     readr::write_rds(mct, fs::path(bundle_dir, "mct.rds"))
+    if (!is.null(hc)) {
+        readr::write_rds(hc, fs::path(bundle_dir, "hc.rds"))
+    }
     fs::file_copy(system.file("app.R", package = "mcATAC"), fs::path(bundle_dir, "app.R"))
 
     if (self_contained) {
