@@ -70,6 +70,9 @@ generate_motif_pssm_matrix <- function(atac = NULL,
     peak_mids <- round((peaks$end + peaks$start) / 2)
     peaks <- mutate(peaks, start = round(peak_mids - peak_width / 2), end = round(peak_mids + peak_width / 2))
     peaks <- fix_missing_chroms_in_peaks(peaks)
+    peaks <- peaks %>%
+        as.data.frame() %>%
+        gintervals.force_range()
     if (!parallel) {
         nc <- 2
     }
