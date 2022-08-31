@@ -320,6 +320,7 @@ app_server <- function(input, output, session) {
 
 parse_coordinate_text <- function(text) {
     text <- gsub(",", "", text) # remove commas
+    text <- gsub("\t", " ", text) # transform tabs to spaces
     text <- gsub(" +", " ", text) # remove multiple spaces
     text <- gsub(": +", ":", text) # remove spaces after colon
     text <- gsub("- +", "-", text) # remove spaces after hyphen
