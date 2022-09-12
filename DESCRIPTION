@@ -33,7 +33,7 @@ Imports:
     stringi,
     stringr,
     tgstat,
-    tgutil (>= 0.1.12),
+    tgutil (>= 0.1.14),
     tibble,
     tidyr,
     withr,
