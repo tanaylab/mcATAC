@@ -46,6 +46,8 @@ add_metadata <- function(obj, metadata, metadata_id_field) {
             missing_cells <- paste(unique(metadata[[metadata_id_field]][missing_cells]), collapse = ", ")
             cli_warn("The following {metadata_id_field}s are missing from {.field mat} colnames: {.val {missing_cells}}")
         }
+
+        metadata[[metadata_id_field]] <- as.character(metadata[[metadata_id_field]])
     }
 
     obj@metadata <- metadata
@@ -58,6 +60,13 @@ get_cell_type_colors <- function(metadata) {
     metadata %>%
         distinct(cell_type, color) %>%
         select(cell_type, color) %>%
+        deframe()
+}
+
+get_metacell_colors <- function(metadata) {
+    metadata %>%
+        distinct(metacell, color) %>%
+        select(metacell, color) %>%
         deframe()
 }
 

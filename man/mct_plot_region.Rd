@@ -11,11 +11,12 @@ mct_plot_region(
   downsample = TRUE,
   downsample_n = NULL,
   metacells = NULL,
-  colors = c("white", "gray", "black", "gold", "gold"),
+  colors = c("white", "gray", "black", "gold"),
+  color_breaks = c(0, 6, 12, 18, 24),
   hc = NULL,
   force_cell_type = TRUE,
   gene_annot = FALSE,
-  n_smooth = 20,
+  n_smooth = 10,
   n_pixels = 1000,
   ...
 )
@@ -35,15 +36,17 @@ mct_plot_region(
 
 \item{colors}{color pallette for the ATAC signal}
 
+\item{color_breaks}{a vector of breaks for the color palette}
+
 \item{hc}{an hclust object to use for the hierarchical clustering of the metacells when \code{detect_dcs=TRUE}. If NULL, metacells will be clustered using \code{mc_hclust_rna}.}
 
 \item{force_cell_type}{do not split cell types when ordering the metacells. Default: TRUE}
 
-\item{gene_annot}{(optional) whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory.}
+\item{gene_annot}{whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory. (optional)}
 
-\item{n_smooth}{number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell. Default is 20.}
+\item{n_smooth}{number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell (optional). Default is 20.}
 
-\item{n_pixels}{number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)}.}
+\item{n_pixels}{number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)} (optional).}
 
 \item{...}{
   Arguments passed on to \code{\link[=mct_diff_access_on_hc]{mct_diff_access_on_hc}}

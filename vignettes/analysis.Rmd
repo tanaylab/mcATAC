@@ -16,8 +16,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-# library(mcATAC)
-devtools::load_all("/home/aviezerl/src/mcATAC/", export_all = FALSE)
+library(mcATAC)
 library(ggplot2)
 ggplot2::theme_set(ggplot2::theme_classic())
 ```
@@ -43,7 +42,7 @@ Note that the 'fragments' file is large - ~2GB, so this step might take some tim
 `mcATAC` allows you to load the raw counts data into an `ScCounts` object. A `ScCounts` holds the raw reads as a set of sparse matrices where the rows are genomic coordinates and the columns are cell barcodes. The number of sparse matrices ("genomic bins") is controlled by the `bin_size` parameter. The matrices are stored in a 'gzip' compressed form under a directory called 'data', together with a 'yaml' file containing the some metadata such as the genomic bins coordinates and the cell barcodes.
 
 We can now import the raw reads into a `ScCounts` object that we are going to store at "pbmc_data/reads". Note that this might take ~4 minutes on a machine with 96 cores. 
-  
+
 ```{r import-scounts, eval = FALSE}
 barcodes <- tgutil::fread("pbmc_data/barcodes.tsv", header = FALSE)[, 1]
 write_sc_counts_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_data/reads", cell_names = barcodes, genome = "hg38", overwrite = TRUE)
@@ -68,7 +67,7 @@ mc_counts
 
 ## Save McCounts object
 
-```{r save-mc-counts}
+```{r save-mc-counts, eval = FALSE}
 mcc_write(mc_counts, "pbmc_data/mc_counts", overwrite = TRUE)
 ```
 
@@ -76,17 +75,27 @@ mcc_write(mc_counts, "pbmc_data/mc_counts", overwrite = TRUE)
 
 We can now create a 'misha' track for each metacell:
 
-```{r misha-tracks}
-mcc_to_tracks(mc_counts, "pbmc_mc", overwrite = TRUE)
+```{r misha-tracks, eval = FALSE}
+mct <- mcc_to_tracks(mc_counts, "pbmc_mc", overwrite = TRUE, create_marginal_track = TRUE, window_size = NULL, resolution = 20)
+mct
 ```
+
+> The window size paramter controls the smoothing of the tracks. If it set to NULL, the tracks will not be smoothed, except for the resolution.
+
+We can now use the tracks we have created to identify peaks (for 'trans' analysis), or to analyse the genomic regions in 'cis'. 
 
 ## Identify peaks
 
-We can then use the tracks we created to identify peaks on the metacell level. We think it is more robust than looking only at the marginal of all the data (as the cell ranger does), or than trying to identify peaks on the single cell level which is very sparse. 
+We can now use the marginal track we created in order to identify peaks: 
 
 ```{r identify-peaks}
-# identify peaks on the metacell level. In the meantime - a placeholder using the ScPeaks peaks
-peaks <- atac_sc@peaks
+peaks <- call_peaks("pbmc_mc.marginal", quantile_thresh = 0.9, min_umis = 8, target_size = 500, genome = "hg38")
+```
+
+We can diagnose our peak calling by plotting the marginal track: 
+
+```{r plot-marginal, fig.width=12, fig.height=5}
+plot_marginal_coverage("pbmc_mc.marginal", interval = peaks[967, ], window_size = 500, peaks = peaks, expand = 1e4, show_thresh = TRUE, quantile_thresh = 0.9, min_umis = 8, genome = "hg38", log_scale = FALSE)
 ```
 
 ## Create a McPeaks object from McCounts object 
@@ -98,5 +107,45 @@ atac_mc <- mcc_to_mcatac(mc_counts, peaks)
 atac_mc
 ```
 
+## Create a McTracks object
 
+We already created a 'McTracks' object when we created the tracks from the counts object, but we can also create it without re-generating the tracks:
 
+```{r mc-tracks}
+mct <- mct_create(genome = "hg38", track_prefix = "pbmc_mc", id = mc_counts@id, description = mc_counts@description)
+```
+
+## Add RNA and metadata to the McTracks object
+
+We can now add the RNA and metadata to the McTracks object:
+
+```{r mc-tracks-add-rna}
+data(rna_mc_mat)
+mct <- add_mc_rna(mct, rna_mc_mat)
+```
+
+An important metadata field is the 'cell_type' field. In addition, a field named 'color' can be added with a color for each cell type. 
+
+```{r mc-tracks-add-metadata}
+data(mcmd)
+head(mcmd)
+mct <- add_mc_metadata(mct, mcmd)
+```
+
+## Plot a genomic region 
+
+```{r plot-genomic-region}
+mct_plot_region(mct, gintervals(5, 54513252, 55535253), detect_dca = TRUE, gene_annot = TRUE)
+```
+
+## Create a shiny app 
+
+```{r shiny-app, eval = FALSE}
+run_app(mct)
+```
+
+## Deploy the shiny app 
+
+```{r shiny-app-deploy, eval = FALSE}
+create_bundle(mct, path = "/path/to/the/server/pbmc_app", overwrite = TRUE, restart = TRUE)
+```

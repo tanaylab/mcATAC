@@ -1,6 +1,7 @@
 setClassUnion("any_matrix", c("sparseMatrix", "matrix"))
 setClassUnion("data.frame_or_null", c("data.frame", "NULL"))
 setClassUnion("character_or_null", c("character", "NULL"))
+setClassUnion("numeric_or_null", c("numeric", "NULL"))
 
 setOldClass("PeakIntervals")
 

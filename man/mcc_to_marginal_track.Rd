@@ -8,8 +8,8 @@ mcc_to_marginal_track(
   mc_counts,
   track,
   metacells = NULL,
-  window_size = 100,
   resolution = 10,
+  window_size = 100,
   overwrite = FALSE
 )
 }
@@ -20,9 +20,9 @@ mcc_to_marginal_track(
 
 \item{metacells}{The metacells for which to create the track. If NULL, all metacells will be used.}
 
-\item{window_size}{The size of the window used to smooth the counts. The counts of at position i are smoothed by a sum of the counts of \link{i - window_size, i + window_size}.}
+\item{resolution}{The resolution of each track (default: 20bp)}
 
-\item{resolution}{The resolution of each track (default: 10bp)}
+\item{window_size}{The size of the window used to smooth the counts. The counts of at position i are smoothed by a sum of the counts of \link{i - window_size, i + window_size}. If NULL - the counts are not smoothed.}
 
 \item{overwrite}{Whether to overwrite existing tracks.}
 }

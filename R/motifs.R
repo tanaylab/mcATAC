@@ -70,6 +70,9 @@ generate_motif_pssm_matrix <- function(atac = NULL,
     peak_mids <- round((peaks$end + peaks$start) / 2)
     peaks <- mutate(peaks, start = round(peak_mids - peak_width / 2), end = round(peak_mids + peak_width / 2))
     peaks <- fix_missing_chroms_in_peaks(peaks)
+    peaks <- peaks %>%
+        as.data.frame() %>%
+        gintervals.force_range()
     if (!parallel) {
         nc <- 2
     }
@@ -308,4 +311,44 @@ fix_missing_chroms_in_peaks <- function(peaks) {
         peaks <- PeakIntervals(peaks)
     }
     return(peaks)
+}
+
+#' Plot LOGO of a motif
+#'
+#' @param dataset name of the dataset from which the motif came from, e.g. "homer", "jolma"
+#' @param motif name of the motif to plot, e.g. "GATA"
+#'
+#' @return a ggplot2 object
+#'
+#' @examples
+#' \dontrun{
+#' gset_genome("mm10")
+#' plot_motif_logo("homer", "GATA") #'
+#' }
+#'
+#' @export
+plot_motif_logo <- function(dataset, motif) {
+    d <- get_available_pssms(datasets_of_interest = dataset)
+    if (dataset %!in% names(d$keys)) {
+        cli_abort("The dataset {.val {dataset}} is not available")
+    }
+    keys <- d$keys[[dataset]]
+    mot_key <- keys %>%
+        filter(track == motif) %>%
+        pull(key)
+    if (length(mot_key) == 0) {
+        cli_abort("The motif {.val {motif}} is not available in the dataset {.val {dataset}}")
+    }
+
+    pssm <- d$datasets[[dataset]] %>%
+        filter(key == mot_key)
+
+    pfm <- pssm %>%
+        dplyr::select(-1) %>%
+        as.data.frame() %>%
+        tibble::column_to_rownames("pos") %>%
+        as.matrix() %>%
+        t()
+    ggseqlogo::ggseqlogo(pfm) +
+        ggtitle("Sequence model")
 }

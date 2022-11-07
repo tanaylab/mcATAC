@@ -7,11 +7,12 @@
 plot_region_mat(
   mat,
   mc_colors = NULL,
-  colors = c("white", "gray", "black", "gold", "gold"),
+  colors = c("white", "gray", "black", "gold"),
+  color_breaks = c(0, 6, 12, 18, 24),
   intervals = NULL,
   resolution = NULL,
   dca_mat = NULL,
-  n_smooth = 20,
+  n_smooth = 10,
   n_pixels = 1000,
   gene_annot = FALSE
 )
@@ -23,17 +24,19 @@ plot_region_mat(
 
 \item{colors}{color pallette for the ATAC signal}
 
+\item{color_breaks}{a vector of breaks for the color palette}
+
 \item{intervals}{the plotted intervals (optional)}
 
 \item{resolution}{the resolution of the plotted intervals (optional)}
 
 \item{dca_mat}{a matrix with the differential cluster accessibility (DCA) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.}
 
-\item{n_smooth}{number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell. Default is 20.}
+\item{n_smooth}{number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell (optional). Default is 20.}
 
-\item{n_pixels}{number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)}.}
+\item{n_pixels}{number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)} (optional).}
 
-\item{gene_annot}{(optional) whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory.}
+\item{gene_annot}{whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory. (optional)}
 }
 \description{
 Plot a genomic region given a matrix
