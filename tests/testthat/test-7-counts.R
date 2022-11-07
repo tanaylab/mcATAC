@@ -1,5 +1,5 @@
 sc_counts <- scc_read(file.path(raw_dir, "reads"))
-mc_counts <- scc_project_on_mc(sc_counts, cell_to_metacell_pbmc_example)
+mc_counts <- scc_to_mcc(sc_counts, cell_to_metacell_pbmc_example)
 
 test_that("write_sparse_matrix_from_fragments works", {
     gset_genome("hg38")
