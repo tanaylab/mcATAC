@@ -194,7 +194,8 @@ mcc_to_mcatac <- function(mc_counts, peaks, metacells = NULL, metadata = NULL, m
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
     if (!has_name(peaks, "peak_name")) {
-        cli_abort("The {.var peaks} must have a column called {.field peak_name}")
+        peaks <- peaks %>% mutate(peak_name = peak_names(.))
+        cli_alert_warning("The {.var peaks} didn't have a column called {.field peak_name}, so it was added using the {.code peak_names} function.")
     }
     matrices <- plyr::alply(mc_counts@genomic_bins, 1, function(bin) {
         return(
@@ -403,8 +404,8 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL) {
 #' Track names will be of the form "{track_prefix}.mc{metacell}"
 #' @param metacells metacells for which to create tracks. If NULL, all metacells will be used.
 #' @param overwrite Whether to overwrite existing tracks.
-#' @param window_size The size of the window used to smooth the counts. The counts of at position i are smoothed by a sum of the counts of [i - window_size, i + window_size].
-#' @param resolution The resolution of each track (default: 10bp)
+#' @param resolution The resolution of each track (default: 20bp)
+#' @param window_size The size of the window used to smooth the counts. The counts of at position i are smoothed by a sum of the counts of [i - window_size, i + window_size]. If NULL - the counts are not smoothed.
 #' @param create_marginal_track Create a track with the total counts from all the metacells. The track would be named "{track_prefix}.marginal"
 #' @param normalize Normalize each metacell by the sum of its counts.
 #'
@@ -417,7 +418,7 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL) {
 #' }
 #'
 #' @export
-mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite = FALSE, window_size = 100, resolution = 10, create_marginal_track = TRUE, normalize = FALSE) {
+mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite = FALSE, resolution = 20, window_size = NULL, create_marginal_track = TRUE, normalize = FALSE) {
     assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
@@ -430,11 +431,13 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
     misha.ext::gtrack.create_dirs(paste0(track_prefix, ".mc"), showWarnings = FALSE)
     withr::local_options(list(gmax.data.size = 1e9))
 
+    marginal_track <- NULL
     if (create_marginal_track) {
+        marginal_track <- paste0(track_prefix, ".marginal")
         cli_alert("Creating marginal track")
         mcc_to_marginal_track(
             mc_counts,
-            track = paste0(track_prefix, ".marginal"),
+            track = marginal_track,
             metacells = metacells,
             window_size = window_size,
             resolution = resolution,
@@ -457,11 +460,17 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
             x <- mcc_extract_to_df(mc_counts, metacell)
         })
 
+        if (is.null(window_size)) {
+            description <- glue("Counts from metacell {metacell} in {resolution}bp resolution")
+        } else {
+            description <- glue("Smoothed counts over {window_size*2} bp from metacell {metacell}")
+        }
+
         create_smoothed_track_from_dataframe(
             x %>% select(chrom, start, end, value),
             track_prefix = track_prefix,
             track = track,
-            description = glue("Smoothed counts over {window_size*2} bp from metacell {metacell}"),
+            description = description,
             window_size = window_size,
             resolution = resolution,
             overwrite = overwrite
@@ -479,7 +488,7 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
 
     cli_alert_success("Created {length(metacells)} tracks at {track_prefix}")
 
-    mct <- mct_create(genome = mc_counts@genome, track_prefix = track_prefix, metacells = metacells, id = mc_counts@id, description = mc_counts@description, path = mc_counts@path, metadata = mc_counts@metadata, resolution = resolution, window_size = window_size)
+    mct <- mct_create(genome = mc_counts@genome, tracks = glue("{track_prefix}.mc{metacells}"), metacells = metacells, id = mc_counts@id, description = mc_counts@description, path = mc_counts@path, metadata = mc_counts@metadata, resolution = resolution, window_size = window_size, marginal_track = marginal_track)
     return(mct)
 }
 
@@ -499,18 +508,24 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
 #' @inheritParams mcc_to_tracks
 #'
 #' @export
-mcc_to_marginal_track <- function(mc_counts, track, metacells = NULL, window_size = 100, resolution = 10, overwrite = FALSE) {
+mcc_to_marginal_track <- function(mc_counts, track, metacells = NULL, resolution = 10, window_size = 100, overwrite = FALSE) {
     assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
     gset_genome(mc_counts@genome)
+
+    if (is.null(window_size)) {
+        description <- glue("Marginal counts from {length(metacells)} metacells")
+    } else {
+        description <- glue("Smoothed marginal counts over {window_size*2} bp from {length(metacells)} metacells")
+    }
 
     mcc_mars <- mcc_marginal(mc_counts, metacells)
     create_smoothed_track_from_dataframe(
         mcc_mars,
         track_prefix = "temp",
         track = track,
-        description = glue("Smoothed counts over {window_size*2} bp from {length(metacells)} metacells"),
+        description = description,
         window_size = window_size,
         resolution = resolution,
         overwrite = overwrite
@@ -549,14 +564,14 @@ create_smoothed_track_from_dataframe <- function(x, track_prefix, ...) {
 #' @param raw_track name of the track to smooth.
 #' @param track The name of the track to create.
 #' @param description The description of the track.
-#' @param window_size The size of the window to smooth (in bp)
 #' @param resolution The resolution of the track (in bp)
+#' @param window_size The size of the window to smooth (in bp). If NULL, no smoothing will be performed.
 #' @param overwrite Overwrite the track if it already exists.
 #'
 #' @return None
 #'
 #' @noRd
-create_smoothed_track <- function(raw_track, track, description, window_size, resolution, overwrite = FALSE) {
+create_smoothed_track <- function(raw_track, track, description, resolution, window_size = NULL, overwrite = FALSE) {
     if (gtrack.exists(track)) {
         if (overwrite) {
             cli_alert_warning("Removing previous track {.val {track}}")
@@ -569,8 +584,10 @@ create_smoothed_track <- function(raw_track, track, description, window_size, re
     gvtrack.create(vt, raw_track, func = "sum")
     withr::defer(gvtrack.rm(vt))
 
-    shift <- window_size - floor(resolution / 2)
-    gvtrack.iterator(vt, sshift = -shift, eshift = shift)
+    if (!is.null(window_size)) {
+        shift <- window_size - floor(resolution / 2)
+        gvtrack.iterator(vt, sshift = -shift, eshift = shift)
+    }
 
     gtrack.create(
         track,

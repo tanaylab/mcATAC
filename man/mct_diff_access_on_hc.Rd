@@ -9,7 +9,7 @@ mct_diff_access_on_hc(
   hc,
   sz_frac_for_peak = 0.25,
   u_reg = 4,
-  peak_lf_thresh1 = 1,
+  peak_lf_thresh1 = 1.2,
   peak_lf_thresh2 = 2,
   trough_lf_thresh1 = -1,
   trough_lf_thresh2 = -2
@@ -31,5 +31,7 @@ a matrix the same dimensions of \code{mat}, with a mask of differential cluster 
 \code{peak_lf_thresh1}, and a value of 2 means the log fold change was above \code{peak_lf_thresh2}. The same with -1 and -2 for troughs.
 }
 \description{
-Return a mask matrix with differential cluster accessibility (DCA)
+This function detects differential cluster accessibility (DCA) for each sub-tree of a given \code{hclust} object with hierarchical clustering of the metacells. \cr
+For each coordinate (column) in the matrix, the function computes the log fold change between the subtree and the rest of the tree, and returns a mask matrix indicating whether the fold change is above or below the threshold(s). \cr
+In order to avoid very long DCAs, the functions limits the size of a peak/trough to a fraction of all the metacells (\code{sz_frac_for_peak}).
 }

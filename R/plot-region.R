@@ -39,7 +39,8 @@
 #' }
 #'
 #' @export
-mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold", "gold"), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 20, n_pixels = 1000, ...) {
+mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, ...) {
+    gset_genome(mct@genome)
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
         if (any(metacells %!in% mct@metacells)) {
@@ -50,24 +51,27 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 
     mat <- raw_mat[, intersect(mct@metacells[mct@order], colnames(raw_mat)), drop = FALSE]
 
-    if (detect_dca && is.null(hc)){
+    if (detect_dca && is.null(hc)) {
+        if (!has_rna(mct)) {
+            cli_abort("Cannot detect DCA without either an hclust object or RNA data.")
+        }
         mct <- mct_subset_metacells(mct, colnames(mat))
         hc <- mc_hclust_rna(mct, force_cell_type = force_cell_type)
     }
 
-    if (!is.null(hc)){
+    if (!is.null(hc)) {
         if (any(hc$label %!in% colnames(mat))) {
             missing_mcs <- setdiff(hc$label, colnames(mat))
             cli_warn("The following metacells are present in the hclust object, but are missing in the matrix (this is probably due to downsampling): {.val {missing_mcs}}")
             hc <- dendextend::prune(hc, missing_mcs)
         }
-        mat <- mat[, hc$label]        
+        mat <- mat[, hc$label]
     }
 
     dca_mat <- NULL
-    if (detect_dca) {        
+    if (detect_dca) {
         dca_mat <- mct_diff_access_on_hc(mat, hc = hc, ...)
-        dca_mat <- dca_mat[, hc$order, drop = FALSE]        
+        dca_mat <- dca_mat[, hc$order, drop = FALSE]
     }
 
     if (!is.null(hc)) {
@@ -75,15 +79,13 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
     }
 
     if (has_cell_type(mct) && has_cell_type_colors(mct)) {
-        mc_colors <- mct@metadata %>%
-            select(metacell, color) %>%
-            tibble::deframe()
+        mc_colors <- get_metacell_colors(mct@metadata)
         mc_colors <- mc_colors[colnames(mat)]
     } else {
         mc_colors <- NULL
     }
 
-    plot_region_mat(mat, mc_colors, colors = colors, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels)
+    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels)
 }
 
 #' Plot a genomic region given a matrix
@@ -91,15 +93,16 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 #' @param mat a matrix where rows are coordinates and columns are metacells
 #' @param mc_colors a vector of colors for the metacells (optional)
 #' @param colors color pallette for the ATAC signal
+#' @param color_breaks a vector of breaks for the color palette
 #' @param intervals the plotted intervals (optional)
 #' @param resolution the resolution of the plotted intervals (optional)
 #' @param dca_mat a matrix with the differential cluster accessibility (DCA) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.
-#' @param n_smooth number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell. Default is 20.
-#' @param n_pixels number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)}.
-#' @param gene_annot (optional) whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory.
+#' @param n_smooth number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell (optional). Default is 20.
+#' @param n_pixels number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)} (optional).
+#' @param gene_annot whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory. (optional)
 #'
 #' @export
-plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold", "gold"), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 20, n_pixels = 1000, gene_annot = FALSE) {
+plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE) {
     mat_smooth <- RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
 
     if (gene_annot) {
@@ -132,7 +135,9 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 
     par(mar = c(4, 0, top_mar, 2))
     shades <- colorRampPalette(colors)(1000)
-    image(mat_smooth, col = shades, yaxt = "n", xaxt = "n")
+    mat_smooth[mat_smooth > max(color_breaks)] <- max(color_breaks)
+    shades_breaks <- approx(color_breaks, n = 1001)$y
+    image(mat_smooth, col = shades, breaks = shades_breaks, yaxt = "n", xaxt = "n")
     if (!is.null(intervals)) {
         axis(1, at = seq(0, 1, l = 11), round(seq(intervals$start[1], intervals$end[1], l = 11) / 1e+6, 3), las = 2)
     }
@@ -183,13 +188,16 @@ plot_tss_strip <- function(intervals) {
     }
 }
 
-#' Extend a DCA matrix with rolling maximum
+#' Extend each DCA using a rolling maximum
+#'
+#' @description This function extends each DCA (differential cluster accesability) using a rolling maximum of size \code{n_peak_smooth} on the rows of \code{dca_mat}.
 #'
 #' @noRd
 extend_dca_mat <- function(dca_mat, n_peak_smooth) {
-    dca_mat[dca_mat == 0] <- -100
-    dca_mat <- dca_mat + 3
+    dca_mat[dca_mat == 0] <- -100 # set all 0 values to -100 to avoid problems with rolling max
+    dca_mat <- dca_mat + 3 # make all the values positive
     dca_mat <- RcppRoll::roll_max(dca_mat, n = n_peak_smooth, fill = c(-97, -97, -97))
+    # set the values back to a scale of -2 to 2
     dca_mat <- dca_mat - 3
     dca_mat[dca_mat == -100] <- 0
     return(dca_mat)
@@ -197,6 +205,11 @@ extend_dca_mat <- function(dca_mat, n_peak_smooth) {
 
 
 #' Return a mask matrix with differential cluster accessibility (DCA)
+#'
+#' @description This function detects differential cluster accessibility (DCA) for each sub-tree of a given `hclust` object with hierarchical clustering of the metacells. \cr
+#' For each coordinate (column) in the matrix, the function computes the log fold change between the subtree and the rest of the tree, and returns a mask matrix indicating whether the fold change is above or below the threshold(s). \cr
+#' In order to avoid very long DCAs, the functions limits the size of a peak/trough to a fraction of all the metacells (\code{sz_frac_for_peak}).
+#'
 #'
 #' @param mat a matrix where rows are coordinates and columns are metacells
 #' @param hc an hclust object with the order of the metacells
@@ -208,7 +221,7 @@ extend_dca_mat <- function(dca_mat, n_peak_smooth) {
 #' \code{peak_lf_thresh1}, and a value of 2 means the log fold change was above \code{peak_lf_thresh2}. The same with -1 and -2 for troughs.
 #'
 #' @export
-mct_diff_access_on_hc <- function(mat, hc, sz_frac_for_peak = 0.25, u_reg = 4, peak_lf_thresh1 = 1, peak_lf_thresh2 = 2, trough_lf_thresh1 = -1, trough_lf_thresh2 = -2) {
+mct_diff_access_on_hc <- function(mat, hc, sz_frac_for_peak = 0.25, u_reg = 4, peak_lf_thresh1 = 1.2, peak_lf_thresh2 = 2, trough_lf_thresh1 = -1, trough_lf_thresh2 = -2) {
     if (length(hc$order) != ncol(mat)) {
         cli_abort("The number of metacells in the matrix and the hclust object do not match.")
     }

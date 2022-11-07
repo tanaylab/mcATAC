@@ -54,7 +54,13 @@ Suggests:
     metacell,
     knitr,
     rmarkdown,
-    fs
+    fs,
+    shiny, 
+    shinyWidgets,
+    shinyjs,
+    shinycssloaders,
+    cli,
+    gert
 Remotes:
     tanaylab/misha,
     tanaylab/misha.ext,
@@ -99,7 +105,7 @@ Collate:
     'project_on_mc.R'
     'promoters.R'
     'rna.R'
-    'subset_bam.R'
+    'shiny.R'
     'utils-intervals.R'
     'utils-pipe.R'
     'utils.R'

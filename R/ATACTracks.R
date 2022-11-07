@@ -22,7 +22,7 @@ ATACTracks <- setClass(
         total_cov = "numeric",
         marginal_track = "character_or_null",
         resolution = "numeric",
-        window_size = "numeric"
+        window_size = "numeric_or_null"
     ),
     contains = c("ATAC", "VIRTUAL")
 )
@@ -51,10 +51,6 @@ make_atac_tracks_object <- function(obj, tracks, genome, id, description, path =
 
     if (is.null(resolution)) {
         resolution <- gtrack.info(tracks[1])$bin.size
-    }
-
-    if (is.null(window_size)) {
-        window_size <- resolution
     }
 
     if (is.null(order)) {
@@ -144,13 +140,14 @@ mct_create <- function(genome, tracks = NULL, track_prefix = NULL, metacells = N
         if (is.null(track_prefix)) {
             cli_abort("Either {.field tracks} or {.field track_prefix} must be provided")
         }
-        tracks <- gtrack.ls(track_prefix)
+
+        tracks <- gtrack.ls(paste0(track_prefix, "\\.?mc.+(?!.*\\.)$"), perl = TRUE)
         marginal_track_pref <- paste0(track_prefix, ".marginal")
         tracks <- tracks[tracks != marginal_track_pref]
         marginal_track <- marginal_track %||% marginal_track_pref
     }
 
-    if (!gtrack.exists(marginal_track)) {
+    if (is.null(marginal_track) || !gtrack.exists(marginal_track)) {
         marginal_track <- NULL
     }
 
