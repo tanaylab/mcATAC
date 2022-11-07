@@ -293,3 +293,47 @@ read_sc_counts_data <- function(data_dir, genomic_bins, cell_names, genome) {
 
     return(data)
 }
+
+
+#' Create an ScPeaks object from an ScCounts object
+#'
+#' @description given an ScCounts object and peaks, summarise the counts over the peaks and return a ScPeaks object
+#'
+#' @param sc_counts a ScCounts object
+#' @param peaks a data frame with the peak intervals (chrom, start, end) and a column called "peak_name"
+#' @param cells names of cells to include. Default: all cells.
+#'
+#' @inheritParams project_atac_on_mc
+#'
+#' @return a McPeaks object
+#'
+#' @examples
+#' \dontrun{
+#' atac_sc <- import_from_10x("pbmc_data", genome = "hg38")
+#' sc_counts <- scc_read("pbmc_reads")
+#' atac_sc <- scc_to_peaks(sc_counts, atac_sc@peaks)
+#' }
+#'
+#' @export
+scc_to_peaks <- function(sc_counts, peaks, cells = NULL, metadata = NULL, mc_size_eps_q = 0.1) {
+    assert_atac_object(sc_counts, class = "ScCounts")
+    cells <- cells %||% sc_counts@cell_names
+    cells <- as.character(cells)
+    if (!has_name(peaks, "peak_name")) {
+        peaks <- peaks %>% mutate(peak_name = peak_names(.))
+        cli_alert_warning("The {.var peaks} didn't have a column called {.field peak_name}, so it was added using the {.code peak_names} function.")
+    }
+    matrices <- plyr::alply(sc_counts@genomic_bins, 1, function(bin) {
+        return(
+            summarise_bin(sc_counts@data[[bin$name]], bin, peaks, cells)
+        )
+    }, .parallel = getOption("mcatac.parallel"))
+
+    mat <- Reduce("+", matrices)
+
+    sc_atac <- new("ScPeaks", mat = mat, peaks = peaks, genome = sc_counts@genome, id = sc_counts@id, description = sc_counts@description, metadata = metadata, path = sc_counts@path)
+
+    cli_alert_success("Created a new ScPeaks object with {.val {ncol(sc_atac@mat)}} cells and {.val {nrow(sc_atac@mat)}} ATAC peaks.")
+
+    return(sc_atac)
+}
