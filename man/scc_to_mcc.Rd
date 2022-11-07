@@ -12,7 +12,8 @@ scc_project_on_mc(sc_counts, cell_to_metacell, ignore_metacells = -1)
 \arguments{
 \item{sc_counts}{A ScCounts object}
 
-\item{cell_to_metacell}{a data frame with a column named "cell_id" with cell id and another column named "metacell" with the metacell the cell is part of.}
+\item{cell_to_metacell}{a data.frame with columns \code{cell_id} and \code{metacell} containing the mapping from single cell names to metacell names, or the name of an 'h5ad' file containing this information at the 'obs' slot. In such a case, the 'obs' slot should contain
+a column named \code{metacell} and the rownames should be the cell names.}
 
 \item{ignore_metacells}{a vector of metacells to ignore. Default: \link{-1} (the "outliers" metacell in the metacell2 python package).}
 }

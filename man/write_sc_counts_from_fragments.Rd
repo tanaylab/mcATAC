@@ -8,7 +8,7 @@ write_sc_counts_from_fragments(
   fragments_file,
   out_dir,
   cell_names,
-  cell_sufix = NULL,
+  cell_suffix = NULL,
   genome = NULL,
   bin_size = 50000000,
   overwrite = FALSE,
@@ -26,8 +26,8 @@ write_sc_counts_from_fragments(
 
 \item{cell_names}{a vector with the cell names or an ScPeaks object}
 
-\item{cell_sufix}{a suffix to add to the cell names (optional). This is useful when you want to merge multiple batches of cells.
-The suffix would be added in the following way: \code{paste0(cell_name, "-", cell_sufix)}.}
+\item{cell_suffix}{a suffix to add to the cell names (optional). This is useful when you want to merge multiple batches of cells.
+The suffix would be added in the following way: \code{paste0(cell_name, "-", cell_suffix)}.}
 
 \item{bin_size}{Size of the genomic bins to use (in bp). Each chromsome will be chunked into bins with size which is
 smaller than this value. Default is 50Mb.}

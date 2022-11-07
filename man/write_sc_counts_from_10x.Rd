@@ -7,7 +7,7 @@
 write_sc_counts_from_10x(
   input_dir,
   out_dir,
-  cell_sufix = NULL,
+  cell_suffix = NULL,
   genome = NULL,
   bin_size = 50000000,
   overwrite = FALSE,
@@ -23,8 +23,8 @@ write_sc_counts_from_10x(
 
 \item{out_dir}{output directory.}
 
-\item{cell_sufix}{a suffix to add to the cell names (optional). This is useful when you want to merge multiple batches of cells.
-The suffix would be added in the following way: \code{paste0(cell_name, "-", cell_sufix)}.}
+\item{cell_suffix}{a suffix to add to the cell names (optional). This is useful when you want to merge multiple batches of cells.
+The suffix would be added in the following way: \code{paste0(cell_name, "-", cell_suffix)}.}
 
 \item{bin_size}{Size of the genomic bins to use (in bp). Each chromsome will be chunked into bins with size which is
 smaller than this value. Default is 50Mb.}
@@ -50,7 +50,7 @@ writes an ScCounts object to "out_dir".
 }
 \examples{
 \dontrun{
-write_sc_counts_from_10x("outs", "pbmc_reads", cell_sufix = "batch1", genome = "hg38")
+write_sc_counts_from_10x("outs", "pbmc_reads", cell_suffix = "batch1", genome = "hg38")
 }
 
 }
