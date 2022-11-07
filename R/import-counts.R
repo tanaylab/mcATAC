@@ -212,13 +212,13 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
 #'
 #' @examples
 #' \dontrun{
-#' write_sc_counts_from_10x("outs", "pbmc_reads", cell_sufix = "batch1", genome = "hg38")
+#' write_sc_counts_from_10x("outs", "pbmc_reads", cell_suffix = "batch1", genome = "hg38")
 #' }
 #'
 #' @inheritParams write_sc_counts_from_fragments
 #'
 #' @export
-write_sc_counts_from_10x <- function(input_dir, out_dir, cell_sufix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = NULL) {
+write_sc_counts_from_10x <- function(input_dir, out_dir, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = NULL) {
     fragments_file <- file.path(input_dir, "atac_fragments.tsv.gz")
     if (!file.exists(fragments_file)) {
         cli_abort("File {.file {fragments_file}} does not exist.")
@@ -228,7 +228,7 @@ write_sc_counts_from_10x <- function(input_dir, out_dir, cell_sufix = NULL, geno
         cli_abort("File {.file {barcodes_file}} does not exist.")
     }
     barcodes <- tgutil::fread(barcodes_file, header = FALSE, stringsAsFactors = FALSE)[, 1]
-    write_sc_counts_from_fragments(fragments_file, out_dir, barcodes, cell_sufix = cell_sufix, genome = genome, bin_size = bin_size, overwrite = overwrite, id = id, description = description, verbose = verbose, tabix_bin = tabix_bin, chromosomes = chromosomes)
+    write_sc_counts_from_fragments(fragments_file, out_dir, barcodes, cell_suffix = cell_suffix, genome = genome, bin_size = bin_size, overwrite = overwrite, id = id, description = description, verbose = verbose, tabix_bin = tabix_bin, chromosomes = chromosomes)
 }
 
 #' Write single cell counts from a 10x fragments file
@@ -238,8 +238,8 @@ write_sc_counts_from_10x <- function(input_dir, out_dir, cell_sufix = NULL, geno
 #' @param fragments_file path to fragments file. Note that in order to use tabix, the file must be compressed with gzip and have a ".gz" extension.
 #' @param out_dir output directory.
 #' @param cell_names a vector with the cell names or an ScPeaks object
-#' @param cell_sufix a suffix to add to the cell names (optional). This is useful when you want to merge multiple batches of cells.
-#' The suffix would be added in the following way: `paste0(cell_name, "-", cell_sufix)`.
+#' @param cell_suffix a suffix to add to the cell names (optional). This is useful when you want to merge multiple batches of cells.
+#' The suffix would be added in the following way: `paste0(cell_name, "-", cell_suffix)`.
 #' @param id an identifier for the object, e.g. "pbmc".
 #' @param description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
 #' @param bin_size Size of the genomic bins to use (in bp). Each chromsome will be chunked into bins with size which is
@@ -258,7 +258,7 @@ write_sc_counts_from_10x <- function(input_dir, out_dir, cell_sufix = NULL, geno
 #' }
 #'
 #' @export
-write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, cell_sufix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = NULL) {
+write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = NULL) {
     withr::local_options(list(scipen = 1e5))
     data_dir <- file.path(out_dir, "data")
     if (dir.exists(out_dir)) {
@@ -315,8 +315,8 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
         cli_alert_success("Finished processing {.val {region$name}}")
     }, .parallel = getOption("mcatac.parallel"))
 
-    if (!is.null(cell_sufix)) {
-        cell_names <- paste0(cell_names, "-", cell_sufix)
+    if (!is.null(cell_suffix)) {
+        cell_names <- paste0(cell_names, "-", cell_suffix)
     }
 
     counts_md <- list(
@@ -354,7 +354,7 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
 #' }
 #'
 #' @export
-write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, cell_sufix = NULL, genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE, overwrite = FALSE) {
+write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE, overwrite = FALSE) {
     withr::local_options(list(scipen = 1e5))
     data_dir <- file.path(out_dir, "data")
     if (dir.exists(out_dir)) {
@@ -389,8 +389,8 @@ write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, cell_sufix =
         cli_alert_success("Finished processing {.val {region$name}}")
     }, .parallel = getOption("mcatac.parallel"))
 
-    if (!is.null(cell_sufix)) {
-        cell_names <- paste0(cell_names, "-", cell_sufix)
+    if (!is.null(cell_suffix)) {
+        cell_names <- paste0(cell_names, "-", cell_suffix)
     }
 
     counts_md <- list(

@@ -35,13 +35,117 @@ setMethod(
     }
 )
 
+#' @export
+#' @noRd
+setMethod("Ops", c("ScCounts", "ScCounts"), function(e1, e2) {
+    if (e1@genome != e2@genome) {
+        cli_abort("Genomes are not the same.")
+    }
+    if (any(e1@genomic_bins$name != e2@genomic_bins$name)) {
+        cli_abort("Genomic bins are not the same.")
+    }
+
+    both <- intersect(e1@cell_names, e2@cell_names)
+    only_e1 <- setdiff(e1@cell_names, e2@cell_names)
+    only_e2 <- setdiff(e2@cell_names, e1@cell_names)
+    all_cells <- unique(c(both, only_e1, only_e2))
+
+    matrices <- plyr::llply(e1@genomic_bins$name, function(bin) {
+        m1 <- e1@data[[bin]]
+        m2 <- e2@data[[bin]]
+
+        intersect_m <- m1[, both] + m2[, both]
+        m <- cbind(intersect_m, m1[, only_e1], m2[, only_e2])
+        m <- m[, all_cells]
+        m
+    }, .parallel = getOption("mcatac.parallel"))
+
+    names(matrices) <- e1@genomic_bins$name
+
+    res <- new("ScCounts",
+        data = matrices,
+        genome = e1@genome,
+        genomic_bins = e1@genomic_bins,
+        cell_names = all_cells
+    )
+
+    return(res)
+})
+
+#' @export
+#' @noRd
+setMethod("Ops", c("McCounts", "McCounts"), function(e1, e2) {
+    scc <- callNextMethod()
+    cell_to_metacell <- rbind(e1@cell_to_metacell, e2@cell_to_metacell) %>%
+        distinct(cell_id, metacell)
+    res <- new("McCounts",
+        data = scc@data,
+        genome = scc@genome,
+        genomic_bins = scc@genomic_bins,
+        cell_names = scc@cell_names,
+        cell_to_metacell = cell_to_metacell
+    )
+    return(res)
+})
+
+
+#' Given metacells (usually from RNA data), project ATAC counts from multiple batches to get a McCounts object
+#'
+#' @param scc_dirs a vector of paths to directories containing ScCounts objects
+#'
+#' @inheritParams scc_to_mcc
+#'
+#' @export
+scc_to_mcc_multi_batch <- function(scc_dirs, cell_to_metacell, ignore_metacells = -1) {
+    cell_to_metacell <- read_cell_to_metacell(cell_to_metacell, ignore_metacells)
+    mcc_list <- purrr::map(scc_dirs, ~ {
+        if (!dir.exists(.x)) {
+            cli_abort("Directory {.x} does not exist")
+        }
+        scc <- scc_read(.x)
+        cell_to_metacell_batch <- cell_to_metacell %>%
+            filter(cell_id %in% scc@cell_names)
+        scc_to_mcc(scc, cell_to_metacell_batch, ignore_metacells)
+    })
+
+    cli_alert("Merging metacells from multiple batches")
+    mcc <- Reduce("+", mcc_list)
+    return(mcc)
+}
+
+read_cell_to_metacell <- function(cell_to_metacell, ignore_metacells) {
+    if (is.character(cell_to_metacell)) {
+        if (!file.exists(cell_to_metacell)) {
+            cli_abort("File {cell_to_metacell} does not exist.")
+        }
+        cell_to_metacell <- anndata::read_h5ad(cell_to_metacell)$obs
+
+        if (!"metacell" %in% colnames(cell_to_metacell)) {
+            cli_abort("Column 'metacell' not found in {.field cell_to_metacell}.")
+        }
+
+        cell_to_metacell <- cell_to_metacell %>%
+            tibble::rownames_to_column("cell_id") %>%
+            select(cell_id, metacell)
+    }
+
+    if (any(cell_to_metacell$metacell %in% ignore_metacells)) {
+        ignored <- cell_to_metacell$metacell[cell_to_metacell$metacell %in% ignore_metacells]
+        cli_alert_warning("Ignoring metacells: {.val {ignore_metacells}}")
+        cell_to_metacell <- cell_to_metacell %>% filter(!(metacell %in% ignored))
+    }
+
+    return(cell_to_metacell)
+}
+
 #' Given metacells (usually from RNA data), project ATAC counts to get a McCounts object
 #'
 #' @description Given cell to metacell association, summarise atac read counts to generate a McCounts object. This can
 #' take a while - around 5 minutes using 24 cores on the PBMC dataset.
 #'
 #' @param sc_counts A ScCounts object
-#' @param cell_to_metacell a data frame with a column named "cell_id" with cell id and another column named "metacell" with the metacell the cell is part of.
+#' @param cell_to_metacell a data.frame with columns \code{cell_id} and \code{metacell} containing the mapping from single cell names to metacell names, or the name of an 'h5ad' file containing this information at the 'obs' slot. In such a case, the 'obs' slot should contain
+#' a column named \code{metacell} and the rownames should be the cell names.
 #' @param ignore_metacells a vector of metacells to ignore. Default: [-1] (the "outliers" metacell in the metacell2 python package).
 #'
 #' @return A McCounts object
@@ -55,14 +159,10 @@ setMethod(
 #' @export
 scc_to_mcc <- function(sc_counts, cell_to_metacell, ignore_metacells = -1) {
     assert_atac_object(sc_counts, class = "ScCounts")
-    if (any(cell_to_metacell$metacell %in% ignore_metacells)) {
-        ignored <- cell_to_metacell$metacell[cell_to_metacell$metacell %in% ignore_metacells]
-        cli_alert_warning("Ignoring metacells: {.val {ignore_metacells}}")
-        cell_to_metacell <- cell_to_metacell %>% filter(!(metacell %in% ignored))
-    }
+
+    cell_to_metacell <- read_cell_to_metacell(cell_to_metacell, ignore_metacells)
     cell_to_metacell <- deframe(cell_to_metacell)
     assert_that(all(names(cell_to_metacell) %in% sc_counts@cell_names))
-
 
     removed_cells <- setdiff(sc_counts@cell_names, names(cell_to_metacell))
     if (length(removed_cells) > 0) {
