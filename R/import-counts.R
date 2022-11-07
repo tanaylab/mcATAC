@@ -247,7 +247,7 @@ write_sc_counts_from_10x <- function(input_dir, out_dir, cell_suffix = NULL, gen
 #' @param overwrite overwrite existing directory (optional)
 #' @param verbose verbose output (optional)
 #' @param tabix_bin path to the tabix binary (optional)
-#' @param chromosomes process only specific chromosomes (optional)
+#' @param chromosomes process only specific chromosomes (optional).
 #'
 #' @return None
 #'
@@ -258,7 +258,7 @@ write_sc_counts_from_10x <- function(input_dir, out_dir, cell_suffix = NULL, gen
 #' }
 #'
 #' @export
-write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = NULL) {
+write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = gintervals.all()) {
     withr::local_options(list(scipen = 1e5))
     data_dir <- file.path(out_dir, "data")
     if (dir.exists(out_dir)) {
@@ -282,19 +282,7 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
 
     chromosomes <- chromosomes %||% gintervals.all()$chrom
 
-    if (use_tabix) {
-        cli_alert_info("using tabix")
-        chroms <- tgutil::fread(
-            cmd = glue("{tabix_bin} -l {fragments_file}"),
-            header = FALSE
-        )[, 1]
-        chroms <- intersect(chroms, chromosomes)
-    } else {
-        cli_alert_info("'tabix' was not found, an index file doesn't exist or the file is not gzipped.")
-        chroms <- chromosomes
-    }
-
-    genomic_bins <- giterator.intervals(iterator = bin_size, intervals = gintervals.all() %>% filter(chrom %in% chroms)) %>%
+    genomic_bins <- giterator.intervals(iterator = bin_size, intervals = gintervals.all() %>% filter(chrom %in% chromosomes)) %>%
         mutate(name = glue("{chrom}_{start}_{end}"))
 
     cli_alert_info("Processing {.val {nrow(genomic_bins)}} genomic bins of maximal size {.val {bin_size}}")
