@@ -49,11 +49,11 @@ setMethod(
 #' @examples
 #' \dontrun{
 #' data(cell_to_metacell_pbmc_example)
-#' scc_project_on_mc(sc_counts, cell_to_metacell_pbmc_example)
+#' scc_to_mcc(sc_counts, cell_to_metacell_pbmc_example)
 #' }
 #'
 #' @export
-scc_project_on_mc <- function(sc_counts, cell_to_metacell, ignore_metacells = -1) {
+scc_to_mcc <- function(sc_counts, cell_to_metacell, ignore_metacells = -1) {
     assert_atac_object(sc_counts, class = "ScCounts")
     if (any(cell_to_metacell$metacell %in% ignore_metacells)) {
         ignored <- cell_to_metacell$metacell[cell_to_metacell$metacell %in% ignore_metacells]
@@ -80,6 +80,19 @@ scc_project_on_mc <- function(sc_counts, cell_to_metacell, ignore_metacells = -1
     res <- new("McCounts", data = new_data, cell_names = as.character(sort(unique(cell_to_metacell))), genome = sc_counts@genome, genomic_bins = sc_counts@genomic_bins, id = sc_counts@id, description = sc_counts@description, path = sc_counts@path, cell_to_metacell = enframe(cell_to_metacell, "cell_id", "metacell"))
 
     return(res)
+}
+
+
+#' @rdname scc_to_mcc
+#' @export
+scc_project_on_mc <- function(sc_counts, cell_to_metacell, ignore_metacells = -1) {
+    lifecycle::deprecate_soft(
+        when = "0.0.1",
+        what = "scc_project_on_mc()",
+        with = "scc_to_mcc()",
+    )
+
+    scc_to_mcc(sc_counts, cell_to_metacell, ignore_metacells)
 }
 
 #' Read an McCounts object from a directory
