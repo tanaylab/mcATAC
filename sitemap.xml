@@ -292,6 +292,9 @@
     <loc>/reference/plot_marginal_coverage.html</loc>
   </url>
   <url>
+    <loc>/reference/plot_motif_logo.html</loc>
+  </url>
+  <url>
     <loc>/reference/plot_peak_coverage_density.html</loc>
   </url>
   <url>
@@ -335,6 +338,9 @@
   </url>
   <url>
     <loc>/reference/scc_read.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scc_to_peaks.html</loc>
   </url>
   <url>
     <loc>/reference/scc_write.html</loc>
