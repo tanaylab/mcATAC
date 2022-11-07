@@ -16,7 +16,7 @@ write_sc_counts_from_fragments(
   description = "",
   verbose = FALSE,
   tabix_bin = "tabix",
-  chromosomes = NULL
+  chromosomes = gintervals.all()
 )
 }
 \arguments{
@@ -42,7 +42,7 @@ smaller than this value. Default is 50Mb.}
 
 \item{tabix_bin}{path to the tabix binary (optional)}
 
-\item{chromosomes}{process only specific chromosomes (optional)}
+\item{chromosomes}{process only specific chromosomes (optional).}
 }
 \value{
 None
