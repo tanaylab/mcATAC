@@ -54,9 +54,9 @@ setMethod("Ops", c("ScCounts", "ScCounts"), function(e1, e2) {
         m1 <- e1@data[[bin]]
         m2 <- e2@data[[bin]]
 
-        intersect_m <- m1[, both] + m2[, both]
-        m <- cbind(intersect_m, m1[, only_e1], m2[, only_e2])
-        m <- m[, all_cells]
+        intersect_m <- m1[, both, drop = FALSE] + m2[, both, drop = FALSE]
+        m <- cbind(intersect_m, m1[, only_e1, drop = FALSE], m2[, only_e2, drop = FALSE])
+        m <- m[, all_cells, drop = FALSE]
         m
     }, .parallel = getOption("mcatac.parallel"))
 
@@ -96,7 +96,7 @@ setMethod("Ops", c("McCounts", "McCounts"), function(e1, e2) {
 #' @inheritParams scc_to_mcc
 #'
 #' @export
-scc_to_mcc_multi_batch <- function(scc_dirs, cell_to_metacell, ignore_metacells = -1) {
+scc_to_mcc_multi_batch <- function(scc_dirs, cell_to_metacell, ignore_metacells = c(-1, -2)) {
     cell_to_metacell <- read_cell_to_metacell(cell_to_metacell, ignore_metacells)
     mcc_list <- purrr::map(scc_dirs, ~ {
         if (!dir.exists(.x)) {
@@ -146,7 +146,7 @@ read_cell_to_metacell <- function(cell_to_metacell, ignore_metacells) {
 #' @param sc_counts A ScCounts object
 #' @param cell_to_metacell a data.frame with columns \code{cell_id} and \code{metacell} containing the mapping from single cell names to metacell names, or the name of an 'h5ad' file containing this information at the 'obs' slot. In such a case, the 'obs' slot should contain
 #' a column named \code{metacell} and the rownames should be the cell names.
-#' @param ignore_metacells a vector of metacells to ignore. Default: [-1] (the "outliers" metacell in the metacell2 python package).
+#' @param ignore_metacells a vector of metacells to ignore. Default: [-1, -2] (the "outliers" metacell in the metacell2 python package).
 #'
 #' @return A McCounts object
 #'
@@ -157,7 +157,7 @@ read_cell_to_metacell <- function(cell_to_metacell, ignore_metacells) {
 #' }
 #'
 #' @export
-scc_to_mcc <- function(sc_counts, cell_to_metacell, ignore_metacells = -1) {
+scc_to_mcc <- function(sc_counts, cell_to_metacell, ignore_metacells = c(-1, -2)) {
     assert_atac_object(sc_counts, class = "ScCounts")
 
     cell_to_metacell <- read_cell_to_metacell(cell_to_metacell, ignore_metacells)
@@ -185,7 +185,7 @@ scc_to_mcc <- function(sc_counts, cell_to_metacell, ignore_metacells = -1) {
 
 #' @rdname scc_to_mcc
 #' @export
-scc_project_on_mc <- function(sc_counts, cell_to_metacell, ignore_metacells = -1) {
+scc_project_on_mc <- function(sc_counts, cell_to_metacell, ignore_metacells = c(-1, -2)) {
     lifecycle::deprecate_soft(
         when = "0.0.1",
         what = "scc_project_on_mc()",

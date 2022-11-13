@@ -4,7 +4,11 @@
 \alias{scc_to_mcc_multi_batch}
 \title{Given metacells (usually from RNA data), project ATAC counts from multiple batches to get a McCounts object}
 \usage{
-scc_to_mcc_multi_batch(scc_dirs, cell_to_metacell, ignore_metacells = -1)
+scc_to_mcc_multi_batch(
+  scc_dirs,
+  cell_to_metacell,
+  ignore_metacells = c(-1, -2)
+)
 }
 \arguments{
 \item{scc_dirs}{a vector of paths to directories containing ScCounts objects}
@@ -12,7 +16,7 @@ scc_to_mcc_multi_batch(scc_dirs, cell_to_metacell, ignore_metacells = -1)
 \item{cell_to_metacell}{a data.frame with columns \code{cell_id} and \code{metacell} containing the mapping from single cell names to metacell names, or the name of an 'h5ad' file containing this information at the 'obs' slot. In such a case, the 'obs' slot should contain
 a column named \code{metacell} and the rownames should be the cell names.}
 
-\item{ignore_metacells}{a vector of metacells to ignore. Default: \link{-1} (the "outliers" metacell in the metacell2 python package).}
+\item{ignore_metacells}{a vector of metacells to ignore. Default: \link{-1, -2} (the "outliers" metacell in the metacell2 python package).}
 }
 \description{
 Given metacells (usually from RNA data), project ATAC counts from multiple batches to get a McCounts object
