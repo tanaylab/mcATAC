@@ -5,9 +5,9 @@
 \alias{scc_project_on_mc}
 \title{Given metacells (usually from RNA data), project ATAC counts to get a McCounts object}
 \usage{
-scc_to_mcc(sc_counts, cell_to_metacell, ignore_metacells = -1)
+scc_to_mcc(sc_counts, cell_to_metacell, ignore_metacells = c(-1, -2))
 
-scc_project_on_mc(sc_counts, cell_to_metacell, ignore_metacells = -1)
+scc_project_on_mc(sc_counts, cell_to_metacell, ignore_metacells = c(-1, -2))
 }
 \arguments{
 \item{sc_counts}{A ScCounts object}
@@ -15,7 +15,7 @@ scc_project_on_mc(sc_counts, cell_to_metacell, ignore_metacells = -1)
 \item{cell_to_metacell}{a data.frame with columns \code{cell_id} and \code{metacell} containing the mapping from single cell names to metacell names, or the name of an 'h5ad' file containing this information at the 'obs' slot. In such a case, the 'obs' slot should contain
 a column named \code{metacell} and the rownames should be the cell names.}
 
-\item{ignore_metacells}{a vector of metacells to ignore. Default: \link{-1} (the "outliers" metacell in the metacell2 python package).}
+\item{ignore_metacells}{a vector of metacells to ignore. Default: \link{-1, -2} (the "outliers" metacell in the metacell2 python package).}
 }
 \value{
 A McCounts object
