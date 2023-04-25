@@ -15,7 +15,7 @@
 #' @param id an identifier for the object, e.g. "pbmc". If NULL - the id would be taken from the scATAC object \code{atac}.
 #' @param description an identifier for the object, e.g. "pbmc". If NULL - the description would be taken from the scATAC object \code{atac}
 #' @param rm_zero_peaks remove peaks without any reads (all-zero peaks). Default: TRUE
-#' @param ignore_metacells a vector of metacells to ignore. Default: [-1] (the "outliers" metacell in the metacell2 python package).
+#' @param ignore_metacells a vector of metacells to ignore. Default: [-1, -2] (the "outliers" metacell in the metacell2 python package).
 #'
 #' @return an McPeaks object
 #'
@@ -27,7 +27,7 @@
 #' }
 #'
 #' @export
-project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5, mc_size_eps_q = 0.1, id = NULL, description = NULL, rm_zero_peaks = TRUE, ignore_metacells = -1) {
+project_atac_on_mc <- function(atac, cell_to_metacell = NULL, metadata = NULL, min_int_frac = 0.5, mc_size_eps_q = 0.1, id = NULL, description = NULL, rm_zero_peaks = TRUE, ignore_metacells = c(-1, -2)) {
     assert_atac_object(atac)
     if (any(cell_to_metacell$metacell %in% ignore_metacells)) {
         ignored <- cell_to_metacell$metacell[cell_to_metacell$metacell %in% ignore_metacells]

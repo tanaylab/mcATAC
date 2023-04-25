@@ -8,6 +8,7 @@ write_sc_counts_from_bam(
   bam_file,
   out_dir,
   cell_names,
+  cell_suffix = NULL,
   genome = NULL,
   bin_size = 50000000,
   id = "",
@@ -26,6 +27,9 @@ write_sc_counts_from_bam(
 \item{out_dir}{output directory.}
 
 \item{cell_names}{a vector with the cell names or an ATAC object}
+
+\item{cell_suffix}{a suffix to add to the cell names (optional). This is useful when you want to merge multiple batches of cells.
+The suffix would be added in the following way: \code{paste0(cell_name, "-", cell_suffix)}.}
 
 \item{genome}{genome name (e.g. hg19). Will be inferred from the ScPeaks object if provided}
 
