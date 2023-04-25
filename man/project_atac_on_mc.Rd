@@ -15,7 +15,7 @@ project_atac_on_mc(
   id = NULL,
   description = NULL,
   rm_zero_peaks = TRUE,
-  ignore_metacells = -1
+  ignore_metacells = c(-1, -2)
 )
 
 project_atac_on_mc_from_metacell1(
@@ -55,7 +55,7 @@ the fraction of peak i in metacell j multiplied by the \code{mc_size_eps_q} quan
 
 \item{rm_zero_peaks}{remove peaks without any reads (all-zero peaks). Default: TRUE}
 
-\item{ignore_metacells}{a vector of metacells to ignore. Default: \link{-1} (the "outliers" metacell in the metacell2 python package).}
+\item{ignore_metacells}{a vector of metacells to ignore. Default: \link{-1, -2} (the "outliers" metacell in the metacell2 python package).}
 
 \item{scdb}{a metacell1 \code{scdb} path}
 
