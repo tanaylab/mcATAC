@@ -98,24 +98,24 @@ setMethod("Ops", c("McCounts", "McCounts"), function(e1, e2) {
 #' @export
 scc_to_mcc_multi_batch <- function(scc_dirs, cell_to_metacell, ignore_metacells = c(-1, -2)) {
     cell_to_metacell <- read_cell_to_metacell(cell_to_metacell, ignore_metacells)
-    
-    add_scc <- function(dir, x = NULL){   
+
+    add_scc <- function(dir, x = NULL) {
         if (!dir.exists(dir)) {
             cli_abort("Directory {.x} does not exist")
-        }     
+        }
         scc <- scc_read(dir)
         cell_to_metacell_batch <- cell_to_metacell %>%
             filter(cell_id %in% scc@cell_names)
         mcc1 <- scc_to_mcc(scc, cell_to_metacell_batch, ignore_metacells)
-        if (!is.null(x)){
-            return(x + mcc1)    
+        if (!is.null(x)) {
+            return(x + mcc1)
         }
-        return(mcc1)        
+        return(mcc1)
     }
 
     mcc <- NULL
-    for (dir in scc_dirs){
-        mcc <- add_scc(dir, mcc)        
+    for (dir in scc_dirs) {
+        mcc <- add_scc(dir, mcc)
     }
     return(mcc)
 }

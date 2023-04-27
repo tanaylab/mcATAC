@@ -9,9 +9,9 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  eval = FALSE
+    collapse = TRUE,
+    comment = "#>",
+    eval = FALSE
 )
 ```
 
@@ -26,8 +26,8 @@ ggplot2::theme_set(ggplot2::theme_classic())
 We will start by downloading the fragments data (and it's index) from 10x:
 
 ```{r download-data}
-if (!dir.exists("pbmc_data") || !file.exists("pbmc_data/fragments.tsv.gz") || !file.exists("pbmc_data/fragments.tsv.gz.tbi")){
-  download_pbmc_example_data(fragments = TRUE)
+if (!dir.exists("pbmc_data") || !file.exists("pbmc_data/fragments.tsv.gz") || !file.exists("pbmc_data/fragments.tsv.gz.tbi")) {
+    download_pbmc_example_data(fragments = TRUE)
 }
 ```
 

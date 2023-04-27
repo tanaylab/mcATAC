@@ -15,8 +15,8 @@ plot_marginal_coverage(
   min_umis = 8,
   genome = NULL,
   seed = 60427,
-  thresh = get_quantile_cov_thresh(marginal_track, quantile_thresh, min_umis,
-    window_size = window_size, genome = genome, seed = seed),
+  thresh = get_quantile_cov_thresh(marginal_track, quantile_thresh, min_umis, window_size
+    = window_size, genome = genome, seed = seed),
   log_scale = TRUE
 )
 }
