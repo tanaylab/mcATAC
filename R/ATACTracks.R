@@ -96,7 +96,7 @@ setMethod(
                 as.numeric()
             tracks <- tracks[order(mc_nums)]
             metacells <- mc_nums[order(mc_nums)]
-            if (length(tracks) == 0 || length(metacells) == 0){
+            if (length(tracks) == 0 || length(metacells) == 0) {
                 cli_abort("No metacells found in the tracks. Note that the metacells should be named as mc1, mc2, mc3, etc. If this is not the case, please provide the {.field metacells} argument.")
             }
         } else {

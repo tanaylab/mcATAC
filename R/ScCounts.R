@@ -337,3 +337,37 @@ scc_to_peaks <- function(sc_counts, peaks, cells = NULL, metadata = NULL, mc_siz
 
     return(sc_atac)
 }
+
+
+#' Change the cell names of a ScCounts object
+#'
+#' @param sc_counts a ScCounts object
+#' @param new_names new cell names
+#'
+#' @return a new ScCounts object with the new cell names
+#'
+#' @examples
+#' \dontrun{
+#' sc_counts <- scc_read("pbmc_reads")
+#' sc_counts <- scc_change_names(sc_counts, paste0(sc_counts@cell_names, "_rep1"))
+#' }
+#'
+#' @export
+scc_change_names <- function(sc_counts, new_names) {
+    assert_atac_object(sc_counts, class = "ScCounts")
+    if (length(new_names) != ncol(sc_counts@data[[1]])) {
+        cli_abort("The length of the new names must be equal to the number of cells in the ScCounts object.")
+    }
+    if (length(new_names) != length(unique(new_names))) {
+        cli_abort("The new names must be unique.")
+    }
+
+    sc_counts@cell_names <- new_names
+
+    # go over data matrices and change the colnames
+    for (i in 1:length(sc_counts@data)) {
+        colnames(sc_counts@data[[i]]) <- new_names
+    }
+
+    return(sc_counts)
+}
