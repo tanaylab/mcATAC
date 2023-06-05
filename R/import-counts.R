@@ -258,7 +258,7 @@ write_sc_counts_from_10x <- function(input_dir, out_dir, cell_suffix = NULL, gen
 #' }
 #'
 #' @export
-write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = gintervals.all()) {
+write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = gintervals.all()$chrom) {
     withr::local_options(list(scipen = 1e5))
     data_dir <- file.path(out_dir, "data")
     if (dir.exists(out_dir)) {
