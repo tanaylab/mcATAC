@@ -253,7 +253,7 @@ app_server <- function(input, output, session) {
             color_breaks = color_breaks,
             n_smooth = n_smooth
         )
-    }) %>%
+    }, res = 96) %>%
         bindCache(
             intervals(),
             input$detect_dca,

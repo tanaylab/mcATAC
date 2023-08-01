@@ -641,6 +641,7 @@ mcc_to_marginal_track <- function(mc_counts, track, metacells = NULL, resolution
     }
 
     mcc_mars <- mcc_marginal(mc_counts, metacells)
+    gdir.create("temp", showWarnings = FALSE)
     create_smoothed_track_from_dataframe(
         mcc_mars,
         track_prefix = "temp",
