@@ -1,6 +1,8 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+> NOTE: this package is still WIP and should be used with caution
+
 # mcATAC
 
 ## Installation
