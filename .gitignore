@@ -13,3 +13,5 @@ tests_notebook.ipynb
 test.R
 test.r
 test.ipynb
+.vscode/
+work/

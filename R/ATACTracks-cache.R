@@ -21,20 +21,22 @@ intervs_key <- function(mct, intervals, downsample = FALSE, downsample_n = NULL)
         tracks = mct@tracks,
         intervals = intervals,
         downsample = downsample,
-        downsample_n = downsample_n
+        downsample_n = downsample_n,
+        genome = mct@genome
     )
 
     hash <- c(
         tracks = TRUE,
         intervals = FALSE,
         downsample = FALSE,
-        downsample_n = FALSE
+        downsample_n = FALSE,
+        genome = FALSE
     )
 
     if (!downsample) {
         params[["downsample_n"]] <- NULL
         params[["downsample"]] <- NULL
-        hash <- hash[1:2]
+        hash <- hash[c(1:2, 5)]
     }
 
     return(paste0("region;", cache_key(params, hash)))
@@ -77,6 +79,14 @@ mct_has_region <- function(mct, intervals, downsample = FALSE, downsample_n = NU
 
 mct_cache_mat <- function(mct, mat, intervals, downsample = FALSE, downsample_n = NULL) {
     .mcatac_cache__[[intervs_key(mct, intervals, downsample, downsample_n)]] <- mat
+}
+
+cache_object <- function(object, key) {
+    .mcatac_cache__[[key]] <- object
+}
+
+get_cached_object <- function(key) {
+    .mcatac_cache__[[key]]
 }
 
 #' Clear the ATAC track matrix cache

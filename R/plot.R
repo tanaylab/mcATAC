@@ -681,49 +681,105 @@ plot_tracks_at_locus <- function(tracks = NULL,
     return(ch)
 }
 
+get_exon_annot <- function(genome = NULL) {
+    if (!is.null(genome)) {
+        exons <- get_cached_object(glue("exons;genome={genome}"))
+        if (!is.null(exons)) {
+            return(exons)
+        }
+        gset_genome(genome)
+    }
+
+    if (!gintervals.exists("intervs.global.exon")) {
+        return(NULL)
+    }
+
+    exon_annot <- gintervals.load("intervs.global.exon")
+
+    if (!is.null(genome)) {
+        cache_object(exon_annot, glue("exons;genome={genome}"))
+    }
+
+    return(exon_annot)
+}
+
 
 #' @param intervals what genomic interval to generate gene annotations for
 #' @param iterator misha iterator of the associated matrix
 #' @return gene annotations: a binary vector for exon locations and associated text labels for starts and ends of transcripts
 #' @noRd
-make_gene_annot <- function(intervals, iterator) {
-    file_path <- file.path(dirname(GROOT), "annots", "refGene.txt")
-    if (!file.exists(file_path)) {
-        cli_alert_warning("Gene annotations do not exist in the appropriate location ({.val {file_path}}). Not annotating genes...")
-        genes_ha <- list(labels = NULL, label_coords = NULL, exon_coords = NULL)
-    } else {
-        refgene <- tgutil::fread(file_path, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
-        rg_here <- dplyr::filter(
-            refgene, chrom == as.character(intervals$chrom),
-            ((txStart >= intervals$start) & (txStart <= intervals$end)) |
-                ((txEnd >= intervals$start) & (txEnd <= intervals$end))
-        )
-
-        if (nrow(rg_here) > 0) {
-            gbins <- giterator.intervals(intervals = intervals, iterator = iterator)
-            exons_df <- rg_here %>%
-                select(chrom, name, exonStarts, exonEnds) %>%
-                mutate(exonStarts = strsplit(exonStarts, ","), exonEnds = strsplit(exonEnds, ",")) %>%
-                tidyr::unnest(c("exonStarts", "exonEnds")) %>%
-                select(chrom, start = exonStarts, end = exonEnds, name) %>%
-                mutate(start = as.numeric(start), end = as.numeric(end))
-            has_gene <- gbins %>%
-                misha.ext::gintervals.neighbors1(exons_df) %>%
-                mutate(val = as.numeric(dist == 0)) %>%
-                pull(val)
-            genes_ha <- list(
-                labels = rep(rg_here$name2, 2),
-                label_coords = c(
-                    round((rg_here$txEnd - intervals$start) / iterator),
-                    round((rg_here$txStart - intervals$start) / iterator)
-                ),
-                exon_coords = has_gene
-            )
-        } else {
-            genes_ha <- list(labels = NULL, label_coords = NULL, exon_coords = NULL)
-        }
+make_gene_annot <- function(intervals, iterator, genome = NULL) {
+    exons_df <- get_exon_annot(genome)
+    if (is.null(exons_df)) {
+        cli_alert_warning("Gene annotations do not exist at {.field intervs.global.exon}. Not annotating genes...")
+        return(list(labels = NULL, label_coords = NULL, exon_coords = NULL))
     }
+
+    gbins <- giterator.intervals(intervals = intervals, iterator = iterator)
+    exons_here <- exons_df %>%
+        gintervals.neighbors1(intervals) %>%
+        filter(dist == 0) %>%
+        select(chrom, start, end, geneSymbol)
+    has_gene <- gbins %>%
+        misha.ext::gintervals.neighbors1(exons_here) %>%
+        mutate(val = as.numeric(dist == 0)) %>%
+        pull(val)
+    genes_here <- exons_df %>%
+        filter(geneSymbol %in% exons_here$geneSymbol) %>%
+        group_by(geneSymbol) %>%
+        summarize(
+            start = min(start),
+            end = max(end)
+        ) %>%
+        ungroup()
+    genes_ha <- list(
+        labels = rep(genes_here$geneSymbol, 2),
+        label_coords = c(
+            round((genes_here$end - intervals$start) / iterator),
+            round((genes_here$start - intervals$start) / iterator)
+        ),
+        exon_coords = has_gene
+    )
+
     return(genes_ha)
+
+    # file_path <- file.path(dirname(GROOT), "annots", "refGene.txt")
+    # if (!file.exists(file_path)) {
+    #     cli_alert_warning("Gene annotations do not exist in the appropriate location ({.val {file_path}}). Not annotating genes...")
+    #     genes_ha <- list(labels = NULL, label_coords = NULL, exon_coords = NULL)
+    # } else {
+    #     refgene <- tgutil::fread(file_path, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
+    #     rg_here <- dplyr::filter(
+    #         refgene, chrom == as.character(intervals$chrom),
+    #         ((txStart >= intervals$start) & (txStart <= intervals$end)) |
+    #             ((txEnd >= intervals$start) & (txEnd <= intervals$end))
+    #     )
+
+    #     if (nrow(rg_here) > 0) {
+    #         gbins <- giterator.intervals(intervals = intervals, iterator = iterator)
+    #         exons_df <- rg_here %>%
+    #             select(chrom, name, exonStarts, exonEnds) %>%
+    #             mutate(exonStarts = strsplit(exonStarts, ","), exonEnds = strsplit(exonEnds, ",")) %>%
+    #             tidyr::unnest(c("exonStarts", "exonEnds")) %>%
+    #             select(chrom, start = exonStarts, end = exonEnds, name) %>%
+    #             mutate(start = as.numeric(start), end = as.numeric(end))
+    #         has_gene <- gbins %>%
+    #             misha.ext::gintervals.neighbors1(exons_df) %>%
+    #             mutate(val = as.numeric(dist == 0)) %>%
+    #             pull(val)
+    #         genes_ha <- list(
+    #             labels = rep(rg_here$name2, 2),
+    #             label_coords = c(
+    #                 round((rg_here$txEnd - intervals$start) / iterator),
+    #                 round((rg_here$txStart - intervals$start) / iterator)
+    #             ),
+    #             exon_coords = has_gene
+    #         )
+    #     } else {
+    #         genes_ha <- list(labels = NULL, label_coords = NULL, exon_coords = NULL)
+    #     }
+    # }
+    # return(genes_ha)
 }
 
 # Function to make annotation of peak locations in ATAC object corresponding to tracks

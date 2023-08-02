@@ -1,4 +1,3 @@
-
 #' Plot a genomic region
 #'
 #' @param mct an McTracks object.
@@ -85,7 +84,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
         mc_colors <- NULL
     }
 
-    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels)
+    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels, genome = mct@genome)
 }
 
 #' Plot a genomic region given a matrix
@@ -99,10 +98,11 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 #' @param dca_mat a matrix with the differential cluster accessibility (DCA) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.
 #' @param n_smooth number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell (optional). Default is 20.
 #' @param n_pixels number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)} (optional).
-#' @param gene_annot whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory. (optional)
+#' @param gene_annot whether to add gene annotations; these annotations rely on the existence of the existence of an intervals set called "intervs.global.tss" and "intervs.global.exon" in the genome's misha directory. (optional)
+#' @param genome the genome to use for the gene annotations (optional)
 #'
 #' @export
-plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE) {
+plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE, genome = NULL) {
     mat_smooth <- RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
 
     if (gene_annot) {
@@ -115,7 +115,8 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
         plot_tss_strip(intervals)
 
         par(mar = c(0, 0, 0, 2))
-        gene_annots <- make_gene_annot(intervals, resolution)
+        gene_annots <- make_gene_annot(intervals, resolution, genome)
+
         if (is.null(gene_annots[["exon_coords"]])) {
             image(as.matrix(rep(0, ncol(mat)), nrow = 1), col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
         } else {
@@ -127,7 +128,7 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
     } else {
         layout(matrix(1:2, nrow = 1), w = c(1, 20))
         top_mar <- 2
-        left_mar <- 1
+        left_mar <- 2
     }
 
     par(mar = c(4, left_mar, top_mar, 0))
@@ -161,6 +162,7 @@ plot_tss_strip <- function(intervals) {
         xaxt = "n",
         yaxt = "n"
     )
+
 
     tss_df <- gintervals.neighbors1("intervs.global.tss", intervals) %>%
         filter(dist == 0) %>%

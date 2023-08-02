@@ -1,4 +1,3 @@
-
 #' Add per-metacell metadata to an McPeaks object
 #'
 #' @param atac_mc an McPeaks object

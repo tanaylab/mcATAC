@@ -126,6 +126,12 @@ app_ui <- function(request) {
                             delay = 1000
                         )
                     )
+                ),
+                shinycssloaders::withSpinner(
+                    plotOutput(
+                        "region_plot2",
+                        height = "50vh"
+                    )
                 )
             )
         )
@@ -145,6 +151,20 @@ app_server <- function(input, output, session) {
     } else {
         hc <- NULL
     }
+
+    if (!is.null(shiny_mct2)) {
+        # if (!is.null(shiny_hc2)) {
+        #     hc2 <- shiny_hc2
+        #     shinyjs::enable("detect_dca") # Enable DCA detection
+        # } else if (has_rna(shiny_mct2) && has_cell_type(shiny_mct2) && has_cell_type_colors(shiny_mct2)) {
+        #     hc2 <- mc_hclust_rna(shiny_mct, force_cell_type = TRUE)
+        #     shinyjs::enable("detect_dca") # Enable DCA detection
+        # } else {
+        #     hc2 <- NULL
+        # }
+        hc <- NULL
+    }
+
 
     min_val <- round(gsummary(shiny_mct@tracks[1], intervals = gintervals.all()[1, ])[[6]] * 10 / 2)
 
@@ -224,8 +244,53 @@ app_server <- function(input, output, session) {
         }
     })
 
-    output$region_plot <- renderPlot({
+    output$region_plot <- renderPlot(
+        {
+            req(intervals())
+            req(input$dca_peak_lf_thresh)
+            req(input$dca_trough_lf_thresh)
+            req(input$dca_sz_frac_for_peak)
+            req(input$min_color)
+            req(input$max_color)
+            req(input$min_color < input$max_color)
+            req(input$n_smooth)
+            req(input$n_smooth >= 1)
+            color_breaks <- c(0, seq(
+                input$min_color,
+                input$max_color,
+                length.out = 4
+            ))
+
+            n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
+
+            mct_plot_region(
+                shiny_mct, intervals(),
+                detect_dca = input$detect_dca %||% FALSE,
+                gene_annot = TRUE,
+                hc = hc,
+                peak_lf_thresh1 = input$dca_peak_lf_thresh,
+                trough_lf_thresh1 = input$dca_trough_lf_thresh,
+                sz_frac_for_peak = input$dca_sz_frac_for_peak,
+                color_breaks = color_breaks,
+                n_smooth = n_smooth
+            )
+        },
+        res = 96
+    ) %>%
+        bindCache(
+            intervals(),
+            input$detect_dca,
+            input$dca_peak_lf_thresh,
+            input$dca_trough_lf_thresh,
+            input$dca_sz_frac_for_peak,
+            input$min_color,
+            input$max_color,
+            input$n_smooth
+        )
+
+    output$region_plot2 <- renderPlot({
         req(intervals())
+        req(shiny_mct2)
         req(input$dca_peak_lf_thresh)
         req(input$dca_trough_lf_thresh)
         req(input$dca_sz_frac_for_peak)
@@ -240,20 +305,27 @@ app_server <- function(input, output, session) {
             length.out = 4
         ))
 
+        if (!is.null(chain_1_to_2)) {
+            intervals2 <- translate_intervals(intervals(), chain_1_to_2)
+        } else {
+            intervals2 <- intervals()
+        }
+
+
         n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
 
         mct_plot_region(
-            shiny_mct, intervals(),
+            shiny_mct2, intervals2,
             detect_dca = input$detect_dca %||% FALSE,
             gene_annot = TRUE,
-            hc = hc,
+            hc = NULL,
             peak_lf_thresh1 = input$dca_peak_lf_thresh,
             trough_lf_thresh1 = input$dca_trough_lf_thresh,
             sz_frac_for_peak = input$dca_sz_frac_for_peak,
             color_breaks = color_breaks,
             n_smooth = n_smooth
         )
-    }, res = 96) %>%
+    }) %>%
         bindCache(
             intervals(),
             input$detect_dca,
@@ -351,7 +423,9 @@ parse_coordinate_text <- function(text) {
 #' Run a shiny app for viewing the MCT object
 #'
 #' @param mct MCT object
+#' @param mct2 MCT object from a different genome (optional)
 #' @param hc an hclust object with clustering of the metacells (optional, see \code{mct_plot_region}
+#' @param chain filename of a chain translating from the genome of mct to the genome of mct2, or an rtracklayer chain object (optional)
 #'
 #' @examples
 #' \dontrun{
@@ -361,9 +435,11 @@ parse_coordinate_text <- function(text) {
 #' @export
 run_app <- function(mct,
                     hc = NULL,
+                    mct2 = NULL,
                     port = NULL,
                     host = NULL,
-                    launch.browser = FALSE) {
+                    launch.browser = FALSE,
+                    chain = NULL) {
     library(misha)
     library(shiny)
     opt <- options(gmultitasking = FALSE, shiny.usecairo = TRUE)
@@ -374,6 +450,25 @@ run_app <- function(mct,
         shiny_hc <<- NULL
     }
     gset_genome(mct@genome)
+
+    if (!is.null(mct2)) {
+        shiny_mct2 <<- mct2
+    } else {
+        shiny_mct2 <<- NULL
+    }
+
+    if (!is.null(chain)) {
+        if (is.character(chain)) {
+            cli::cli_alert_info("Loading chain {.file {chain}}")
+            chain_1_to_2 <<- rtracklayer::import.chain(chain)
+            cli::cli_alert_success("Loaded chain {.file {chain}} successfully")
+        } else {
+            chain_1_to_2 <<- chain
+        }
+    } else {
+        chain_1_to_2 <<- NULL
+    }
+
     shiny::shinyApp(
         ui = app_ui,
         server = app_server,

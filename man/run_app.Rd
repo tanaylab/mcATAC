@@ -4,12 +4,24 @@
 \alias{run_app}
 \title{Run a shiny app for viewing the MCT object}
 \usage{
-run_app(mct, hc = NULL, port = NULL, host = NULL, launch.browser = FALSE)
+run_app(
+  mct,
+  hc = NULL,
+  mct2 = NULL,
+  port = NULL,
+  host = NULL,
+  launch.browser = FALSE,
+  chain = NULL
+)
 }
 \arguments{
 \item{mct}{MCT object}
 
 \item{hc}{an hclust object with clustering of the metacells (optional, see \code{mct_plot_region}}
+
+\item{mct2}{MCT object from a different genome (optional)}
+
+\item{chain}{filename of a chain translating from the genome of mct to the genome of mct2, or an rtracklayer chain object (optional)}
 }
 \description{
 Run a shiny app for viewing the MCT object
