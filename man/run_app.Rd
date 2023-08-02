@@ -11,7 +11,10 @@ run_app(
   port = NULL,
   host = NULL,
   launch.browser = FALSE,
-  chain = NULL
+  chain = NULL,
+  chain2 = NULL,
+  annotations1 = NULL,
+  annotations2 = NULL
 )
 }
 \arguments{
@@ -22,6 +25,12 @@ run_app(
 \item{mct2}{MCT object from a different genome (optional)}
 
 \item{chain}{filename of a chain translating from the genome of mct to the genome of mct2, or an rtracklayer chain object (optional)}
+
+\item{chain2}{filename of a chain translating from the genome of mct2 to the genome of mct, or an rtracklayer chain object (optional)}
+
+\item{annotations1}{an intervals object with annotations for the first genome (optional)}
+
+\item{annotations2}{an intervals object with annotations for the second genome (optional)}
 }
 \description{
 Run a shiny app for viewing the MCT object

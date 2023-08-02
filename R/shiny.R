@@ -118,7 +118,7 @@ app_ui <- function(request) {
                 shinycssloaders::withSpinner(
                     plotOutput(
                         "region_plot",
-                        height = "50vh",
+                        height = "40vh",
                         brush = brushOpts(
                             id = "region_brush",
                             direction = "x",
@@ -129,8 +129,14 @@ app_ui <- function(request) {
                 ),
                 shinycssloaders::withSpinner(
                     plotOutput(
+                        "comparison_plot",
+                        height = "20vh"
+                    )
+                ),
+                shinycssloaders::withSpinner(
+                    plotOutput(
                         "region_plot2",
-                        height = "50vh"
+                        height = "40vh"
                     )
                 )
             )
@@ -140,6 +146,7 @@ app_ui <- function(request) {
 
 app_server <- function(input, output, session) {
     intervals <- reactiveVal()
+    intervals2 <- reactiveVal()
     globals <- reactiveValues()
 
     if (!is.null(shiny_hc)) {
@@ -288,8 +295,32 @@ app_server <- function(input, output, session) {
             input$n_smooth
         )
 
+    output$comparison_plot <- renderPlot({
+        req(intervals())
+        req(intervals2())
+        req(shiny_mct2)
+        req(chain_1_to_2)
+        req(chain_2_to_1)
+        gset_genome(mct@genome)
+        mct_plot_comparison(mct = shiny_mct, intervals = intervals(), intervals2 = intervals2(), chain = chain_1_to_2, chain2 = chain_2_to_1, selected_chain_chainscore = NULL, annot1 = shiny_annotations1, annot2 = shiny_annotations2)
+    })
+
+    observe({
+        req(intervals())
+        if (!is.null(chain_1_to_2)) {
+            # intervs2 <- translate_and_center(intervals(), chain_1_to_2, chainscore = 78939364) %>%
+            intervs2 <- translate_and_center(intervals(), chain_1_to_2, chainscore = NULL) %>%
+                select(chrom, start, end) %>%
+                as.data.frame()
+            intervals2(intervs2)
+        } else {
+            intervals2(intervals())
+        }
+    })
+
     output$region_plot2 <- renderPlot({
         req(intervals())
+        req(intervals2())
         req(shiny_mct2)
         req(input$dca_peak_lf_thresh)
         req(input$dca_trough_lf_thresh)
@@ -305,17 +336,10 @@ app_server <- function(input, output, session) {
             length.out = 4
         ))
 
-        if (!is.null(chain_1_to_2)) {
-            intervals2 <- translate_intervals(intervals(), chain_1_to_2)
-        } else {
-            intervals2 <- intervals()
-        }
-
-
         n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
 
         mct_plot_region(
-            shiny_mct2, intervals2,
+            shiny_mct2, intervals2(),
             detect_dca = input$detect_dca %||% FALSE,
             gene_annot = TRUE,
             hc = NULL,
@@ -325,9 +349,11 @@ app_server <- function(input, output, session) {
             color_breaks = color_breaks,
             n_smooth = n_smooth
         )
+
+        gset_genome(mct@genome)
     }) %>%
         bindCache(
-            intervals(),
+            intervals2(),
             input$detect_dca,
             input$dca_peak_lf_thresh,
             input$dca_trough_lf_thresh,
@@ -426,6 +452,9 @@ parse_coordinate_text <- function(text) {
 #' @param mct2 MCT object from a different genome (optional)
 #' @param hc an hclust object with clustering of the metacells (optional, see \code{mct_plot_region}
 #' @param chain filename of a chain translating from the genome of mct to the genome of mct2, or an rtracklayer chain object (optional)
+#' @param chain2 filename of a chain translating from the genome of mct2 to the genome of mct, or an rtracklayer chain object (optional)
+#' @param annotations1 an intervals object with annotations for the first genome (optional)
+#' @param annotations2 an intervals object with annotations for the second genome (optional)
 #'
 #' @examples
 #' \dontrun{
@@ -439,7 +468,10 @@ run_app <- function(mct,
                     port = NULL,
                     host = NULL,
                     launch.browser = FALSE,
-                    chain = NULL) {
+                    chain = NULL,
+                    chain2 = NULL,
+                    annotations1 = NULL,
+                    annotations2 = NULL) {
     library(misha)
     library(shiny)
     opt <- options(gmultitasking = FALSE, shiny.usecairo = TRUE)
@@ -467,6 +499,30 @@ run_app <- function(mct,
         }
     } else {
         chain_1_to_2 <<- NULL
+    }
+
+    if (!is.null(chain2)) {
+        if (is.character(chain2)) {
+            cli::cli_alert_info("Loading chain {.file {chain2}}")
+            chain_2_to_1 <<- rtracklayer::import.chain(chain2)
+            cli::cli_alert_success("Loaded chain {.file {chain2}} successfully")
+        } else {
+            chain_2_to_1 <<- chain2
+        }
+    } else {
+        chain_2_to_1 <<- NULL
+    }
+
+    if (!is.null(annotations1)) {
+        shiny_annotations1 <<- annotations1
+    } else {
+        shiny_annotations1 <<- NULL
+    }
+
+    if (!is.null(annotations2)) {
+        shiny_annotations2 <<- annotations2
+    } else {
+        shiny_annotations2 <<- NULL
     }
 
     shiny::shinyApp(
