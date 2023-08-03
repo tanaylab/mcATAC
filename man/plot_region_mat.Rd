@@ -15,7 +15,9 @@ plot_region_mat(
   n_smooth = 10,
   n_pixels = 1000,
   gene_annot = FALSE,
-  genome = NULL
+  genome = NULL,
+  plot_x_axis_ticks = TRUE,
+  gene_annot_pos = "top"
 )
 }
 \arguments{

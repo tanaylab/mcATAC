@@ -277,8 +277,9 @@ mct_plot_comparison <- function(mct, intervals, intervals2, chain, chain2, selec
     }
 
 
+    vp <- grid::plotViewport(margins = c(0, 2, 0, 0))
 
-    vp <- grid::plotViewport(margins = c(0, 3, 0, 0))
+
     grid::pushViewport(vp)
     genoPlotR::plot_gene_map(
         offsets = c(0, 0),
@@ -311,4 +312,44 @@ load_chain <- function(chain) {
     }
 
     return(chain)
+}
+
+plot_intervals_comparison <- function(intervals, intervals2, chain, chain2, chainscore = NULL, annot1 = NULL, annot2 = NULL) {
+    grid_resolution <- round((intervals$end - intervals$start) / 50)
+
+    # create a grid iterator for the first intervals set
+    i1 <- tibble(
+        chrom = intervals$chrom,
+        end = seq(intervals$start, intervals$end, grid_resolution),
+        start = end - grid_resolution
+    ) %>%
+        mutate(end = pmin(end, intervals$end)) %>%
+        as.data.frame()
+
+
+    i12 <- translate_intervals(i1, chain, chainscore = chainscore)
+
+    i12 <- i1 %>%
+        rowid_to_column("row_ID") %>%
+        left_join(i12 %>% rename(chrom1 = chrom, start1 = start, end1 = end), by = join_by(row_ID)) %>%
+        as_tibble()
+
+    # translate start1 and start2 to relative coordinates (from 0 to 1) according to intervals1 and intervals2
+    i12 <- i12 %>%
+        mutate(
+            x1 = (start - intervals$start) / (intervals$end - intervals$start),
+            x2 = (start1 - intervals2$start) / (intervals2$end - intervals2$start),
+            x2 = ifelse(is.na(chrom1) | as.character(chrom1) != as.character(intervals2$chrom), NA, x2)
+        )
+
+    # Set the plot parameters
+    plot(1, 1, xlim = c(0, 1), ylim = c(0, 1), type = "n", ann = FALSE, axes = FALSE)
+
+    segments(x0 = i12$x1, y0 = 1, x1 = i12$x1, y1 = 0.99, lwd = 1)
+    text(x = i12$x1, y = 0.96, labels = round(i12$start / 1e+6, 3), srt = 90, adj = c(1, 0.5), xpd = TRUE, cex = 0.5)
+    segments(x0 = i12$x1, y0 = 0.75, x1 = i12$x1, y1 = 0.7, lwd = 1)
+    segments(x0 = i12$x1, y0 = 0.7, x1 = i12$x2, y1 = 0.27, lwd = 1)
+    segments(x0 = i12$x2, y0 = 0.27, x1 = i12$x2, y1 = 0.25, lwd = 1)
+    text(x = i12$x2[i12$x2 <= 1 & i12$x2 >= 0], y = 0.2, labels = round(i12$start1[i12$x2 <= 1 & i12$x2 >= 0] / 1e+6, 3), srt = 90, adj = c(1, 0.5), xpd = TRUE, cex = 0.5)
+    segments(x0 = i12$x2, y0 = 0, x1 = i12$x2, y1 = 0.01, lwd = 1)
 }

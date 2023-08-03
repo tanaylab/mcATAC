@@ -38,7 +38,7 @@
 #' }
 #'
 #' @export
-mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, ...) {
+mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", ...) {
     gset_genome(mct@genome)
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
@@ -84,7 +84,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
         mc_colors <- NULL
     }
 
-    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels, genome = mct@genome)
+    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels, genome = mct@genome, plot_x_axis_ticks = plot_x_axis_ticks, gene_annot_pos = gene_annot_pos)
 }
 
 #' Plot a genomic region given a matrix
@@ -102,19 +102,29 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 #' @param genome the genome to use for the gene annotations (optional)
 #'
 #' @export
-plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE, genome = NULL) {
+plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE, genome = NULL, plot_x_axis_ticks = TRUE, gene_annot_pos = "top") {
     mat_smooth <- RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
 
     if (gene_annot) {
         if (is.null(intervals) || is.null(resolution)) {
             cli_abort("If gene annotations are requested, intervals and resolution must be specified")
         }
-        layout(cbind(c(0, 0, 3), c(1, 2, 4)), widths = c(1, 20), heights = c(3, 0.5, 15))
+
+        # Different layouts depending on annotation position
+        if (gene_annot_pos == "top") {
+            layout(cbind(c(0, 0, 3), c(1, 2, 4)), widths = c(1, 20), heights = c(3, 0.5, 15))
+        } else if (gene_annot_pos == "bottom") {
+            layout(cbind(c(3, 0, 0, 0), c(4, 1, 2, 0)), widths = c(1, 20), heights = c(15, 3, 0.5, 0.5))
+        }
 
         par(mar = c(0, 0, 2, 2))
         plot_tss_strip(intervals)
 
-        par(mar = c(0, 0, 0, 2))
+        if (gene_annot_pos == "top") {
+            par(mar = c(0, 0, 0, 2))
+        } else {
+            par(mar = c(0, 0, 0, 2))
+        }
         gene_annots <- make_gene_annot(intervals, resolution, genome)
 
         if (is.null(gene_annots[["exon_coords"]])) {
@@ -131,15 +141,26 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
         left_mar <- 2
     }
 
-    par(mar = c(4, left_mar, top_mar, 0))
-    image(t(as.matrix(1:length(mc_colors), nrow = 1)), col = mc_colors, yaxt = "n", xaxt = "n")
+    if (plot_x_axis_ticks && gene_annot_pos == "bottom") {
+        plot_x_axis_ticks <- FALSE
+        cli_alert_warning("Gene annotations are at the bottom, so x-axis ticks are disabled.")
+    }
 
-    par(mar = c(4, 0, top_mar, 2))
+    if (plot_x_axis_ticks) {
+        bottom_mar <- 4
+    } else {
+        bottom_mar <- 0
+    }
+
+    par(mar = c(bottom_mar, left_mar, top_mar, 0))
+    image(t(as.matrix(seq_along(mc_colors), nrow = 1)), col = mc_colors, yaxt = "n", xaxt = "n")
+
+    par(mar = c(bottom_mar, 0, top_mar, 2))
     shades <- colorRampPalette(colors)(1000)
     mat_smooth[mat_smooth > max(color_breaks)] <- max(color_breaks)
     shades_breaks <- approx(color_breaks, n = 1001)$y
     image(mat_smooth, col = shades, breaks = shades_breaks, yaxt = "n", xaxt = "n")
-    if (!is.null(intervals)) {
+    if (!is.null(intervals) && plot_x_axis_ticks) {
         axis(1, at = seq(0, 1, l = 11), round(seq(intervals$start[1], intervals$end[1], l = 11) / 1e+6, 3), las = 2)
     }
 

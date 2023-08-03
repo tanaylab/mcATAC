@@ -18,6 +18,8 @@ mct_plot_region(
   gene_annot = FALSE,
   n_smooth = 10,
   n_pixels = 1000,
+  plot_x_axis_ticks = TRUE,
+  gene_annot_pos = "top",
   ...
 )
 }

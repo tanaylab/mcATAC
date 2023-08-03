@@ -196,7 +196,8 @@ app_server <- function(input, output, session) {
     observe({
         shinyWidgets::updateVirtualSelect(
             "genes",
-            choices = shinyWidgets::prepare_choices(promoters, label, coords)
+            choices = shinyWidgets::prepare_choices(promoters, label, coords),
+            selected = "chrX:60843429-60943430"
         )
     })
 
@@ -279,7 +280,8 @@ app_server <- function(input, output, session) {
                 trough_lf_thresh1 = input$dca_trough_lf_thresh,
                 sz_frac_for_peak = input$dca_sz_frac_for_peak,
                 color_breaks = color_breaks,
-                n_smooth = n_smooth
+                n_smooth = n_smooth,
+                plot_x_axis_ticks = FALSE
             )
         },
         res = 96
@@ -295,15 +297,30 @@ app_server <- function(input, output, session) {
             input$n_smooth
         )
 
-    output$comparison_plot <- renderPlot({
-        req(intervals())
-        req(intervals2())
-        req(shiny_mct2)
-        req(chain_1_to_2)
-        req(chain_2_to_1)
-        gset_genome(mct@genome)
-        mct_plot_comparison(mct = shiny_mct, intervals = intervals(), intervals2 = intervals2(), chain = chain_1_to_2, chain2 = chain_2_to_1, selected_chain_chainscore = NULL, annot1 = shiny_annotations1, annot2 = shiny_annotations2)
-    }, res = 96)
+    output$comparison_plot <- renderPlot(
+        {
+            req(intervals())
+            req(intervals2())
+            req(shiny_mct2)
+            req(chain_1_to_2)
+            req(chain_2_to_1)
+            gset_genome(mct@genome)
+
+            layout(matrix(2:1, nrow = 1), w = c(1, 20))
+            par(mar = c(0, 0, 0, 2))
+            plot_intervals_comparison(
+                intervals = intervals(),
+                intervals2 = intervals2(),
+                chain = chain_1_to_2,
+                chain2 = chain_2_to_1,
+                annot1 = shiny_annotations1,
+                annot2 = shiny_annotations2,
+                chainscore = NULL
+            )
+            # mct_plot_comparison(mct = shiny_mct, intervals = intervals(), intervals2 = intervals2(), chain = chain_1_to_2, chain2 = chain_2_to_1, selected_chain_chainscore = NULL, annot1 = shiny_annotations1, annot2 = shiny_annotations2)
+        },
+        res = 96
+    )
 
     observe({
         req(intervals())
@@ -318,40 +335,44 @@ app_server <- function(input, output, session) {
         }
     })
 
-    output$region_plot2 <- renderPlot({
-        req(intervals())
-        req(intervals2())
-        req(shiny_mct2)
-        req(input$dca_peak_lf_thresh)
-        req(input$dca_trough_lf_thresh)
-        req(input$dca_sz_frac_for_peak)
-        req(input$min_color)
-        req(input$max_color)
-        req(input$min_color < input$max_color)
-        req(input$n_smooth)
-        req(input$n_smooth >= 1)
-        color_breaks <- c(0, seq(
-            input$min_color,
-            input$max_color,
-            length.out = 4
-        ))
+    output$region_plot2 <- renderPlot(
+        {
+            req(intervals())
+            req(intervals2())
+            req(shiny_mct2)
+            req(input$dca_peak_lf_thresh)
+            req(input$dca_trough_lf_thresh)
+            req(input$dca_sz_frac_for_peak)
+            req(input$min_color)
+            req(input$max_color)
+            req(input$min_color < input$max_color)
+            req(input$n_smooth)
+            req(input$n_smooth >= 1)
+            color_breaks <- c(0, seq(
+                input$min_color,
+                input$max_color,
+                length.out = 4
+            ))
 
-        n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
+            n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
 
-        mct_plot_region(
-            shiny_mct2, intervals2(),
-            detect_dca = input$detect_dca %||% FALSE,
-            gene_annot = TRUE,
-            hc = shiny_hc2,
-            peak_lf_thresh1 = input$dca_peak_lf_thresh,
-            trough_lf_thresh1 = input$dca_trough_lf_thresh,
-            sz_frac_for_peak = input$dca_sz_frac_for_peak,
-            color_breaks = color_breaks,
-            n_smooth = n_smooth
-        )
+            mct_plot_region(
+                shiny_mct2, intervals2(),
+                detect_dca = input$detect_dca %||% FALSE,
+                gene_annot = TRUE,
+                hc = shiny_hc2,
+                peak_lf_thresh1 = input$dca_peak_lf_thresh,
+                trough_lf_thresh1 = input$dca_trough_lf_thresh,
+                sz_frac_for_peak = input$dca_sz_frac_for_peak,
+                color_breaks = color_breaks,
+                n_smooth = n_smooth,
+                gene_annot_pos = "bottom"
+            )
 
-        gset_genome(mct@genome)
-    }, res = 96) %>%
+            gset_genome(mct@genome)
+        },
+        res = 96
+    ) %>%
         bindCache(
             intervals2(),
             input$detect_dca,
