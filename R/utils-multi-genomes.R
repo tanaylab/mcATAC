@@ -314,7 +314,7 @@ load_chain <- function(chain) {
     return(chain)
 }
 
-plot_intervals_comparison <- function(intervals, intervals2, chain, chain2, chainscore = NULL, annot1 = NULL, annot2 = NULL) {
+compute_intervals_comparison <- function(intervals, intervals2, chain, chainscore = NULL) {
     grid_resolution <- round((intervals$end - intervals$start) / 50)
 
     # create a grid iterator for the first intervals set
@@ -334,6 +334,7 @@ plot_intervals_comparison <- function(intervals, intervals2, chain, chain2, chai
         left_join(i12 %>% rename(chrom1 = chrom, start1 = start, end1 = end), by = join_by(row_ID)) %>%
         as_tibble()
 
+
     # translate start1 and start2 to relative coordinates (from 0 to 1) according to intervals1 and intervals2
     i12 <- i12 %>%
         mutate(
@@ -341,6 +342,29 @@ plot_intervals_comparison <- function(intervals, intervals2, chain, chain2, chai
             x2 = (start1 - intervals2$start) / (intervals2$end - intervals2$start),
             x2 = ifelse(is.na(chrom1) | as.character(chrom1) != as.character(intervals2$chrom), NA, x2)
         )
+
+    return(i12)
+}
+
+is_comparison_flipped <- function(intervals_comparison) {
+    i12 <- intervals_comparison
+
+    cr <- i12 %>%
+        mutate(
+            mid1 = start + (end - start) / 2,
+            mid2 = start1 + (end1 - start1) / 2
+        ) %>%
+        summarise(cr = cor(mid1, mid2, use = "pairwise.complete.obs"))
+
+    return(cr < 0)
+}
+
+plot_intervals_comparison <- function(intervals_comparison, annot1 = NULL, annot2 = NULL) {
+    i12 <- intervals_comparison
+
+    if (is_comparison_flipped(i12)) {
+        i12$x2 <- 1 - i12$x2
+    }
 
     # Set the plot parameters
     plot(1, 1, xlim = c(0, 1), ylim = c(0, 1), type = "n", ann = FALSE, axes = FALSE)

@@ -38,7 +38,7 @@
 #' }
 #'
 #' @export
-mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", ...) {
+mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, ...) {
     gset_genome(mct@genome)
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
@@ -84,7 +84,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
         mc_colors <- NULL
     }
 
-    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels, genome = mct@genome, plot_x_axis_ticks = plot_x_axis_ticks, gene_annot_pos = gene_annot_pos)
+    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels, genome = mct@genome, plot_x_axis_ticks = plot_x_axis_ticks, gene_annot_pos = gene_annot_pos, flip = flip)
 }
 
 #' Plot a genomic region given a matrix
@@ -100,9 +100,11 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 #' @param n_pixels number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)} (optional).
 #' @param gene_annot whether to add gene annotations; these annotations rely on the existence of the existence of an intervals set called "intervs.global.tss" and "intervs.global.exon" in the genome's misha directory. (optional)
 #' @param genome the genome to use for the gene annotations (optional)
+#' @param gene_annot_pos the position of the gene annotations ("top" or "bottom")
+#' @param flip whether to flip the coordinates (optional)
 #'
 #' @export
-plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE, genome = NULL, plot_x_axis_ticks = TRUE, gene_annot_pos = "top") {
+plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE, genome = NULL, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE) {
     mat_smooth <- RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
 
     if (gene_annot) {
@@ -118,7 +120,7 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
         }
 
         par(mar = c(0, 0, 2, 2))
-        plot_tss_strip(intervals)
+        plot_tss_strip(intervals, flip = flip)
 
         if (gene_annot_pos == "top") {
             par(mar = c(0, 0, 0, 2))
@@ -130,7 +132,13 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
         if (is.null(gene_annots[["exon_coords"]])) {
             image(as.matrix(rep(0, ncol(mat)), nrow = 1), col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
         } else {
-            image(as.matrix(gene_annots[["exon_coords"]], nrow = 1), col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
+            exon_mat <- t(as.matrix(gene_annots[["exon_coords"]]))
+
+            if (flip) {
+                exon_mat <- exon_mat[, ncol(exon_mat):1, drop = FALSE]
+            }
+
+            image(exon_mat, col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
         }
 
         top_mar <- 0
@@ -159,6 +167,9 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
     shades <- colorRampPalette(colors)(1000)
     mat_smooth[mat_smooth > max(color_breaks)] <- max(color_breaks)
     shades_breaks <- approx(color_breaks, n = 1001)$y
+    if (flip) {
+        mat_smooth <- mat_smooth[nrow(mat_smooth):1, , drop = FALSE]
+    }
     image(mat_smooth, col = shades, breaks = shades_breaks, yaxt = "n", xaxt = "n")
     if (!is.null(intervals) && plot_x_axis_ticks) {
         axis(1, at = seq(0, 1, l = 11), round(seq(intervals$start[1], intervals$end[1], l = 11) / 1e+6, 3), las = 2)
@@ -169,11 +180,14 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
         cli_alert_info("Extending DCAs with {.val {n_peak_smooth}} bins. This can be tweaked using the {.field n_pixels} paramater.")
         dca_mat <- extend_dca_mat(dca_mat, n_peak_smooth)
         dca_cols <- c(rgb(0, 0, 1, 0.4), rgb(0, 0, 1, 0.15), rgb(0, 0, 0, 0), rgb(1, 0, 0, 0.15), rgb(1, 0, 0, 0.4))
+        if (flip) {
+            dca_mat <- dca_mat[nrow(dca_mat):1, , drop = FALSE]
+        }
         image(dca_mat, col = dca_cols, add = TRUE, breaks = c(-3, -1.5, -0.5, 0.5, 1.5, 3))
     }
 }
 
-plot_tss_strip <- function(intervals) {
+plot_tss_strip <- function(intervals, flip = FALSE) {
     plot( # empty plot
         x = intervals$start:intervals$end,
         y = c(0, rep(0.7, intervals$end - intervals$start)),
@@ -190,6 +204,11 @@ plot_tss_strip <- function(intervals) {
         arrange(chrom, start, end, strand, geneSymbol) %>%
         distinct(geneSymbol, strand, .keep_all = TRUE) %>%
         select(chrom, tss = start, strand, gene = geneSymbol)
+
+    if (flip) {
+        # flip the coordinates relative to the start end end of the intervals
+        tss_df$tss <- intervals$end - tss_df$tss + intervals$start
+    }
     if (nrow(tss_df) > 0) {
         text(x = tss_df$tss, y = rep(0.35, length(tss_df$tss)), labels = tss_df$gene, las = 1, cex = 1)
         line_len <- (intervals$end - intervals$start) * 0.01
@@ -199,6 +218,7 @@ plot_tss_strip <- function(intervals) {
         minus_tss <- tss_df %>%
             filter(strand == -1) %>%
             pull(tss)
+
 
         segments(x0 = tss_df$tss, x1 = tss_df$tss, y0 = 0, y1 = 0.2)
         if (length(plus_tss) > 0) {

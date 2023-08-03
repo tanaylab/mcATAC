@@ -147,6 +147,7 @@ app_ui <- function(request) {
 app_server <- function(input, output, session) {
     intervals <- reactiveVal()
     intervals2 <- reactiveVal()
+    intervals_comparison <- reactiveVal()
     globals <- reactiveValues()
 
     if (!is.null(shiny_hc)) {
@@ -297,31 +298,6 @@ app_server <- function(input, output, session) {
             input$n_smooth
         )
 
-    output$comparison_plot <- renderPlot(
-        {
-            req(intervals())
-            req(intervals2())
-            req(shiny_mct2)
-            req(chain_1_to_2)
-            req(chain_2_to_1)
-            gset_genome(mct@genome)
-
-            layout(matrix(2:1, nrow = 1), w = c(1, 20))
-            par(mar = c(0, 0, 0, 2))
-            plot_intervals_comparison(
-                intervals = intervals(),
-                intervals2 = intervals2(),
-                chain = chain_1_to_2,
-                chain2 = chain_2_to_1,
-                annot1 = shiny_annotations1,
-                annot2 = shiny_annotations2,
-                chainscore = NULL
-            )
-            # mct_plot_comparison(mct = shiny_mct, intervals = intervals(), intervals2 = intervals2(), chain = chain_1_to_2, chain2 = chain_2_to_1, selected_chain_chainscore = NULL, annot1 = shiny_annotations1, annot2 = shiny_annotations2)
-        },
-        res = 96
-    )
-
     observe({
         req(intervals())
         if (!is.null(chain_1_to_2)) {
@@ -335,10 +311,42 @@ app_server <- function(input, output, session) {
         }
     })
 
+    observe({
+        req(intervals())
+        req(intervals2())
+        req(chain_1_to_2)
+        i12 <- compute_intervals_comparison(intervals(), intervals2(), chain_1_to_2, chainscore = NULL)
+        intervals_comparison(i12)
+    })
+
+    output$comparison_plot <- renderPlot(
+        {
+            req(intervals())
+            req(intervals2())
+            req(intervals_comparison())
+            req(shiny_mct2)
+            req(chain_1_to_2)
+            req(chain_2_to_1)
+            gset_genome(mct@genome)
+
+            layout(matrix(2:1, nrow = 1), w = c(1, 20))
+            par(mar = c(0, 0, 0, 2))
+            plot_intervals_comparison(
+                intervals_comparison(),
+                annot1 = shiny_annotations1,
+                annot2 = shiny_annotations2
+            )
+        },
+        res = 96
+    )
+
+
+
     output$region_plot2 <- renderPlot(
         {
             req(intervals())
             req(intervals2())
+            req(intervals_comparison())
             req(shiny_mct2)
             req(input$dca_peak_lf_thresh)
             req(input$dca_trough_lf_thresh)
@@ -366,7 +374,8 @@ app_server <- function(input, output, session) {
                 sz_frac_for_peak = input$dca_sz_frac_for_peak,
                 color_breaks = color_breaks,
                 n_smooth = n_smooth,
-                gene_annot_pos = "bottom"
+                gene_annot_pos = "bottom",
+                flip = is_comparison_flipped(intervals_comparison())
             )
 
             gset_genome(mct@genome)

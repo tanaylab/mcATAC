@@ -17,7 +17,8 @@ plot_region_mat(
   gene_annot = FALSE,
   genome = NULL,
   plot_x_axis_ticks = TRUE,
-  gene_annot_pos = "top"
+  gene_annot_pos = "top",
+  flip = FALSE
 )
 }
 \arguments{
@@ -42,6 +43,10 @@ plot_region_mat(
 \item{gene_annot}{whether to add gene annotations; these annotations rely on the existence of the existence of an intervals set called "intervs.global.tss" and "intervs.global.exon" in the genome's misha directory. (optional)}
 
 \item{genome}{the genome to use for the gene annotations (optional)}
+
+\item{gene_annot_pos}{the position of the gene annotations ("top" or "bottom")}
+
+\item{flip}{whether to flip the coordinates (optional)}
 }
 \description{
 Plot a genomic region given a matrix
