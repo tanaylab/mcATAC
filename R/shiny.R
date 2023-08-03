@@ -303,7 +303,7 @@ app_server <- function(input, output, session) {
         req(chain_2_to_1)
         gset_genome(mct@genome)
         mct_plot_comparison(mct = shiny_mct, intervals = intervals(), intervals2 = intervals2(), chain = chain_1_to_2, chain2 = chain_2_to_1, selected_chain_chainscore = NULL, annot1 = shiny_annotations1, annot2 = shiny_annotations2)
-    })
+    }, res = 96)
 
     observe({
         req(intervals())
@@ -351,7 +351,7 @@ app_server <- function(input, output, session) {
         )
 
         gset_genome(mct@genome)
-    }) %>%
+    }, res = 96) %>%
         bindCache(
             intervals2(),
             input$detect_dca,
