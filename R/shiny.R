@@ -160,16 +160,16 @@ app_server <- function(input, output, session) {
     }
 
     if (!is.null(shiny_mct2)) {
-        # if (!is.null(shiny_hc2)) {
-        #     hc2 <- shiny_hc2
-        #     shinyjs::enable("detect_dca") # Enable DCA detection
-        # } else if (has_rna(shiny_mct2) && has_cell_type(shiny_mct2) && has_cell_type_colors(shiny_mct2)) {
-        #     hc2 <- mc_hclust_rna(shiny_mct, force_cell_type = TRUE)
-        #     shinyjs::enable("detect_dca") # Enable DCA detection
-        # } else {
-        #     hc2 <- NULL
-        # }
-        hc <- NULL
+        if (!is.null(shiny_hc2)) {
+            hc2 <- shiny_hc2
+            shinyjs::enable("detect_dca") # Enable DCA detection
+        } else if (has_rna(shiny_mct2) && has_cell_type(shiny_mct2) && has_cell_type_colors(shiny_mct2)) {
+            hc2 <- mc_hclust_rna(shiny_mct, force_cell_type = TRUE)
+            shinyjs::enable("detect_dca") # Enable DCA detection
+        } else {
+            hc2 <- NULL
+        }
+        # hc <- NULL
     }
 
 
@@ -342,7 +342,7 @@ app_server <- function(input, output, session) {
             shiny_mct2, intervals2(),
             detect_dca = input$detect_dca %||% FALSE,
             gene_annot = TRUE,
-            hc = NULL,
+            hc = shiny_hc2,
             peak_lf_thresh1 = input$dca_peak_lf_thresh,
             trough_lf_thresh1 = input$dca_trough_lf_thresh,
             sz_frac_for_peak = input$dca_sz_frac_for_peak,
@@ -451,6 +451,7 @@ parse_coordinate_text <- function(text) {
 #' @param mct MCT object
 #' @param mct2 MCT object from a different genome (optional)
 #' @param hc an hclust object with clustering of the metacells (optional, see \code{mct_plot_region}
+#' @param hc2 an hclust object with clustering of the metacells for the second genome (optional, see \code{mct_plot_region}
 #' @param chain filename of a chain translating from the genome of mct to the genome of mct2, or an rtracklayer chain object (optional)
 #' @param chain2 filename of a chain translating from the genome of mct2 to the genome of mct, or an rtracklayer chain object (optional)
 #' @param annotations1 an intervals object with annotations for the first genome (optional)
@@ -465,6 +466,7 @@ parse_coordinate_text <- function(text) {
 run_app <- function(mct,
                     hc = NULL,
                     mct2 = NULL,
+                    hc2 = NULL,
                     port = NULL,
                     host = NULL,
                     launch.browser = FALSE,
@@ -476,54 +478,24 @@ run_app <- function(mct,
     library(shiny)
     opt <- options(gmultitasking = FALSE, shiny.usecairo = TRUE)
     shiny_mct <<- mct
-    if (!is.null(hc)) {
-        shiny_hc <<- hc
-    } else {
-        shiny_hc <<- NULL
-    }
+    shiny_hc <<- hc
     gset_genome(mct@genome)
 
-    if (!is.null(mct2)) {
-        shiny_mct2 <<- mct2
-    } else {
-        shiny_mct2 <<- NULL
-    }
+    shiny_mct2 <<- mct2
+    shiny_hc2 <<- hc2
 
+    chain_1_to_2 <<- NULL
     if (!is.null(chain)) {
-        if (is.character(chain)) {
-            cli::cli_alert_info("Loading chain {.file {chain}}")
-            chain_1_to_2 <<- rtracklayer::import.chain(chain)
-            cli::cli_alert_success("Loaded chain {.file {chain}} successfully")
-        } else {
-            chain_1_to_2 <<- chain
-        }
-    } else {
-        chain_1_to_2 <<- NULL
+        chain_1_to_2 <<- load_chain(chain)
     }
 
+    chain_2_to_1 <<- NULL
     if (!is.null(chain2)) {
-        if (is.character(chain2)) {
-            cli::cli_alert_info("Loading chain {.file {chain2}}")
-            chain_2_to_1 <<- rtracklayer::import.chain(chain2)
-            cli::cli_alert_success("Loaded chain {.file {chain2}} successfully")
-        } else {
-            chain_2_to_1 <<- chain2
-        }
-    } else {
-        chain_2_to_1 <<- NULL
+        chain_2_to_1 <<- load_chain(chain2)
     }
 
-    if (!is.null(annotations1)) {
-        shiny_annotations1 <<- annotations1
-    } else {
-        shiny_annotations1 <<- NULL
-    }
-
-    if (!is.null(annotations2)) {
-        shiny_annotations2 <<- annotations2
-    } else {
-        shiny_annotations2 <<- NULL
-    }
+    shiny_annotations1 <<- annotations1
+    shiny_annotations2 <<- annotations2
 
     shiny::shinyApp(
         ui = app_ui,

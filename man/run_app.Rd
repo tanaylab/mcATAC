@@ -8,6 +8,7 @@ run_app(
   mct,
   hc = NULL,
   mct2 = NULL,
+  hc2 = NULL,
   port = NULL,
   host = NULL,
   launch.browser = FALSE,
@@ -23,6 +24,8 @@ run_app(
 \item{hc}{an hclust object with clustering of the metacells (optional, see \code{mct_plot_region}}
 
 \item{mct2}{MCT object from a different genome (optional)}
+
+\item{hc2}{an hclust object with clustering of the metacells for the second genome (optional, see \code{mct_plot_region}}
 
 \item{chain}{filename of a chain translating from the genome of mct to the genome of mct2, or an rtracklayer chain object (optional)}
 

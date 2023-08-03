@@ -290,7 +290,6 @@ mct_plot_comparison <- function(mct, intervals, intervals2, chain, chain2, selec
         seg_plots = seg_plots,
         seg_plot_height = 2,
         seg_plot_y_axis = NULL,
-        
         comparisons = list(
             # orth_one_per_element(mm_oc_comp)
             orth_one_per_element(ruler)
@@ -302,4 +301,14 @@ mct_plot_comparison <- function(mct, intervals, intervals2, chain, chain2, selec
         xlims = xlims,
         plot_new = FALSE
     )
+}
+
+load_chain <- function(chain) {
+    if (is.character(chain)) {
+        cli::cli_alert_info("Loading chain {.file {chain}}")
+        chain <<- rtracklayer::import.chain(chain)
+        cli::cli_alert_success("Loaded chain {.file {chain}} successfully")
+    }
+
+    return(chain)
 }
