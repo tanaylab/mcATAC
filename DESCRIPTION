@@ -50,7 +50,6 @@ Imports:
     rtracklayer,
     regioneR,
     GenomicRanges,
-    genoPlotR,
     plyr,
     yaml,
 	zoo
@@ -76,7 +75,6 @@ Remotes:
     bioc::rtracklayer,
     bioc::regioneR,
     bioc::GenomicRanges,
-    bioc::genoPlotR
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: es
