@@ -315,7 +315,7 @@ app_server <- function(input, output, session) {
         req(intervals())
         req(intervals2())
         req(chain_1_to_2)
-        i12 <- compute_intervals_comparison(intervals(), intervals2(), chain_1_to_2, chainscore = NULL)
+        i12 <- compute_intervals_comparison(intervals(), intervals2(), chain_1_to_2, chainscore = NULL, grid_resolution=100)
         intervals_comparison(i12)
     })
 
@@ -334,7 +334,8 @@ app_server <- function(input, output, session) {
             plot_intervals_comparison(
                 intervals_comparison(),
                 annot1 = shiny_annotations1,
-                annot2 = shiny_annotations2
+                annot2 = shiny_annotations2,
+                grid_resolution=100
             )
         },
         res = 96

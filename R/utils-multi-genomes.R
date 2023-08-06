@@ -164,7 +164,8 @@ orth_one_per_element <- function(comparison_obj, width = 10) {
     comparison_obj[, 1:6]
 }
 
-mct_plot_comparison <- function(mct, intervals, intervals2, chain, chain2, selected_chain_chainscore = NULL, annot1 = NULL, annot2 = NULL) {
+q
+mct_plot_comparison <- function(mct, intervals, intervals2, chain, chain2, selected_chain_chainscore = NULL, annot1 = NULL, annot2 = NULL, grid_resolution=100) {
     mm_elems <- intervals
 
     if (!("strand" %in% colnames(mm_elems))) {
@@ -202,7 +203,7 @@ mct_plot_comparison <- function(mct, intervals, intervals2, chain, chain2, selec
     # }
 
 
-    grid_resolution <- (intervals$end - intervals$start) / 50
+    grid_resolution <- (intervals$end - intervals$start) / grid_resolution
     ruler <- get_comparison(giterator.intervals(intervals = intervals, iterator = grid_resolution), chain, selected_chain_chainscore = selected_chain_chainscore)
 
     flip <- cor(
@@ -314,8 +315,8 @@ load_chain <- function(chain) {
     return(chain)
 }
 
-compute_intervals_comparison <- function(intervals, intervals2, chain, chainscore = NULL) {
-    grid_resolution <- round((intervals$end - intervals$start) / 50)
+compute_intervals_comparison <- function(intervals, intervals2, chain, chainscore = NULL, grid_resolution=100) {
+    grid_resolution <- round((intervals$end - intervals$start) / grid_resolution)
 
     # create a grid iterator for the first intervals set
     i1 <- tibble(
@@ -359,7 +360,7 @@ is_comparison_flipped <- function(intervals_comparison) {
     return(cr < 0)
 }
 
-plot_intervals_comparison <- function(intervals_comparison, annot1 = NULL, annot2 = NULL) {
+plot_intervals_comparison <- function(intervals_comparison, annot1 = NULL, annot2 = NULL, grid_resolution=100) {
     i12 <- intervals_comparison
 
     if (is_comparison_flipped(i12)) {
@@ -371,9 +372,9 @@ plot_intervals_comparison <- function(intervals_comparison, annot1 = NULL, annot
 
     segments(x0 = i12$x1, y0 = 1, x1 = i12$x1, y1 = 0.99, lwd = 1)
     text(x = i12$x1, y = 0.96, labels = round(i12$start / 1e+6, 3), srt = 90, adj = c(1, 0.5), xpd = TRUE, cex = 0.5)
-    segments(x0 = i12$x1, y0 = 0.75, x1 = i12$x1, y1 = 0.7, lwd = 1)
-    segments(x0 = i12$x1, y0 = 0.7, x1 = i12$x2, y1 = 0.27, lwd = 1)
-    segments(x0 = i12$x2, y0 = 0.27, x1 = i12$x2, y1 = 0.25, lwd = 1)
+    segments(x0 = i12$x1, y0 = 0.75, x1 = i12$x1, y1 = 0.7, lwd = 1, col=ifelse(1:length(i12$x1)%%round(grid_resolution/10)==0,"black","grey"))
+    segments(x0 = i12$x1, y0 = 0.7, x1 = i12$x2, y1 = 0.27, lwd = 1, col=ifelse(1:length(i12$x1)%%round(grid_resolution/10)==0,"black","grey"))
+    segments(x0 = i12$x2, y0 = 0.27, x1 = i12$x2, y1 = 0.25, lwd = 1, col=ifelse(1:length(i12$x1)%%round(grid_resolution/10)==0,"black","grey"))
     text(x = i12$x2[i12$x2 <= 1 & i12$x2 >= 0], y = 0.2, labels = round(i12$start1[i12$x2 <= 1 & i12$x2 >= 0] / 1e+6, 3), srt = 90, adj = c(1, 0.5), xpd = TRUE, cex = 0.5)
     segments(x0 = i12$x2, y0 = 0, x1 = i12$x2, y1 = 0.01, lwd = 1)
 }
