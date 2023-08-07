@@ -277,6 +277,8 @@ app_server <- function(input, output, session) {
 
             mct_plot_region(
                 shiny_mct, intervals(),
+                downsample = TRUE,
+                downsample_n = 2500000,
                 detect_dca = input$detect_dca %||% FALSE,
                 gene_annot = TRUE,
                 hc = hc,
@@ -318,6 +320,7 @@ app_server <- function(input, output, session) {
         req(intervals())
         req(intervals2())
         req(chain_1_to_2)
+        req(chain_2_to_1)
         i12 <- compute_intervals_comparison(intervals(), intervals2(), chain_1_to_2, chainscore = NULL, grid_resolution=100)
         intervals_comparison(i12)
     })
@@ -331,14 +334,12 @@ app_server <- function(input, output, session) {
             req(chain_1_to_2)
             req(chain_2_to_1)
             gset_genome(mct@genome)
-
             layout(matrix(2:1, nrow = 1), w = c(1, 20))
             par(mar = c(0, 0, 0, 2))
             par(xaxs="i")
             plot_intervals_comparison(
                 intervals_comparison(),
-                annot1 = shiny_annotations1,
-                annot2 = shiny_annotations2,
+                annotations = compute_annotation_comparison(shiny_annotations1, shiny_annotations2, intervals(), intervals2(), chain_1_to_2, chain_2_to_1, selected_chain_chainscore=NULL),
                 grid_resolution=100
             )
         },
@@ -372,7 +373,8 @@ app_server <- function(input, output, session) {
             mct_plot_region(
                 shiny_mct2, intervals2(),
                 detect_dca = input$detect_dca %||% FALSE,
-                downsample = FALSE,
+                downsample = TRUE,
+                downsample_n = 2500000,
                 gene_annot = TRUE,
                 hc = shiny_hc2,
                 peak_lf_thresh1 = input$dca_peak_lf_thresh,

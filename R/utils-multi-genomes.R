@@ -160,6 +160,34 @@ load_chain <- function(chain) {
     return(chain)
 }
 
+compute_annotation_comparison <- function(annot1, annot2, intervals, intervals2, chain_1_to_2, chain_2_to_1, selected_chain_chainscore=NULL){
+    annot1 <- annot1 %>%
+        gintervals.neighbors1(intervals) %>%
+        filter(dist == 0)
+    annot1_colors <- chameleon::distinct_colors(nrow(annot1))$name
+
+    lifted_annot1 <- translate_intervals(as.data.frame(annot1), chain = chain_1_to_2, chainscore = selected_chain_chainscore) %>%
+        arrange(row_ID)
+
+    annot2 <- annot2 %>%
+        filter(
+            chrom == intervals2$chrom,
+            start >= intervals2$start,
+            end <= intervals2$end
+        )
+    annot2_colors <- chameleon::distinct_colors(nrow(annot1) + nrow(annot2))$name[(nrow(annot1) + 1):(nrow(annot1) + nrow(annot2))]
+    lifted_annot2 <- translate_intervals(as.data.frame(annot2), chain = chain_2_to_1, chainscore = selected_chain_chainscore) %>%
+        arrange(row_ID)
+    list(
+         annot1=annot1 %>% mutate(x1 = (start - intervals$start) / (intervals$end - intervals$start)), 
+         lifted_annot1=lifted_annot1 %>% mutate(x2 = (start - intervals2$start) / (intervals2$end - intervals2$start)), 
+         annot1_colors=annot1_colors, 
+         annot2=annot2 %>% mutate(x2 = (start - intervals2$start) / (intervals2$end - intervals2$start)), 
+         lifted_annot2=lifted_annot2 %>% mutate(x1 = (start - intervals$start) / (intervals$end - intervals$start)), 
+         annot2_colors=annot2_colors)
+}
+
+
 compute_intervals_comparison <- function(intervals, intervals2, chain, chainscore = NULL, grid_resolution=100) {
     grid_resolution <- round((intervals$end - intervals$start) / grid_resolution)
 
@@ -205,15 +233,14 @@ is_comparison_flipped <- function(intervals_comparison) {
     return(cr < 0)
 }
 
-plot_intervals_comparison <- function(intervals_comparison, annot1 = NULL, annot2 = NULL, grid_resolution=100) {
+plot_intervals_comparison <- function(intervals_comparison, annotations = NULL, grid_resolution=100) {
     i12 <- intervals_comparison
 
     if (is_comparison_flipped(i12)) {
         i12$x2 <- 1 - i12$x2
     }
-
     # Set the plot parameters
-    plot(1, 1, xlim = c(0, 1), ylim = c(0, 1), type = "n", ann = FALSE, axes = FALSE)
+    plot(1, 1, xlim = c(0, 1), ylim = c(-0.02, 1.02), type = "n", ann = FALSE, axes = FALSE)
 
     segments(x0 = i12$x1, y0 = 1, x1 = i12$x1, y1 = 0.99, lwd = 1)
     text(x = i12$x1, y = 0.96, labels = round(i12$start / 1e+6, 3), srt = 90, adj = c(1, 0.5), xpd = TRUE, cex = 0.5)
@@ -221,5 +248,30 @@ plot_intervals_comparison <- function(intervals_comparison, annot1 = NULL, annot
     segments(x0 = i12$x1, y0 = 0.7, x1 = i12$x2, y1 = 0.27, lwd = 1, col=ifelse(1:length(i12$x1)%%round(grid_resolution/10)==0,"black","grey"))
     segments(x0 = i12$x2, y0 = 0.27, x1 = i12$x2, y1 = 0.25, lwd = 1, col=ifelse(1:length(i12$x1)%%round(grid_resolution/10)==0,"black","grey"))
     text(x = i12$x2[i12$x2 <= 1 & i12$x2 >= 0], y = 0.2, labels = round(i12$start1[i12$x2 <= 1 & i12$x2 >= 0] / 1e+6, 3), srt = 90, adj = c(1, 0.5), xpd = TRUE, cex = 0.5)
-    segments(x0 = i12$x2, y0 = 0, x1 = i12$x2, y1 = 0.01, lwd = 1)
+    segments(x0 = i12$x2, y0 = 0, x1 = i12$x2, y1 = 0.01, lwd = 1)    
+    if (!is.null(annotations)) {
+        annot1 = annotations[["annot1"]]
+        lifted_annot1 = annotations[["lifted_annot1"]]
+        annot1_colors = annotations[["annot1_colors"]]
+        annot2 = annotations[["annot2"]]
+        lifted_annot2 = annotations[["lifted_annot2"]]
+        annot2_colors = annotations[["annot2_colors"]]
+        if (is_comparison_flipped(i12)) {
+            annot2$x2 <- 1 - annot2$x2
+            lifted_annot1$x2 <- 1 - lifted_annot1$x2
+        }
+        points(
+            x = c(annot1$x1, lifted_annot2$x1),
+            y = c(rnorm(nrow(annot1), sd = 0.001) + 1.019, rnorm(nrow(lifted_annot2), sd = 0.001) + 0.981),
+            col = c(annot1_colors, annot2_colors), 
+            pch = 3, cex = 0.5
+        )
+        points(
+            x = c(annot2$x2, lifted_annot1$x2),
+            y = c(rnorm(nrow(annot2), sd = 0.001) - 0.019, rnorm(nrow(lifted_annot1), sd = 0.001) + 0.019),
+            col = c(annot2_colors, annot1_colors),
+            pch = 3, cex = 0.5
+        )
+
+    }
 }
