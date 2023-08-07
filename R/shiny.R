@@ -118,7 +118,8 @@ app_ui <- function(request) {
                 shinycssloaders::withSpinner(
                     plotOutput(
                         "region_plot",
-                        height = "40vh",
+                        height = "400px",
+                        width = "2048px",
                         brush = brushOpts(
                             id = "region_brush",
                             direction = "x",
@@ -130,13 +131,15 @@ app_ui <- function(request) {
                 shinycssloaders::withSpinner(
                     plotOutput(
                         "comparison_plot",
-                        height = "20vh"
+                        width = "2062px",
+                        height = "200px"
                     )
                 ),
                 shinycssloaders::withSpinner(
                     plotOutput(
                         "region_plot2",
-                        height = "40vh"
+                        width = "2048px",
+                        height = "400px"
                     )
                 )
             )
@@ -331,6 +334,7 @@ app_server <- function(input, output, session) {
 
             layout(matrix(2:1, nrow = 1), w = c(1, 20))
             par(mar = c(0, 0, 0, 2))
+            par(xaxs="i")
             plot_intervals_comparison(
                 intervals_comparison(),
                 annot1 = shiny_annotations1,
@@ -368,6 +372,7 @@ app_server <- function(input, output, session) {
             mct_plot_region(
                 shiny_mct2, intervals2(),
                 detect_dca = input$detect_dca %||% FALSE,
+                downsample = FALSE,
                 gene_annot = TRUE,
                 hc = shiny_hc2,
                 peak_lf_thresh1 = input$dca_peak_lf_thresh,
