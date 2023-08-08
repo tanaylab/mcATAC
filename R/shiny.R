@@ -510,6 +510,8 @@ run_app <- function(mct,
                     launch.browser = FALSE,
                     chain = NULL,
                     chain2 = NULL,
+                    genome1 = NULL,
+                    genome2 = NULL,
                     annotations1 = NULL,
                     annotations2 = NULL) {
     library(misha)
@@ -524,12 +526,12 @@ run_app <- function(mct,
 
     chain_1_to_2 <<- NULL
     if (!is.null(chain)) {
-        chain_1_to_2 <<- load_chain(chain)
+        chain_1_to_2 <<- load_chain(chain, genome1=genome1, genome2=genome2)
     }
 
     chain_2_to_1 <<- NULL
     if (!is.null(chain2)) {
-        chain_2_to_1 <<- load_chain(chain2)
+        chain_2_to_1 <<- load_chain(chain2, genome1=genome2, genome2=genome1)
     }
 
     shiny_annotations1 <<- annotations1

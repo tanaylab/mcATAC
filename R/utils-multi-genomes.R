@@ -106,36 +106,40 @@ translate_intervals <- function(intervals, chain, chainscore = NULL) {
     if (is.null(chainscore)) {
         chainscore <- max(lifted_list$cont$chainscore)
     }
-
-    lifted_list$cont %>%
-        filter(chainscore == !!chainscore) %>%
-        select(chrom = seqnames, start, end, row_ID) %>%
-        as.data.frame() %>%
-        select(chrom, start, end, everything())
+    gset_genome(chain@metadata[["genome2"]])
+    ff_lifted_list = gintervals.force_range(
+        lifted_list$cont %>%
+            filter(chainscore == !!chainscore) %>%
+            select(chrom = seqnames, start, end, row_ID) %>%
+            as.data.frame() %>%
+            select(chrom, start, end, everything())
+        )
+    gset_genome(chain@metadata[["genome1"]])
+    ff_lifted_list
 }
 
 translate_and_center <- function(intervals, chain, chainscore = NULL) {
     r <- regioneR::toGRanges(intervals)
     lifted_list <- custom_lift2(r, chain)
-
     if (!is.null(chainscore)) {
-        intervs2 <- lifted_list$cont %>%
-            filter(chainscore == !!chainscore) %>%
-            select(chrom = seqnames, start, end) %>%
-            as.data.frame()
+        intervs2 = lifted_list$cont %>%
+        filter(chainscore == !!chainscore) %>%
+        select(chrom = seqnames, start, end) %>%
+        as.data.frame()
     } else {
-        intervs2 <- lifted_list$cont %>%
+        intervs2 = lifted_list$cont %>%
             arrange(desc(chainscore)) %>%
             ungroup() %>%
             slice(1) %>%
             select(chrom = seqnames, start, end) %>%
             as.data.frame()
-    }
-
+    }    
     expand <- round(abs(intervals$end - intervals$start) / 2)
     intervs2 <- misha.ext::gintervals.centers(intervs2) %>%
         mutate(start = start - expand, end = end + expand)
-
+    gset_genome(chain@metadata[["genome2"]])
+    intervs2 = gintervals.force_range(intervs2)
+    gset_genome(chain@metadata[["genome1"]])
     return(intervs2)
 }
 
@@ -150,10 +154,11 @@ orth_one_per_element <- function(comparison_obj, width = 10) {
     comparison_obj[, 1:6]
 }
 
-load_chain <- function(chain) {
+load_chain <- function(chain, genome1=NULL, genome2=NULL) {
     if (is.character(chain)) {
-        cli::cli_alert_info("Loading chain {.file {chain}}")
+        cli::cli_alert_info("Loading {genome1}->{genome2} chain {.file {chain}}")
         chain <<- rtracklayer::import.chain(chain)
+        chain@metadata = list(genome1=genome1, genome2=genome2)
         cli::cli_alert_success("Loaded chain {.file {chain}} successfully")
     }
 
