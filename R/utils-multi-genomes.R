@@ -106,18 +106,21 @@ translate_intervals <- function(intervals, chain, chainscore = NULL) {
     if (is.null(chainscore)) {
         chainscore <- max(lifted_list$cont$chainscore)
     }
-
-    lifted_list$cont %>%
-        filter(chainscore == !!chainscore) %>%
-        select(chrom = seqnames, start, end, row_ID) %>%
-        as.data.frame() %>%
-        select(chrom, start, end, everything())
+    gset_genome(chain@metadata[["genome2"]])
+    ff_lifted_list <- gintervals.force_range(
+        lifted_list$cont %>%
+            filter(chainscore == !!chainscore) %>%
+            select(chrom = seqnames, start, end, row_ID) %>%
+            as.data.frame() %>%
+            select(chrom, start, end, everything())
+    )
+    gset_genome(chain@metadata[["genome1"]])
+    ff_lifted_list
 }
 
 translate_and_center <- function(intervals, chain, chainscore = NULL) {
     r <- regioneR::toGRanges(intervals)
     lifted_list <- custom_lift2(r, chain)
-
     if (!is.null(chainscore)) {
         intervs2 <- lifted_list$cont %>%
             filter(chainscore == !!chainscore) %>%
@@ -131,11 +134,12 @@ translate_and_center <- function(intervals, chain, chainscore = NULL) {
             select(chrom = seqnames, start, end) %>%
             as.data.frame()
     }
-
     expand <- round(abs(intervals$end - intervals$start) / 2)
     intervs2 <- misha.ext::gintervals.centers(intervs2) %>%
         mutate(start = start - expand, end = end + expand)
-
+    gset_genome(chain@metadata[["genome2"]])
+    intervs2 <- gintervals.force_range(intervs2)
+    gset_genome(chain@metadata[["genome1"]])
     return(intervs2)
 }
 
@@ -150,17 +154,19 @@ orth_one_per_element <- function(comparison_obj, width = 10) {
     comparison_obj[, 1:6]
 }
 
-load_chain <- function(chain) {
+load_chain <- function(chain, genome1 = NULL, genome2 = NULL) {
     if (is.character(chain)) {
-        cli::cli_alert_info("Loading chain {.file {chain}}")
-        chain <<- rtracklayer::import.chain(chain)
+        cli::cli_alert_info("Loading {genome1}->{genome2} chain {.file {chain}}")
+        chain <- rtracklayer::import.chain(chain)
         cli::cli_alert_success("Loaded chain {.file {chain}} successfully")
     }
+
+    chain@metadata <- list(genome1 = genome1, genome2 = genome2)
 
     return(chain)
 }
 
-compute_annotation_comparison <- function(annot1, annot2, intervals, intervals2, chain_1_to_2, chain_2_to_1, selected_chain_chainscore=NULL){
+compute_annotation_comparison <- function(annot1, annot2, intervals, intervals2, chain_1_to_2, chain_2_to_1, selected_chain_chainscore = NULL) {
     annot1 <- annot1 %>%
         gintervals.neighbors1(intervals) %>%
         filter(dist == 0)
@@ -179,16 +185,17 @@ compute_annotation_comparison <- function(annot1, annot2, intervals, intervals2,
     lifted_annot2 <- translate_intervals(as.data.frame(annot2), chain = chain_2_to_1, chainscore = selected_chain_chainscore) %>%
         arrange(row_ID)
     list(
-         annot1=annot1 %>% mutate(x1 = (start - intervals$start) / (intervals$end - intervals$start)), 
-         lifted_annot1=lifted_annot1 %>% mutate(x2 = (start - intervals2$start) / (intervals2$end - intervals2$start)), 
-         annot1_colors=annot1_colors, 
-         annot2=annot2 %>% mutate(x2 = (start - intervals2$start) / (intervals2$end - intervals2$start)), 
-         lifted_annot2=lifted_annot2 %>% mutate(x1 = (start - intervals$start) / (intervals$end - intervals$start)), 
-         annot2_colors=annot2_colors)
+        annot1 = annot1 %>% mutate(x1 = (start - intervals$start) / (intervals$end - intervals$start)),
+        lifted_annot1 = lifted_annot1 %>% mutate(x2 = (start - intervals2$start) / (intervals2$end - intervals2$start)),
+        annot1_colors = annot1_colors,
+        annot2 = annot2 %>% mutate(x2 = (start - intervals2$start) / (intervals2$end - intervals2$start)),
+        lifted_annot2 = lifted_annot2 %>% mutate(x1 = (start - intervals$start) / (intervals$end - intervals$start)),
+        annot2_colors = annot2_colors
+    )
 }
 
 
-compute_intervals_comparison <- function(intervals, intervals2, chain, chainscore = NULL, grid_resolution=100) {
+compute_intervals_comparison <- function(intervals, intervals2, chain, chainscore = NULL, grid_resolution = 100) {
     grid_resolution <- round((intervals$end - intervals$start) / grid_resolution)
 
     # create a grid iterator for the first intervals set
@@ -233,7 +240,7 @@ is_comparison_flipped <- function(intervals_comparison) {
     return(cr < 0)
 }
 
-plot_intervals_comparison <- function(intervals_comparison, annotations = NULL, grid_resolution=100) {
+plot_intervals_comparison <- function(intervals_comparison, annotations = NULL, grid_resolution = 100) {
     i12 <- intervals_comparison
 
     if (is_comparison_flipped(i12)) {
@@ -244,18 +251,18 @@ plot_intervals_comparison <- function(intervals_comparison, annotations = NULL, 
 
     segments(x0 = i12$x1, y0 = 1, x1 = i12$x1, y1 = 0.99, lwd = 1)
     text(x = i12$x1, y = 0.96, labels = round(i12$start / 1e+6, 3), srt = 90, adj = c(1, 0.5), xpd = TRUE, cex = 0.5)
-    segments(x0 = i12$x1, y0 = 0.75, x1 = i12$x1, y1 = 0.7, lwd = 1, col=ifelse(1:length(i12$x1)%%round(grid_resolution/10)==0,"black","grey"))
-    segments(x0 = i12$x1, y0 = 0.7, x1 = i12$x2, y1 = 0.27, lwd = 1, col=ifelse(1:length(i12$x1)%%round(grid_resolution/10)==0,"black","grey"))
-    segments(x0 = i12$x2, y0 = 0.27, x1 = i12$x2, y1 = 0.25, lwd = 1, col=ifelse(1:length(i12$x1)%%round(grid_resolution/10)==0,"black","grey"))
+    segments(x0 = i12$x1, y0 = 0.75, x1 = i12$x1, y1 = 0.7, lwd = 1, col = ifelse(1:length(i12$x1) %% round(grid_resolution / 10) == 0, "black", "grey"))
+    segments(x0 = i12$x1, y0 = 0.7, x1 = i12$x2, y1 = 0.27, lwd = 1, col = ifelse(1:length(i12$x1) %% round(grid_resolution / 10) == 0, "black", "grey"))
+    segments(x0 = i12$x2, y0 = 0.27, x1 = i12$x2, y1 = 0.25, lwd = 1, col = ifelse(1:length(i12$x1) %% round(grid_resolution / 10) == 0, "black", "grey"))
     text(x = i12$x2[i12$x2 <= 1 & i12$x2 >= 0], y = 0.2, labels = round(i12$start1[i12$x2 <= 1 & i12$x2 >= 0] / 1e+6, 3), srt = 90, adj = c(1, 0.5), xpd = TRUE, cex = 0.5)
-    segments(x0 = i12$x2, y0 = 0, x1 = i12$x2, y1 = 0.01, lwd = 1)    
+    segments(x0 = i12$x2, y0 = 0, x1 = i12$x2, y1 = 0.01, lwd = 1)
     if (!is.null(annotations)) {
-        annot1 = annotations[["annot1"]]
-        lifted_annot1 = annotations[["lifted_annot1"]]
-        annot1_colors = annotations[["annot1_colors"]]
-        annot2 = annotations[["annot2"]]
-        lifted_annot2 = annotations[["lifted_annot2"]]
-        annot2_colors = annotations[["annot2_colors"]]
+        annot1 <- annotations[["annot1"]]
+        lifted_annot1 <- annotations[["lifted_annot1"]]
+        annot1_colors <- annotations[["annot1_colors"]]
+        annot2 <- annotations[["annot2"]]
+        lifted_annot2 <- annotations[["lifted_annot2"]]
+        annot2_colors <- annotations[["annot2_colors"]]
         if (is_comparison_flipped(i12)) {
             annot2$x2 <- 1 - annot2$x2
             lifted_annot1$x2 <- 1 - lifted_annot1$x2
@@ -263,7 +270,7 @@ plot_intervals_comparison <- function(intervals_comparison, annotations = NULL, 
         points(
             x = c(annot1$x1, lifted_annot2$x1),
             y = c(rnorm(nrow(annot1), sd = 0.001) + 1.019, rnorm(nrow(lifted_annot2), sd = 0.001) + 0.981),
-            col = c(annot1_colors, annot2_colors), 
+            col = c(annot1_colors, annot2_colors),
             pch = 3, cex = 0.5
         )
         points(
@@ -272,6 +279,5 @@ plot_intervals_comparison <- function(intervals_comparison, annotations = NULL, 
             col = c(annot2_colors, annot1_colors),
             pch = 3, cex = 0.5
         )
-
     }
 }

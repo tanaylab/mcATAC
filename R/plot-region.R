@@ -202,13 +202,13 @@ plot_tss_strip <- function(intervals, flip = FALSE) {
     tss_df <- gintervals.neighbors1("intervs.global.tss", intervals) %>%
         filter(dist == 0) %>%
         arrange(chrom, start, end, strand, geneSymbol) %>%
-#        distinct(geneSymbol, strand, .keep_all = TRUE) %>%
+        #        distinct(geneSymbol, strand, .keep_all = TRUE) %>%
         select(chrom, tss = start, strand, gene = geneSymbol)
 
     if (flip) {
         # flip the coordinates relative to the start end end of the intervals
         tss_df$tss <- intervals$end - tss_df$tss + intervals$start
-        tss_df$strand = -1*tss_df$strand
+        tss_df$strand <- -1 * tss_df$strand
     }
     if (nrow(tss_df) > 0) {
         text(x = tss_df$tss, y = rep(0.35, length(tss_df$tss)), labels = tss_df$gene, las = 1, cex = 1)

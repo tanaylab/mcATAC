@@ -321,7 +321,7 @@ app_server <- function(input, output, session) {
         req(intervals2())
         req(chain_1_to_2)
         req(chain_2_to_1)
-        i12 <- compute_intervals_comparison(intervals(), intervals2(), chain_1_to_2, chainscore = NULL, grid_resolution=100)
+        i12 <- compute_intervals_comparison(intervals(), intervals2(), chain_1_to_2, chainscore = NULL, grid_resolution = 100)
         intervals_comparison(i12)
     })
 
@@ -336,11 +336,11 @@ app_server <- function(input, output, session) {
             gset_genome(mct@genome)
             layout(matrix(2:1, nrow = 1), w = c(1, 20))
             par(mar = c(0, 0, 0, 2))
-            par(xaxs="i")
+            par(xaxs = "i")
             plot_intervals_comparison(
                 intervals_comparison(),
-                annotations = compute_annotation_comparison(shiny_annotations1, shiny_annotations2, intervals(), intervals2(), chain_1_to_2, chain_2_to_1, selected_chain_chainscore=NULL),
-                grid_resolution=100
+                annotations = compute_annotation_comparison(shiny_annotations1, shiny_annotations2, intervals(), intervals2(), chain_1_to_2, chain_2_to_1, selected_chain_chainscore = NULL),
+                grid_resolution = 100
             )
         },
         res = 96
@@ -524,12 +524,18 @@ run_app <- function(mct,
 
     chain_1_to_2 <<- NULL
     if (!is.null(chain)) {
-        chain_1_to_2 <<- load_chain(chain)
+        if (is.null(mct2)) {
+            cli_abort("Please provide mct2 when providing chain")
+        }
+        chain_1_to_2 <<- load_chain(chain, genome1 = mct@genome, genome2 = mct2@genome)
     }
 
     chain_2_to_1 <<- NULL
     if (!is.null(chain2)) {
-        chain_2_to_1 <<- load_chain(chain2)
+        if (is.null(mct2)) {
+            cli_abort("Please provide mct2 when providing chain")
+        }
+        chain_2_to_1 <<- load_chain(chain2, genome1 = mct2@genome, genome2 = mct@genome)
     }
 
     shiny_annotations1 <<- annotations1
