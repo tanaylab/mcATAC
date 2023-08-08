@@ -122,12 +122,12 @@ translate_and_center <- function(intervals, chain, chainscore = NULL) {
     r <- regioneR::toGRanges(intervals)
     lifted_list <- custom_lift2(r, chain)
     if (!is.null(chainscore)) {
-        intervs2 <- lifted_list$cont %>%
-            filter(chainscore == !!chainscore) %>%
-            select(chrom = seqnames, start, end) %>%
-            as.data.frame()
+        intervs2 = lifted_list$cont %>%
+        filter(chainscore == !!chainscore) %>%
+        select(chrom = seqnames, start, end) %>%
+        as.data.frame()
     } else {
-        intervs2 <- lifted_list$cont %>%
+        intervs2 = lifted_list$cont %>%
             arrange(desc(chainscore)) %>%
             ungroup() %>%
             slice(1) %>%
