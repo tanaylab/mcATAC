@@ -72,9 +72,10 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
         dca_mat <- mct_diff_access_on_hc(mat, hc = hc, ...)
         dca_mat <- dca_mat[, hc$order, drop = FALSE]
     }
-
+    y_seps <- NULL
     if (!is.null(hc)) {
         mat <- mat[, hc$order, drop = FALSE]
+        y_seps = cutree(hc, h=0.1)
     }
 
     if (has_cell_type(mct) && has_cell_type_colors(mct)) {
@@ -83,8 +84,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
     } else {
         mc_colors <- NULL
     }
-
-    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels, genome = mct@genome, plot_x_axis_ticks = plot_x_axis_ticks, gene_annot_pos = gene_annot_pos, flip = flip)
+    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, y_seps=y_seps, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels, genome = mct@genome, plot_x_axis_ticks = plot_x_axis_ticks, gene_annot_pos = gene_annot_pos, flip = flip)
 }
 
 #' Plot a genomic region given a matrix
@@ -104,7 +104,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 #' @param flip whether to flip the coordinates (optional)
 #'
 #' @export
-plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE, genome = NULL, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE) {
+plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, y_seps=NULL, y_seps_lty=2, y_seps_lwd=1, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE, genome = NULL, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE) {
     mat_smooth <- RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
 
     if (gene_annot) {
@@ -128,12 +128,11 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
             par(mar = c(0, 0, 0, 2))
         }
         gene_annots <- make_gene_annot(intervals, resolution, genome)
-
+        
         if (is.null(gene_annots[["exon_coords"]])) {
             image(as.matrix(rep(0, ncol(mat)), nrow = 1), col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
         } else {
             exon_mat <- t(as.matrix(gene_annots[["exon_coords"]]))
-
             if (flip) {
                 exon_mat <- exon_mat[, ncol(exon_mat):1, drop = FALSE]
             }
@@ -170,7 +169,7 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
     if (flip) {
         mat_smooth <- mat_smooth[nrow(mat_smooth):1, , drop = FALSE]
     }
-    image(mat_smooth, col = shades, breaks = shades_breaks, yaxt = "n", xaxt = "n")
+    image(mat_smooth, col = shades, breaks = shades_breaks, yaxt = "n", xaxt = "n", ylim=c(0,1))
     if (!is.null(intervals) && plot_x_axis_ticks) {
         axis(1, at = seq(0, 1, l = 11), round(seq(intervals$start[1], intervals$end[1], l = 11) / 1e+6, 3), las = 2)
     }
@@ -184,6 +183,13 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
             dca_mat <- dca_mat[nrow(dca_mat):1, , drop = FALSE]
         }
         image(dca_mat, col = dca_cols, add = TRUE, breaks = c(-3, -1.5, -0.5, 0.5, 1.5, 3))
+    }
+    if (!is.null(y_seps)){
+        n = length(colnames(mat_smooth))
+        a = y_seps[colnames(mat_smooth)]
+        y_seps = unname(sapply(split(seq_along(a), a),max))+1
+        y_bords = seq(0, 1, length=n+1)[y_seps]
+        abline(h=y_bords, lty=y_seps_lty, lwd = y_seps_lwd, add=TRUE, ylim = c(0, 1), col="grey")
     }
 }
 
@@ -265,7 +271,7 @@ extend_dca_mat <- function(dca_mat, n_peak_smooth) {
 #' \code{peak_lf_thresh1}, and a value of 2 means the log fold change was above \code{peak_lf_thresh2}. The same with -1 and -2 for troughs.
 #'
 #' @export
-mct_diff_access_on_hc <- function(mat, hc, sz_frac_for_peak = 0.25, u_reg = 4, peak_lf_thresh1 = 1.2, peak_lf_thresh2 = 2, trough_lf_thresh1 = -1, trough_lf_thresh2 = -2) {
+mct_diff_access_on_hc <- function(mat, hc, sz_frac_for_peak = 0.25, u_reg = 4, peak_lf_thresh1 = 1.2, peak_lf_thresh2 = 2, trough_lf_thresh1 = -1, trough_lf_thresh2 = -2, ...) {
     if (length(hc$order) != ncol(mat)) {
         cli_abort("The number of metacells in the matrix and the hclust object do not match.")
     }
