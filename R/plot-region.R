@@ -169,7 +169,7 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
     if (flip) {
         mat_smooth <- mat_smooth[nrow(mat_smooth):1, , drop = FALSE]
     }
-    image(mat_smooth, col = shades, breaks = shades_breaks, yaxt = "n", xaxt = "n", ylim=c(0,1))
+    image(mat_smooth, col = shades, breaks = shades_breaks, yaxt = "n", xaxt = "n")
     if (!is.null(intervals) && plot_x_axis_ticks) {
         axis(1, at = seq(0, 1, l = 11), round(seq(intervals$start[1], intervals$end[1], l = 11) / 1e+6, 3), las = 2)
     }
@@ -188,8 +188,8 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
         n = length(colnames(mat_smooth))
         a = y_seps[colnames(mat_smooth)]
         y_seps = unname(sapply(split(seq_along(a), a),max))+1
-        y_bords = seq(0, 1, length=n+1)[y_seps]
-        abline(h=y_bords, lty=y_seps_lty, lwd = y_seps_lwd, add=TRUE, ylim = c(0, 1), col="grey")
+        y_bords = seq(-1/(2*(n-1)), 1+1/(2*(n-1)), length=n+1)[y_seps]
+        abline(h=y_bords, lty=y_seps_lty, lwd = y_seps_lwd, add=TRUE, col="grey")
     }
 }
 
