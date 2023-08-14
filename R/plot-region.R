@@ -38,7 +38,7 @@
 #' }
 #'
 #' @export
-mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, ...) {
+mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, genes_correlations = NULL, cor_colors=c("blue", "white", "white", "white", "red"), cor_color_breaks=c(-1,-0.05, 0, 0.05, 1), roll_mean = FALSE, ...) {
     gset_genome(mct@genome)
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
@@ -84,7 +84,24 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
     } else {
         mc_colors <- NULL
     }
-    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, y_seps=y_seps, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels, genome = mct@genome, plot_x_axis_ticks = plot_x_axis_ticks, gene_annot_pos = gene_annot_pos, flip = flip)
+    if (!is.null(genes_correlations) && has_rna(mct)){
+        overlapping_types = intersect(colnames(mct@rna_egc), colnames(mat))
+        atac_egc = t(t(mat)/colSums(mat))
+        atac_legc = log2(1e-5+atac_egc)
+        rna_legc = log2(1e-5+mct@rna_egc)
+        cors = tgstat::tgs_cor(
+            t(atac_legc[,overlapping_types]), 
+            t(rna_legc[toupper(genes_correlations),overlapping_types,drop=FALSE]), 
+            pairwise.complete.obs = T
+        )
+        mat = cors
+        mc_colors = rep("white", length(genes_correlations))
+        colors = cor_colors
+        color_breaks = cor_color_breaks
+        y_seps <- NULL
+        dca_mat <- NULL
+    }
+    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, y_seps=y_seps, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels, genome = mct@genome, plot_x_axis_ticks = plot_x_axis_ticks, gene_annot_pos = gene_annot_pos, roll_mean = roll_mean, flip = flip)
 }
 
 #' Plot a genomic region given a matrix
@@ -98,21 +115,23 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 #' @param dca_mat a matrix with the differential cluster accessibility (DCA) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.
 #' @param n_smooth number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell (optional). Default is 20.
 #' @param n_pixels number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)} (optional).
-#' @param gene_annot whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory. (optional)
 #' @param gene_annot whether to add gene annotations; these annotations rely on the existence of the existence of an intervals set called "intervs.global.tss" and "intervs.global.exon" in the genome's misha directory. (optional)
 #' @param genome the genome to use for the gene annotations (optional)
 #' @param gene_annot_pos the position of the gene annotations ("top" or "bottom")
 #' @param flip whether to flip the coordinates (optional)
 #'
 #' @export
-plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, y_seps=NULL, y_seps_lty=2, y_seps_lwd=1, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE, genome = NULL, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE) {
-    mat_smooth <- RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
+plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, y_seps=NULL, y_seps_lty=2, y_seps_lwd=1, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE, genome = NULL, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, roll_mean=FALSE) {
+    if(roll_mean){
+        mat_smooth <- RcppRoll::roll_mean(mat, n = n_smooth, fill = c(0, 0, 0))
+    } else {
+        mat_smooth <- RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
+    }
 
     if (gene_annot) {
         if (is.null(intervals) || is.null(resolution)) {
             cli_abort("If gene annotations are requested, intervals and resolution must be specified")
         }
-        layout(cbind(c(0, 0, 3), c(1, 2, 4)), widths = c(1, 20), heights = c(3, 0.5, 15))
 
         # Different layouts depending on annotation position
         if (gene_annot_pos == "top") {
@@ -123,9 +142,7 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 
         par(mar = c(0, 0, 2, 2))
         plot_tss_strip(intervals, flip = flip)
-
-        par(mar = c(0, 0, 0, 2))
-        gene_annots <- make_gene_annot(intervals, resolution)
+        
         if (gene_annot_pos == "top") {
             par(mar = c(0, 0, 0, 2))
         } else {
@@ -136,10 +153,9 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
         if (is.null(gene_annots[["exon_coords"]])) {
             image(as.matrix(rep(0, ncol(mat)), nrow = 1), col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
         } else {
-            image(as.matrix(gene_annots[["exon_coords"]], nrow = 1), col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
-            exon_mat <- t(as.matrix(gene_annots[["exon_coords"]]))
+            exon_mat <- as.matrix(gene_annots[["exon_coords"]])
             if (flip) {
-                exon_mat <- exon_mat[, ncol(exon_mat):1, drop = FALSE]
+                exon_mat <- exon_mat[nrow(exon_mat):1,, drop = FALSE]
             }
 
             image(exon_mat, col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
@@ -148,13 +164,12 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
         top_mar <- 0
         left_mar <- 2
     } else {
+        #par(mar = c(0,0,0,0))
         layout(matrix(1:2, nrow = 1), w = c(1, 20))
-        top_mar <- 2
+        top_mar <- 0
         left_mar <- 2
     }
 
-    par(mar = c(4, left_mar, top_mar, 0))
-    image(t(as.matrix(1:length(mc_colors), nrow = 1)), col = mc_colors, yaxt = "n", xaxt = "n")
     if (plot_x_axis_ticks && gene_annot_pos == "bottom") {
         plot_x_axis_ticks <- FALSE
         cli_alert_warning("Gene annotations are at the bottom, so x-axis ticks are disabled.")
