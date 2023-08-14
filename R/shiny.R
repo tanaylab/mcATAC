@@ -119,7 +119,8 @@ app_ui <- function(request) {
                     plotOutput(
                         "region_plot",
                         height = "400px",
-                        width = "2048px",
+                        width = "2060px",
+                        fill=FALSE,
                         brush = brushOpts(
                             id = "region_brush",
                             direction = "x",
@@ -130,16 +131,34 @@ app_ui <- function(request) {
                 ),
                 shinycssloaders::withSpinner(
                     plotOutput(
+                        "region_plot_cor",
+                        height = "20px",
+                        width = "2067px",
+                        fill=FALSE
+                    )
+                ),
+                shinycssloaders::withSpinner(
+                    plotOutput(
                         "comparison_plot",
-                        width = "2062px",
-                        height = "200px"
+                        width = "2070px",
+                        height = "200px",
+                        fill=FALSE
+                    )
+                ),
+                shinycssloaders::withSpinner(
+                    plotOutput(
+                        "region_plot_cor2",
+                        width = "2067px",
+                        height = "20px",
+                        fill=FALSE
                     )
                 ),
                 shinycssloaders::withSpinner(
                     plotOutput(
                         "region_plot2",
-                        width = "2048px",
-                        height = "400px"
+                        width = "2060px",
+                        height = "400px",
+                        fill=FALSE
                     )
                 )
             )
@@ -302,6 +321,56 @@ app_server <- function(input, output, session) {
             input$max_color,
             input$n_smooth
         )
+    output$region_plot_cor <- renderPlot(
+        {
+            req(intervals())
+            req(input$dca_peak_lf_thresh)
+            req(input$dca_trough_lf_thresh)
+            req(input$dca_sz_frac_for_peak)
+            req(input$min_color)
+            req(input$max_color)
+            req(input$min_color < input$max_color)
+            req(input$n_smooth)
+            req(input$n_smooth >= 1)
+            color_breaks <- c(0, seq(
+                input$min_color,
+                input$max_color,
+                length.out = 4
+            ))
+
+            n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
+
+            mct_plot_region(
+                shiny_mct, intervals(),
+                downsample = TRUE,
+                downsample_n = 1500000,
+                detect_dca = input$detect_dca %||% FALSE,
+                gene_annot = FALSE,
+                hc = NULL,
+                peak_lf_thresh1 = input$dca_peak_lf_thresh,
+                trough_lf_thresh1 = input$dca_trough_lf_thresh,
+                sz_frac_for_peak = input$dca_sz_frac_for_peak,
+                color_breaks = color_breaks,
+                n_smooth = 1,
+                plot_x_axis_ticks = FALSE,
+                roll_mean = TRUE,
+                genes_correlations = promoters[promoters$coords==input$genes,]$geneSymbol,
+                cor_color_breaks=c(-0.8, -0.4, 0, 0.4, 0.8),
+                cor_colors = c("blue","white","white","white","red")
+            )
+        },
+        res = 96
+    ) %>%
+        bindCache(
+            intervals(),
+            input$detect_dca,
+            input$dca_peak_lf_thresh,
+            input$dca_trough_lf_thresh,
+            input$dca_sz_frac_for_peak,
+            input$min_color,
+            input$max_color,
+            input$n_smooth
+        )
 
     observe({
         req(intervals())
@@ -346,7 +415,62 @@ app_server <- function(input, output, session) {
         res = 96
     )
 
+    output$region_plot_cor2 <- renderPlot(
+        {
+            req(intervals())
+            req(intervals2())
+            req(intervals_comparison())
+            req(shiny_mct2)
+            req(input$dca_peak_lf_thresh)
+            req(input$dca_trough_lf_thresh)
+            req(input$dca_sz_frac_for_peak)
+            req(input$min_color)
+            req(input$max_color)
+            req(input$min_color < input$max_color)
+            req(input$n_smooth)
+            req(input$n_smooth >= 1)
+            color_breaks <- c(0, seq(
+                input$min_color,
+                input$max_color,
+                length.out = 4
+            ))
 
+            n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
+            
+            mct_plot_region(
+                shiny_mct2, intervals2(),
+                downsample = TRUE,
+                downsample_n = 1500000,
+                detect_dca = input$detect_dca %||% FALSE,
+                gene_annot = FALSE,
+                hc = NULL,
+                peak_lf_thresh1 = input$dca_peak_lf_thresh,
+                trough_lf_thresh1 = input$dca_trough_lf_thresh,
+                sz_frac_for_peak = input$dca_sz_frac_for_peak,
+                color_breaks = color_breaks,
+                n_smooth = 1,
+                plot_x_axis_ticks = FALSE,
+                genes_correlations = toupper(promoters[promoters$coords==input$genes,]$geneSymbol),
+                roll_mean = TRUE,
+                flip = is_comparison_flipped(intervals_comparison()),
+                cor_color_breaks=c(-0.8, -0.4, 0, 0.4, 0.8),
+                cor_colors = c("blue","white","white","white","red")
+            )
+
+            gset_genome(mct@genome)
+        },
+        res = 96
+    ) %>%
+        bindCache(
+            intervals2(),
+            input$detect_dca,
+            input$dca_peak_lf_thresh,
+            input$dca_trough_lf_thresh,
+            input$dca_sz_frac_for_peak,
+            input$min_color,
+            input$max_color,
+            input$n_smooth
+        )
 
     output$region_plot2 <- renderPlot(
         {
@@ -372,9 +496,9 @@ app_server <- function(input, output, session) {
 
             mct_plot_region(
                 shiny_mct2, intervals2(),
-                detect_dca = input$detect_dca %||% FALSE,
                 downsample = TRUE,
                 downsample_n = 2500000,
+                detect_dca = input$detect_dca %||% FALSE,
                 gene_annot = TRUE,
                 hc = shiny_hc2,
                 peak_lf_thresh1 = input$dca_peak_lf_thresh,
@@ -383,9 +507,9 @@ app_server <- function(input, output, session) {
                 color_breaks = color_breaks,
                 n_smooth = n_smooth,
                 gene_annot_pos = "bottom",
-                flip = is_comparison_flipped(intervals_comparison())
+                flip = is_comparison_flipped(intervals_comparison()),
+                plot_x_axis_ticks = FALSE
             )
-
             gset_genome(mct@genome)
         },
         res = 96
@@ -400,7 +524,6 @@ app_server <- function(input, output, session) {
             input$max_color,
             input$n_smooth
         )
-
     output$current_coords <- renderText({
         if (is.null(intervals())) {
             return("Please enter valid genomic coordinates (e.g. \"chr3:34300000-35000020\")")
@@ -446,7 +569,6 @@ app_server <- function(input, output, session) {
             select(chrom, start, end)
         update_intervals(zoom_intervals)
     })
-
     observe({
         shinyjs::toggle(id = "dca_peak_lf_thresh", condition = input$detect_dca && input$show_controls)
         shinyjs::toggle(id = "dca_trough_lf_thresh", condition = input$detect_dca && input$show_controls)

@@ -240,7 +240,7 @@ is_comparison_flipped <- function(intervals_comparison) {
     return(cr < 0)
 }
 
-plot_intervals_comparison <- function(intervals_comparison, annotations = NULL, grid_resolution = 100) {
+plot_intervals_comparison <- function(intervals_comparison, annotations = NULL, correlations = NULL, grid_resolution = 100) {
     i12 <- intervals_comparison
 
     if (is_comparison_flipped(i12)) {
@@ -256,6 +256,8 @@ plot_intervals_comparison <- function(intervals_comparison, annotations = NULL, 
     segments(x0 = i12$x2, y0 = 0.27, x1 = i12$x2, y1 = 0.25, lwd = 1, col = ifelse(1:length(i12$x1) %% round(grid_resolution / 10) == 0, "black", "grey"))
     text(x = i12$x2[i12$x2 <= 1 & i12$x2 >= 0], y = 0.2, labels = round(i12$start1[i12$x2 <= 1 & i12$x2 >= 0] / 1e+6, 3), srt = 90, adj = c(1, 0.5), xpd = TRUE, cex = 0.5)
     segments(x0 = i12$x2, y0 = 0, x1 = i12$x2, y1 = 0.01, lwd = 1)
+    if (!is.null(correlations)) {
+    }
     if (!is.null(annotations)) {
         annot1 <- annotations[["annot1"]]
         lifted_annot1 <- annotations[["lifted_annot1"]]
@@ -271,13 +273,13 @@ plot_intervals_comparison <- function(intervals_comparison, annotations = NULL, 
             x = c(annot1$x1, lifted_annot2$x1),
             y = c(rnorm(nrow(annot1), sd = 0.001) + 1.019, rnorm(nrow(lifted_annot2), sd = 0.001) + 0.981),
             col = c(annot1_colors, annot2_colors),
-            pch = 3, cex = 0.5
+            pch = 3, cex = 1
         )
         points(
             x = c(annot2$x2, lifted_annot1$x2),
             y = c(rnorm(nrow(annot2), sd = 0.001) - 0.019, rnorm(nrow(lifted_annot1), sd = 0.001) + 0.019),
             col = c(annot2_colors, annot1_colors),
-            pch = 3, cex = 0.5
+            pch = 3, cex = 1
         )
     }
 }
