@@ -390,21 +390,53 @@ app_server <- function(input, output, session) {
         req(hover)
 
         # convert y to metacell 
-        mc <- mct@metacells[1]
+        gset_genome(mct@genome)
+        raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
+        if (!is.null(metacells)) {
+            if (any(metacells %!in% mct@metacells)) {
+                cli_abort("The following metacells are not in the McTracks object: {.val {metacells}}")
+            }
+            raw_mat <- raw_mat[, intersect(metacells, colnames(raw_mat)), drop = FALSE]
+        }
+    
+        mat <- raw_mat[, intersect(mct@metacells[mct@order], colnames(raw_mat)), drop = FALSE]
+    
+        if (detect_dca && is.null(hc)) {
+            if (!has_rna(mct)) {
+                cli_abort("Cannot detect DCA without either an hclust object or RNA data.")
+            }
+            mct <- mct_subset_metacells(mct, colnames(mat))
+            hc <- mc_hclust_rna(mct, force_cell_type = force_cell_type)
+        }
+    
+        if (!is.null(hc)) {
+            if (any(hc$label %!in% colnames(mat))) {
+                missing_mcs <- setdiff(hc$label, colnames(mat))
+                cli_warn("The following metacells are present in the hclust object, but are missing in the matrix (this is probably due to downsampling): {.val {missing_mcs}}")
+                hc <- dendextend::prune(hc, missing_mcs)
+            }
+            mat <- mat[, hc$label]
+        }
+
+        n = length(hc$label)
+        range_padding = 1/(2*(n-1))
+        mat_y = hover$y*(1+2*range_padding) - range_padding
+        mc_idx = hc$label[floor(mat_y*n)+1]
+        mc <- mct@metacells[mc_idx]
         mc_metadata <- mct@metadata %>% filter(metacell == mc) %>% slice(1)
         mc_color <- mc_metadata$color
         mc_cell_type <- mc_metadata$cell_type
-
+        message(round(mat_y*n), mc_idx, mc)
         # taken from https://gitlab.com/-/snippets/16220
         left_px <- hover$coords_css$x
         top_px <- hover$coords_css$y
         style <- glue(
-            "background-color: {grDevices::rgb(t(grDevices::col2rgb(mc_color) / 255))}; position:absolute; z-index:100; left: {left_px + 2}px; top: {top_px + 2}px;"
+            "background-color: {grDevices::rgb(t(grDevices::col2rgb(mc_color) / 255))}; position:absolute; z-index:100; left: {left_px + 2}px; top: {top_px + 150}px;"
         )
-        
         tooltip <- paste(
             glue("Metacell: {mc}"),
             glue("Cell type: {mc_cell_type}"),
+            style,
             sep = "<br/>"
         )
 
