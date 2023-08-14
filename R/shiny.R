@@ -120,6 +120,11 @@ app_ui <- function(request) {
                         "region_plot",
                         height = "50vh",
                         fill=FALSE,
+                        hover = hoverOpts(
+                            id = "region_hover",
+                            delayType = "throttle",
+                            delay = 250
+                        ),                                                
                         brush = brushOpts(
                             id = "region_brush",
                             direction = "x",
@@ -136,7 +141,8 @@ app_ui <- function(request) {
                     )
                 ),
                 )
-            )
+            ),
+            uiOutput("hover_info", style = "pointer-events: none")
         )
     )
 }
@@ -286,6 +292,7 @@ app_server <- function(input, output, session) {
             req(input$dca_peak_lf_thresh)
             req(input$dca_trough_lf_thresh)
             req(input$dca_sz_frac_for_peak)
+            req(has_rna(shiny_mct))
             req(input$min_color)
             req(input$max_color)
             req(input$min_color < input$max_color)
@@ -376,6 +383,36 @@ app_server <- function(input, output, session) {
             select(chrom, start, end)
         update_intervals(zoom_intervals)
     })
+
+    output$hover_info <- renderUI({
+
+        hover <- input$region_hover
+        req(hover)
+
+        # convert y to metacell 
+        mc <- mct@metacells[1]
+        mc_metadata <- mct@metadata %>% filter(metacell == mc) %>% slice(1)
+        mc_color <- mc_metadata$color
+        mc_cell_type <- mc_metadata$cell_type
+
+        # taken from https://gitlab.com/-/snippets/16220
+        left_px <- hover$coords_css$x
+        top_px <- hover$coords_css$y
+        style <- glue(
+            "background-color: {grDevices::rgb(t(grDevices::col2rgb(mc_color) / 255))}; position:absolute; z-index:100; left: {left_px + 2}px; top: {top_px + 2}px;"
+        )
+        
+        tooltip <- paste(
+            glue("Metacell: {mc}"),
+            glue("Cell type: {mc_cell_type}"),
+            sep = "<br/>"
+        )
+
+        wellPanel(
+            style = style,
+            p(HTML(tooltip))
+        )
+})
 
     observe({
         shinyjs::toggle(id = "dca_peak_lf_thresh", condition = input$detect_dca && input$show_controls)
