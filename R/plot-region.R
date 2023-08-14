@@ -135,12 +135,12 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 
         # Different layouts depending on annotation position
         if (gene_annot_pos == "top") {
-            layout(cbind(c(0, 0, 3), c(1, 2, 4)), widths = c(1, 20), heights = c(3, 0.5, 15))
+            layout(cbind(c(0, 0, 3), c(1, 2, 4)), widths = c(1, 20), heights = c(2, 0.5, 15))
         } else if (gene_annot_pos == "bottom") {
-            layout(cbind(c(3, 0, 0, 0), c(4, 1, 2, 0)), widths = c(1, 20), heights = c(15, 3, 0.5, 0.5))
+            layout(cbind(c(3, 0, 0, 0), c(4, 1, 2, 0)), widths = c(1, 20), heights = c(15, 2, 0.5, 0.5))
         }
 
-        par(mar = c(0, 0, 2, 2))
+        par(mar = c(0, 0, 1, 2))
         plot_tss_strip(intervals, flip = flip)
         
         if (gene_annot_pos == "top") {
