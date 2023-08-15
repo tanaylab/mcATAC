@@ -1,3 +1,34 @@
+get_raw_mat <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, genes_correlations = NULL, cor_colors=c("blue", "white", "white", "white", "red"), cor_color_breaks=c(-1,-0.05, 0, 0.05, 1), roll_mean = FALSE, ...) {
+    gset_genome(mct@genome)
+    raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
+    if (!is.null(metacells)) {
+        if (any(metacells %!in% mct@metacells)) {
+            cli_abort("The following metacells are not in the McTracks object: {.val {metacells}}")
+        }
+        raw_mat <- raw_mat[, intersect(metacells, colnames(raw_mat)), drop = FALSE]
+    }
+
+    mat <- raw_mat[, intersect(mct@metacells[mct@order], colnames(raw_mat)), drop = FALSE]
+
+    if (detect_dca && is.null(hc)) {
+        if (!has_rna(mct)) {
+            cli_abort("Cannot detect DCA without either an hclust object or RNA data.")
+        }
+        mct <- mct_subset_metacells(mct, colnames(mat))
+        hc <- mc_hclust_rna(mct, force_cell_type = force_cell_type)
+    }
+
+    if (!is.null(hc)) {
+        if (any(hc$label %!in% colnames(mat))) {
+            missing_mcs <- setdiff(hc$label, colnames(mat))
+            cli_warn("The following metacells are present in the hclust object, but are missing in the matrix (this is probably due to downsampling): {.val {missing_mcs}}")
+            hc <- dendextend::prune(hc, missing_mcs)
+        }
+        mat <- mat[, hc$label]
+    }
+    mat
+}
+
 #' Plot a genomic region
 #'
 #' @param mct an McTracks object.
