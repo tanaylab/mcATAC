@@ -18,6 +18,13 @@ mct_plot_region(
   gene_annot = FALSE,
   n_smooth = 10,
   n_pixels = 1000,
+  plot_x_axis_ticks = TRUE,
+  gene_annot_pos = "top",
+  flip = FALSE,
+  genes_correlations = NULL,
+  cor_colors = c("blue", "white", "white", "white", "red"),
+  cor_color_breaks = c(-1, -0.05, 0, 0.05, 1),
+  roll_mean = FALSE,
   ...
 )
 }
@@ -42,11 +49,15 @@ mct_plot_region(
 
 \item{force_cell_type}{do not split cell types when ordering the metacells. Default: TRUE}
 
-\item{gene_annot}{whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory. (optional)}
+\item{gene_annot}{whether to add gene annotations; these annotations rely on the existence of the existence of an intervals set called "intervs.global.tss" and "intervs.global.exon" in the genome's misha directory. (optional)}
 
 \item{n_smooth}{number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell (optional). Default is 20.}
 
 \item{n_pixels}{number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)} (optional).}
+
+\item{gene_annot_pos}{the position of the gene annotations ("top" or "bottom")}
+
+\item{flip}{whether to flip the coordinates (optional)}
 
 \item{...}{
   Arguments passed on to \code{\link[=mct_diff_access_on_hc]{mct_diff_access_on_hc}}

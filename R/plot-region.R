@@ -1,4 +1,4 @@
-get_raw_mat <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, genes_correlations = NULL, cor_colors=c("blue", "white", "white", "white", "red"), cor_color_breaks=c(-1,-0.05, 0, 0.05, 1), roll_mean = FALSE, ...) {
+get_raw_mat <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, genes_correlations = NULL, cor_colors = c("blue", "white", "white", "white", "red"), cor_color_breaks = c(-1, -0.05, 0, 0.05, 1), roll_mean = FALSE, ...) {
     gset_genome(mct@genome)
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
@@ -69,7 +69,7 @@ get_raw_mat <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, d
 #' }
 #'
 #' @export
-mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, genes_correlations = NULL, cor_colors=c("blue", "white", "white", "white", "red"), cor_color_breaks=c(-1,-0.05, 0, 0.05, 1), roll_mean = FALSE, ...) {
+mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, genes_correlations = NULL, cor_colors = c("blue", "white", "white", "white", "red"), cor_color_breaks = c(-1, -0.05, 0, 0.05, 1), roll_mean = FALSE, ...) {
     gset_genome(mct@genome)
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
@@ -106,7 +106,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
     y_seps <- NULL
     if (!is.null(hc)) {
         mat <- mat[, hc$order, drop = FALSE]
-        y_seps = cutree(hc, h=0.1)
+        y_seps <- cutree(hc, h = 0.1)
     }
 
     if (has_cell_type(mct) && has_cell_type_colors(mct)) {
@@ -115,24 +115,24 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
     } else {
         mc_colors <- NULL
     }
-    if (!is.null(genes_correlations) && has_rna(mct)){
-        overlapping_types = intersect(colnames(mct@rna_egc), colnames(mat))
-        atac_egc = t(t(mat)/colSums(mat))
-        atac_legc = log2(1e-5+atac_egc)
-        rna_legc = log2(1e-5+mct@rna_egc)
-        cors = tgstat::tgs_cor(
-            t(atac_legc[,overlapping_types]), 
-            t(rna_legc[toupper(genes_correlations),overlapping_types,drop=FALSE]), 
+    if (!is.null(genes_correlations) && has_rna(mct)) {
+        overlapping_types <- intersect(colnames(mct@rna_egc), colnames(mat))
+        # atac_egc = t(t(mat)/colSums(mat))
+        # atac_legc = log2(1e-5+atac_egc)
+        rna_legc <- log2(1e-5 + mct@rna_egc)
+        cors <- tgstat::tgs_cor(
+            t(mat[, overlapping_types]),
+            t(rna_legc[toupper(genes_correlations), overlapping_types, drop = FALSE]),
             pairwise.complete.obs = T
         )
-        mat = cors
-        mc_colors = rep("white", length(genes_correlations))
-        colors = cor_colors
-        color_breaks = cor_color_breaks
+        mat <- cors
+        mc_colors <- rep("white", length(genes_correlations))
+        colors <- cor_colors
+        color_breaks <- cor_color_breaks
         y_seps <- NULL
         dca_mat <- NULL
     }
-    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, y_seps=y_seps, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels, genome = mct@genome, plot_x_axis_ticks = plot_x_axis_ticks, gene_annot_pos = gene_annot_pos, roll_mean = roll_mean, flip = flip)
+    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, y_seps = y_seps, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels, genome = mct@genome, plot_x_axis_ticks = plot_x_axis_ticks, gene_annot_pos = gene_annot_pos, roll_mean = roll_mean, flip = flip)
 }
 
 #' Plot a genomic region given a matrix
@@ -152,8 +152,8 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 #' @param flip whether to flip the coordinates (optional)
 #'
 #' @export
-plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, y_seps=NULL, y_seps_lty=2, y_seps_lwd=1, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE, genome = NULL, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, roll_mean=FALSE) {
-    if(roll_mean){
+plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, y_seps = NULL, y_seps_lty = 2, y_seps_lwd = 1, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE, genome = NULL, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, roll_mean = FALSE) {
+    if (roll_mean) {
         mat_smooth <- RcppRoll::roll_mean(mat, n = n_smooth, fill = c(0, 0, 0))
     } else {
         mat_smooth <- RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
@@ -173,20 +173,20 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 
         par(mar = c(0, 0, 1, 2))
         plot_tss_strip(intervals, flip = flip)
-        
+
         if (gene_annot_pos == "top") {
             par(mar = c(0, 0, 0, 2))
         } else {
             par(mar = c(0, 0, 0, 2))
         }
         gene_annots <- make_gene_annot(intervals, resolution, genome)
-        
+
         if (is.null(gene_annots[["exon_coords"]])) {
             image(as.matrix(rep(0, ncol(mat)), nrow = 1), col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
         } else {
             exon_mat <- as.matrix(gene_annots[["exon_coords"]])
             if (flip) {
-                exon_mat <- exon_mat[nrow(exon_mat):1,, drop = FALSE]
+                exon_mat <- exon_mat[nrow(exon_mat):1, , drop = FALSE]
             }
 
             image(exon_mat, col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
@@ -195,7 +195,7 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
         top_mar <- 0
         left_mar <- 2
     } else {
-        #par(mar = c(0,0,0,0))
+        # par(mar = c(0,0,0,0))
         layout(matrix(1:2, nrow = 1), w = c(1, 20))
         top_mar <- 0
         left_mar <- 2
@@ -217,7 +217,7 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 
     par(mar = c(bottom_mar, 0, top_mar, 2))
     shades <- colorRampPalette(colors)(1000)
-    mat_smooth[mat_smooth > max(color_breaks)] <- max(color_breaks)
+    # mat_smooth[mat_smooth > max(color_breaks)] <- max(color_breaks)
     shades_breaks <- approx(color_breaks, n = 1001)$y
     if (flip) {
         mat_smooth <- mat_smooth[nrow(mat_smooth):1, , drop = FALSE]
@@ -237,12 +237,12 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
         }
         image(dca_mat, col = dca_cols, add = TRUE, breaks = c(-3, -1.5, -0.5, 0.5, 1.5, 3))
     }
-    if (!is.null(y_seps)){
-        n = length(colnames(mat_smooth))
-        a = y_seps[colnames(mat_smooth)]
-        y_seps = unname(sapply(split(seq_along(a), a),max))+1
-        y_bords = seq(-1/(2*(n-1)), 1+1/(2*(n-1)), length=n+1)[y_seps]
-        abline(h=y_bords, lty=y_seps_lty, lwd = y_seps_lwd, add=TRUE, col="grey")
+    if (!is.null(y_seps)) {
+        n <- length(colnames(mat_smooth))
+        a <- y_seps[colnames(mat_smooth)]
+        y_seps <- unname(sapply(split(seq_along(a), a), max)) + 1
+        y_bords <- seq(-1 / (2 * (n - 1)), 1 + 1 / (2 * (n - 1)), length = n + 1)[y_seps]
+        abline(h = y_bords, lty = y_seps_lty, lwd = y_seps_lwd, add = TRUE, col = "grey")
     }
 }
 
