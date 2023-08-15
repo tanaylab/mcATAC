@@ -23,7 +23,7 @@ Imports:
     mclust,
     methods,
     misha,
-    misha.ext (>= 0.0.5),
+    misha.ext (>= 0.0.8),
     pheatmap,
     purrr,
     lifecycle,

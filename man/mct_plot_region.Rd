@@ -21,6 +21,10 @@ mct_plot_region(
   plot_x_axis_ticks = TRUE,
   gene_annot_pos = "top",
   flip = FALSE,
+  genes_correlations = NULL,
+  cor_colors = c("blue", "white", "white", "white", "red"),
+  cor_color_breaks = c(-1, -0.05, 0, 0.05, 1),
+  roll_mean = FALSE,
   ...
 )
 }

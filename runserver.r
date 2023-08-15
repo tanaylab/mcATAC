@@ -7,8 +7,8 @@ devtools::load_all(export_all = FALSE)
 library(tgutil)
 library(here)
 
-load("ct_mm_egc.Rda")
-load("ct_oc_egc.Rda")
+load("work/ct_mm_egc.Rda")
+load("work/ct_oc_egc.Rda")
 
 mct <- mct_create("mm10", tracks = gtrack.ls("csf_reik_small.c"), metacells = gsub("csf_reik_small\\.", "", gtrack.ls("csf_reik_small.c")), id = "Reik Gastrulation multiome (cell types)")
 mct_oc <- mct_create("GCF_009806435.1_UM_NZW_1.0_renamed", tracks = gtrack.ls("rabbit2_mc.c"), metacells = gsub("rabbit2_mc\\.", "", gtrack.ls("rabbit2_mc.c")), id = "Rabbit Gastrulation multiome (cell types)")

@@ -12,13 +12,17 @@ plot_region_mat(
   intervals = NULL,
   resolution = NULL,
   dca_mat = NULL,
+  y_seps = NULL,
+  y_seps_lty = 2,
+  y_seps_lwd = 1,
   n_smooth = 10,
   n_pixels = 1000,
   gene_annot = FALSE,
   genome = NULL,
   plot_x_axis_ticks = TRUE,
   gene_annot_pos = "top",
-  flip = FALSE
+  flip = FALSE,
+  roll_mean = FALSE
 )
 }
 \arguments{

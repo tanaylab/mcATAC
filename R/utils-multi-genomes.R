@@ -330,3 +330,12 @@ group_to_hclust <- function(df) {
 
     return(hc)
 }
+
+get_heatmap_idx <- function(x, y, m) {
+    n_x <- nrow(m)
+    n_y <- ncol(m)
+    x_idx <- floor(x * n_x) + 1
+
+    y_idx <- n_y - max(floor(y * n_y), 0)
+    return(c(x_idx, y_idx))
+}
