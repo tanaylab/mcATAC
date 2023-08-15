@@ -12,7 +12,8 @@ mct_diff_access_on_hc(
   peak_lf_thresh1 = 1.2,
   peak_lf_thresh2 = 2,
   trough_lf_thresh1 = -1,
-  trough_lf_thresh2 = -2
+  trough_lf_thresh2 = -2,
+  ...
 )
 }
 \arguments{
