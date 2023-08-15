@@ -19,7 +19,7 @@ app_ui <- function(request) {
             titlePanel(title),
             fluidRow(
                 column(
-                    12,
+                    10,
                     wellPanel(
                         fluidRow(
                             align = "left",
@@ -112,7 +112,15 @@ app_ui <- function(request) {
                             )
                         )
                     )
-                )
+                ),
+                column(2,
+                    plotOutput(
+                        "scatter_plot",
+                        height = "300px",
+                        width = "300px",
+                        fill=FALSE,
+                        )
+                    )
             ),
             fluidRow(
                 shinycssloaders::withSpinner(
@@ -177,6 +185,8 @@ app_server <- function(input, output, session) {
     intervals2 <- reactiveVal()
     intervals_comparison <- reactiveVal()
     globals <- reactiveValues()
+    mat <- reactiveVal()
+    mat2 <- reactiveVal()
 
     if (!is.null(shiny_hc)) {
         hc <- shiny_hc
@@ -280,7 +290,27 @@ app_server <- function(input, output, session) {
             intervals(globals$history[[globals$history_iterator]])
         }
     })
-
+    output$region_plot_cor <- renderPlot(
+            plot(1:5,5:1)
+    )
+    observe({
+        req(intervals())
+        raw_mat <- get_raw_mat(
+                shiny_mct, intervals(),
+                downsample = TRUE,
+                downsample_n = 1500000,
+                detect_dca = input$detect_dca %||% FALSE,
+                gene_annot = TRUE,
+                hc = hc,
+                peak_lf_thresh1 = input$dca_peak_lf_thresh,
+                trough_lf_thresh1 = input$dca_trough_lf_thresh,
+                sz_frac_for_peak = input$dca_sz_frac_for_peak,
+                color_breaks = color_breaks,
+                n_smooth = n_smooth,
+                plot_x_axis_ticks = FALSE
+        )
+        mat(raw_mat)
+    })
     output$region_plot <- renderPlot(
         {
             req(intervals())
@@ -292,6 +322,7 @@ app_server <- function(input, output, session) {
             req(input$min_color < input$max_color)
             req(input$n_smooth)
             req(input$n_smooth >= 1)
+            req(mat())
             color_breaks <- c(0, seq(
                 input$min_color,
                 input$max_color,
@@ -303,7 +334,7 @@ app_server <- function(input, output, session) {
             mct_plot_region(
                 shiny_mct, intervals(),
                 downsample = TRUE,
-                downsample_n = 2500000,
+                downsample_n = 1500000,
                 detect_dca = input$detect_dca %||% FALSE,
                 gene_annot = TRUE,
                 hc = hc,
@@ -582,45 +613,18 @@ app_server <- function(input, output, session) {
 
         hover <- input$region_hover
         req(hover)
-
-        # convert y to metacell 
-        gset_genome(mct@genome)
-        raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
-        if (!is.null(metacells)) {
-            if (any(metacells %!in% mct@metacells)) {
-                cli_abort("The following metacells are not in the McTracks object: {.val {metacells}}")
-            }
-            raw_mat <- raw_mat[, intersect(metacells, colnames(raw_mat)), drop = FALSE]
-        }
-    
-        mat <- raw_mat[, intersect(mct@metacells[mct@order], colnames(raw_mat)), drop = FALSE]
-    
-        if (detect_dca && is.null(hc)) {
-            if (!has_rna(mct)) {
-                cli_abort("Cannot detect DCA without either an hclust object or RNA data.")
-            }
-            mct <- mct_subset_metacells(mct, colnames(mat))
-            hc <- mc_hclust_rna(mct, force_cell_type = force_cell_type)
-        }
-    
-        if (!is.null(hc)) {
-            if (any(hc$label %!in% colnames(mat))) {
-                missing_mcs <- setdiff(hc$label, colnames(mat))
-                cli_warn("The following metacells are present in the hclust object, but are missing in the matrix (this is probably due to downsampling): {.val {missing_mcs}}")
-                hc <- dendextend::prune(hc, missing_mcs)
-            }
-            mat <- mat[, hc$label]
-        }
-
-        n = length(hc$label)
-        range_padding = 1/(2*(n-1))
-        mat_y = hover$y*(1+2*range_padding) - range_padding
-        mc_idx = hc$label[floor(mat_y*n)+1]
-        mc <- mct@metacells[mc_idx]
+        req(mat())
+        raw_mat = mat()
+        n = length(colnames(raw_mat))
+        #range_padding = 1/(2*(n-1))
+        range_padding = 0
+        mat_y = hover$y*(1+2*range_padding)-range_padding
+        mat_idx = n-max(floor(mat_y*n),0)
+        mc <- colnames(raw_mat)[mat_idx]
         mc_metadata <- mct@metadata %>% filter(metacell == mc) %>% slice(1)
         mc_color <- mc_metadata$color
         mc_cell_type <- mc_metadata$cell_type
-        message(round(mat_y*n), mc_idx, mc)
+        #message(mat_idx, ' ', mc, ' ', mc_color, ' ', mc_cell_type)
         # taken from https://gitlab.com/-/snippets/16220
         left_px <- hover$coords_css$x
         top_px <- hover$coords_css$y
