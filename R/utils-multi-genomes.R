@@ -170,7 +170,11 @@ compute_annotation_comparison <- function(annot1, annot2, intervals, intervals2,
     annot1 <- annot1 %>%
         gintervals.neighbors1(intervals) %>%
         filter(dist == 0)
-    annot1_colors <- chameleon::distinct_colors(nrow(annot1))$name
+    if(nrow(annot1)>0){
+        annot1_colors <- chameleon::distinct_colors(nrow(annot1))$name
+    }else{
+        annot1_colors <- NULL
+    }
 
     lifted_annot1 <- translate_intervals(as.data.frame(annot1), chain = chain_1_to_2, chainscore = selected_chain_chainscore) %>%
         arrange(row_ID)

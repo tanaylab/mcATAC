@@ -101,11 +101,19 @@ app_ui <- function(request) {
                                         ),
                                         column(
                                             2,
-                                            tags$div(numericInput("min_color", "Min color:", value = 6, min = 0, step = 1), id = "inline", style = "display:inline-block;vertical-align: middle;", width = "30%"),
+                                            tags$div(numericInput("min_color", "Min color:", value = 6, min = 0, step = 1), id = "inline", style = "display:inline-block;vertical-align: middle;", width = "15%"),
                                         ),
                                         column(
                                             2,
-                                            tags$div(numericInput("max_color", "Max color:", value = 24, min = 0, step = 1), id = "inline", style = "display:inline-block;vertical-align: middle;", width = "30%")
+                                            tags$div(numericInput("max_color", "Max color:", value = 24, min = 0, step = 1), id = "inline", style = "display:inline-block;vertical-align: middle;", width = "15%")
+                                        ),
+                                        column(
+                                            2,
+                                            tags$div(numericInput("min_color2", "Min color:", value = 6, min = 0, step = 1), id = "inline", style = "display:inline-block;vertical-align: middle;", width = "15%"),
+                                        ),
+                                        column(
+                                            2,
+                                            tags$div(numericInput("max_color2", "Max color:", value = 24, min = 0, step = 1), id = "inline", style = "display:inline-block;vertical-align: middle;", width = "15%")
                                         )
                                     )
                                 )
@@ -215,18 +223,25 @@ app_server <- function(input, output, session) {
         # hc <- NULL
     }
 
-
+    gset_genome(shiny_mct@genome)
     min_val <- round(gsummary(shiny_mct@tracks[1], intervals = gintervals.all()[1, ])[[6]] * 10 / 2)
+    gset_genome(shiny_mct2@genome)
+    min_val2 <- round(gsummary(shiny_mct2@tracks[1], intervals = gintervals.all()[1, ])[[6]] * 10 / 2)
+    gset_genome(shiny_mct@genome)
 
     observe({
         updateNumericInput(session = session, inputId = "min_color", value = min_val)
         updateNumericInput(session = session, inputId = "max_color", value = min_val * 4)
+        updateNumericInput(session = session, inputId = "min_color2", value = min_val2)
+        updateNumericInput(session = session, inputId = "max_color2", value = min_val2 * 4)
         updateNumericInput(session = session, inputId = "n_smooth", value = shiny_mct@resolution * 10)
     })
 
     observe({
         shinyjs::toggle(id = "min_color", condition = input$show_controls)
         shinyjs::toggle(id = "max_color", condition = input$show_controls)
+        shinyjs::toggle(id = "min_color2", condition = input$show_controls)
+        shinyjs::toggle(id = "max_color2", condition = input$show_controls)
         shinyjs::toggle(id = "n_smooth", condition = input$show_controls)
     })
 
@@ -350,15 +365,18 @@ app_server <- function(input, output, session) {
             theme_classic() +
             xlab("ATAC") +
             ylab("RNA") +
-            ggtitle(glue("Correlation: {round(cor(data$atac, data$rna), digits = 4)}"), subtitle = data$coords[1])
+            ggtitle(glue("Correlation: {round(cor(data$atac, data$rna), digits = 2)} Coverage:{sum(data$atac)}"), subtitle = data$coords[1])
     })
 
     observe({
         req(intervals())
+        req(input$n_smooth)
+        req(input$n_smooth >= 1)
+        n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
         raw_mat <- get_raw_mat(
             shiny_mct, intervals(),
             downsample = TRUE,
-            downsample_n = 1500000,
+            downsample_n = 20000000,
             detect_dca = input$detect_dca %||% FALSE,
             gene_annot = TRUE,
             hc = shiny_hc,
@@ -374,17 +392,20 @@ app_server <- function(input, output, session) {
 
     observe({
         req(intervals2())
+        req(input$n_smooth)
+        req(input$n_smooth >= 1)
+        n_smooth <- max(round(input$n_smooth / shiny_mct2@resolution), 1)
         raw_mat2 <- get_raw_mat(
             shiny_mct2, intervals2(),
             downsample = TRUE,
-            downsample_n = 1500000,
+            downsample_n = 2500000,
             detect_dca = input$detect_dca %||% FALSE,
             gene_annot = TRUE,
             hc = shiny_hc2,
             peak_lf_thresh1 = input$dca_peak_lf_thresh,
             trough_lf_thresh1 = input$dca_trough_lf_thresh,
             sz_frac_for_peak = input$dca_sz_frac_for_peak,
-            color_breaks = color_breaks,
+            color_breaks = color_breaks2,
             n_smooth = n_smooth,
             plot_x_axis_ticks = FALSE
         )
@@ -414,7 +435,7 @@ app_server <- function(input, output, session) {
             mct_plot_region(
                 shiny_mct, intervals(),
                 downsample = TRUE,
-                downsample_n = 1500000,
+                downsample_n = 20000000,
                 detect_dca = input$detect_dca %||% FALSE,
                 gene_annot = TRUE,
                 hc = hc,
@@ -461,7 +482,7 @@ app_server <- function(input, output, session) {
             mct_plot_region(
                 shiny_mct, intervals(),
                 downsample = TRUE,
-                downsample_n = 1500000,
+                downsample_n = 20000000,
                 detect_dca = input$detect_dca %||% FALSE,
                 gene_annot = FALSE,
                 hc = NULL,
@@ -469,7 +490,7 @@ app_server <- function(input, output, session) {
                 trough_lf_thresh1 = input$dca_trough_lf_thresh,
                 sz_frac_for_peak = input$dca_sz_frac_for_peak,
                 color_breaks = color_breaks,
-                n_smooth = 1,
+                n_smooth = n_smooth,
                 plot_x_axis_ticks = FALSE,
                 roll_mean = TRUE,
                 genes_correlations = promoters[promoters$coords == input$genes, ]$geneSymbol,
@@ -545,31 +566,31 @@ app_server <- function(input, output, session) {
             req(input$dca_peak_lf_thresh)
             req(input$dca_trough_lf_thresh)
             req(input$dca_sz_frac_for_peak)
-            req(input$min_color)
-            req(input$max_color)
-            req(input$min_color < input$max_color)
+            req(input$min_color2)
+            req(input$max_color2)
+            req(input$min_color2 < input$max_color2)
             req(input$n_smooth)
             req(input$n_smooth >= 1)
-            color_breaks <- c(0, seq(
-                input$min_color,
-                input$max_color,
+            color_breaks2 <- c(0, seq(
+                input$min_color2,
+                input$max_color2,
                 length.out = 4
             ))
 
-            n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
+            n_smooth <- max(round(input$n_smooth / shiny_mct2@resolution), 1)
 
             mct_plot_region(
                 shiny_mct2, intervals2(),
                 downsample = TRUE,
-                downsample_n = 1500000,
+                downsample_n = 2500000,
                 detect_dca = input$detect_dca %||% FALSE,
                 gene_annot = FALSE,
                 hc = NULL,
                 peak_lf_thresh1 = input$dca_peak_lf_thresh,
                 trough_lf_thresh1 = input$dca_trough_lf_thresh,
                 sz_frac_for_peak = input$dca_sz_frac_for_peak,
-                color_breaks = color_breaks,
-                n_smooth = 1,
+                color_breaks = color_breaks2,
+                n_smooth = n_smooth,
                 plot_x_axis_ticks = FALSE,
                 genes_correlations = toupper(promoters[promoters$coords == input$genes, ]$geneSymbol),
                 roll_mean = TRUE,
@@ -588,8 +609,8 @@ app_server <- function(input, output, session) {
             input$dca_peak_lf_thresh,
             input$dca_trough_lf_thresh,
             input$dca_sz_frac_for_peak,
-            input$min_color,
-            input$max_color,
+            input$min_color2,
+            input$max_color2,
             input$n_smooth
         )
 
@@ -602,18 +623,18 @@ app_server <- function(input, output, session) {
             req(input$dca_peak_lf_thresh)
             req(input$dca_trough_lf_thresh)
             req(input$dca_sz_frac_for_peak)
-            req(input$min_color)
-            req(input$max_color)
-            req(input$min_color < input$max_color)
+            req(input$min_color2)
+            req(input$max_color2)
+            req(input$min_color2 < input$max_color2)
             req(input$n_smooth)
             req(input$n_smooth >= 1)
-            color_breaks <- c(0, seq(
-                input$min_color,
-                input$max_color,
+            color_breaks2 <- c(0, seq(
+                input$min_color2,
+                input$max_color2,
                 length.out = 4
             ))
 
-            n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
+            n_smooth <- max(round(input$n_smooth / shiny_mct2@resolution), 1)
 
             mct_plot_region(
                 shiny_mct2, intervals2(),
@@ -625,7 +646,7 @@ app_server <- function(input, output, session) {
                 peak_lf_thresh1 = input$dca_peak_lf_thresh,
                 trough_lf_thresh1 = input$dca_trough_lf_thresh,
                 sz_frac_for_peak = input$dca_sz_frac_for_peak,
-                color_breaks = color_breaks,
+                color_breaks = color_breaks2,
                 n_smooth = n_smooth,
                 gene_annot_pos = "bottom",
                 flip = is_comparison_flipped(intervals_comparison()),
@@ -641,8 +662,8 @@ app_server <- function(input, output, session) {
             input$dca_peak_lf_thresh,
             input$dca_trough_lf_thresh,
             input$dca_sz_frac_for_peak,
-            input$min_color,
-            input$max_color,
+            input$min_color2,
+            input$max_color2,
             input$n_smooth
         )
     output$current_coords <- renderText({
