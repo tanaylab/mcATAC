@@ -165,7 +165,8 @@ app_ui <- function(request) {
                         "region_plot_cor2",
                         width = "2067px",
                         height = "20px",
-                        fill = FALSE
+                        fill = FALSE,
+                        click = "region_plot_cor2_click"
                     )
                 ),
                 shinycssloaders::withSpinner(
@@ -304,13 +305,35 @@ app_server <- function(input, output, session) {
         mat_idxs <- get_heatmap_idx(mat_x, mat_y, m)
 
         gene <- toupper(promoters[promoters$coords == input$genes, ]$geneSymbol)
-        req(gene %in% rownames(mct@rna_egc))
+        req(gene %in% rownames(shiny_mct@rna_egc))
 
-        mcs <- intersect(colnames(mct@rna_egc), colnames(m))
+        mcs <- intersect(colnames(shiny_mct@rna_egc), colnames(m))
 
-        data <- data.frame(atac = m[mat_idxs[1], mcs], rna = mct@rna_egc[gene, mcs], metacell = mcs) %>%
+        data <- data.frame(atac = m[mat_idxs[1], mcs], rna = shiny_mct@rna_egc[gene, mcs], metacell = mcs) %>%
             mutate(rna = log2(rna + 1e-5)) %>%
-            left_join(mct@metadata, by = "metacell") %>%
+            left_join(shiny_mct@metadata, by = "metacell") %>%
+            mutate(coords = rownames(m)[mat_idxs[1]])
+
+        scatter_data(data)
+    })
+    
+    observeEvent(input$region_plot_cor2_click, {
+        mat_x <- input$region_plot_cor2_click$x
+        req(mat_x)
+        mat_y <- input$region_plot_cor2_click$y
+        req(mat_y)
+        m <- mat2()
+        req(m)
+        mat_idxs <- get_heatmap_idx(mat_x, mat_y, m)
+
+        gene <- toupper(promoters[promoters$coords == input$genes, ]$geneSymbol)
+        req(gene %in% rownames(shiny_mct2@rna_egc))
+
+        mcs <- intersect(colnames(shiny_mct2@rna_egc), colnames(m))
+
+        data <- data.frame(atac = m[mat_idxs[1], mcs], rna = shiny_mct2@rna_egc[gene, mcs], metacell = mcs) %>%
+            mutate(rna = log2(rna + 1e-5)) %>%
+            left_join(shiny_mct2@metadata, by = "metacell") %>%
             mutate(coords = rownames(m)[mat_idxs[1]])
 
         scatter_data(data)
@@ -338,7 +361,7 @@ app_server <- function(input, output, session) {
             downsample_n = 1500000,
             detect_dca = input$detect_dca %||% FALSE,
             gene_annot = TRUE,
-            hc = hc,
+            hc = shiny_hc,
             peak_lf_thresh1 = input$dca_peak_lf_thresh,
             trough_lf_thresh1 = input$dca_trough_lf_thresh,
             sz_frac_for_peak = input$dca_sz_frac_for_peak,
@@ -347,6 +370,25 @@ app_server <- function(input, output, session) {
             plot_x_axis_ticks = FALSE
         )
         mat(raw_mat)
+    })
+
+    observe({
+        req(intervals2())
+        raw_mat2 <- get_raw_mat(
+            shiny_mct2, intervals2(),
+            downsample = TRUE,
+            downsample_n = 1500000,
+            detect_dca = input$detect_dca %||% FALSE,
+            gene_annot = TRUE,
+            hc = shiny_hc2,
+            peak_lf_thresh1 = input$dca_peak_lf_thresh,
+            trough_lf_thresh1 = input$dca_trough_lf_thresh,
+            sz_frac_for_peak = input$dca_sz_frac_for_peak,
+            color_breaks = color_breaks,
+            n_smooth = n_smooth,
+            plot_x_axis_ticks = FALSE
+        )
+        mat2(raw_mat2)
     })
 
     output$region_plot <- renderPlot(

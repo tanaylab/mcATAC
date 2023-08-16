@@ -250,11 +250,11 @@ plot_intervals_comparison <- function(intervals_comparison, annotations = NULL, 
     plot(1, 1, xlim = c(0, 1), ylim = c(-0.02, 1.02), type = "n", ann = FALSE, axes = FALSE)
 
     segments(x0 = i12$x1, y0 = 1, x1 = i12$x1, y1 = 0.99, lwd = 1)
-    text(x = i12$x1, y = 0.96, labels = round(i12$start / 1e+6, 3), srt = 90, adj = c(1, 0.5), xpd = TRUE, cex = 0.5)
-    segments(x0 = i12$x1, y0 = 0.75, x1 = i12$x1, y1 = 0.7, lwd = 1, col = ifelse(1:length(i12$x1) %% round(grid_resolution / 10) == 0, "black", "grey"))
-    segments(x0 = i12$x1, y0 = 0.7, x1 = i12$x2, y1 = 0.27, lwd = 1, col = ifelse(1:length(i12$x1) %% round(grid_resolution / 10) == 0, "black", "grey"))
-    segments(x0 = i12$x2, y0 = 0.27, x1 = i12$x2, y1 = 0.25, lwd = 1, col = ifelse(1:length(i12$x1) %% round(grid_resolution / 10) == 0, "black", "grey"))
-    text(x = i12$x2[i12$x2 <= 1 & i12$x2 >= 0], y = 0.2, labels = round(i12$start1[i12$x2 <= 1 & i12$x2 >= 0] / 1e+6, 3), srt = 90, adj = c(1, 0.5), xpd = TRUE, cex = 0.5)
+    #text(x = i12$x1, y = 0.96, labels = round(i12$start / 1e+6, 3), srt = 90, adj = c(1, 0.5), xpd = TRUE, cex = 0.5)
+    #segments(x0 = i12$x1, y0 = 0.75, x1 = i12$x1, y1 = 0.7, lwd = 1, col = ifelse(1:length(i12$x1) %% round(grid_resolution / 10) == 0, "black", "grey"))
+    segments(x0 = i12$x1, y0 = 0.99, x1 = i12$x2, y1 = 0.01, lwd = 1, col = ifelse(1:length(i12$x1) %% round(grid_resolution / 10) == 0, "black", "grey"))
+    #segments(x0 = i12$x2, y0 = 0.27, x1 = i12$x2, y1 = 0.25, lwd = 1, col = ifelse(1:length(i12$x1) %% round(grid_resolution / 10) == 0, "black", "grey"))
+    #text(x = i12$x2[i12$x2 <= 1 & i12$x2 >= 0], y = 0.2, labels = round(i12$start1[i12$x2 <= 1 & i12$x2 >= 0] / 1e+6, 3), srt = 90, adj = c(1, 0.5), xpd = TRUE, cex = 0.5)
     segments(x0 = i12$x2, y0 = 0, x1 = i12$x2, y1 = 0.01, lwd = 1)
     if (!is.null(correlations)) {
     }
@@ -335,7 +335,6 @@ get_heatmap_idx <- function(x, y, m) {
     n_x <- nrow(m)
     n_y <- ncol(m)
     x_idx <- floor(x * n_x) + 1
-
     y_idx <- n_y - max(floor(y * n_y), 0)
     return(c(x_idx, y_idx))
 }

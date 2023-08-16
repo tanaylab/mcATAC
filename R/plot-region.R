@@ -69,7 +69,7 @@ get_raw_mat <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, d
 #' }
 #'
 #' @export
-mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, genes_correlations = NULL, cor_colors = c("blue", "white", "white", "white", "red"), cor_color_breaks = c(-1, -0.05, 0, 0.05, 1), roll_mean = FALSE, ...) {
+mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, genes_correlations = NULL, cor_colors = c("blue", "white", "white", "white", "red"), cor_color_breaks = c(-1, -0.05, 0, 0.05, 1), roll_mean = FALSE, min_atac_sum=10, ...) {
     gset_genome(mct@genome)
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
@@ -125,6 +125,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
             t(rna_legc[toupper(genes_correlations), overlapping_types, drop = FALSE]),
             pairwise.complete.obs = T
         )
+        cors[rowSums(mat[, overlapping_types]) < min_atac_sum] = NA
         mat <- cors
         mc_colors <- rep("white", length(genes_correlations))
         colors <- cor_colors
