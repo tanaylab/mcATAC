@@ -263,13 +263,13 @@ app_server <- function(input, output, session) {
         mat_idxs <- get_heatmap_idx(mat_x, mat_y, m)
 
         gene <- toupper(promoters[promoters$coords == input$genes, ]$geneSymbol)
-        req(gene %in% rownames(mct@rna_egc))
+        req(gene %in% rownames(shiny_mct@rna_egc))
 
-        mcs <- intersect(colnames(mct@rna_egc), colnames(m))
+        mcs <- intersect(colnames(shiny_mct@rna_egc), colnames(m))
 
-        data <- data.frame(atac = m[mat_idxs[1], mcs], rna = mct@rna_egc[gene, mcs], metacell = mcs) %>%
+        data <- data.frame(atac = m[mat_idxs[1], mcs], rna = shiny_mct@rna_egc[gene, mcs], metacell = mcs) %>%
             mutate(rna = log2(rna + 1e-5)) %>%
-            left_join(mct@metadata, by = "metacell") %>%
+            left_join(shiny_mct@metadata, by = "metacell") %>%
             mutate(coords = rownames(m)[mat_idxs[1]])
 
         scatter_data(data)
@@ -286,18 +286,21 @@ app_server <- function(input, output, session) {
             theme_classic() +
             xlab("ATAC") +
             ylab("RNA") +
-            ggtitle(glue("Correlation: {round(cor(data$atac, data$rna), digits = 4)}"), subtitle = data$coords[1])
+            ggtitle(glue("Correlation: {round(cor(data$atac, data$rna), digits = 2)} Coverage:{sum(data$atac)}"), subtitle = data$coords[1])
     })
 
     observe({
         req(intervals())
+        req(input$n_smooth)
+        req(input$n_smooth >= 1)
+        n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
         raw_mat <- get_raw_mat(
             shiny_mct, intervals(),
             downsample = TRUE,
-            downsample_n = 1500000,
+            downsample_n = 20000000,
             detect_dca = input$detect_dca %||% FALSE,
             gene_annot = TRUE,
-            hc = hc,
+            hc = shiny_hc,
             peak_lf_thresh1 = input$dca_peak_lf_thresh,
             trough_lf_thresh1 = input$dca_trough_lf_thresh,
             sz_frac_for_peak = input$dca_sz_frac_for_peak,
@@ -331,7 +334,7 @@ app_server <- function(input, output, session) {
             mct_plot_region(
                 shiny_mct, intervals(),
                 downsample = TRUE,
-                downsample_n = 1500000,
+                downsample_n = 20000000,
                 detect_dca = input$detect_dca %||% FALSE,
                 gene_annot = TRUE,
                 hc = hc,
@@ -378,7 +381,7 @@ app_server <- function(input, output, session) {
             mct_plot_region(
                 shiny_mct, intervals(),
                 downsample = TRUE,
-                downsample_n = 1500000,
+                downsample_n = 20000000,
                 detect_dca = input$detect_dca %||% FALSE,
                 gene_annot = FALSE,
                 hc = NULL,
@@ -386,11 +389,11 @@ app_server <- function(input, output, session) {
                 trough_lf_thresh1 = input$dca_trough_lf_thresh,
                 sz_frac_for_peak = input$dca_sz_frac_for_peak,
                 color_breaks = color_breaks,
-                n_smooth = 1,
+                n_smooth = n_smooth,
                 plot_x_axis_ticks = FALSE,
                 roll_mean = TRUE,
                 genes_correlations = promoters[promoters$coords == input$genes, ]$geneSymbol,
-                cor_color_breaks = c(-0.8, -0.4, 0, 0.4, 0.8),
+                cor_color_breaks = c(-1.0, -0.5, 0, 0.5, 1.0),
                 cor_colors = c("blue", "white", "white", "white", "red")
             )
         },
