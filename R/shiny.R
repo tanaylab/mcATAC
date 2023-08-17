@@ -494,7 +494,7 @@ app_server <- function(input, output, session) {
                 plot_x_axis_ticks = FALSE,
                 roll_mean = TRUE,
                 genes_correlations = promoters[promoters$coords == input$genes, ]$geneSymbol,
-                cor_color_breaks = c(-0.8, -0.4, 0, 0.4, 0.8),
+                cor_color_breaks = c(-1.0, -0.5, 0, 0.5, 1.0),
                 cor_colors = c("blue", "white", "white", "white", "red")
             )
         },
@@ -569,6 +569,7 @@ app_server <- function(input, output, session) {
             req(input$min_color2)
             req(input$max_color2)
             req(input$min_color2 < input$max_color2)
+            req(length(intersect(toupper(promoters[promoters$coords == input$genes, ]$geneSymbol), rownames(shiny_mct2@rna_egc))) > 0)
             req(input$n_smooth)
             req(input$n_smooth >= 1)
             color_breaks2 <- c(0, seq(
@@ -595,7 +596,7 @@ app_server <- function(input, output, session) {
                 genes_correlations = toupper(promoters[promoters$coords == input$genes, ]$geneSymbol),
                 roll_mean = TRUE,
                 flip = is_comparison_flipped(intervals_comparison()),
-                cor_color_breaks = c(-0.8, -0.4, 0, 0.4, 0.8),
+                cor_color_breaks = c(-1.0, -0.5, 0, 0.5, 1.0),
                 cor_colors = c("blue", "white", "white", "white", "red")
             )
 
