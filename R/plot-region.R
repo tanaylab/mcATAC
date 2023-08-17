@@ -217,7 +217,7 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 
     par(mar = c(bottom_mar, 0, top_mar, 2))
     shades <- colorRampPalette(colors)(1000)
-    # mat_smooth[mat_smooth > max(color_breaks)] <- max(color_breaks)
+    mat_smooth[mat_smooth > max(color_breaks)] <- max(color_breaks)
     shades_breaks <- approx(color_breaks, n = 1001)$y
     if (flip) {
         mat_smooth <- mat_smooth[nrow(mat_smooth):1, , drop = FALSE]
