@@ -26,7 +26,9 @@ get_raw_mat <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, d
         }
         mat <- mat[, hc$label]
     }
-    RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
+    mat_smooth = RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
+    rownames(mat_smooth) = rownames(mat)
+    mat_smooth
 }
 
 #' Plot a genomic region
