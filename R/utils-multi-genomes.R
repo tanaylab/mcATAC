@@ -70,7 +70,7 @@ custom_lift2 <- function(x, chain, maxgap = 1000) {
             ungroup(test3) %>%
                 select(seqnames, strand, chainscore, lstart = alt_start, lend = end, widthsum, match) %>%
                 mutate(lrow_id = row_number()),
-            by = join_by(seqnames, strand, chainscore)
+            by = c('seqnames', 'strand', 'chainscore')
         )
     btest2 <- atest2 %>%
         group_by(
@@ -216,7 +216,7 @@ compute_intervals_comparison <- function(intervals, intervals2, chain, chainscor
 
     i12 <- i1 %>%
         rowid_to_column("row_ID") %>%
-        left_join(i12 %>% rename(chrom1 = chrom, start1 = start, end1 = end), by = join_by(row_ID)) %>%
+        left_join(i12 %>% rename(chrom1 = chrom, start1 = start, end1 = end), by = "row_ID") %>%
         as_tibble()
 
 
