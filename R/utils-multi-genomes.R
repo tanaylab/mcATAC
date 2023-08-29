@@ -166,7 +166,7 @@ load_chain <- function(chain, genome1 = NULL, genome2 = NULL) {
     return(chain)
 }
 
-compute_annotation_comparison <- function(annot1, annot2, intervals, intervals2, chain_1_to_2, chain_2_to_1, selected_chain_chainscore = NULL) {
+compute_annotation_comparison <- function(annot1, annot2, intervals, intervals2, chain_1_to_2, chain_2_to_1, selected_chain_1_to_2_chainscore = NULL, selected_chain_2_to_1_chainscore = NULL) {
     annot1 <- annot1 %>%
         gintervals.neighbors1(intervals) %>%
         filter(dist == 0)
@@ -176,7 +176,7 @@ compute_annotation_comparison <- function(annot1, annot2, intervals, intervals2,
         annot1_colors <- NULL
     }
 
-    lifted_annot1 <- translate_intervals(as.data.frame(annot1), chain = chain_1_to_2, chainscore = selected_chain_chainscore) %>%
+    lifted_annot1 <- translate_intervals(as.data.frame(annot1), chain = chain_1_to_2, chainscore = selected_chain_1_to_2_chainscore) %>%
         arrange(row_ID)
 
     annot2 <- annot2 %>%
@@ -186,7 +186,7 @@ compute_annotation_comparison <- function(annot1, annot2, intervals, intervals2,
             end <= intervals2$end
         )
     annot2_colors <- chameleon::distinct_colors(nrow(annot1) + nrow(annot2))$name[(nrow(annot1) + 1):(nrow(annot1) + nrow(annot2))]
-    lifted_annot2 <- translate_intervals(as.data.frame(annot2), chain = chain_2_to_1, chainscore = selected_chain_chainscore) %>%
+    lifted_annot2 <- translate_intervals(as.data.frame(annot2), chain = chain_2_to_1, chainscore = selected_chain_2_to_1_chainscore) %>%
         arrange(row_ID)
     list(
         annot1 = annot1 %>% mutate(x1 = (start - intervals$start) / (intervals$end - intervals$start)),
@@ -196,6 +196,104 @@ compute_annotation_comparison <- function(annot1, annot2, intervals, intervals2,
         lifted_annot2 = lifted_annot2 %>% mutate(x1 = (start - intervals$start) / (intervals$end - intervals$start)),
         annot2_colors = annot2_colors
     )
+}
+
+
+get_dot_mat = function(mct, mct_oc, mm_scope_peaks, oc_scope_peaks, mm2oc_chainscore=NULL, oc2mm_chainscore=NULL){
+    lifted_mm <- translate_intervals(mm_scope_peaks %>% arrange(chrom, start), chain = mm2oc, chainscore = mm2oc_chainscore) %>% arrange(row_ID)
+    lifted_oc <- translate_intervals(oc_scope_peaks %>% arrange(chrom, start), chain = oc2mm, chainscore = oc2mm_chainscore) %>% arrange(row_ID)
+    dot_mat = matrix(nrow = dim(mm_scope_peaks)[1], ncol = dim(oc_scope_peaks)[1],0)
+    gset_genome(mct_oc@genome)
+    mm2oc_dot = gintervals.neighbors(oc_scope_peaks %>% arrange(start), lifted_mm, mindist = 0, maxdist = 0, na.if.notfound = T)$row_ID
+    names(mm2oc_dot) = 1:dim(oc_scope_peaks)[1]
+    for(i in 1:dim(oc_scope_peaks)[1]){
+        if(!is.na(mm2oc_dot[i])){
+            dot_mat[mm2oc_dot[i], i] = dot_mat[mm2oc_dot[as.character(i)], i] + 0.7
+        }
+    }
+    gset_genome(mct@genome)
+    oc2mm_dot = gintervals.neighbors(mm_scope_peaks %>% arrange(start), lifted_oc, mindist = 0, maxdist = 0, na.if.notfound = T)$row_ID
+    names(oc2mm_dot) = 1:dim(mm_scope_peaks)[1]
+    for(i in 1:dim(mm_scope_peaks)[1]){
+        if(!is.na(oc2mm_dot[i])){
+            dot_mat[i, oc2mm_dot[i]] = dot_mat[i, oc2mm_dot[as.character(i)]] + 0.3
+        }
+    }
+    -1.01-dot_mat
+}
+
+
+get_comb_mat = function(gene_name, mct, mct_oc, mm_mat_peaks, oc_mat_peaks, mm_scope_peaks, oc_scope_peaks, flipped=FALSE, mm2oc_chainscore=NULL, oc2mm_chainscore=NULL){
+    mm_mat_peaks_n = t(t(mm_mat_peaks)/mct@total_cov)
+    mm_mat_peaks_nl = log2(1e-5+mm_mat_peaks_n)
+    oc_mat_peaks_n = t(t(oc_mat_peaks)/mct_oc@total_cov)
+    oc_mat_peaks_nl = log2(1e-5+oc_mat_peaks_n)
+
+    gset_genome(mct@genome)
+    mm_gene = t(log2(1e-5 + mct@rna_egc)[gene_name,,drop = FALSE])
+    mm_atac = t(mm_mat_peaks_nl[rownames(mm_scope_peaks %>% misha.ext::intervs_to_mat(remove_intervalID = TRUE)),])
+    gset_genome(mct_oc@genome)
+    oc_gene = t(log2(1e-5 + mct_oc@rna_egc)[toupper(gene_name),,drop = FALSE])
+    oc_atac = t(oc_mat_peaks_nl[rownames(oc_scope_peaks %>% misha.ext::intervs_to_mat(remove_intervalID = TRUE)),])
+    common_mcs = intersect(rownames(mm_atac), rownames(oc_atac))
+
+    mm_gene__mm_atac = tgstat::tgs_cor(
+            mm_gene,
+            mm_atac
+        )
+    mm_atac__mm_atac = tgstat::tgs_cor(
+        mm_atac
+    )
+    diag(mm_atac__mm_atac) = 0
+    oc_gene__oc_atac = tgstat::tgs_cor(
+            oc_gene,
+            oc_atac
+        )
+    oc_atac__oc_atac = tgstat::tgs_cor(
+        oc_atac
+    )
+    diag(oc_atac__oc_atac) = 0
+
+    oc_atac__mm_atac = tgstat::tgs_cor(
+        oc_atac[common_mcs,],
+        mm_atac[common_mcs,]
+    )
+
+    gset_genome(mct@genome)
+
+    dot_mat = get_dot_mat(mct, mct_oc, mm_scope_peaks, oc_scope_peaks, mm2oc_chainscore=mm2oc_chainscore, oc2mm_chainscore=oc2mm_chainscore)
+    
+    colnames(oc_atac__mm_atac) = mm_scope_peaks$peak_name
+    rownames(mm_atac__mm_atac) = mm_scope_peaks$peak_name
+    colnames(mm_atac__mm_atac) = mm_scope_peaks$peak_name
+    dot_mat = get_dot_mat(mct, mct_oc, mm_scope_peaks, oc_scope_peaks, mm2oc_chainscore=mm2oc_chainscore, oc2mm_chainscore=oc2mm_chainscore)
+
+    colnames(mm_gene__mm_atac) = mm_scope_peaks$peak_name
+    colnames(oc_atac__mm_atac) = mm_scope_peaks$peak_name
+    rownames(mm_atac__mm_atac) = mm_scope_peaks$peak_name
+    colnames(mm_atac__mm_atac) = mm_scope_peaks$peak_name
+    rownames(dot_mat) = mm_scope_peaks$peak_name
+    
+    if(flipped){
+        oc_atac__oc_atac = oc_atac__oc_atac[dim(oc_atac__oc_atac)[1]:1, dim(oc_atac__oc_atac)[2]:1]
+        oc_gene__oc_atac = oc_gene__oc_atac[, dim(oc_gene__oc_atac)[2]:1, drop = FALSE]
+        oc_atac__mm_atac = oc_atac__mm_atac[dim(oc_atac__mm_atac)[1]:1, ]
+        dot_mat = dot_mat[dim(dot_mat)[1]:1,]
+    }
+    
+    oc_gene_oc_atac_padded = t(cbind(0, oc_gene__oc_atac))
+    rownames(oc_gene_oc_atac_padded)[1] = gene_name
+
+    comb_mat = cbind(
+            rbind(
+                cbind(oc_gene_oc_atac_padded, rbind(mm_gene__mm_atac, oc_atac__mm_atac)), 
+                cbind(0,mm_atac__mm_atac)
+            ),
+            rbind(0,
+                oc_atac__oc_atac, 
+                matrix(nrow = dim(mm_scope_peaks)[1], ncol = dim(oc_scope_peaks)[1],0))
+        )
+    comb_mat
 }
 
 

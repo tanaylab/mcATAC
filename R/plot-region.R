@@ -125,7 +125,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
         mat_smooth <- RcppRoll::roll_sum(mat[, overlapping_types], n = n_smooth, fill = c(0,0,0))
         cors <- tgstat::tgs_cor(
             t(mat_smooth),
-            t(rna_legc[toupper(genes_correlations), overlapping_types, drop = FALSE]),
+            t(rna_legc[genes_correlations, overlapping_types, drop = FALSE]),
             pairwise.complete.obs = T
         )
         #cors[rowSums(mat[, overlapping_types]) < min_atac_sum] = NA

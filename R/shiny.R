@@ -19,7 +19,7 @@ app_ui <- function(request) {
             titlePanel(title),
             fluidRow(
                 column(
-                    10,
+                    8,
                     wellPanel(
                         fluidRow(
                             align = "left",
@@ -58,7 +58,7 @@ app_ui <- function(request) {
                                             )
                                         ),
                                         column(
-                                            6,
+                                            3,
                                             shinyWidgets::searchInput(
                                                 inputId = "coords",
                                                 label = "Enter coordinates:",
@@ -124,12 +124,22 @@ app_ui <- function(request) {
                 column(
                     2,
                     plotOutput(
+                        "pheatmap_plot",
+                        height = "300px",
+                        width = "300px",
+                        fill = FALSE,
+                    )
+                ),
+                column(
+                    2,
+                    plotOutput(
                         "scatter_plot",
                         height = "300px",
                         width = "300px",
                         fill = FALSE,
                     )
                 )
+
             ),
             fluidRow(
                 shinycssloaders::withSpinner(
@@ -199,6 +209,8 @@ app_server <- function(input, output, session) {
     mat <- reactiveVal()
     mat2 <- reactiveVal()
     scatter_data <- reactiveVal()
+    comb_mat <- reactiveVal()
+    comb_mat_txt <- reactiveVal()
 
     if (!is.null(shiny_hc)) {
         hc <- shiny_hc
@@ -329,6 +341,7 @@ app_server <- function(input, output, session) {
             left_join(shiny_mct@metadata, by = "metacell") %>%
             mutate(coords = rownames(m)[mat_idxs[1]])
 
+        browser()
         scatter_data(data)
     })
     
@@ -352,6 +365,36 @@ app_server <- function(input, output, session) {
             mutate(coords = rownames(m)[mat_idxs[1]])
 
         scatter_data(data)
+    })
+
+    output$pheatmap_plot <- renderPlot({
+        req(intervals())
+        req(intervals2())
+        req(intervals_comparison())
+        req(dim(intervals_comparison()[!is.na(intervals_comparison()$start1),])[1]>1)
+        req(shiny_mct)
+        req(shiny_mct2)
+        req(has_rna(shiny_mct2))
+        req(comb_mat())
+        req(comb_mat_txt())
+        paletteLength=1000
+
+        myColor <- c(
+        #         colorRampPalette(c("black","grey","white","white"))(10),
+                colorRampPalette(c("blue","white", "red"))(paletteLength)
+                    )
+        myBreaks <- c(
+        #     seq(-2.0, -1.001, length.out=10),
+            seq(-1.0, 0.0, length.out=ceiling(paletteLength/2) + 1),
+            seq(0.01, 1.0, length.out=floor(paletteLength/2)))
+
+        pheatmap::pheatmap(
+            comb_mat(),
+            color = myColor, breaks = myBreaks,
+            display_numbers = comb_mat_txt(),
+            cluster_rows = F, cluster_cols = F,
+            labels_row='', labels_col=''
+        )
     })
 
     output$scatter_plot <- renderPlot({
@@ -410,6 +453,66 @@ app_server <- function(input, output, session) {
             plot_x_axis_ticks = FALSE
         )
         mat2(raw_mat2)
+    })
+
+    observe({
+        req(intervals())
+        req(intervals2())
+        req(intervals_comparison())
+        req(shiny_mct)
+        req(shiny_mct2)
+        req(shiny_all_peaks)
+        req(shiny_all_peaks2)
+        gset_genome(shiny_mct@genome)
+        scope_peaks = gintervals.neighbors(shiny_all_peaks, intervals(), mindist = 0, maxdist = 0)[,1:length(colnames(shiny_all_peaks))]
+        gset_genome(shiny_mct2@genome)
+        scope_peaks2 = gintervals.neighbors(gintervals.force_range(as.data.frame(shiny_all_peaks2)), intervals2(), mindist = 0, maxdist = 0)[,1:length(colnames(shiny_all_peaks2))]
+        gset_genome(shiny_mct@genome)
+        comb_mat_tmp = get_comb_mat(
+            promoters[promoters$coords == input$genes, ]$geneSymbol,
+            shiny_mct, 
+            shiny_mct2, 
+            shiny_all_peaks %>% misha.ext::intervs_to_mat(remove_intervalID = TRUE),
+            shiny_all_peaks2 %>% misha.ext::intervs_to_mat(remove_intervalID = TRUE), 
+            scope_peaks, 
+            scope_peaks2,
+            flipped=is_comparison_flipped(intervals_comparison()))
+        comb_mat(comb_mat_tmp)
+    })
+
+
+    observe({
+        req(intervals())
+        req(intervals2())
+        req(intervals_comparison())
+        req(shiny_mct)
+        req(shiny_mct2)
+        req(shiny_all_peaks)
+        req(shiny_all_peaks2)
+        req(comb_mat())
+        gset_genome(shiny_mct@genome)
+        scope_peaks = gintervals.neighbors(shiny_all_peaks, intervals(), mindist = 0, maxdist = 0)[,1:length(colnames(shiny_all_peaks))]
+        gset_genome(shiny_mct2@genome)
+        scope_peaks2 = gintervals.neighbors(gintervals.force_range(as.data.frame(shiny_all_peaks2)), intervals2(), mindist = 0, maxdist = 0)[,1:length(colnames(shiny_all_peaks2))]
+        gset_genome(shiny_mct@genome)
+        dot_mat = get_dot_mat(shiny_mct, shiny_mct2, scope_peaks, scope_peaks2)
+        if(is_comparison_flipped(intervals_comparison())){
+            dot_mat = dot_mat[dim(dot_mat)[1]:1,]
+        }
+        txt = comb_mat()
+        txt = txt-txt
+        txt[txt==0] = ""
+        txt[which(t(dot_mat) < -1.01, arr.ind = TRUE)+1] = "X"
+        txt[cbind(
+                (which(dot_mat < -1.01, arr.ind = TRUE)+1)[,2],
+                (which(dot_mat < -1.01, arr.ind = TRUE)+1)[,2] + dim(scope_peaks)[1]
+                )] = "O"
+
+        txt[cbind(
+                (which(dot_mat < -1.01, arr.ind = TRUE)+1)[,1] + dim(scope_peaks2)[1],
+                (which(dot_mat < -1.01, arr.ind = TRUE)+1)[,1]
+                )] = "M"
+        comb_mat_txt(txt)
     })
 
     output$region_plot <- renderPlot(
@@ -550,7 +653,7 @@ app_server <- function(input, output, session) {
             par(xaxs = "i")
             plot_intervals_comparison(
                 intervals_comparison(),
-                annotations = compute_annotation_comparison(shiny_annotations1, shiny_annotations2, intervals(), intervals2(), chain_1_to_2, chain_2_to_1, selected_chain_chainscore = NULL),
+                annotations = compute_annotation_comparison(shiny_annotations1, shiny_annotations2, intervals(), intervals2(), chain_1_to_2, chain_2_to_1),
                 grid_resolution = 100
             )
         },
@@ -815,7 +918,9 @@ run_app <- function(mct,
                     chain = NULL,
                     chain2 = NULL,
                     annotations1 = NULL,
-                    annotations2 = NULL) {
+                    annotations2 = NULL,
+                    all_peaks = NULL,
+                    all_peaks2 = NULL) {
     library(misha)
     library(shiny)
     opt <- options(gmultitasking = FALSE, shiny.usecairo = TRUE)
@@ -844,6 +949,9 @@ run_app <- function(mct,
 
     shiny_annotations1 <<- annotations1
     shiny_annotations2 <<- annotations2
+
+    shiny_all_peaks <<- all_peaks
+    shiny_all_peaks2 <<- all_peaks2
 
     shiny::shinyApp(
         ui = app_ui,
