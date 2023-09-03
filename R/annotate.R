@@ -1,5 +1,3 @@
-
-
 #' Annotate ATAC peaks
 #'
 #' @param atac a McPeaks or ScPeaks object

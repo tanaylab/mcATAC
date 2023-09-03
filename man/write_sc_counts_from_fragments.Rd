@@ -16,7 +16,7 @@ write_sc_counts_from_fragments(
   description = "",
   verbose = FALSE,
   tabix_bin = "tabix",
-  chromosomes = gintervals.all()
+  chromosomes = gintervals.all()$chrom
 )
 }
 \arguments{
