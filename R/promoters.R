@@ -1,4 +1,3 @@
-
 #' Select only peaks that are close to a gene promoter
 #'
 #' @description Select only peaks that are close to a gene promoter. In case of alternative promoters or multiple peaks close to the same promoter, the reads from all the peaks and promoters are summed.

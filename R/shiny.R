@@ -224,36 +224,39 @@ app_server <- function(input, output, session) {
         }
     })
 
-    output$region_plot <- renderPlot({
-        req(intervals())
-        req(input$dca_peak_lf_thresh)
-        req(input$dca_trough_lf_thresh)
-        req(input$dca_sz_frac_for_peak)
-        req(input$min_color)
-        req(input$max_color)
-        req(input$min_color < input$max_color)
-        req(input$n_smooth)
-        req(input$n_smooth >= 1)
-        color_breaks <- c(0, seq(
-            input$min_color,
-            input$max_color,
-            length.out = 4
-        ))
+    output$region_plot <- renderPlot(
+        {
+            req(intervals())
+            req(input$dca_peak_lf_thresh)
+            req(input$dca_trough_lf_thresh)
+            req(input$dca_sz_frac_for_peak)
+            req(input$min_color)
+            req(input$max_color)
+            req(input$min_color < input$max_color)
+            req(input$n_smooth)
+            req(input$n_smooth >= 1)
+            color_breaks <- c(0, seq(
+                input$min_color,
+                input$max_color,
+                length.out = 4
+            ))
 
-        n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
+            n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
 
-        mct_plot_region(
-            shiny_mct, intervals(),
-            detect_dca = input$detect_dca %||% FALSE,
-            gene_annot = TRUE,
-            hc = hc,
-            peak_lf_thresh1 = input$dca_peak_lf_thresh,
-            trough_lf_thresh1 = input$dca_trough_lf_thresh,
-            sz_frac_for_peak = input$dca_sz_frac_for_peak,
-            color_breaks = color_breaks,
-            n_smooth = n_smooth
-        )
-    }, res = 96) %>%
+            mct_plot_region(
+                shiny_mct, intervals(),
+                detect_dca = input$detect_dca %||% FALSE,
+                gene_annot = TRUE,
+                hc = hc,
+                peak_lf_thresh1 = input$dca_peak_lf_thresh,
+                trough_lf_thresh1 = input$dca_trough_lf_thresh,
+                sz_frac_for_peak = input$dca_sz_frac_for_peak,
+                color_breaks = color_breaks,
+                n_smooth = n_smooth
+            )
+        },
+        res = 96
+    ) %>%
         bindCache(
             intervals(),
             input$detect_dca,

@@ -1,4 +1,3 @@
-
 #' Cluster atac peaks based on atac distributions
 #'
 #' @param atac_mc a McPeaks object

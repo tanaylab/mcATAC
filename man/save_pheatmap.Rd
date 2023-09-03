@@ -9,7 +9,8 @@ save_pheatmap(x, filename, dev = png, width = 2000, height = 2000, res = 150)
 \arguments{
 \item{filename}{the output file path.
     The page number is substituted if a C integer format is included in
-    the character string, as in the default.  (The result must be less
+    the character string, as in the default.  (Depending on the platform,
+    the result should be less
     than \code{PATH_MAX} characters long, and may be truncated if not.
     See \code{\link[grDevices]{postscript}} for further details.)  Tilde expansion
     is performed where supported by the platform.  An input with

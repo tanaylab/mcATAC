@@ -1,4 +1,3 @@
-
 #' Plot a genomic region
 #'
 #' @param mct an McTracks object.
