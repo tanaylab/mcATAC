@@ -262,7 +262,7 @@ app_server <- function(input, output, session) {
         req(m)
         mat_idxs <- get_heatmap_idx(mat_x, mat_y, m)
 
-        gene <- toupper(promoters[promoters$coords == input$genes, ]$geneSymbol)
+        gene <- promoters[promoters$coords == input$genes, ]$geneSymbol
         req(gene %in% rownames(shiny_mct@rna_egc))
 
         mcs <- intersect(colnames(shiny_mct@rna_egc), colnames(m))
