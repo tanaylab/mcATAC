@@ -331,7 +331,7 @@ app_server <- function(input, output, session) {
         req(m)
         mat_idxs <- get_heatmap_idx(mat_x, mat_y, m)
 
-        gene <- toupper(promoters[promoters$coords == input$genes, ]$geneSymbol)
+        gene <- promoters[promoters$coords == input$genes, ]$geneSymbol
         req(gene %in% rownames(shiny_mct@rna_egc))
 
         mcs <- intersect(colnames(shiny_mct@rna_egc), colnames(m))
@@ -341,7 +341,6 @@ app_server <- function(input, output, session) {
             left_join(shiny_mct@metadata, by = "metacell") %>%
             mutate(coords = rownames(m)[mat_idxs[1]])
 
-        browser()
         scatter_data(data)
     })
     
@@ -352,6 +351,11 @@ app_server <- function(input, output, session) {
         req(mat_y)
         m <- mat2()
         req(m)
+        req(intervals_comparison())
+        flipped=is_comparison_flipped(intervals_comparison())
+        if(flipped){
+            m = m[dim(m)[1]:1,]
+        }
         mat_idxs <- get_heatmap_idx(mat_x, mat_y, m)
 
         gene <- toupper(promoters[promoters$coords == input$genes, ]$geneSymbol)
@@ -468,6 +472,8 @@ app_server <- function(input, output, session) {
         gset_genome(shiny_mct2@genome)
         scope_peaks2 = gintervals.neighbors(gintervals.force_range(as.data.frame(shiny_all_peaks2)), intervals2(), mindist = 0, maxdist = 0)[,1:length(colnames(shiny_all_peaks2))]
         gset_genome(shiny_mct@genome)
+        req(!is.null(scope_peaks))
+        req(!is.null(scope_peaks2))
         comb_mat_tmp = get_comb_mat(
             promoters[promoters$coords == input$genes, ]$geneSymbol,
             shiny_mct, 
