@@ -281,7 +281,7 @@ app_server <- function(input, output, session) {
 
         data %>%
             ggplot(aes(x = atac, y = rna, color = color)) +
-            geom_point(size = 2) +
+            geom_point(size = 4) +
             scale_color_identity() +
             theme_classic() +
             xlab("ATAC") +
@@ -335,6 +335,7 @@ app_server <- function(input, output, session) {
                 shiny_mct, intervals(),
                 downsample = TRUE,
                 downsample_n = 20000000,
+                colors = c("white", "gray", "darkgrey", "black"),
                 detect_dca = input$detect_dca %||% FALSE,
                 gene_annot = TRUE,
                 hc = hc,
@@ -343,7 +344,8 @@ app_server <- function(input, output, session) {
                 sz_frac_for_peak = input$dca_sz_frac_for_peak,
                 color_breaks = color_breaks,
                 n_smooth = n_smooth,
-                plot_x_axis_ticks = FALSE
+                plot_x_axis_ticks = FALSE,
+                color_max_by_type = TRUE
             )
         },
         res = 96
@@ -410,6 +412,7 @@ app_server <- function(input, output, session) {
             input$n_smooth
         )
 
+                color_max_by_type = TRUE
     output$current_coords <- renderText({
         if (is.null(intervals())) {
             return("Please enter valid genomic coordinates (e.g. \"chr3:34300000-35000020\")")
