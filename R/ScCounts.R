@@ -329,7 +329,12 @@ scc_to_peaks <- function(sc_counts, peaks, cells = NULL, metadata = NULL, mc_siz
         )
     }, .parallel = getOption("mcatac.parallel"))
 
-    mat <- Reduce("+", matrices)
+    browser()
+    #mat <- Reduce("+", matrices)
+    binded <- purrr::map_dfr(matrices, ~ as.data.frame(Matrix::summary(.x)))
+    mat <- Matrix::sparseMatrix(i = binded$i, j = binded$j, x = binded$x)
+    colnames(mat) <- colnames(matrices[[1]])
+    rownames(mat) <- rownames(matrices[[1]])
 
     sc_atac <- new("ScPeaks", mat = mat, peaks = peaks, genome = sc_counts@genome, id = sc_counts@id, description = sc_counts@description, metadata = metadata, path = sc_counts@path)
 

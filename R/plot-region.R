@@ -71,7 +71,7 @@ get_raw_mat <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, d
 #' }
 #'
 #' @export
-mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, genes_correlations = NULL, cor_colors = c("blue", "white", "white", "white", "red"), cor_color_breaks = c(-1, -0.05, 0, 0.05, 1), min_atac_sum=10, ...) {
+mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, genes_correlations = NULL, cor_colors = c("blue", "white", "white", "white", "red"), cor_color_breaks = c(-1, -0.05, 0, 0.05, 1), min_atac_sum=10, color_max_by_type=FALSE,...) {
     gset_genome(mct@genome)
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
@@ -138,7 +138,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
         dca_mat <- NULL
         n_smooth <- 1
     }
-    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, y_seps = y_seps, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels, genome = mct@genome, plot_x_axis_ticks = plot_x_axis_ticks, gene_annot_pos = gene_annot_pos, flip = flip)
+    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, y_seps = y_seps, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels, genome = mct@genome, plot_x_axis_ticks = plot_x_axis_ticks, gene_annot_pos = gene_annot_pos, flip = flip, color_max_by_type=color_max_by_type)
 }
 
 #' Plot a genomic region given a matrix
@@ -158,7 +158,7 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 #' @param flip whether to flip the coordinates (optional)
 #'
 #' @export
-plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, y_seps = NULL, y_seps_lty = 2, y_seps_lwd = 1, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE, genome = NULL, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE) {
+plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, y_seps = NULL, y_seps_lty = 2, y_seps_lwd = 1, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE, genome = NULL, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", flip = FALSE, color_max_by_type=FALSE) {
     mat_smooth <- RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
 
     if (gene_annot) {
@@ -219,8 +219,19 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
 
     par(mar = c(bottom_mar, 0, top_mar, 2))
     shades <- colorRampPalette(colors)(1000)
-    mat_smooth[mat_smooth > max(color_breaks)] <- max(color_breaks)
-    shades_breaks <- approx(color_breaks, n = 1001)$y
+    if(color_max_by_type){
+        shades_breaks <- approx(color_breaks, n = 1001)$y
+        for(i in 1:length(mc_colors)){
+            coli = mat_smooth[,i]
+            coli[coli > max(color_breaks)] <- max(color_breaks)-1+i
+            mat_smooth[,i] = coli
+        }
+        shades_breaks = c(shades_breaks, max(color_breaks) - 1 + 1:length(mc_colors))
+        shades = c(shades, mc_colors)
+    } else{
+        mat_smooth[mat_smooth > max(color_breaks)] <- max(color_breaks)
+        shades_breaks <- approx(color_breaks, n = 1001)$y
+    }
     if (flip) {
         mat_smooth <- mat_smooth[nrow(mat_smooth):1, , drop = FALSE]
     }

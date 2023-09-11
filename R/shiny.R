@@ -407,7 +407,7 @@ app_server <- function(input, output, session) {
 
         data %>%
             ggplot(aes(x = atac, y = rna, color = color)) +
-            geom_point(size = 2) +
+            geom_point(size = 4) +
             scale_color_identity() +
             theme_classic() +
             xlab("ATAC") +
@@ -445,7 +445,7 @@ app_server <- function(input, output, session) {
         raw_mat2 <- get_raw_mat(
             shiny_mct2, intervals2(),
             downsample = TRUE,
-            downsample_n = 2500000,
+            downsample_n = 10000000,
             detect_dca = input$detect_dca %||% FALSE,
             gene_annot = TRUE,
             hc = shiny_hc2,
@@ -545,6 +545,7 @@ app_server <- function(input, output, session) {
                 shiny_mct, intervals(),
                 downsample = TRUE,
                 downsample_n = 20000000,
+                colors = c("white", "gray", "darkgrey", "black"),
                 detect_dca = input$detect_dca %||% FALSE,
                 gene_annot = TRUE,
                 hc = hc,
@@ -553,7 +554,8 @@ app_server <- function(input, output, session) {
                 sz_frac_for_peak = input$dca_sz_frac_for_peak,
                 color_breaks = color_breaks,
                 n_smooth = n_smooth,
-                plot_x_axis_ticks = FALSE
+                plot_x_axis_ticks = FALSE,
+                color_max_by_type = TRUE
             )
         },
         res = 96
@@ -694,7 +696,7 @@ app_server <- function(input, output, session) {
             mct_plot_region(
                 shiny_mct2, intervals2(),
                 downsample = TRUE,
-                downsample_n = 2500000,
+                downsample_n = 10000000,
                 detect_dca = input$detect_dca %||% FALSE,
                 gene_annot = FALSE,
                 hc = NULL,
@@ -752,7 +754,8 @@ app_server <- function(input, output, session) {
             mct_plot_region(
                 shiny_mct2, intervals2(),
                 downsample = TRUE,
-                downsample_n = 2500000,
+                downsample_n = 10000000,
+                colors = c("white", "gray", "darkgrey", "black"),
                 detect_dca = input$detect_dca %||% FALSE,
                 gene_annot = TRUE,
                 hc = shiny_hc2,
@@ -763,7 +766,8 @@ app_server <- function(input, output, session) {
                 n_smooth = n_smooth,
                 gene_annot_pos = "bottom",
                 flip = is_comparison_flipped(intervals_comparison()),
-                plot_x_axis_ticks = FALSE
+                plot_x_axis_ticks = FALSE,
+                color_max_by_type = TRUE
             )
             gset_genome(mct@genome)
         },
@@ -783,7 +787,10 @@ app_server <- function(input, output, session) {
         if (is.null(intervals())) {
             return("Please enter valid genomic coordinates (e.g. \"chr3:34300000-35000020\")")
         }
-        paste0(intervals()$chrom, ":", intervals()$start, "-", intervals()$end, " (", scales::comma(intervals()$end - intervals()$start), " bp)")
+        paste0(
+            paste0(intervals()$chrom, ":", intervals()$start, "-", intervals()$end, " (", scales::comma(intervals()$end - intervals()$start), " bp)\n"),
+            paste0(intervals2()$chrom, ":", intervals2()$start, "-", intervals2()$end, " (", scales::comma(intervals2()$end - intervals2()$start), " bp)")
+        )
     })
 
     purrr::walk(c(1.5, 3, 10), ~ {

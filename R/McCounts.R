@@ -252,6 +252,7 @@ mcc_read <- function(path, id = NULL, description = NULL, verbose = TRUE) {
 summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
     metacells <- metacells %||% colnames(mat)
     intervs <- as.data.frame(intervs)
+
     if (!has_name(intervs, "peak_name")) {
         cli_abort("The {.var intervs} must have a column called {.field peak_name}")
     }
@@ -283,7 +284,7 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
         mutate(ind = start - bin$start + 1)
 
     group <- factor(mat_intervs$peak_name, levels = intervs$peak_name)
-    mat_f <- mat[mat_intervs$ind, metacells]
+    mat_f <- mat[mat_intervs$ind, metacells, drop=FALSE]
     res <- t(sparse_matrix_tapply_sum(t(mat_f), group))
 
     return(res)
@@ -608,6 +609,7 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
 
     cli_alert_success("Created {length(metacells)} tracks at {track_prefix}")
 
+    gdb.reload()
     mct <- mct_create(genome = mc_counts@genome, tracks = glue("{track_prefix}.mc{metacells}"), metacells = metacells, id = mc_counts@id, description = mc_counts@description, path = mc_counts@path, metadata = mc_counts@metadata, resolution = resolution, window_size = window_size, marginal_track = marginal_track)
     return(mct)
 }
