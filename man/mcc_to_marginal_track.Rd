@@ -11,7 +11,10 @@ mcc_to_marginal_track(
   metacells = NULL,
   resolution = 10,
   window_size = 100,
-  overwrite = FALSE
+  overwrite = FALSE,
+  normalize = TRUE,
+  norm_track = paste0(track, "_norm"),
+  ...
 )
 
 scc_to_marginal_track(
@@ -20,7 +23,10 @@ scc_to_marginal_track(
   cells = NULL,
   resolution = 10,
   window_size = 100,
-  overwrite = FALSE
+  overwrite = FALSE,
+  normalize = TRUE,
+  norm_track = paste0(track, "_norm"),
+  ...
 )
 }
 \arguments{
@@ -35,6 +41,18 @@ scc_to_marginal_track(
 \item{window_size}{The size of the window used to smooth the counts. The counts of at position i are smoothed by a sum of the counts of \link{i - window_size, i + window_size}. If NULL - the counts are not smoothed.}
 
 \item{overwrite}{Whether to overwrite existing tracks.}
+
+\item{normalize}{Normalize each metacell by the sum of its counts.}
+
+\item{norm_track}{The name of the normalized track to be created.}
+
+\item{...}{
+  Arguments passed on to \code{\link[=normalize_marginal]{normalize_marginal}}
+  \describe{
+    \item{\code{orig_track}}{The original track to be normalized.}
+    \item{\code{iterator}}{The iterator used for smoothing the track.}
+    \item{\code{floor_percentile}}{The percentile used to calculate the floored smoothed track value.}
+  }}
 
 \item{sc_counts}{An ScCounts object}
 
