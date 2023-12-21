@@ -2,7 +2,8 @@
 % Please edit documentation in R/McCounts.R
 \name{mcc_to_marginal_track}
 \alias{mcc_to_marginal_track}
-\title{Create a track with smoothed marginal counts from a McCounts object}
+\alias{scc_to_marginal_track}
+\title{Create a track with smoothed marginal counts from an ScCounts/McCounts object}
 \usage{
 mcc_to_marginal_track(
   mc_counts,
@@ -12,9 +13,18 @@ mcc_to_marginal_track(
   window_size = 100,
   overwrite = FALSE
 )
+
+scc_to_marginal_track(
+  sc_counts,
+  track,
+  cells = NULL,
+  resolution = 10,
+  window_size = 100,
+  overwrite = FALSE
+)
 }
 \arguments{
-\item{mc_counts}{A McCounts object}
+\item{mc_counts}{An McCounts object}
 
 \item{track}{The name of the track to create.}
 
@@ -25,12 +35,16 @@ mcc_to_marginal_track(
 \item{window_size}{The size of the window used to smooth the counts. The counts of at position i are smoothed by a sum of the counts of \link{i - window_size, i + window_size}. If NULL - the counts are not smoothed.}
 
 \item{overwrite}{Whether to overwrite existing tracks.}
+
+\item{sc_counts}{An ScCounts object}
+
+\item{cells}{The cells for which to create the track.}
 }
 \value{
 None.
 }
 \description{
-Create a track with smoothed marginal counts from a McCounts object
+Create a track with smoothed marginal counts from an ScCounts/McCounts object
 }
 \examples{
 \dontrun{
