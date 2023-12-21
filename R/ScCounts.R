@@ -169,7 +169,7 @@ mcc_write <- function(object, out_dir, overwrite = FALSE) {
 
 #' Read an ScCounts object from a directory
 #'
-#' @param path path to the directory containing the object (which was created by \code{write_sc_counts_from_fragments/bam})
+#' @param path path to the directory containing the object (which was created by \code{scc_from_fragments/bam})
 #' @param id an identifier for the object (optional)
 #' @param description description of the object (optional)
 #' @param verbose print success message (default: TRUE)

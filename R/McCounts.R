@@ -204,7 +204,7 @@ scc_project_on_mc <- function(sc_counts, cell_to_metacell, ignore_metacells = c(
 
 #' Read an McCounts object from a directory
 #'
-#' @param path path to the directory containing the object (which was created by \code{write_sc_counts_from_bam})
+#' @param path path to the directory containing the object (which was created by \code{scc_from_bam})
 #'
 #' @return A McCounts object
 #'
@@ -629,7 +629,7 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
 #'
 #' @export
 mcc_to_marginal_track <- function(mc_counts, track, metacells = NULL, resolution = 10, window_size = 100, overwrite = FALSE) {
-    assert_atac_object(mc_counts, class = "McCounts")
+    assert_atac_object(mc_counts, class = "ATAC")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
     gset_genome(mc_counts@genome)

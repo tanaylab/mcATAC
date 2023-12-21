@@ -25,7 +25,8 @@ https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/pipelines
 
 \item{genome}{Genome name, such as 'hg19' or 'mm10'.}
 
-\item{binsize}{bin size of the newly created 'Dense' track or '0' for a 'Sparse' track}
+\item{binsize}{bin size of the newly created 'Dense' track or '0' for a
+'Sparse' track}
 
 \item{overwrite}{Overwrite the existing track if it exists.}
 

@@ -212,13 +212,13 @@ write_sparse_matrix_from_fragments <- function(fragments_file, out_file, cell_na
 #'
 #' @examples
 #' \dontrun{
-#' write_sc_counts_from_10x("outs", "pbmc_reads", cell_suffix = "batch1", genome = "hg38")
+#' scc_from_10x("outs", "pbmc_reads", cell_suffix = "batch1", genome = "hg38")
 #' }
 #'
-#' @inheritParams write_sc_counts_from_fragments
+#' @inheritParams scc_from_fragments
 #'
 #' @export
-write_sc_counts_from_10x <- function(input_dir, out_dir, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = NULL) {
+scc_from_10x <- function(input_dir, out_dir, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = NULL) {
     fragments_file <- file.path(input_dir, "atac_fragments.tsv.gz")
     if (!file.exists(fragments_file)) {
         cli_abort("File {.file {fragments_file}} does not exist.")
@@ -228,8 +228,21 @@ write_sc_counts_from_10x <- function(input_dir, out_dir, cell_suffix = NULL, gen
         cli_abort("File {.file {barcodes_file}} does not exist.")
     }
     barcodes <- tgutil::fread(barcodes_file, header = FALSE, stringsAsFactors = FALSE)[, 1]
-    write_sc_counts_from_fragments(fragments_file, out_dir, barcodes, cell_suffix = cell_suffix, genome = genome, bin_size = bin_size, overwrite = overwrite, id = id, description = description, verbose = verbose, tabix_bin = tabix_bin, chromosomes = chromosomes)
+    scc_from_fragments(fragments_file, out_dir, barcodes, cell_suffix = cell_suffix, genome = genome, bin_size = bin_size, overwrite = overwrite, id = id, description = description, verbose = verbose, tabix_bin = tabix_bin, chromosomes = chromosomes)
 }
+
+#' @rdname scc_from_10x
+#' @export
+write_sc_counts_from_10x <- function(input_dir, out_dir, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = NULL) {
+    lifecycle::deprecate_soft(
+        when = "0.0.2",
+        what = "write_sc_counts_from_10x",
+        with = "scc_from_10x"
+    )
+
+    scc_from_10x(input_dir, out_dir, cell_suffix = cell_suffix, genome = genome, bin_size = bin_size, overwrite = overwrite, id = id, description = description, verbose = verbose, tabix_bin = tabix_bin, chromosomes = chromosomes)
+}
+
 
 #' Write single cell counts from a 10x fragments file
 #'
@@ -253,12 +266,12 @@ write_sc_counts_from_10x <- function(input_dir, out_dir, cell_suffix = NULL, gen
 #'
 #' @examples
 #' \dontrun{
-#' write_sc_counts_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_reads", cell_names = atac_sc)
-#' write_sc_counts_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_reads", cell_names = atac_sc, chromosomes = paste0("chr", c(1:22, "X", "Y")))
+#' scc_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_reads", cell_names = atac_sc)
+#' scc_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_reads", cell_names = atac_sc, chromosomes = paste0("chr", c(1:22, "X", "Y")))
 #' }
 #'
 #' @export
-write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = gintervals.all()$chrom) {
+scc_from_fragments <- function(fragments_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = gintervals.all()$chrom) {
     withr::local_options(list(scipen = 1e5))
     data_dir <- file.path(out_dir, "data")
     if (dir.exists(out_dir)) {
@@ -322,6 +335,30 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
     cli_alert_success("Created an ScCounts object at {.file {out_dir}}")
 }
 
+#' @rdname scc_from_fragments
+#' @export
+write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = gintervals.all()$chrom) {
+    lifecycle::deprecate_soft(
+        when = "0.0.2",
+        what = "write_sc_counts_from_fragments",
+        with = "scc_from_fragments"
+    )
+
+    scc_from_fragments(fragments_file, out_dir, cell_names, cell_suffix = cell_suffix, genome = genome, bin_size = bin_size, overwrite = overwrite, id = id, description = description, verbose = verbose, tabix_bin = tabix_bin, chromosomes = chromosomes)
+}
+
+#' @rdname scc_from_bam
+#' @export
+write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", min_mapq = NULL, samtools_bin = "samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE) {
+    lifecycle::deprecate_soft(
+        when = "0.0.2",
+        what = "write_sc_counts_from_bam",
+        with = "scc_from_bam"
+    )
+
+    scc_from_bam(bam_file, out_dir, cell_names, cell_suffix = cell_suffix, genome = genome, bin_size = bin_size, overwrite = overwrite, id = id, description = description, min_mapq = min_mapq, samtools_bin = samtools_bin, samtools_opts = samtools_opts, num_reads = num_reads, verbose = verbose)
+}
+
 #' Write single cell counts from an indexed bam file
 #'
 #' @param out_dir output directory.
@@ -334,15 +371,15 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
 #' @return None
 #'
 #' @inheritParams write_sparse_matrix_from_bam
-#' @inheritParams write_sc_counts_from_fragments
+#' @inheritParams scc_from_fragments
 #'
 #' @examples
 #' \dontrun{
-#' write_sc_counts_from_bam("pbmc_data/possorted_bam.bam", "pbmc_reads", cell_names = atac_sc)
+#' scc_from_bam("pbmc_data/possorted_bam.bam", "pbmc_reads", cell_names = atac_sc)
 #' }
 #'
 #' @export
-write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE, overwrite = FALSE) {
+scc_from_bam <- function(bam_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE, overwrite = FALSE) {
     withr::local_options(list(scipen = 1e5))
     data_dir <- file.path(out_dir, "data")
     if (dir.exists(out_dir)) {

@@ -7,7 +7,7 @@
 mcc_read(path, id = NULL, description = NULL, verbose = TRUE)
 }
 \arguments{
-\item{path}{path to the directory containing the object (which was created by \code{write_sc_counts_from_bam})}
+\item{path}{path to the directory containing the object (which was created by \code{scc_from_bam})}
 
 \item{id}{an identifier for the object (optional)}
 
