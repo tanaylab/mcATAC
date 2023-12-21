@@ -44,7 +44,7 @@ Note that the 'fragments' file is large - ~2GB, so this step might take some tim
 We can now import the raw reads into a `ScCounts` object that we are going to store at "pbmc_data/reads". Note that this might take ~4 minutes on a machine with 96 cores. 
 
 ```{r import-scounts, eval = FALSE}
-barcodes <- tgutil::fread("pbmc_data/barcodes.tsv", header = FALSE)[, 1]
+barcodes <- tgutil::fread("pbmc_data/barcodes.csv", header = FALSE)[, 1]
 scc_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_data/reads", cell_names = barcodes, genome = "hg38", overwrite = TRUE)
 ```
 

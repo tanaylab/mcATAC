@@ -392,15 +392,21 @@ mcc_metacell_total_cov <- function(mc_counts, metacells = NULL) {
     return(mc_covs)
 }
 
-#' Return the total coverage of each non-zero coordinate in an McCounts object
+#' Return the total coverage of each non-zero coordinate in an ScCounts/McCounts object
 #'
 #' @param mc_counts a McCounts object
 #' @param metacells names of metacells to include. Default: all metacells.
+#' @param cells names of cells to include. Default: all cells.
 #'
 #' @return an intervals set with an additional column called "cov" with the total coverage for each coordinate
 #'
 #' @examples
 #' \dontrun{
+#' # cell counts
+#' sc_counts <- scc_read("pbmc_reads")
+#' sc_mars <- scc_marginal(sc_counts)
+#'
+#' # metacell counts
 #' mc_counts <- mcc_read("pbmc_reads_mc")
 #' mc_mars <- mcc_marginal(mc_counts)
 #' }
@@ -422,6 +428,11 @@ mcc_marginal <- function(mc_counts, metacells = NULL) {
         as_tibble()
 
     return(mars)
+}
+
+#' @rdname mcc_marginal
+scc_marginal <- function(sc_counts, cells = NULL) {
+    mcc_marginal(sc_counts, cells)
 }
 
 #' Normalize each metacell in a McCounts object by its total counts
@@ -612,11 +623,13 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
     return(mct)
 }
 
-#' Create a track with smoothed marginal counts from a McCounts object
+#' Create a track with smoothed marginal counts from an ScCounts/McCounts object
 #'
-#' @param mc_counts A McCounts object
+#' @param mc_counts An McCounts object
+#' @param sc_counts An ScCounts object
 #' @param track The name of the track to create.
 #' @param metacells The metacells for which to create the track. If NULL, all metacells will be used.
+#' @param cells The cells for which to create the track.
 #'
 #' @return None.
 #'
@@ -651,6 +664,12 @@ mcc_to_marginal_track <- function(mc_counts, track, metacells = NULL, resolution
         resolution = resolution,
         overwrite = overwrite
     )
+}
+
+#' @rdname mcc_to_marginal_track
+#' @export
+scc_to_marginal_track <- function(sc_counts, track, cells = NULL, resolution = 10, window_size = 100, overwrite = FALSE) {
+    mcc_to_marginal_track(sc_counts, track, cells, resolution, window_size, overwrite)
 }
 
 #' Create a smoothed track from a data frame
