@@ -2,9 +2,27 @@
 % Please edit documentation in R/import-counts.R
 \name{write_sc_counts_from_bam}
 \alias{write_sc_counts_from_bam}
+\alias{scc_from_bam}
 \title{Write single cell counts from an indexed bam file}
 \usage{
 write_sc_counts_from_bam(
+  bam_file,
+  out_dir,
+  cell_names,
+  cell_suffix = NULL,
+  genome = NULL,
+  bin_size = 50000000,
+  overwrite = FALSE,
+  id = "",
+  description = "",
+  min_mapq = NULL,
+  samtools_bin = "samtools",
+  samtools_opts = NULL,
+  num_reads = NULL,
+  verbose = FALSE
+)
+
+scc_from_bam(
   bam_file,
   out_dir,
   cell_names,
@@ -36,6 +54,8 @@ The suffix would be added in the following way: \code{paste0(cell_name, "-", cel
 \item{bin_size}{Size of the genomic bins to use (in bp). Each chromsome will be chunked into bins with size which is
 smaller than this value. Default is 50Mb.}
 
+\item{overwrite}{overwrite existing directory (optional)}
+
 \item{id}{an identifier for the object, e.g. "pbmc".}
 
 \item{description}{description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"}
@@ -49,8 +69,6 @@ smaller than this value. Default is 50Mb.}
 \item{num_reads}{number of reads (within the \code{region}) to process (optional).}
 
 \item{verbose}{verbose output (optional)}
-
-\item{overwrite}{overwrite existing directory (optional)}
 }
 \value{
 None
@@ -60,7 +78,7 @@ Write single cell counts from an indexed bam file
 }
 \examples{
 \dontrun{
-write_sc_counts_from_bam("pbmc_data/possorted_bam.bam", "pbmc_reads", cell_names = atac_sc)
+scc_from_bam("pbmc_data/possorted_bam.bam", "pbmc_reads", cell_names = atac_sc)
 }
 
 }

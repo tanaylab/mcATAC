@@ -1,8 +1,8 @@
 ---
-title: "peaks"
+title: "Analysis"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{peaks}
+  %\VignetteIndexEntry{Analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -45,13 +45,13 @@ We can now import the raw reads into a `ScCounts` object that we are going to st
 
 ```{r import-scounts, eval = FALSE}
 barcodes <- tgutil::fread("pbmc_data/barcodes.tsv", header = FALSE)[, 1]
-write_sc_counts_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_data/reads", cell_names = barcodes, genome = "hg38", overwrite = TRUE)
+scc_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_data/reads", cell_names = barcodes, genome = "hg38", overwrite = TRUE)
 ```
 
 If you have multiple batches, please add a suffix to the cell names using the `cell_suffix` parameter, e.g.:
 
 ```{r, eval = FALSE}
-write_sc_counts_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_data/reads", cell_names = barcodes, cell_suffix = "batch1", genome = "hg38", overwrite = TRUE)
+scc_from_fragments("pbmc_data/fragments.tsv.gz", "pbmc_data/reads", cell_names = barcodes, cell_suffix = "batch1", genome = "hg38", overwrite = TRUE)
 ```
 
 ## Load ScCounts object
@@ -88,28 +88,28 @@ mct
 
 > The window size paramter controls the smoothing of the tracks. If it set to NULL, the tracks will not be smoothed, except for the resolution.
 
-We can now use the tracks we have created to identify peaks (for 'trans' analysis), or to analyse the genomic regions in 'cis'. 
+We can now use the tracks we have created to identify candidate regularoty elements (CREs) for 'trans' analysis, or to analyse the genomic regions in 'cis'. 
 
-## Identify peaks
+## Identify CREs (candidate regulatory elements)
 
-We can now use the marginal track we created in order to identify peaks: 
+We can now use the marginal track we created in order to identify CREs: 
 
 ```{r identify-peaks}
-peaks <- call_peaks("pbmc_mc.marginal", quantile_thresh = 0.9, min_umis = 8, target_size = 500, genome = "hg38")
+cres <- call_peaks("pbmc_mc.marginal", quantile_thresh = 0.9, min_umis = 8, target_size = 500, genome = "hg38")
 ```
 
 We can diagnose our peak calling by plotting the marginal track: 
 
 ```{r plot-marginal, fig.width=12, fig.height=5}
-plot_marginal_coverage("pbmc_mc.marginal", interval = peaks[967, ], window_size = 500, peaks = peaks, expand = 1e4, show_thresh = TRUE, quantile_thresh = 0.9, min_umis = 8, genome = "hg38", log_scale = FALSE)
+plot_marginal_coverage("pbmc_mc.marginal", interval = cres[967, ], window_size = 500, peaks = cres, expand = 1e4, show_thresh = TRUE, quantile_thresh = 0.9, min_umis = 8, genome = "hg38", log_scale = FALSE)
 ```
 
 ## Create a McPeaks object from McCounts object 
 
-After we have indentified the peaks, we can create a `McPeaks` object from the `McCounts` object that we have created.
+After we have indentified the CREs, we can create a `McPeaks` object from the `McCounts` object that we have created.
 
 ```{r mc-atac}
-atac_mc <- mcc_to_mcatac(mc_counts, peaks)
+atac_mc <- mcc_to_mcatac(mc_counts, cres)
 atac_mc
 ```
 

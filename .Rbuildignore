@@ -12,3 +12,5 @@
 pbmc_data/
 ^data-raw$
 pbmc_data/reads/
+^work/.*
+^.vscode/.*
