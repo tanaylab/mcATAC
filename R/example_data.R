@@ -20,6 +20,7 @@
 #'
 #' @export
 download_pbmc_example_data <- function(dir = "pbmc_data", fragments = FALSE) {
+    withr::local_options(list(timeout = 1e4))    
     url <- "https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k"
     file_url <- "https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.tar.gz"
 
