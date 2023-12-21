@@ -99,6 +99,7 @@ Collate:
     'mcATAC-package.R'
     'metadata.R'
     'motifs.R'
+    'pcr-bias.R'
     'peak_calling.R'
     'plot-markers.R'
     'plot-region.R'

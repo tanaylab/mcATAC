@@ -639,9 +639,11 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
 #' }
 #'
 #' @inheritParams mcc_to_tracks
+#' @inheritParams normalize_marginal
+#' @inheritDotParams normalize_marginal
 #'
 #' @export
-mcc_to_marginal_track <- function(mc_counts, track, metacells = NULL, resolution = 10, window_size = 100, overwrite = FALSE) {
+mcc_to_marginal_track <- function(mc_counts, track, metacells = NULL, resolution = 10, window_size = 100, overwrite = FALSE, normalize = TRUE, norm_track = paste0(track, "_norm"), ...) {
     assert_atac_object(mc_counts, class = "ATAC")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
@@ -664,12 +666,16 @@ mcc_to_marginal_track <- function(mc_counts, track, metacells = NULL, resolution
         resolution = resolution,
         overwrite = overwrite
     )
+
+    if (normalize) {
+        normalize_marginal(orig_track = track, norm_track = norm_track, overwrite = overwrite, ...)
+    }
 }
 
 #' @rdname mcc_to_marginal_track
 #' @export
-scc_to_marginal_track <- function(sc_counts, track, cells = NULL, resolution = 10, window_size = 100, overwrite = FALSE) {
-    mcc_to_marginal_track(sc_counts, track, cells, resolution, window_size, overwrite)
+scc_to_marginal_track <- function(sc_counts, track, cells = NULL, resolution = 10, window_size = 100, overwrite = FALSE, normalize = TRUE, norm_track = paste0(track, "_norm"), ...) {
+    mcc_to_marginal_track(sc_counts, track, cells, resolution, window_size, overwrite, normalize, norm_track, ...)
 }
 
 #' Create a smoothed track from a data frame
