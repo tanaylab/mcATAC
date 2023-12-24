@@ -7,6 +7,7 @@
 normalize_marginal(
   orig_track,
   norm_track,
+  smoothed_track = NULL,
   window_size = 20000,
   iterator = 1000,
   floor_percentile = 0.1,
@@ -17,6 +18,9 @@ normalize_marginal(
 \item{orig_track}{The original track to be normalized.}
 
 \item{norm_track}{The name of the normalized track to be created.}
+
+\item{smoothed_track}{The name of the smoothed track to be created.
+The original track is normalized by this track. If NULL, a temporary track is created.}
 
 \item{window_size}{The size of the windows used for smoothing the track.}
 
@@ -39,7 +43,7 @@ floor_percentile of the smoothed track.
 \examples{
 \dontrun{
 mcc_to_marginal_track(mc_counts, "pbmc_mc.marginal")
-normalize_marginal("pbmc_mc.marginal", "pbmc_mc.marginal_norm")
+normalize_marginal("pbmc_mc.marginal", "pbmc_mc.marginal_norm", "pbmc_mc.marginal_smoothed")
 }
 
 }

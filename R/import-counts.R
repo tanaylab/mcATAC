@@ -273,7 +273,7 @@ write_sc_counts_from_10x <- function(input_dir, out_dir, cell_suffix = NULL, gen
 #' @export
 scc_from_fragments <- function(fragments_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = gintervals.all()$chrom) {
     withr::local_options(list(scipen = 1e5))
-    
+
     if (!file.exists(fragments_file)) {
         cli_abort("File {.file {fragments_file}} does not exist.")
     }

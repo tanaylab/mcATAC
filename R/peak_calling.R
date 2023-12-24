@@ -105,15 +105,18 @@ get_quantile_cov_thresh <- function(marginal_track, quantile_thresh, min_umis, w
 #' Call peaks from ATAC marginals track
 #'
 #' @description Peaks are called by screening for genomic regions with a number of UMIs above a quantile of the marginal ATAC counts,
-#' and above \code{min_umis}. Peaks that are longer than \code{max_peak_size} would be splitted equally into smaller peaks.
+#' and above \code{min_umis}. Peaks are then canonized using \code{canonize_peaks}. \cr
+#' If \code{split_peaks} is TRUE, then peaks that are longer than \code{max_peak_size} would be splitted into smaller peaks using \code{split_long_peaks}. \cr
 #'
 #' @param marginal_track Name of the 'misha' track to call peaks from. You can create it using \code{import_atac_marginal}.
 #' @param quantile_thresh Quantile of the marginal track above which peaks are called.
 #' @param min_umis Minimal number of UMIs to call a peak.
 #' @param genome Genome name, such as 'hg19' or 'mm10'. If NULL - the current misha database is used.
-#' @param split_peaks Split peaks that are longer than \code{max_peak_size} into smaller peaks using \code{split_long_peaks}.
+#' @param canonize Whether to canonize the peaks using \code{canonize_peaks}. Default is TRUE.
+#' @param split_peaks Split peaks that are longer than \code{max_peak_size} into smaller peaks using \code{split_long_peaks}. Default is FALSE.
 #' @param seed random seed for reproducibility (\code{misha::gquantiles} sometimes samples the data)
 #' @inheritParams split_long_peaks
+#' @inheritParams canonize_peaks
 #'
 #' @return an intervals set with the called peaks
 #'
@@ -123,7 +126,7 @@ get_quantile_cov_thresh <- function(marginal_track, quantile_thresh, min_umis, w
 #' }
 #'
 #' @export
-call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, split_peaks = TRUE, target_size = 500, max_peak_size = 1e3, very_long = 5e3, min_peak_size = 200, window_size = target_size, genome = NULL, seed = 60427) {
+call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, canonize = TRUE, split_peaks = FALSE, target_size = 500, max_peak_size = 1e3, very_long = 5e3, min_peak_size = 200, window_size = target_size, genome = NULL, keep_marginal = FALSE, seed = 60427) {
     if (!is.null(genome)) {
         gset_genome(genome)
     }
@@ -137,6 +140,10 @@ call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, spli
 
     if (split_peaks) {
         df <- split_long_peaks(marginal_track, peaks = df, target_size = target_size, max_peak_size = max_peak_size, very_long = very_long, min_peak_size = min_peak_size, window_size = window_size)
+    }
+
+    if (canonize) {
+        df <- canonize_peaks(df, size = target_size, marginal_track = marginal_track, keep_marginal = keep_marginal)
     }
 
     return(df)
