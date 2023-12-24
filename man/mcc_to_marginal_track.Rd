@@ -9,7 +9,7 @@ mcc_to_marginal_track(
   mc_counts,
   track,
   metacells = NULL,
-  resolution = 10,
+  resolution = 20,
   window_size = 100,
   overwrite = FALSE,
   normalize = TRUE,
