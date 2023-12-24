@@ -643,7 +643,7 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
 #' @inheritDotParams normalize_marginal
 #'
 #' @export
-mcc_to_marginal_track <- function(mc_counts, track, metacells = NULL, resolution = 10, window_size = 100, overwrite = FALSE, normalize = TRUE, norm_track = paste0(track, "_norm"), smoothed_track = paste0(track, "_smoothed"), ...) {
+mcc_to_marginal_track <- function(mc_counts, track, metacells = NULL, resolution = 20, window_size = 100, overwrite = FALSE, normalize = TRUE, norm_track = paste0(track, "_norm"), smoothed_track = paste0(track, "_smoothed"), ...) {
     assert_atac_object(mc_counts, class = "ATAC")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
