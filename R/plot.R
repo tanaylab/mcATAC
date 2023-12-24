@@ -687,7 +687,7 @@ plot_tracks_at_locus <- function(tracks = NULL,
 #' @return gene annotations: a binary vector for exon locations and associated text labels for starts and ends of transcripts
 #' @noRd
 make_gene_annot <- function(intervals, iterator) {
-    file_path <- file.path(dirname(GROOT), "annots", "refGene.txt")
+    file_path <- file.path(dirname(.misha$GROOT), "annots", "refGene.txt")
     if (!file.exists(file_path)) {
         cli_alert_warning("Gene annotations do not exist in the appropriate location ({.val {file_path}}). Not annotating genes...")
         genes_ha <- list(labels = NULL, label_coords = NULL, exon_coords = NULL)
