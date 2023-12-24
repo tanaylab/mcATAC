@@ -16,7 +16,7 @@ PeakIntervals <- function(intervals, genome = NULL) {
     validate_peaks(intervals)
 
     if (!is.null(genome)) {
-        withr::defer(gsetroot(GROOT))
+        withr::defer(gsetroot(.misha$GROOT))
         gset_genome(genome)
         bad_intervals <- intervals %>%
             filter(chrom %!in% gintervals.all()$chrom)

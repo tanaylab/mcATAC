@@ -376,7 +376,7 @@ run_app <- function(mct,
     } else {
         shiny_hc <<- NULL
     }
-    gset_genome(mct@genome)
+    gset_genome(mct@genome, force = FALSE)
     shiny::shinyApp(
         ui = app_ui,
         server = app_server,

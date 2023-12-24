@@ -242,7 +242,7 @@ get_peaks_for_pssm <- function(atac) {
 #' @export
 get_available_pssms <- function(pssm_path = NULL, datasets_of_interest = NULL, return_datasets_only = FALSE) {
     if (is.null(pssm_path)) {
-        pssm_path <- file.path(GROOT, "pssms")
+        pssm_path <- file.path(.misha$GROOT, "pssms")
         if (!dir.exists(pssm_path)) {
             cli_abort("The default {.var pssm_path} directory ({.val pssm_path}) does not exist. Make sure you have set up misha gdb correctly.")
         }
