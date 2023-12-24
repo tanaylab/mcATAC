@@ -8,6 +8,8 @@
 #'
 #' @param orig_track The original track to be normalized.
 #' @param norm_track The name of the normalized track to be created.
+#' @param smoothed_track The name of the smoothed track to be created.
+#' The original track is normalized by this track. If NULL, a temporary track is created.
 #' @param window_size The size of the windows used for smoothing the track.
 #' @param iterator The iterator used for smoothing the track.
 #' @param floor_percentile The percentile used to calculate the floored smoothed track value.
@@ -17,13 +19,15 @@
 #' @examples
 #' \dontrun{
 #' mcc_to_marginal_track(mc_counts, "pbmc_mc.marginal")
-#' normalize_marginal("pbmc_mc.marginal", "pbmc_mc.marginal_norm")
+#' normalize_marginal("pbmc_mc.marginal", "pbmc_mc.marginal_norm", "pbmc_mc.marginal_smoothed")
 #' }
 #'
 #' @export
-normalize_marginal <- function(orig_track, norm_track, window_size = 20e3, iterator = 1e3, floor_percentile = 0.1, overwrite = FALSE) {
-    gdir.create("temp", showWarnings = FALSE)
-    smoo_track <- temp_track_name("temp.")
+normalize_marginal <- function(orig_track, norm_track, smoothed_track = NULL, window_size = 20e3, iterator = 1e3, floor_percentile = 0.1, overwrite = FALSE) {
+    if (is.null(smoothed_track)) {
+        gdir.create("temp", showWarnings = FALSE)
+        smoo_track <- temp_track_name("temp.")
+    }
 
     if (gtrack.exists(norm_track)) {
         if (overwrite) {
@@ -38,7 +42,7 @@ normalize_marginal <- function(orig_track, norm_track, window_size = 20e3, itera
     # Create a track of smoothed ATAC signal (geometric mean of window_size windows)
     gtrack.smooth(
         track = smoo_track,
-        description = "Please delete me!",
+        description = glue("Smoothed track of {orig_track} with window size {window_size} and iterator {iterator}"),
         expr = glue("log2(1 + ifelse(is.na({orig_track}), 0, {orig_track}))"),
         winsize = window_size,
         weight_thr = 0,

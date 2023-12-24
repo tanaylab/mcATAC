@@ -112,8 +112,8 @@ test_that("mcc_to_mcatac works", {
 })
 
 test_that("create_smoothed_track_from_dataframe works", {
-    prev_groot <- GROOT
-    withr::defer(gsetroot(GROOT))
+    prev_groot <- .misha$GROOT
+    withr::defer(gsetroot(.misha$GROOT))
     misha.ext::gset_genome("hg38")
     temp_track <- temp_track_name("temp.")
     df <- giterator.intervals(iterator = 1, intervals = gintervals(1, 0, 100)) %>%

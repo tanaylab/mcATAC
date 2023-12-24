@@ -8,13 +8,15 @@ call_peaks(
   marginal_track,
   quantile_thresh = 0.9,
   min_umis = 8,
-  split_peaks = TRUE,
+  canonize = TRUE,
+  split_peaks = FALSE,
   target_size = 500,
   max_peak_size = 1000,
   very_long = 5000,
   min_peak_size = 200,
   window_size = target_size,
   genome = NULL,
+  keep_marginal = FALSE,
   seed = 60427
 )
 }
@@ -25,7 +27,9 @@ call_peaks(
 
 \item{min_umis}{Minimal number of UMIs to call a peak.}
 
-\item{split_peaks}{Split peaks that are longer than \code{max_peak_size} into smaller peaks using \code{split_long_peaks}.}
+\item{canonize}{Whether to canonize the peaks using \code{canonize_peaks}. Default is TRUE.}
+
+\item{split_peaks}{Split peaks that are longer than \code{max_peak_size} into smaller peaks using \code{split_long_peaks}. Default is FALSE.}
 
 \item{target_size}{The target size of peaks.}
 
@@ -39,6 +43,8 @@ call_peaks(
 
 \item{genome}{Genome name, such as 'hg19' or 'mm10'. If NULL - the current misha database is used.}
 
+\item{keep_marginal}{Whether to keep the marginal track in the output. If TRUE, a column named \code{marginal} will be added to the output.}
+
 \item{seed}{random seed for reproducibility (\code{misha::gquantiles} sometimes samples the data)}
 }
 \value{
@@ -46,7 +52,8 @@ an intervals set with the called peaks
 }
 \description{
 Peaks are called by screening for genomic regions with a number of UMIs above a quantile of the marginal ATAC counts,
-and above \code{min_umis}. Peaks that are longer than \code{max_peak_size} would be splitted equally into smaller peaks.
+and above \code{min_umis}. Peaks are then canonized using \code{canonize_peaks}. \cr
+If \code{split_peaks} is TRUE, then peaks that are longer than \code{max_peak_size} would be splitted into smaller peaks using \code{split_long_peaks}. \cr
 }
 \examples{
 \dontrun{

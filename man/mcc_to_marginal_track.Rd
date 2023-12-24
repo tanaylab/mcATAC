@@ -14,6 +14,7 @@ mcc_to_marginal_track(
   overwrite = FALSE,
   normalize = TRUE,
   norm_track = paste0(track, "_norm"),
+  smoothed_track = paste0(track, "_smoothed"),
   ...
 )
 
@@ -45,6 +46,9 @@ scc_to_marginal_track(
 \item{normalize}{Normalize each metacell by the sum of its counts.}
 
 \item{norm_track}{The name of the normalized track to be created.}
+
+\item{smoothed_track}{The name of the smoothed track to be created.
+The original track is normalized by this track. If NULL, a temporary track is created.}
 
 \item{...}{
   Arguments passed on to \code{\link[=normalize_marginal]{normalize_marginal}}
