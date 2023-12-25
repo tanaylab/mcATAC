@@ -95,7 +95,7 @@ We can now use the tracks we have created to identify candidate regularoty eleme
 We can now use the normalized marginal track we created in order to identify CREs: 
 
 ```{r identify-peaks}
-cres <- call_peaks("pbmc_mc.marginal_norm", quantile_thresh = 0.9, min_umis = 8, target_size = 500, genome = "hg38")
+cres <- call_peaks("pbmc_mc.marginal_norm", quantile_thresh = 0.9, min_umis = 8, target_size = 300, genome = "hg38")
 ```
 
 We can diagnose our peak calling by plotting the marginal track: 
