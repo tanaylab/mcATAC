@@ -7,7 +7,7 @@
 #' floor_percentile of the smoothed track.
 #'
 #' @param orig_track The original track to be normalized.
-#' @param norm_track The name of the normalized track to be created.
+#' @param normed_track The name of the normalized track to be created.
 #' @param smoothed_track The name of the smoothed track to be created.
 #' The original track is normalized by this track. If NULL, a temporary track is created.
 #' @param window_size The size of the windows used for smoothing the track.
@@ -23,18 +23,18 @@
 #' }
 #'
 #' @export
-normalize_marginal <- function(orig_track, norm_track, smoothed_track = NULL, window_size = 20e3, iterator = 1e3, floor_percentile = 0.1, overwrite = FALSE) {
+normalize_marginal <- function(orig_track, normed_track, smoothed_track = NULL, window_size = 20e3, iterator = 1e3, floor_percentile = 0.1, overwrite = FALSE) {
     if (is.null(smoothed_track)) {
         gdir.create("temp", showWarnings = FALSE)
         smoothed_track <- temp_track_name("temp.")
     }
 
-    if (gtrack.exists(norm_track)) {
+    if (gtrack.exists(normed_track)) {
         if (overwrite) {
-            cli_alert_warning("Removing previous track {.val {norm_track}}")
-            gtrack.rm(norm_track, force = TRUE)
+            cli_alert_warning("Removing previous track {.val {normed_track}}")
+            gtrack.rm(normed_track, force = TRUE)
         } else {
-            cli_abort("{norm_track} already exists. Use 'overwrite = TRUE' to overwrite.")
+            cli_abort("{normed_track} already exists. Use 'overwrite = TRUE' to overwrite.")
         }
     }
 
@@ -65,12 +65,12 @@ normalize_marginal <- function(orig_track, norm_track, smoothed_track = NULL, wi
 
     # We now normalize the marginal track by the smoothed track.
     # The norm is in log-scale of the value + 1 (geometric mean) hence the exponent of 2 and the -1
-    cli_alert_info("Normalizing track {.val {orig_track}} to track {.val {norm_track}}")
+    cli_alert_info("Normalizing track {.val {orig_track}} to track {.val {normed_track}}")
     expr <- glue("{orig_track} / 2^({smoo_track_floored} - 1)", smoo_track_floored = glue("pmax(1, 1 + ifelse(is.na({smoothed_track}), 0, {smoothed_track} - {floor_val}))"))
     orig_description <- gtrack.attr.export(orig_track)$description
     description <- glue("{orig_description} (normalized by a geometric mean of {window_size}bp windows and iterator of {iterator})")
     gtrack.create(
-        track = norm_track,
+        track = normed_track,
         description = description,
         expr = expr,
         iterator = gtrack.info(orig_track)$bin.size
