@@ -139,10 +139,12 @@ call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, cano
     df <- gscreen(glue("vt_marginal >= thresh"), intervals = gintervals.all())
 
     if (split_peaks) {
+        cli_alert_info("Splitting peaks")
         df <- split_long_peaks(marginal_track, peaks = df, target_size = target_size, max_peak_size = max_peak_size, very_long = very_long, min_peak_size = min_peak_size, window_size = window_size)
     }
 
     if (canonize) {
+        cli_alert_info("Canonizing peaks")
         df <- canonize_peaks(df, size = target_size, marginal_track = marginal_track, keep_marginal = keep_marginal)
     }
 
