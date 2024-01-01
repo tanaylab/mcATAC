@@ -25,6 +25,9 @@
     <loc>/index.html</loc>
   </url>
   <url>
+    <loc>/news/index.html</loc>
+  </url>
+  <url>
     <loc>/reference/ATAC-class.html</loc>
   </url>
   <url>
@@ -77,6 +80,9 @@
   </url>
   <url>
     <loc>/reference/call_peaks.html</loc>
+  </url>
+  <url>
+    <loc>/reference/canonize_peaks.html</loc>
   </url>
   <url>
     <loc>/reference/check_dependencies.html</loc>
@@ -262,7 +268,13 @@
     <loc>/reference/mct_plot_region.html</loc>
   </url>
   <url>
+    <loc>/reference/mct_to_mcatac.html</loc>
+  </url>
+  <url>
     <loc>/reference/name_enhancers.html</loc>
+  </url>
+  <url>
+    <loc>/reference/normalize_marginal.html</loc>
   </url>
   <url>
     <loc>/reference/order_tracks.html</loc>
@@ -331,13 +343,28 @@
     <loc>/reference/save_pheatmap.html</loc>
   </url>
   <url>
+    <loc>/reference/scc_change_names.html</loc>
+  </url>
+  <url>
     <loc>/reference/scc_extract.html</loc>
   </url>
   <url>
-    <loc>/reference/scc_project_on_mc.html</loc>
+    <loc>/reference/scc_from_10x.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scc_from_bam.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scc_from_fragments.html</loc>
   </url>
   <url>
     <loc>/reference/scc_read.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scc_to_mcc.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scc_to_mcc_multi_batch.html</loc>
   </url>
   <url>
     <loc>/reference/scc_to_peaks.html</loc>
@@ -359,12 +386,6 @@
   </url>
   <url>
     <loc>/reference/temp_track_name.html</loc>
-  </url>
-  <url>
-    <loc>/reference/write_sc_counts_from_bam.html</loc>
-  </url>
-  <url>
-    <loc>/reference/write_sc_counts_from_fragments.html</loc>
   </url>
   <url>
     <loc>/reference/write_sparse_matrix_from_bam.html</loc>

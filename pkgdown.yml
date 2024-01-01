@@ -1,8 +1,8 @@
 pandoc: 2.7.3
-pkgdown: 2.0.5
+pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   analysis: analysis.html
   mcATAC: mcATAC.html
-last_built: 2022-11-07T07:33Z
+last_built: 2024-01-01T11:45Z
 
