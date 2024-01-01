@@ -1,8 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-> NOTE: this package is still WIP and should be used with caution
-
 # mcATAC
 
 ## Installation
@@ -36,8 +34,8 @@ Sys.setenv(PATH = paste0(Sys.getenv("PATH"), ":", file.path(cell_ranger_path, "e
 ## Example
 
 ``` r
-if (!dir.exists("pbmc_data")){
-  download_pbmc_example_data()
+if (!dir.exists("pbmc_data")) {
+    download_pbmc_example_data()
 }
 ```
 
