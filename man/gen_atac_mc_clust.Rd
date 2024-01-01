@@ -30,8 +30,9 @@ gen_atac_mc_clust(
 \item{...}{
   Arguments passed on to \code{\link[tglkmeans:TGL_kmeans]{tglkmeans::TGL_kmeans}}
   \describe{
-    \item{\code{df}}{data frame. Each row is a single observation and each column is a dimension.
-the first column can contain id for each observation (if id_column is TRUE).}
+    \item{\code{df}}{a data frame or a matrix. Each row is a single observation and each column is a dimension.
+the first column can contain id for each observation (if id_column is TRUE),
+otherwise the rownames are used.}
     \item{\code{metric}}{distance metric for kmeans++ seeding. can be 'euclid', 'pearson' or 'spearman'}
     \item{\code{max_iter}}{maximal number of iterations}
     \item{\code{min_delta}}{minimal change in assignments (fraction out of all observations) to continue iterating}
@@ -43,6 +44,8 @@ if NULL, no reordering would be done.}
     \item{\code{hclust_intra_clusters}}{run hierarchical clustering within each cluster and return an ordering of the observations.}
     \item{\code{seed}}{seed for the c++ random number generator}
     \item{\code{parallel}}{cluster every cluster parallelly (if hclust_intra_clusters is true)}
+    \item{\code{use_cpp_random}}{use c++ random number generator instead of R's. This should be used for only for
+backwards compatibility, as from version 0.4.0 onwards the default random number generator was changed o R.}
   }}
 }
 \value{

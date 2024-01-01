@@ -226,3 +226,56 @@ mct_subset_metacells <- function(mct, metacells) {
 
     return(mct)
 }
+
+#' Create an McPeaks object from McTracks object
+#'
+#' @description Create an McPeaks object from an McTracks object by extracting the atac data from the tracks at the peaks.
+#'
+#' @param mct an McTracks object
+#'
+#' @return a McPeaks object
+#'
+#' @examples
+#' \dontrun{
+#' atac_mc <- mct_to_mcatac(mct, peaks)
+#' }
+#'
+#' @inheritParams mcc_to_mcatac
+#' @export
+mct_to_mcatac <- function(mct, peaks, metacells = NULL, metadata = NULL, mc_size_eps_q = 0.1, parallel = getOption("mcatac.parallel")) {
+    gset_genome(mct@genome)
+
+    if (parallel) {
+        num_bins <- getOption("mcatac.parallel.nc")
+        withr::local_options(list(gmultitasking = FALSE))
+    } else {
+        num_bins <- round(length(peaks) / 300)
+    }
+
+    # divide the tracks into bins
+    bins_df <- tibble(track = mct@tracks, metacell = mct@metacells) %>%
+        mutate(bin = ceiling(row_number() / (length(mct@tracks) / num_bins)))
+
+    atac_list <- plyr::dlply(bins_df, "bin", function(df) {
+        cli::cli_alert_info("Extracting ATAC data from bin {.val {df$bin[1]}}")
+        vtracks <- paste0("vt_", df$metacell)
+        purrr::walk2(df$track, vtracks, ~ gvtrack.create(.y, .x, func = "sum"))
+        res <- gextract(vtracks, iterator = peaks, intervals = peaks, colnames = df$metacell) %>%
+            arrange(intervalID) %>%
+            select(-intervalID)
+        cli::cli_alert_success("Finished extracting ATAC data from bin {.val {df$bin[1]}}")
+        return(res)
+    }, .parallel = parallel)
+
+    atac_mat <- atac_list %>%
+        map(misha.ext::intervs_to_mat) %>%
+        do.call(cbind, .)
+
+    atac_mat[is.na(atac_mat)] <- 0
+
+    mc_atac <- new("McPeaks", mat = atac_mat, peaks = peaks, genome = mct@genome, id = mct@id, description = mct@description, metadata = metadata, mc_size_eps_q = mc_size_eps_q)
+
+    cli_alert_success("Created a new McPeaks object with {.val {ncol(mc_atac@mat)}} metacells and {.val {nrow(mc_atac@mat)}} ATAC peaks.")
+
+    return(mc_atac)
+}

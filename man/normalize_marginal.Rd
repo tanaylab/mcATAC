@@ -6,7 +6,7 @@
 \usage{
 normalize_marginal(
   orig_track,
-  norm_track,
+  normed_track,
   smoothed_track = NULL,
   window_size = 20000,
   iterator = 1000,
@@ -17,7 +17,7 @@ normalize_marginal(
 \arguments{
 \item{orig_track}{The original track to be normalized.}
 
-\item{norm_track}{The name of the normalized track to be created.}
+\item{normed_track}{The name of the normalized track to be created.}
 
 \item{smoothed_track}{The name of the smoothed track to be created.
 The original track is normalized by this track. If NULL, a temporary track is created.}
