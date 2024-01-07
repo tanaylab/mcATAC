@@ -153,7 +153,6 @@ app_ui <- function(request) {
                 )
             ),
             uiOutput("hover_info", style = "pointer-events: none")
-        )
     )
 }
 
@@ -197,8 +196,7 @@ app_server <- function(input, output, session) {
     observe({
         shinyWidgets::updateVirtualSelect(
             "genes",
-            choices = shinyWidgets::prepare_choices(promoters, label, coords),
-            selected = "chrX:60843429-60943430"
+            choices = shinyWidgets::prepare_choices(promoters, label, coords)
         )
     })
 
