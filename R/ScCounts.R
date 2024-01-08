@@ -330,6 +330,8 @@ scc_to_peaks <- function(sc_counts, peaks, cells = NULL, metadata = NULL, mc_siz
     }, .parallel = getOption("mcatac.parallel"))
 
     binded <- purrr::map_dfr(matrices, ~ as.data.frame(Matrix::summary(.x)))
+    all_0_idxs <- which(!(seq_len(nrow(matrices[[1]])) %in% binded$i))
+    binded <- bind_rows(binded, data.frame(i = all_0_idxs, j = 1, x = 0))
     mat <- Matrix::sparseMatrix(i = binded$i, j = binded$j, x = binded$x)
     colnames(mat) <- colnames(matrices[[1]])
     rownames(mat) <- rownames(matrices[[1]])

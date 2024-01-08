@@ -283,7 +283,7 @@ summarise_bin <- function(mat, bin, intervs, metacells = NULL) {
         mutate(ind = start - bin$start + 1)
 
     group <- factor(mat_intervs$peak_name, levels = intervs$peak_name)
-    mat_f <- mat[mat_intervs$ind, metacells, drop=FALSE]
+    mat_f <- mat[mat_intervs$ind, metacells, drop = FALSE]
     res <- t(sparse_matrix_tapply_sum(t(mat_f), group))
 
     return(res)
