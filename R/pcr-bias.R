@@ -18,8 +18,11 @@
 #'
 #' @examples
 #' \dontrun{
-#' mcc_to_marginal_track(mc_counts, "pbmc_mc.marginal")
-#' normalize_marginal("pbmc_mc.marginal", "pbmc_mc.marginal_norm", "pbmc_mc.marginal_smoothed")
+#' # mcc_to_marginal runs internally normalize_marginal when normalize = TRUE
+#' mcc_to_marginal_track(mc_counts, "pbmc_mc.marginal", normalize = TRUE)
+#'
+#' # alternatively, you can run normalize_marginal directly
+#' # normalize_marginal("pbmc_mc.marginal", "pbmc_mc.marginal_normed", "pbmc_mc.marginal_smoothed")
 #' }
 #'
 #' @export
