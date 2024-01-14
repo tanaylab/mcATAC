@@ -79,3 +79,46 @@ normalize_marginal <- function(orig_track, normed_track, smoothed_track = NULL, 
         iterator = gtrack.info(orig_track)$bin.size
     )
 }
+
+#' Normalize McPeaks data using marginal coverage
+#'
+#' The function calculates the (punctured) marginal coverage in \code{window_size} windows around each peak,
+#' and then normalizes the data by dividing the original data by the punctured marginal coverage, while setting
+#' the minimum to \code{minimal_quantile} of the punctured marginal coverage.
+#'
+#' @param mcatac The McPeaks object containing the data to be normalized.
+#' @param marginal_track The marginal track
+#' @param widnow_size The size of the windows to use around each peak for normalization.
+#' @param epsilon The epsilon value added to the egc matrix (default is 1e-5).
+#'
+#' @return The McPeaks object with normalized egc values.
+#'
+#'
+#' @examples
+#' \dontrun{
+#' mcatac <- import_from_matrix(mat, peaks, genome = "hg38", class = "McPeaks")
+#' mcatac <- normalize_egc(mcatac, "pbmc_mc.marginal")
+#' }
+#'
+#' @export
+normalize_egc <- function(mcatac, marginal_track, window_size = 1e4, epsilon = 1e-5, minimal_quantile = 0.1) {
+    gvtrack.create("marginal", marginal_track, func = "sum")
+    gvtrack.create("marginal_20k", marginal_track, func = "sum")
+    gvtrack.iterator("marginal_20k", sshift = -window_size / 2, eshift = window_size / 2)
+    peaks_metadata <- misha.ext::gextract.left_join(
+        c("marginal", "marginal_20k"),
+        intervals = mcatac@peaks,
+        iterator = mcatac@peaks
+    ) %>%
+        mutate(marginal_20k_punc = marginal_20k - marginal) %>%
+        mutate(norm_f = marginal_20k_punc / quantile(marginal_20k_punc, minimal_quantile)) %>%
+        mutate(norm_f = ifelse(norm_f < 1, 1, norm_f)) %>%
+        mutate(norm_f = 1 / norm_f)
+    mc_mat_s <- mcatac@mat * peaks_metadata$norm_f
+    mc_egc_s <- t(t(mc_mat_s) / colSums(mc_mat_s))
+    mc_egc_s <- log2(mc_egc_s + epsilon)
+    mcatac@egc <- mc_egc_s
+    mcatac@fp <- calc_mc_fp(mcatac)
+
+    return(mcatac)
+}
