@@ -236,8 +236,8 @@ scc_from_10x <- function(input_dir, out_dir, cell_suffix = NULL, genome = NULL, 
 write_sc_counts_from_10x <- function(input_dir, out_dir, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = NULL) {
     lifecycle::deprecate_soft(
         when = "0.0.2",
-        what = "write_sc_counts_from_10x",
-        with = "scc_from_10x"
+        what = "write_sc_counts_from_10x()",
+        with = "scc_from_10x()"
     )
 
     scc_from_10x(input_dir, out_dir, cell_suffix = cell_suffix, genome = genome, bin_size = bin_size, overwrite = overwrite, id = id, description = description, verbose = verbose, tabix_bin = tabix_bin, chromosomes = chromosomes)
@@ -345,8 +345,8 @@ scc_from_fragments <- function(fragments_file, out_dir, cell_names, cell_suffix 
 write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = gintervals.all()$chrom) {
     lifecycle::deprecate_soft(
         when = "0.0.2",
-        what = "write_sc_counts_from_fragments",
-        with = "scc_from_fragments"
+        what = "write_sc_counts_from_fragments()",
+        with = "scc_from_fragments()"
     )
 
     scc_from_fragments(fragments_file, out_dir, cell_names, cell_suffix = cell_suffix, genome = genome, bin_size = bin_size, overwrite = overwrite, id = id, description = description, verbose = verbose, tabix_bin = tabix_bin, chromosomes = chromosomes)
@@ -357,8 +357,8 @@ write_sc_counts_from_fragments <- function(fragments_file, out_dir, cell_names, 
 write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", min_mapq = NULL, samtools_bin = "samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE) {
     lifecycle::deprecate_soft(
         when = "0.0.2",
-        what = "write_sc_counts_from_bam",
-        with = "scc_from_bam"
+        what = "write_sc_counts_from_bam()",
+        with = "scc_from_bam()"
     )
 
     scc_from_bam(bam_file, out_dir, cell_names, cell_suffix = cell_suffix, genome = genome, bin_size = bin_size, overwrite = overwrite, id = id, description = description, min_mapq = min_mapq, samtools_bin = samtools_bin, samtools_opts = samtools_opts, num_reads = num_reads, verbose = verbose)
