@@ -116,9 +116,10 @@ normalize_egc <- function(mcatac, marginal_track, window_size = 1e4, epsilon = 1
         mutate(norm_f = 1 / norm_f)
     mc_mat_s <- mcatac@mat * peaks_metadata$norm_f
     mc_egc_s <- t(t(mc_mat_s) / colSums(mc_mat_s))
-    mc_egc_s <- log2(mc_egc_s + epsilon)
+    
     mcatac@egc <- mc_egc_s
     mcatac@fp <- calc_mc_fp(mcatac)
 
     return(mcatac)
 }
+
