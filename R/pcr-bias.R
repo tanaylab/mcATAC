@@ -114,6 +114,7 @@ normalize_egc <- function(mcatac, marginal_track, window_size = 1e4, epsilon = 1
         mutate(norm_f = marginal_20k_punc / quantile(marginal_20k_punc, minimal_quantile)) %>%
         mutate(norm_f = ifelse(norm_f < 1, 1, norm_f)) %>%
         mutate(norm_f = 1 / norm_f)
+
     mc_mat_s <- mcatac@mat * peaks_metadata$norm_f
     mc_egc_s <- t(t(mc_mat_s) / colSums(mc_mat_s))
 
@@ -167,7 +168,7 @@ normalize_const <- function(mcatac, norm_type, norm_quant = 1) {
     const_peak_score_norm <- const_peak_score_all / const_peak_score_norm_type
 
     egc_norm <- t(t(egc) / const_peak_score_norm)
-    egc_norm <- egc_norm / quantile(egc_norm, norm_quant)
+    egc_norm <- egc_norm / quantile(as.vector(egc_norm), norm_quant)
     egc_norm[egc_norm > 1] <- 1
 
     egc_norm <- egc_norm * max(egc[, norm_type_mcs])
@@ -199,7 +200,7 @@ normalize_const <- function(mcatac, norm_type, norm_quant = 1) {
 #' @export
 calc_const_peaks <- function(mcatac, const_threshold) {
     mc_egc <- mcatac@egc
-    mc_egc <- log2(mc_egc + 1e-5)
+    mc_egc <- as.matrix(log2(mc_egc + 1e-5))
 
     if (!has_cell_type(mcatac)) {
         cli_abort("No cell_type in metadata")
