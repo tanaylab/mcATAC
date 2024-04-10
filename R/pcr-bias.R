@@ -144,7 +144,7 @@ normalize_egc <- function(mcatac, marginal_track, window_size = 1e4, epsilon = 1
 #' }
 #'
 #' @export
-normalize_const <- function(mcatac, norm_type, norm_quant = 1) {
+normalize_const <- function(mcatac, norm_type, norm_quant = 1, scaling_quant = 0.9) {
     if (!has_name(mcatac@peaks, "const")) {
         cli_abort("No field named {.field const} in peaks. Please run {.code add_const_peaks}")
     }
@@ -171,7 +171,7 @@ normalize_const <- function(mcatac, norm_type, norm_quant = 1) {
     egc_norm <- egc_norm / quantile(as.vector(egc_norm), norm_quant)
     egc_norm[egc_norm > 1] <- 1
 
-    egc_norm <- egc_norm * max(egc[, norm_type_mcs])
+    egc_norm <- egc_norm * max(egc[, norm_type_mcs]) / scaling_quant
 
     mcatac@egc <- egc_norm
 
@@ -231,7 +231,7 @@ calc_const_peaks <- function(mcatac, const_threshold) {
 #'
 #' @inheritParams calc_const_peaks
 #' @export
-add_const_peaks <- function(mcatac, const_threshold6) {
+add_const_peaks <- function(mcatac, const_threshold) {
     mcatac@peaks$const <- calc_const_peaks(mcatac, const_threshold)
     return(mcatac)
 }
@@ -264,9 +264,9 @@ normalize_to_prob <- function(mcatac, prob1_thresh = NULL, const_quantile = 0.8)
         prob1_thresh <- quantile(mcatac@egc[mcatac@peaks$const, ], const_quantile)
         cli::cli_alert("Using {.val {prob1_thresh}} as the p=1 threshold")
     }
-
-    mcatac@egc[mcatac@egc > prob1_thresh] <- prob1_thresh
-    mcatac@egc <- norm01(mcatac@egc)
+    mcatac@egc = mcatac@egc / prob1_thresh
+    mcatac@egc[mcatac@egc > 1] <- 1
+    #mcatac@egc <- norm01(mcatac@egc)
 
     return(mcatac)
 }

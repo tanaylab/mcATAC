@@ -4,7 +4,7 @@
 \alias{normalize_const}
 \title{Normalize McPeaks data using constitutive peaks}
 \usage{
-normalize_const(mcatac, norm_type, norm_quant = 1)
+normalize_const(mcatac, norm_type, norm_quant = 1, scaling_quant = 0.9)
 }
 \arguments{
 \item{mcatac}{The McPeaks object containing the data to be normalized. The object should contain a field named {.field const} in {.field peaks}. Use \code{add_const_peaks} to add this field.}
