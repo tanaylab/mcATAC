@@ -232,7 +232,7 @@ mcc_read <- function(path, id = NULL, description = NULL, verbose = TRUE) {
     mc_counts <- new("McCounts", data = sc_counts@data, cell_names = sc_counts@cell_names, genome = sc_counts@genome, genomic_bins = sc_counts@genomic_bins, id = sc_counts@id, description = sc_counts@description, path = sc_counts@path, cell_to_metacell = as_tibble(md$cell_to_metacell))
 
     if (verbose) {
-        cli_alert_success("Succesfully read a McCounts object from {.file {path}}")
+        cli_alert_success("Successfully read a McCounts object from {.file {path}}")
     }
 
     return(mc_counts)
