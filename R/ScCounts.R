@@ -211,7 +211,7 @@ read_counts_object <- function(path, type, id = NULL, description = NULL, verbos
     counts <- new("ScCounts", data = data, cell_names = md$cell_names, genome = md$genome, genomic_bins = genomic_bins, id = id %||% md$id, description = description %||% md$description, path = path)
 
     if (verbose) {
-        cli_alert_success("Succesfully read a ScCounts object from {.file {path}}")
+        cli_alert_success("Successfully read a ScCounts object from {.file {path}}")
     }
 
     return(counts)
