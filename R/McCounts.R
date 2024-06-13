@@ -491,6 +491,50 @@ extract_bin <- function(mat, bin, metacells, all_metacells) {
         as_tibble()
 }
 
+#' Calculate the sum of values in each bin for a given matrix and metacells
+#'
+#' This function takes a matrix, a bin definition, and a set of metacells as input.
+#' It calculates the sum of values in each bin for the specified metacells.
+#'
+#' @param mat A matrix containing the values to be summed
+#' @param bin A data frame defining the bins, with columns "chrom", "start", and "end"
+#' @param metacells A vector specifying the indices of the metacells to include in the calculation
+#'
+#' @return A tibble with columns "chrom", "start", "end", and "value", representing the bin coordinates and the sum of values in each bin
+#' @noRd
+sum_bin <- function(mat, bin, metacells) {
+    mat_s <- mat[, metacells, drop = FALSE]
+    ones <- rep(1, ncol(mat_s))
+    ones <- Matrix::Matrix(ones, sparse = TRUE)
+    rs <- mat_s %*% ones
+    Matrix::summary(rs) %>%
+        mutate(
+            start = i + bin$start - 1, # we remove 1 in order to transform to 0 based coordinates
+            end = start + 1,
+            chrom = bin$chrom
+        ) %>%
+        select(chrom, start, end, value = x) %>%
+        as_tibble()
+}
+
+mcc_extract_marginal <- function(mc_counts, metacells = NULL) {
+    assert_atac_object(mc_counts, class = "McCounts")
+    metacells <- metacells %||% mc_counts@cell_names
+    metacells <- as.character(metacells)
+
+    mc_data <- plyr::adply(mc_counts@genomic_bins, 1, function(bin) {
+        return(
+            sum_bin(mc_counts@data[[bin$name]], bin, metacells)
+        )
+    }, .parallel = getOption("mcatac.parallel"))
+
+    mc_data <- mc_data %>%
+        select(chrom, start, end, value) %>%
+        as_tibble()
+
+    return(mc_data)
+}
+
 #' Extract McCounts to a tidy data frame
 #'
 #' @param mc_counts A McCounts object
@@ -622,6 +666,89 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
     mct <- mct_create(genome = mc_counts@genome, tracks = glue("{track_prefix}.mc{metacells}"), metacells = metacells, id = mc_counts@id, description = mc_counts@description, path = mc_counts@path, metadata = mc_counts@metadata, resolution = resolution, window_size = window_size, marginal_track = marginal_track)
     return(mct)
 }
+
+#' Convert MC counts to cell type tracks
+#'
+#' This function takes in MC counts and converts them into cell type tracks.
+#'
+#' @param mc_counts A data frame containing MC counts.
+#' @param track_prefix A character string specifying the prefix for the output track names.
+#' @param overwrite A logical value indicating whether to overwrite existing tracks with the same name. Default is FALSE.
+#' @param resolution An integer specifying the resolution for the tracks. Default is 20.
+#' @param window_size An optional integer specifying the window size for smoothing the tracks. Default is NULL.
+#'
+#' @return A list of cell type tracks.
+#'
+#' @examples
+#' \dontrun{
+#' mcc_to_cell_type_tracks(mc_counts, "pbmc_cell_types")
+#' }
+#'
+#' @export
+mcc_to_cell_type_tracks <- function(mc_counts, track_prefix, overwrite = FALSE, resolution = 20, window_size = NULL) {
+    assert_atac_object(mc_counts, class = "McCounts")
+    gset_genome(mc_counts@genome)
+
+    if (!has_cell_type(mcc)) {
+        cli_abort("McCounts object does not have cell type information.")
+    }
+
+    cell_types <- unique(mcc@metadata$cell_type)
+    cell_types <- cell_types[!is.na(cell_types)]
+
+    cli_alert_info("Creating tracks for {.val {length(cell_types)}} cell types")
+    cli_alert_info("Smoothing over {.val {window_size*2+1}} bp window")
+    cli_alert_info("Tracks resolution: {.val {resolution}} bp")
+
+    misha.ext::gtrack.create_dirs(paste0(track_prefix, ".ct"), showWarnings = FALSE)
+    withr::local_options(list(gmax.data.size = 1e9))
+
+    withr::local_options(list(gmultitasking = !getOption("mcatac.parallel")))
+
+    plyr::l_ply(cell_types, function(ct) {
+        track <- glue("{track_prefix}.{ct}")
+        cli_alert("Creating {.val {track}} track")
+        metacells <- mcc@metadata %>%
+            filter(cell_type == ct) %>%
+            pull(metacell)
+
+        withr::with_options(list(mcatac.parallel = FALSE), {
+            x <- mcc_extract_marginal(mc_counts, metacells)
+        })
+
+        if (is.null(window_size)) {
+            description <- glue("Counts from cell type {ct} in {resolution}bp resolution")
+        } else {
+            description <- glue("Smoothed counts over {window_size*2} bp from cell type {ct}")
+        }
+
+        create_smoothed_track_from_dataframe(
+            x %>% select(chrom, start, end, value),
+            track_prefix = track_prefix,
+            track = track,
+            description = description,
+            window_size = window_size,
+            resolution = resolution,
+            overwrite = overwrite
+        )
+
+        gtrack.attr.set(track, "total_cov", sum(x$value))
+        num_cells <- mc_counts@cell_to_metacell %>%
+            filter(metacell %in% !!metacells) %>%
+            nrow()
+        gtrack.attr.set(track, "num_cells", num_cells)
+        gc()
+    }, .parallel = getOption("mcatac.parallel"))
+
+    gdb.reload()
+
+    cli_alert_success("Created {length(cell_types)} tracks at {track_prefix}")
+
+    mct <- mct_create(genome = mc_counts@genome, tracks = glue("{track_prefix}.{cell_types}"), metacells = cell_types, id = mc_counts@id, description = mc_counts@description, path = mc_counts@path, metadata = mc_counts@metadata, resolution = resolution, window_size = window_size, marginal_track = NULL)
+
+    return(mct)
+}
+
 
 #' Create a track with smoothed marginal counts from an ScCounts/McCounts object
 #'
