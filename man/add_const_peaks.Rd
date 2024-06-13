@@ -4,10 +4,12 @@
 \alias{add_const_peaks}
 \title{Add constitutive peaks to McPeaks object}
 \usage{
-add_const_peaks(mcatac, const_threshold6)
+add_const_peaks(mcatac, const_threshold)
 }
 \arguments{
 \item{mcatac}{McPeaks object.}
+
+\item{const_threshold}{The threshold value for determining constitutive peaks. A peak would be considered constitutive if its minimal expression across all cell types is greater than or equal to this threshold.}
 }
 \value{
 The McPeaks object with the added field.

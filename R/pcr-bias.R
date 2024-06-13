@@ -264,9 +264,9 @@ normalize_to_prob <- function(mcatac, prob1_thresh = NULL, const_quantile = 0.8)
         prob1_thresh <- quantile(mcatac@egc[mcatac@peaks$const, ], const_quantile)
         cli::cli_alert("Using {.val {prob1_thresh}} as the p=1 threshold")
     }
-    mcatac@egc = mcatac@egc / prob1_thresh
+    mcatac@egc <- mcatac@egc / prob1_thresh
     mcatac@egc[mcatac@egc > 1] <- 1
-    #mcatac@egc <- norm01(mcatac@egc)
+    # mcatac@egc <- norm01(mcatac@egc)
 
     return(mcatac)
 }
