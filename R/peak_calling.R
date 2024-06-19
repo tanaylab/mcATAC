@@ -95,8 +95,9 @@ get_quantile_cov_thresh <- function(marginal_track, quantile_thresh, min_umis, w
     if (!is.null(genome)) {
         gset_genome(genome)
     }
+    iterator <- gtrack.info(marginal_track)$bin.size
     gvtrack.create("vt_marginal", marginal_track, func = "sum")
-    gvtrack.iterator("vt_marginal", sshift = -window_size, eshift = window_size)
+    gvtrack.iterator("vt_marginal", sshift = -(window_size / 2) + (iterator / 2), eshift = (window_size / 2) - (iterator / 2))
     withr::local_options(gmax.data.size = 1e9)
     withr::with_seed(seed, thresh <- max(gquantiles("vt_marginal", quantile_thresh), min_umis))
     return(thresh)
@@ -133,9 +134,10 @@ call_peaks <- function(marginal_track, quantile_thresh = 0.9, min_umis = 8, cano
 
     thresh <- get_quantile_cov_thresh(marginal_track, quantile_thresh, min_umis, window_size = window_size, genome = genome, seed = seed)
     cli::cli_alert_info("Coverage threshold: {.val {round(thresh, digits=3)}}")
+    iterator <- gtrack.info(marginal_track)$bin.size
 
     gvtrack.create("vt_marginal", marginal_track, func = "sum")
-    gvtrack.iterator("vt_marginal", sshift = -window_size, eshift = window_size)
+    gvtrack.iterator("vt_marginal", sshift = -(window_size / 2) + (iterator / 2), eshift = (window_size / 2) - (iterator / 2))
     df <- gscreen(glue("vt_marginal >= thresh"), intervals = gintervals.all())
 
     if (split_peaks) {
