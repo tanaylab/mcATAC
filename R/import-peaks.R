@@ -153,7 +153,14 @@ import_from_h5ad <- function(file, class = NULL, genome = NULL, id = NULL, descr
             cell_to_metacell <- NULL
         }
 
-        res <- new("McPeaks", mat = mat, peaks = peaks, genome = genome, id = id, description = description, metadata = metadata, cell_to_metacell = cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = file, tad_based = tad_based)
+        egc <- NULL
+        if (!is.null(adata$uns[["egc"]])) {
+            egc <- adata$uns[["egc"]]
+            colnames(egc) <- colnames(mat)
+            rownames(egc) <- rownames(mat)
+        }
+
+        res <- new("McPeaks", mat = mat, peaks = peaks, genome = genome, id = id, description = description, metadata = metadata, cell_to_metacell = cell_to_metacell, mc_size_eps_q = mc_size_eps_q, path = file, tad_based = tad_based, egc = egc)
 
         if (!is.null(adata$uns[["rna_egc"]]) && !is.null(adata$uns[["rna_mcs"]]) && !is.null(adata$uns[["rna_gene_names"]])) {
             rna_egc <- adata$uns[["rna_egc"]]

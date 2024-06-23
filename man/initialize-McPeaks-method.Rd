@@ -16,7 +16,8 @@
   mc_size_eps_q = 0.1,
   path = "",
   tad_based = TRUE,
-  order = NULL
+  order = NULL,
+  egc = NULL
 )
 }
 \arguments{

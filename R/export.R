@@ -46,7 +46,7 @@ export_to_h5ad <- function(object, out_file, ...) {
     # add all other slots
     slots <- methods::slotNames(object)
     slots <- slots[slots %!in% c(
-        "egc", "fp", "mat", "peaks", "genome", "metadata",
+        "fp", "mat", "peaks", "genome", "metadata",
         "ignore_peaks", "ignore_pmat", "rna_egc", "tad_based"
     )]
     for (s in slots) {

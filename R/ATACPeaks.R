@@ -168,11 +168,16 @@ McPeaks <- setClass(
 setMethod(
     "initialize",
     signature = "McPeaks",
-    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, cell_to_metacell = NULL, mc_size_eps_q = 0.1, path = "", tad_based = TRUE, order = NULL) {
+    definition = function(.Object, mat, peaks, genome, id = NULL, description = NULL, metadata = NULL, cell_to_metacell = NULL, mc_size_eps_q = 0.1, path = "", tad_based = TRUE, order = NULL, egc = NULL) {
         .Object <- make_atac_peaks_object(.Object, mat, peaks, genome, id = id, description = description, path = path, tad_based = tad_based, rename = FALSE, order = order)
         validate_atac_peaks_object(.Object)
         .Object <- add_metadata(.Object, metadata, "metacell")
-        .Object@egc <- calc_mc_egc(.Object, mc_size_eps_q)
+        if (!is.null(egc)) {
+            .Object@egc <- egc
+        } else {
+            .Object@egc <- calc_mc_egc(.Object, mc_size_eps_q)
+        }
+
         .Object@fp <- calc_mc_fp(.Object)
         .Object@metacells <- colnames(.Object@mat)
         .Object@mc_size_eps_q <- mc_size_eps_q
