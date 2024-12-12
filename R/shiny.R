@@ -19,7 +19,7 @@ app_ui <- function(request) {
             titlePanel(title),
             fluidRow(
                 column(
-                    12,
+                    10,
                     wellPanel(
                         fluidRow(
                             align = "left",
@@ -112,6 +112,15 @@ app_ui <- function(request) {
                             )
                         )
                     )
+                ),
+                column(
+                    2,
+                    plotOutput(
+                        "scatter_plot",
+                        height = "300px",
+                        width = "300px",
+                        fill = FALSE,
+                    )
                 )
             ),
             fluidRow(
@@ -119,6 +128,12 @@ app_ui <- function(request) {
                     plotOutput(
                         "region_plot",
                         height = "50vh",
+                        fill = FALSE,
+                        hover = hoverOpts(
+                            id = "region_hover",
+                            delayType = "throttle",
+                            delay = 250
+                        ),
                         brush = brushOpts(
                             id = "region_brush",
                             direction = "x",
@@ -126,15 +141,27 @@ app_ui <- function(request) {
                             delay = 1000
                         )
                     )
+                ),
+                shinycssloaders::withSpinner(
+                    plotOutput(
+                        "region_plot_cor",
+                        height = "20px",
+                        fill = FALSE,
+                        click = "region_plot_cor_click"
+                    )
+                ),
                 )
-            )
-        )
+            ),
+            uiOutput("hover_info", style = "pointer-events: none")
     )
 }
 
 app_server <- function(input, output, session) {
     intervals <- reactiveVal()
     globals <- reactiveValues()
+    mat <- reactiveVal()
+    mat2 <- reactiveVal()
+    scatter_data <- reactiveVal()
 
     if (!is.null(shiny_hc)) {
         hc <- shiny_hc
@@ -224,12 +251,120 @@ app_server <- function(input, output, session) {
         }
     })
 
+    observeEvent(input$region_plot_cor_click, {
+        mat_x <- input$region_plot_cor_click$x
+        req(mat_x)
+        mat_y <- input$region_plot_cor_click$y
+        req(mat_y)
+        m <- mat()
+        req(m)
+        mat_idxs <- get_heatmap_idx(mat_x, mat_y, m)
+
+        gene <- promoters[promoters$coords == input$genes, ]$geneSymbol
+        req(gene %in% rownames(shiny_mct@rna_egc))
+
+        mcs <- intersect(colnames(shiny_mct@rna_egc), colnames(m))
+
+        data <- data.frame(atac = m[mat_idxs[1], mcs], rna = shiny_mct@rna_egc[gene, mcs], metacell = mcs) %>%
+            mutate(rna = log2(rna + 1e-5)) %>%
+            left_join(shiny_mct@metadata, by = "metacell") %>%
+            mutate(coords = rownames(m)[mat_idxs[1]])
+
+        scatter_data(data)
+    })
+
+    output$scatter_plot <- renderPlot({
+        data <- scatter_data()
+        req(data)
+
+        data %>%
+            ggplot(aes(x = atac, y = rna, color = color)) +
+            geom_point(size = 4) +
+            scale_color_identity() +
+            theme_classic() +
+            xlab("ATAC") +
+            ylab("RNA") +
+            ggtitle(glue("Correlation: {round(cor(data$atac, data$rna), digits = 2)} Coverage:{sum(data$atac)}"), subtitle = data$coords[1])
+    })
+
+    observe({
+        req(intervals())
+        req(input$n_smooth)
+        req(input$n_smooth >= 1)
+        n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
+        raw_mat <- get_raw_mat(
+            shiny_mct, intervals(),
+            downsample = TRUE,
+            downsample_n = 20000000,
+            detect_dca = input$detect_dca %||% FALSE,
+            gene_annot = TRUE,
+            hc = shiny_hc,
+            peak_lf_thresh1 = input$dca_peak_lf_thresh,
+            trough_lf_thresh1 = input$dca_trough_lf_thresh,
+            sz_frac_for_peak = input$dca_sz_frac_for_peak,
+            color_breaks = color_breaks,
+            n_smooth = n_smooth,
+            plot_x_axis_ticks = FALSE
+        )
+        mat(raw_mat)
+    })
+
     output$region_plot <- renderPlot(
         {
             req(intervals())
             req(input$dca_peak_lf_thresh)
             req(input$dca_trough_lf_thresh)
             req(input$dca_sz_frac_for_peak)
+            req(input$min_color)
+            req(input$max_color)
+            req(input$min_color < input$max_color)
+            req(input$n_smooth)
+            req(input$n_smooth >= 1)
+            req(mat())
+            color_breaks <- c(0, seq(
+                input$min_color,
+                input$max_color,
+                length.out = 4
+            ))
+
+            n_smooth <- max(round(input$n_smooth / shiny_mct@resolution), 1)
+
+            mct_plot_region(
+                shiny_mct, intervals(),
+                downsample = TRUE,
+                downsample_n = 20000000,
+                colors = c("white", "gray", "darkgrey", "black"),
+                detect_dca = input$detect_dca %||% FALSE,
+                gene_annot = TRUE,
+                hc = hc,
+                peak_lf_thresh1 = input$dca_peak_lf_thresh,
+                trough_lf_thresh1 = input$dca_trough_lf_thresh,
+                sz_frac_for_peak = input$dca_sz_frac_for_peak,
+                color_breaks = color_breaks,
+                n_smooth = n_smooth,
+                plot_x_axis_ticks = FALSE,
+                color_max_by_type = TRUE
+            )
+        },
+        res = 96
+    ) %>%
+        bindCache(
+            intervals(),
+            input$detect_dca,
+            input$dca_peak_lf_thresh,
+            input$dca_trough_lf_thresh,
+            input$dca_sz_frac_for_peak,
+            input$min_color,
+            input$max_color,
+            input$n_smooth
+        )
+    output$region_plot_cor <- renderPlot(
+        {
+            req(intervals())
+            req(input$dca_peak_lf_thresh)
+            req(input$dca_trough_lf_thresh)
+            req(input$dca_sz_frac_for_peak)
+            req(has_rna(shiny_mct))
             req(input$min_color)
             req(input$max_color)
             req(input$min_color < input$max_color)
@@ -245,14 +380,21 @@ app_server <- function(input, output, session) {
 
             mct_plot_region(
                 shiny_mct, intervals(),
+                downsample = TRUE,
+                downsample_n = 20000000,
                 detect_dca = input$detect_dca %||% FALSE,
-                gene_annot = TRUE,
-                hc = hc,
+                gene_annot = FALSE,
+                hc = NULL,
                 peak_lf_thresh1 = input$dca_peak_lf_thresh,
                 trough_lf_thresh1 = input$dca_trough_lf_thresh,
                 sz_frac_for_peak = input$dca_sz_frac_for_peak,
                 color_breaks = color_breaks,
-                n_smooth = n_smooth
+                n_smooth = n_smooth,
+                plot_x_axis_ticks = FALSE,
+                roll_mean = TRUE,
+                genes_correlations = promoters[promoters$coords == input$genes, ]$geneSymbol,
+                cor_color_breaks = c(-1.0, -0.5, 0, 0.5, 1.0),
+                cor_colors = c("blue", "white", "white", "white", "red")
             )
         },
         res = 96
@@ -268,6 +410,7 @@ app_server <- function(input, output, session) {
             input$n_smooth
         )
 
+                color_max_by_type = TRUE
     output$current_coords <- renderText({
         if (is.null(intervals())) {
             return("Please enter valid genomic coordinates (e.g. \"chr3:34300000-35000020\")")
@@ -314,6 +457,41 @@ app_server <- function(input, output, session) {
         update_intervals(zoom_intervals)
     })
 
+    output$hover_info <- renderUI({
+        hover <- input$region_hover
+        req(hover)
+        raw_mat <- mat()
+        req(raw_mat)
+        mat_idxs <- get_heatmap_idx(hover$x, hover$y, raw_mat)
+
+        mc <- colnames(raw_mat)[mat_idxs[2]]
+        req(mc)
+        mc_metadata <- mct@metadata %>%
+            filter(metacell == mc) %>%
+            slice(1)
+        mc_color <- mc_metadata$color
+        mc_cell_type <- mc_metadata$cell_type
+        coords <- rownames(raw_mat)[mat_idxs[1]]
+
+        # taken from https://gitlab.com/-/snippets/16220
+        left_px <- hover$coords_css$x
+        top_px <- hover$coords_css$y
+        style <- glue(
+            "background-color: {grDevices::rgb(t(grDevices::col2rgb(mc_color) / 255))}; position:absolute; z-index:100; left: {left_px + 2}px; top: {top_px + 200}px;"
+        )
+        tooltip <- paste(
+            glue("Metacell: {mc}"),
+            glue("Cell type: {mc_cell_type}"),
+            glue("Coordinates: {coords}"),
+            sep = "<br/>"
+        )
+
+        wellPanel(
+            style = style,
+            p(HTML(tooltip))
+        )
+    })
+
     observe({
         shinyjs::toggle(id = "dca_peak_lf_thresh", condition = input$detect_dca && input$show_controls)
         shinyjs::toggle(id = "dca_trough_lf_thresh", condition = input$detect_dca && input$show_controls)
@@ -355,6 +533,7 @@ parse_coordinate_text <- function(text) {
 #'
 #' @param mct MCT object
 #' @param hc an hclust object with clustering of the metacells (optional, see \code{mct_plot_region}
+#' @param annotations an intervals object with annotations for the second genome (optional)
 #'
 #' @examples
 #' \dontrun{
@@ -366,6 +545,7 @@ run_app <- function(mct,
                     hc = NULL,
                     port = NULL,
                     host = NULL,
+                    annotations = NULL,
                     launch.browser = FALSE) {
     library(misha)
     library(shiny)
@@ -377,6 +557,8 @@ run_app <- function(mct,
         shiny_hc <<- NULL
     }
     gset_genome(mct@genome, force = FALSE)
+    shiny_annotations <<- annotations
+
     shiny::shinyApp(
         ui = app_ui,
         server = app_server,
