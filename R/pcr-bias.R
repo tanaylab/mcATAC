@@ -88,7 +88,7 @@ normalize_marginal <- function(orig_track, normed_track, smoothed_track = NULL, 
 #'
 #' @param mcatac The McPeaks object containing the data to be normalized.
 #' @param marginal_track The marginal track
-#' @param widnow_size The size of the windows to use around each peak for normalization.
+#' @param window_size The size of the windows to use around each peak for normalization.
 #' @param epsilon The epsilon value added to the egc matrix (default is 1e-5).
 #'
 #' @return The McPeaks object with normalized egc values.

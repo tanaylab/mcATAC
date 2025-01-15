@@ -1,6 +1,6 @@
 Package: mcATAC
 Title: Metacell analysis for scATAC data
-Version: 0.0.2.9000
+Version: 0.0.3.1
 Authors@R: c(
     person("Aviezer", "Lifshitz", , "aviezer.lifshitz@weizmann.ac.il", role = c("aut", "cre")),
     person("Yonatan", "Shapira", , "yonatan.shapira@weizmann.ac.il", role = "aut")
@@ -22,7 +22,7 @@ Imports:
     Matrix,
     mclust,
     methods,
-    misha (>= 4.2.0),
+    misha (>= 4.2.3),
     misha.ext (>= 0.0.10),
     pheatmap,
     purrr,

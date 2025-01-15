@@ -33,7 +33,7 @@ import_atac_marginal <- function(file, track, description, genome, binsize = 20,
     bigwig_to_wig(file, wig_file, genome, wig_temp_dir = wig_temp_dir)
 
     cli_li("Creating {.field misha} track")
-    misha.ext::gtrack.create_dirs(track, showWarnings = FALSE)
+    misha::gtrack.create_dirs(track)
     gtrack.import(track, description, wig_file, binsize = binsize)
     cli_alert_success("Successfully imported marginal ATAC counts to {.val {track}} from {.file {file}}")
     cli_text("To generate a new set of peaks, please run {.field call_peaks(\"{track}\")}")
@@ -53,7 +53,7 @@ import_atac_marginal <- function(file, track, description, genome, binsize = 20,
 #' @noRd
 bigwig_to_wig <- function(bigwig_file, wig_file, genome, wig_temp_dir = tempdir()) {
     gset_genome(genome)
-    bin <- system.file("exec/bigWigToWig", package = "misha")
+    bin <- misha:::get_bigWigToWig_bin()
     chroms <- gintervals.all()$chrom
     cli::cli_progress_bar("Converting", total = length(chroms) + 1)
     prefix <- gsub(".bigwig$", "", basename(tempfile()))

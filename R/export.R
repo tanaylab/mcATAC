@@ -164,7 +164,7 @@ write_cluster_misha_track <- function(cl, atac_mc_mat_clust, track_prefix, peaks
     atac_vec <- atac_mc_mat_clust[, cl]
     cl <- gsub("[\\/\\.-]", "_", cl)
     if (!is.null(track_prefix)) {
-        misha.ext::gtrack.create_dirs(paste0(track_prefix, ".clust"), showWarnings = FALSE)
+        misha::gtrack.create_dirs(paste0(track_prefix, ".clust"))
         trknm <- paste0(track_prefix, ".", cl)
     }
     if (is.null(description)) {

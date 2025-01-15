@@ -603,7 +603,7 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
     cli_alert_info("Smoothing over {.val {window_size*2+1}} bp window")
     cli_alert_info("Tracks resolution: {.val {resolution}} bp")
 
-    misha.ext::gtrack.create_dirs(paste0(track_prefix, ".mc"), showWarnings = FALSE)
+    misha::gtrack.create_dirs(paste0(track_prefix, ".mc"))
     withr::local_options(list(gmax.data.size = 1e9))
 
     marginal_track <- NULL
@@ -700,7 +700,7 @@ mcc_to_cell_type_tracks <- function(mc_counts, track_prefix, overwrite = FALSE, 
     cli_alert_info("Smoothing over {.val {window_size*2+1}} bp window")
     cli_alert_info("Tracks resolution: {.val {resolution}} bp")
 
-    misha.ext::gtrack.create_dirs(paste0(track_prefix, ".ct"), showWarnings = FALSE)
+    misha::gtrack.create_dirs(paste0(track_prefix, ".ct"))
     withr::local_options(list(gmax.data.size = 1e9))
 
     withr::local_options(list(gmultitasking = !getOption("mcatac.parallel")))
