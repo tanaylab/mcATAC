@@ -106,12 +106,13 @@ normalize_egc <- function(mcatac, marginal_track, window_size = 1e4, epsilon = 1
     gvtrack.create("marginal_20k", marginal_track, func = "sum")
     gvtrack.iterator("marginal_20k", sshift = -window_size / 2, eshift = window_size / 2)
     peaks_metadata <- misha.ext::gextract.left_join(
-        c("marginal", "marginal_20k"),
+        c("ifelse(is.na(marginal), 0, marginal)", "ifelse(is.na(marginal_20k), 0, marginal_20k)"),
+        colnames = c("marginal", "marginal_20k"),
         intervals = mcatac@peaks,
         iterator = mcatac@peaks
     ) %>%
         mutate(marginal_20k_punc = marginal_20k - marginal) %>%
-        mutate(norm_f = marginal_20k_punc / quantile(marginal_20k_punc, minimal_quantile)) %>%
+        mutate(norm_f = marginal_20k_punc / quantile(marginal_20k_punc, minimal_quantile, na.rm = TRUE)) %>%
         mutate(norm_f = ifelse(norm_f < 1, 1, norm_f)) %>%
         mutate(norm_f = 1 / norm_f)
 

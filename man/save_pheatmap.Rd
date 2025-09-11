@@ -12,7 +12,7 @@ save_pheatmap(x, filename, dev = png, width = 2000, height = 2000, res = 150)
     the character string, as in the default.  (Depending on the platform,
     the result should be less
     than \code{PATH_MAX} characters long, and may be truncated if not.
-    See \code{\link[grDevices]{postscript}} for further details.)  Tilde expansion
+    See \code{\link[grDevices]{pdf}} for further details.)  Tilde expansion
     is performed where supported by the platform.  An input with
     a marked encoding is converted to the native encoding on an error is
     given.}
@@ -23,7 +23,7 @@ save_pheatmap(x, filename, dev = png, width = 2000, height = 2000, res = 150)
 
 \item{height}{the height of the device.}
 
-\item{res}{The nominal resolution in ppi which will be recorded in the
+\item{res}{The nominal resolution in \abbr{ppi} which will be recorded in the
     bitmap file, if a positive integer.  Also used for \code{units}
     other than the default, and to convert points to pixels.}
 }

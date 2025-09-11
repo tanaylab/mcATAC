@@ -569,7 +569,7 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL) {
 #' Create a misha track for each metacell in a McCounts object
 #'
 #' @description This would create a sparse track of the form "{track_prefix}.mc{metacell}" for each metacell in the McCounts object. The counts are smoothed by a running sum window of size \code{window_size * 2 + 1} (default: 201).
-#' The resulted track would be stored in a 'dense' format with a resolution of \code{resolution} bp (default: 10). \cr
+#' The resulted track would be stored in a 'dense' format with a resolution of \code{resolution} bp (default: 20). \cr
 #' Each track would have a track attribute named "total_cov" with the total coverage of the metacell. \cr
 #' If \code{create_marginal_track} is \code{TRUE} (default), an additional track with the total counts over all the metacells will be created. \cr
 #' Counts can be normalized to the total counts of each metacell by setting \code{normalize = TRUE}.
@@ -583,6 +583,7 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL) {
 #' @param window_size The size of the window used to smooth the counts. The counts of at position i are smoothed by a sum of the counts of [i - window_size, i + window_size]. If NULL - the counts are not smoothed.
 #' @param create_marginal_track Create a track with the total counts from all the metacells. The track would be named "{track_prefix}.marginal"
 #' @param normalize Normalize each metacell by the sum of its counts.
+#' @param description Additional description for the tracks.
 #'
 #'
 #' @return An McTracks object with the new tracks.
@@ -593,7 +594,7 @@ mcc_extract_to_df <- function(mc_counts, metacells = NULL) {
 #' }
 #'
 #' @export
-mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite = FALSE, resolution = 20, window_size = NULL, create_marginal_track = TRUE, normalize = FALSE) {
+mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite = FALSE, resolution = 20, window_size = NULL, create_marginal_track = TRUE, normalize = FALSE, description = NULL) {
     assert_atac_object(mc_counts, class = "McCounts")
     metacells <- metacells %||% mc_counts@cell_names
     metacells <- as.character(metacells)
@@ -639,6 +640,10 @@ mcc_to_tracks <- function(mc_counts, track_prefix, metacells = NULL, overwrite =
             description <- glue("Counts from metacell {metacell} in {resolution}bp resolution")
         } else {
             description <- glue("Smoothed counts over {window_size*2} bp from metacell {metacell}")
+        }
+
+        if (!is.null(description)) {
+            description <- glue("{description} ({mc_counts@description})")
         }
 
         create_smoothed_track_from_dataframe(
@@ -693,7 +698,7 @@ mcc_to_cell_type_tracks <- function(mc_counts, track_prefix, overwrite = FALSE, 
         cli_abort("McCounts object does not have cell type information.")
     }
 
-    cell_types <- unique(mcc@metadata$cell_type)
+    cell_types <- unique(mc_counts@metadata$cell_type)
     cell_types <- cell_types[!is.na(cell_types)]
 
     cli_alert_info("Creating tracks for {.val {length(cell_types)}} cell types")
@@ -757,6 +762,7 @@ mcc_to_cell_type_tracks <- function(mc_counts, track_prefix, overwrite = FALSE, 
 #' @param track The name of the track to create.
 #' @param metacells The metacells for which to create the track. If NULL, all metacells will be used.
 #' @param cells The cells for which to create the track.
+#' @param normalize normalize the marginal track by the geometric mean of it's envrionment (up to window_size bp)
 #'
 #' @return None.
 #'

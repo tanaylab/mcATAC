@@ -12,7 +12,8 @@ mcc_to_tracks(
   resolution = 20,
   window_size = NULL,
   create_marginal_track = TRUE,
-  normalize = FALSE
+  normalize = FALSE,
+  description = NULL
 )
 }
 \arguments{
@@ -32,13 +33,15 @@ Track names will be of the form "{track_prefix}.mc{metacell}"}
 \item{create_marginal_track}{Create a track with the total counts from all the metacells. The track would be named "{track_prefix}.marginal"}
 
 \item{normalize}{Normalize each metacell by the sum of its counts.}
+
+\item{description}{Additional description for the tracks.}
 }
 \value{
 An McTracks object with the new tracks.
 }
 \description{
 This would create a sparse track of the form "{track_prefix}.mc{metacell}" for each metacell in the McCounts object. The counts are smoothed by a running sum window of size \code{window_size * 2 + 1} (default: 201).
-The resulted track would be stored in a 'dense' format with a resolution of \code{resolution} bp (default: 10). \cr
+The resulted track would be stored in a 'dense' format with a resolution of \code{resolution} bp (default: 20). \cr
 Each track would have a track attribute named "total_cov" with the total coverage of the metacell. \cr
 If \code{create_marginal_track} is \code{TRUE} (default), an additional track with the total counts over all the metacells will be created. \cr
 Counts can be normalized to the total counts of each metacell by setting \code{normalize = TRUE}.

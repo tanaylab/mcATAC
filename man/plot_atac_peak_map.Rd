@@ -36,7 +36,7 @@ plot_atac_peak_map(
   \describe{
     \item{\code{width}}{the width of the device.}
     \item{\code{height}}{the height of the device.}
-    \item{\code{res}}{The nominal resolution in ppi which will be recorded in the
+    \item{\code{res}}{The nominal resolution in \abbr{ppi} which will be recorded in the
     bitmap file, if a positive integer.  Also used for \code{units}
     other than the default, and to convert points to pixels.}
   }}

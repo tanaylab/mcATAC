@@ -17,9 +17,9 @@ normalize_egc(
 
 \item{marginal_track}{The marginal track}
 
-\item{epsilon}{The epsilon value added to the egc matrix (default is 1e-5).}
+\item{window_size}{The size of the windows to use around each peak for normalization.}
 
-\item{widnow_size}{The size of the windows to use around each peak for normalization.}
+\item{epsilon}{The epsilon value added to the egc matrix (default is 1e-5).}
 }
 \value{
 The McPeaks object with normalized egc values.

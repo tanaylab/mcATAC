@@ -43,7 +43,7 @@ scc_to_marginal_track(
 
 \item{overwrite}{Whether to overwrite existing tracks.}
 
-\item{normalize}{Normalize each metacell by the sum of its counts.}
+\item{normalize}{normalize the marginal track by the geometric mean of it's envrionment (up to window_size bp)}
 
 \item{normed_track}{The name of the normalized track to be created.}
 
