@@ -39,7 +39,7 @@ write_sc_counts_from_10x(
 \item{out_dir}{output directory.}
 
 \item{cell_suffix}{a suffix to add to the cell names (optional). This is useful when you want to merge multiple batches of cells.
-The suffix would be added in the following way: \code{paste0(cell_name, "-", cell_suffix)}.}
+The suffix would be added in the following way: \code{paste0(cell_name, cell_suffix_sep, cell_suffix)}.}
 
 \item{bin_size}{Size of the genomic bins to use (in bp). Each chromsome will be chunked into bins with size which is
 smaller than this value. Default is 50Mb.}

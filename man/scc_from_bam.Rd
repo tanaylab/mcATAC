@@ -27,6 +27,7 @@ scc_from_bam(
   out_dir,
   cell_names,
   cell_suffix = NULL,
+  cell_suffix_sep = "-",
   genome = NULL,
   bin_size = 50000000,
   id = "",
@@ -47,7 +48,7 @@ scc_from_bam(
 \item{cell_names}{a vector with the cell names or an ATAC object}
 
 \item{cell_suffix}{a suffix to add to the cell names (optional). This is useful when you want to merge multiple batches of cells.
-The suffix would be added in the following way: \code{paste0(cell_name, "-", cell_suffix)}.}
+The suffix would be added in the following way: \code{paste0(cell_name, cell_suffix_sep, cell_suffix)}.}
 
 \item{genome}{genome name (e.g. hg19). Will be inferred from the ScPeaks object if provided}
 
@@ -69,6 +70,8 @@ smaller than this value. Default is 50Mb.}
 \item{num_reads}{number of reads (within the \code{region}) to process (optional).}
 
 \item{verbose}{verbose output (optional)}
+
+\item{cell_suffix_sep}{separator to use between the cell name and the suffix. Default is "-".}
 }
 \value{
 None

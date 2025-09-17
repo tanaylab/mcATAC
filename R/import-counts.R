@@ -251,8 +251,9 @@ write_sc_counts_from_10x <- function(input_dir, out_dir, cell_suffix = NULL, gen
 #' @param fragments_file path to fragments file. Note that in order to use tabix, the file must be compressed with gzip and have a ".gz" extension.
 #' @param out_dir output directory.
 #' @param cell_names a vector with the cell names or an ScPeaks object
+#' @param cell_suffix_sep separator to use between the cell name and the suffix. Default is "-".
 #' @param cell_suffix a suffix to add to the cell names (optional). This is useful when you want to merge multiple batches of cells.
-#' The suffix would be added in the following way: `paste0(cell_name, "-", cell_suffix)`.
+#' The suffix would be added in the following way: `paste0(cell_name, cell_suffix_sep, cell_suffix)`.
 #' @param id an identifier for the object, e.g. "pbmc".
 #' @param description description of the object, e.g. "PBMC from a healthy donor - granulocytes removed through cell sorting (10k)"
 #' @param bin_size Size of the genomic bins to use (in bp). Each chromsome will be chunked into bins with size which is
@@ -271,7 +272,7 @@ write_sc_counts_from_10x <- function(input_dir, out_dir, cell_suffix = NULL, gen
 #' }
 #'
 #' @export
-scc_from_fragments <- function(fragments_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = gintervals.all()$chrom) {
+scc_from_fragments <- function(fragments_file, out_dir, cell_names, cell_suffix = NULL, cell_suffix_sep = "-", genome = NULL, bin_size = 5e7, overwrite = FALSE, id = "", description = "", verbose = FALSE, tabix_bin = "tabix", chromosomes = gintervals.all()$chrom) {
     withr::local_options(list(scipen = 1e5))
 
     if (!file.exists(fragments_file)) {
@@ -322,7 +323,7 @@ scc_from_fragments <- function(fragments_file, out_dir, cell_names, cell_suffix 
     }, .parallel = getOption("mcatac.parallel"))
 
     if (!is.null(cell_suffix)) {
-        cell_names <- paste0(cell_names, "-", cell_suffix)
+        cell_names <- paste0(cell_names, cell_suffix_sep, cell_suffix)
     }
 
     counts_md <- list(
@@ -384,7 +385,7 @@ write_sc_counts_from_bam <- function(bam_file, out_dir, cell_names, cell_suffix 
 #' }
 #'
 #' @export
-scc_from_bam <- function(bam_file, out_dir, cell_names, cell_suffix = NULL, genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE, overwrite = FALSE) {
+scc_from_bam <- function(bam_file, out_dir, cell_names, cell_suffix = NULL, cell_suffix_sep = "-", genome = NULL, bin_size = 5e7, id = "", description = "", min_mapq = NULL, samtools_bin = "samtools", samtools_opts = NULL, num_reads = NULL, verbose = FALSE, overwrite = FALSE) {
     withr::local_options(list(scipen = 1e5))
     data_dir <- file.path(out_dir, "data")
     if (dir.exists(out_dir)) {
@@ -420,7 +421,7 @@ scc_from_bam <- function(bam_file, out_dir, cell_names, cell_suffix = NULL, geno
     }, .parallel = getOption("mcatac.parallel"))
 
     if (!is.null(cell_suffix)) {
-        cell_names <- paste0(cell_names, "-", cell_suffix)
+        cell_names <- paste0(cell_names, cell_suffix_sep, cell_suffix)
     }
 
     counts_md <- list(
