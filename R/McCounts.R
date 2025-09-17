@@ -694,7 +694,7 @@ mcc_to_cell_type_tracks <- function(mc_counts, track_prefix, overwrite = FALSE, 
     assert_atac_object(mc_counts, class = "McCounts")
     gset_genome(mc_counts@genome)
 
-    if (!has_cell_type(mcc)) {
+    if (!has_cell_type(mc_counts)) {
         cli_abort("McCounts object does not have cell type information.")
     }
 
@@ -713,7 +713,7 @@ mcc_to_cell_type_tracks <- function(mc_counts, track_prefix, overwrite = FALSE, 
     plyr::l_ply(cell_types, function(ct) {
         track <- glue("{track_prefix}.{ct}")
         cli_alert("Creating {.val {track}} track")
-        metacells <- mcc@metadata %>%
+        metacells <- mc_counts@metadata %>%
             filter(cell_type == ct) %>%
             pull(metacell)
 
