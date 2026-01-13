@@ -271,6 +271,10 @@ mct_to_mcatac <- function(mct, peaks, metacells = NULL, metadata = NULL, mc_size
         map(misha.ext::intervs_to_mat) %>%
         do.call(cbind, .)
 
+    if (has_name(peaks, "peak_name")) {
+        rownames(atac_mat) <- peaks$peak_name
+    }
+
     atac_mat[is.na(atac_mat)] <- 0
 
     mc_atac <- new("McPeaks", mat = atac_mat, peaks = peaks, genome = mct@genome, id = mct@id, description = mct@description, metadata = metadata, mc_size_eps_q = mc_size_eps_q)
