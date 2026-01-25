@@ -285,6 +285,14 @@ read_sc_counts_data <- function(data_dir, genomic_bins, cell_names, genome) {
         }
 
         m <- tgutil::fread_mm(region_file)
+        if (!methods::is(m, "dgCMatrix")) {
+            if (methods::is(m, "ddiMatrix")) {
+                # Avoid deprecated ddiMatrix -> dgCMatrix coercion.
+                m <- methods::as(methods::as(m, "generalMatrix"), "CsparseMatrix")
+            } else {
+                m <- methods::as(m, "CsparseMatrix")
+            }
+        }
         colnames(m) <- cell_names
         return(m)
     }, .parallel = getOption("mcatac.parallel"))
