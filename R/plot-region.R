@@ -1,3 +1,36 @@
+get_raw_mat <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", genes_correlations = NULL, cor_colors = c("blue", "white", "white", "white", "red"), cor_color_breaks = c(-1, -0.05, 0, 0.05, 1), ...) {
+    gset_genome(mct@genome)
+    raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
+    if (!is.null(metacells)) {
+        if (any(metacells %!in% mct@metacells)) {
+            cli_abort("The following metacells are not in the McTracks object: {.val {metacells}}")
+        }
+        raw_mat <- raw_mat[, intersect(metacells, colnames(raw_mat)), drop = FALSE]
+    }
+
+    mat <- raw_mat[, intersect(mct@metacells[mct@order], colnames(raw_mat)), drop = FALSE]
+
+    if (detect_dca && is.null(hc)) {
+        if (!has_rna(mct)) {
+            cli_abort("Cannot detect DCA without either an hclust object or RNA data.")
+        }
+        mct <- mct_subset_metacells(mct, colnames(mat))
+        hc <- mc_hclust_rna(mct, force_cell_type = force_cell_type)
+    }
+
+    if (!is.null(hc)) {
+        if (any(hc$label %!in% colnames(mat))) {
+            missing_mcs <- setdiff(hc$label, colnames(mat))
+            cli_warn("The following metacells are present in the hclust object, but are missing in the matrix (this is probably due to downsampling): {.val {missing_mcs}}")
+            hc <- dendextend::prune(hc, missing_mcs)
+        }
+        mat <- mat[, hc$label]
+    }
+    mat_smooth = RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
+    rownames(mat_smooth) = rownames(mat)
+    mat_smooth
+}
+
 #' Plot a genomic region
 #'
 #' @param mct an McTracks object.
@@ -38,7 +71,7 @@
 #' }
 #'
 #' @export
-mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, ...) {
+mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRUE, downsample_n = NULL, metacells = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), hc = NULL, force_cell_type = TRUE, gene_annot = FALSE, n_smooth = 10, n_pixels = 1000, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", genes_correlations = NULL, cor_colors = c("blue", "white", "white", "white", "red"), cor_color_breaks = c(-1, -0.05, 0, 0.05, 1), min_atac_sum=10, color_max_by_type=FALSE,...) {
     gset_genome(mct@genome)
     raw_mat <- mct_get_mat(mct, intervals, downsample, downsample_n)
     if (!is.null(metacells)) {
@@ -72,9 +105,10 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
         dca_mat <- mct_diff_access_on_hc(mat, hc = hc, ...)
         dca_mat <- dca_mat[, hc$order, drop = FALSE]
     }
-
+    y_seps <- NULL
     if (!is.null(hc)) {
         mat <- mat[, hc$order, drop = FALSE]
+        y_seps <- cutree(hc, h = 0.1)
     }
 
     if (has_cell_type(mct) && has_cell_type_colors(mct)) {
@@ -83,8 +117,24 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
     } else {
         mc_colors <- NULL
     }
-
-    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels)
+    if (!is.null(genes_correlations) && has_rna(mct)) {
+        overlapping_types <- intersect(colnames(mct@rna_egc), colnames(mat))
+        rna_legc <- log2(1e-5 + mct@rna_egc)
+        mat_smooth <- RcppRoll::roll_sum(mat[, overlapping_types], n = n_smooth, fill = c(0,0,0))
+        cors <- tgstat::tgs_cor(
+            t(mat[, overlapping_types]),
+            t(rna_legc[genes_correlations, overlapping_types, drop = FALSE]),
+            pairwise.complete.obs = T
+        )
+        mat <- cors
+        mc_colors <- rep("white", length(genes_correlations))
+        colors <- cor_colors
+        color_breaks <- cor_color_breaks
+        y_seps <- NULL
+        dca_mat <- NULL
+        n_smooth <- 1
+    }
+    plot_region_mat(mat, mc_colors, colors = colors, color_breaks = color_breaks, intervals = intervals, resolution = mct@resolution, dca_mat = dca_mat, y_seps = y_seps, n_smooth = n_smooth, gene_annot = gene_annot, n_pixels = n_pixels, plot_x_axis_ticks = plot_x_axis_ticks, gene_annot_pos = gene_annot_pos, color_max_by_type=color_max_by_type)
 }
 
 #' Plot a genomic region given a matrix
@@ -98,46 +148,82 @@ mct_plot_region <- function(mct, intervals, detect_dca = FALSE, downsample = TRU
 #' @param dca_mat a matrix with the differential cluster accessibility (DCA) for the plotted regions (optional). Output of \code{mct_diff_access_on_hc}.
 #' @param n_smooth number of genomic bins to use for smoothing the signal. Signal is smoothed by a rolling sum for each metacell (optional). Default is 20.
 #' @param n_pixels number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)} (optional).
-#' @param gene_annot whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory. (optional)
+#' @param gene_annot whether to add gene annotations; these annotations rely on the existence of the existence of an intervals set called "intervs.global.tss" and "intervs.global.exon" in the genome's misha directory. (optional)
+#' @param gene_annot_pos the position of the gene annotations ("top" or "bottom")
 #'
 #' @export
-plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE) {
+plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "black", "gold"), color_breaks = c(0, 6, 12, 18, 24), intervals = NULL, resolution = NULL, dca_mat = NULL, y_seps = NULL, y_seps_lty = 2, y_seps_lwd = 1, n_smooth = 10, n_pixels = 1000, gene_annot = FALSE, plot_x_axis_ticks = TRUE, gene_annot_pos = "top", color_max_by_type=FALSE) {
     mat_smooth <- RcppRoll::roll_sum(mat, n = n_smooth, fill = c(0, 0, 0))
 
     if (gene_annot) {
         if (is.null(intervals) || is.null(resolution)) {
             cli_abort("If gene annotations are requested, intervals and resolution must be specified")
         }
-        layout(cbind(c(0, 0, 3), c(1, 2, 4)), widths = c(1, 20), heights = c(3, 0.5, 15))
 
-        par(mar = c(0, 0, 2, 2))
+        # Different layouts depending on annotation position
+        if (gene_annot_pos == "top") {
+            layout(cbind(c(0, 0, 3), c(1, 2, 4)), widths = c(1, 20), heights = c(2, 0.5, 15))
+        } else if (gene_annot_pos == "bottom") {
+            layout(cbind(c(3, 0, 0, 0), c(4, 1, 2, 0)), widths = c(1, 20), heights = c(15, 2, 0.5, 0.5))
+        }
+
+        par(mar = c(0, 0, 1, 2))
         plot_tss_strip(intervals)
 
-        par(mar = c(0, 0, 0, 2))
+        if (gene_annot_pos == "top") {
+            par(mar = c(0, 0, 0, 2))
+        } else {
+            par(mar = c(0, 0, 0, 2))
+        }
         gene_annots <- make_gene_annot(intervals, resolution)
+
         if (is.null(gene_annots[["exon_coords"]])) {
             image(as.matrix(rep(0, ncol(mat)), nrow = 1), col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
         } else {
-            image(as.matrix(gene_annots[["exon_coords"]], nrow = 1), col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
+            exon_mat <- as.matrix(gene_annots[["exon_coords"]])
+
+            image(exon_mat, col = c("white", "black"), breaks = c(-0.5, 0, 1), yaxt = "n", xaxt = "n", frame.plot = FALSE)
         }
 
         top_mar <- 0
         left_mar <- 2
     } else {
         layout(matrix(1:2, nrow = 1), w = c(1, 20))
-        top_mar <- 2
-        left_mar <- 1
+        top_mar <- 0
+        left_mar <- 2
     }
 
-    par(mar = c(4, left_mar, top_mar, 0))
-    image(t(as.matrix(1:length(mc_colors), nrow = 1)), col = mc_colors, yaxt = "n", xaxt = "n")
+    if (plot_x_axis_ticks && gene_annot_pos == "bottom") {
+        plot_x_axis_ticks <- FALSE
+        cli_alert_warning("Gene annotations are at the bottom, so x-axis ticks are disabled.")
+    }
 
-    par(mar = c(4, 0, top_mar, 2))
+    if (plot_x_axis_ticks) {
+        bottom_mar <- 4
+    } else {
+        bottom_mar <- 0
+    }
+
+    par(mar = c(bottom_mar, left_mar, top_mar, 0))
+    image(t(as.matrix(seq_along(mc_colors), nrow = 1)), col = mc_colors, yaxt = "n", xaxt = "n")
+
+    par(mar = c(bottom_mar, 0, top_mar, 2))
     shades <- colorRampPalette(colors)(1000)
-    mat_smooth[mat_smooth > max(color_breaks)] <- max(color_breaks)
-    shades_breaks <- approx(color_breaks, n = 1001)$y
+    if(color_max_by_type){
+        shades_breaks <- approx(color_breaks, n = 1001)$y
+        for(i in 1:length(mc_colors)){
+            coli = mat_smooth[,i]
+            coli[coli > max(color_breaks)] <- max(color_breaks)-1+i
+            mat_smooth[,i] = coli
+        }
+        shades_breaks = c(shades_breaks, max(color_breaks) - 1 + 1:length(mc_colors))
+        shades = c(shades, mc_colors)
+    } else{
+        mat_smooth[mat_smooth > max(color_breaks)] <- max(color_breaks)
+        shades_breaks <- approx(color_breaks, n = 1001)$y
+    }
     image(mat_smooth, col = shades, breaks = shades_breaks, yaxt = "n", xaxt = "n")
-    if (!is.null(intervals)) {
+    if (!is.null(intervals) && plot_x_axis_ticks) {
         axis(1, at = seq(0, 1, l = 11), round(seq(intervals$start[1], intervals$end[1], l = 11) / 1e+6, 3), las = 2)
     }
 
@@ -147,6 +233,13 @@ plot_region_mat <- function(mat, mc_colors = NULL, colors = c("white", "gray", "
         dca_mat <- extend_dca_mat(dca_mat, n_peak_smooth)
         dca_cols <- c(rgb(0, 0, 1, 0.4), rgb(0, 0, 1, 0.15), rgb(0, 0, 0, 0), rgb(1, 0, 0, 0.15), rgb(1, 0, 0, 0.4))
         image(dca_mat, col = dca_cols, add = TRUE, breaks = c(-3, -1.5, -0.5, 0.5, 1.5, 3))
+    }
+    if (!is.null(y_seps)) {
+        n <- length(colnames(mat_smooth))
+        a <- y_seps[colnames(mat_smooth)]
+        y_seps <- unname(sapply(split(seq_along(a), a), max)) + 1
+        y_bords <- seq(-1 / (2 * (n - 1)), 1 + 1 / (2 * (n - 1)), length = n + 1)[y_seps]
+        abline(h = y_bords, lty = y_seps_lty, lwd = y_seps_lwd, add = TRUE, col = "grey")
     }
 }
 
@@ -161,11 +254,12 @@ plot_tss_strip <- function(intervals) {
         yaxt = "n"
     )
 
+
     tss_df <- gintervals.neighbors1("intervs.global.tss", intervals) %>%
         filter(dist == 0) %>%
         arrange(chrom, start, end, strand, geneSymbol) %>%
-        distinct(geneSymbol, strand, .keep_all = TRUE) %>%
         select(chrom, tss = start, strand, gene = geneSymbol)
+
     if (nrow(tss_df) > 0) {
         text(x = tss_df$tss, y = rep(0.35, length(tss_df$tss)), labels = tss_df$gene, las = 1, cex = 1)
         line_len <- (intervals$end - intervals$start) * 0.01
@@ -175,6 +269,7 @@ plot_tss_strip <- function(intervals) {
         minus_tss <- tss_df %>%
             filter(strand == -1) %>%
             pull(tss)
+
 
         segments(x0 = tss_df$tss, x1 = tss_df$tss, y0 = 0, y1 = 0.2)
         if (length(plus_tss) > 0) {
@@ -220,7 +315,7 @@ extend_dca_mat <- function(dca_mat, n_peak_smooth) {
 #' \code{peak_lf_thresh1}, and a value of 2 means the log fold change was above \code{peak_lf_thresh2}. The same with -1 and -2 for troughs.
 #'
 #' @export
-mct_diff_access_on_hc <- function(mat, hc, sz_frac_for_peak = 0.25, u_reg = 4, peak_lf_thresh1 = 1.2, peak_lf_thresh2 = 2, trough_lf_thresh1 = -1, trough_lf_thresh2 = -2) {
+mct_diff_access_on_hc <- function(mat, hc, sz_frac_for_peak = 0.25, u_reg = 4, peak_lf_thresh1 = 1.2, peak_lf_thresh2 = 2, trough_lf_thresh1 = -1, trough_lf_thresh2 = -2, ...) {
     if (length(hc$order) != ncol(mat)) {
         cli_abort("The number of metacells in the matrix and the hclust object do not match.")
     }

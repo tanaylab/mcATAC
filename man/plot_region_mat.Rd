@@ -12,9 +12,17 @@ plot_region_mat(
   intervals = NULL,
   resolution = NULL,
   dca_mat = NULL,
+  y_seps = NULL,
+  y_seps_lty = 2,
+  y_seps_lwd = 1,
   n_smooth = 10,
   n_pixels = 1000,
-  gene_annot = FALSE
+  gene_annot = FALSE,
+  genome = NULL,
+  plot_x_axis_ticks = TRUE,
+  gene_annot_pos = "top",
+  flip = FALSE,
+  roll_mean = FALSE
 )
 }
 \arguments{
@@ -36,7 +44,13 @@ plot_region_mat(
 
 \item{n_pixels}{number of pixels in the plot. The DCA regions would be extended by \code{ceiling(2 * nrow(mat) / n_pixels)} (optional).}
 
-\item{gene_annot}{whether to add gene annotations; these annotations rely on the existence of an \code{annots/refGene.txt} file in the genome's misha directory, and on the existence of an intervals set called "intervs.global.tss" in the genome's misha directory. (optional)}
+\item{gene_annot}{whether to add gene annotations; these annotations rely on the existence of the existence of an intervals set called "intervs.global.tss" and "intervs.global.exon" in the genome's misha directory. (optional)}
+
+\item{genome}{the genome to use for the gene annotations (optional)}
+
+\item{gene_annot_pos}{the position of the gene annotations ("top" or "bottom")}
+
+\item{flip}{whether to flip the coordinates (optional)}
 }
 \description{
 Plot a genomic region given a matrix
